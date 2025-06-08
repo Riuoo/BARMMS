@@ -44,7 +44,12 @@
     <!-- Main Content -->
     <main class="flex-grow pt-20 flex items-center justify-center px-4">
         <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Contact Administrator</h2>
+            <div class="flex items-center justify-between mb-6">
+                <a href="{{ route('landing') }}" class="text-gray-600 hover:text-gray-800 transition duration-300">
+                    <i class="fas fa-arrow-left mr-2"></i>Back
+                </a>
+                <h2 class="text-3xl font-bold text-gray-900 text-center flex-1 mr-8">Contact Administrator</h2>
+            </div>
             <p class="text-gray-600 mb-6 text-center">Please fill out the form below to send a message to the administrator.</p>
             <form action="{{ route('admin.contact.submit') }}" method="POST" class="space-y-6">
                 @csrf
