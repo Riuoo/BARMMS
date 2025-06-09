@@ -12,6 +12,8 @@
                     <th class="p-2 sm:p-3 text-left">ID</th>
                     <th class="p-2 sm:p-3 text-left">Name</th>
                     <th class="p-2 sm:p-3 text-left">Email</th>
+                    <th class="p-2 sm:p-3 text-left">Role</th>
+                    <th class="p-2 sm:p-3 text-left">Address</th>
                     <th class="p-2 sm:p-3 text-left">Actions</th>
                 </tr>
             </thead>
@@ -21,6 +23,8 @@
                     <td class="p-2 sm:p-3">{{ $user->id }}</td>
                     <td class="p-2 sm:p-3">{{ $user->name }}</td>
                     <td class="p-2 sm:p-3">{{ $user->email }}</td>
+                    <td class="p-2 sm:p-3">{{ $user->role }}</td>
+                    <td class="p-2 sm:p-3">{{ $user->address }}</td>
                     <td class="p-2 sm:p-3 space-x-2 whitespace-nowrap">
                         <a href="{{ route('admin.users.edit', $user->id) }}" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition">Edit</a>
                         <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?');">

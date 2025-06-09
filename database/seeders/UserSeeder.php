@@ -17,6 +17,8 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Admin User',
             'email' => 'admin@barangay.gov.ph',
+            'role' => 'admin',
+            'address' => '123 Admin St, Barangay',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
         ]);
@@ -24,6 +26,8 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Barangay Captain',
             'email' => 'captain@barangay.gov.ph',
+            'role' => 'captain',
+            'address' => '456 Captain Rd, Barangay',
             'password' => Hash::make('captain123'),
             'email_verified_at' => now(),
         ]);
@@ -31,6 +35,8 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Secretary',
             'email' => 'secretary@barangay.gov.ph',
+            'role' => 'secretary',
+            'address' => '789 Secretary Ln, Barangay',
             'password' => Hash::make('secretary123'),
             'email_verified_at' => now(),
         ]);
