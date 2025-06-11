@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -15,31 +14,13 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
-            $request->session()->regenerate();
-
-            // Redirect to admin dashboard after successful login
-            return redirect()->route('admin.dashboard');
-        }
-
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ]);
+        // Login validation and session management removed as requested
+        return redirect()->route('landing');
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
+        // Logout session invalidation removed as requested
         return redirect('/');
     }
 }

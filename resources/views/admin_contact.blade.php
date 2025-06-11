@@ -50,40 +50,52 @@
                 </a>
                 <h2 class="text-3xl font-bold text-gray-900 text-center flex-1 mr-8">Contact Administrator</h2>
             </div>
-            <p class="text-gray-600 mb-6 text-center">Please fill out the form below to send a message to the administrator.</p>
-            <form action="{{ route('admin.contact.submit') }}" method="POST" class="space-y-6">
+            <p class="text-gray-600 mb-6 text-center">Please enter your email address below to request an account. The administrator will contact you with a link to complete your account creation.</p>
+           <form action="{{ route('admin.contact') }}" method="POST" class="space-y-6">
                 @csrf
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
-                    <input type="text" id="name" name="name" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                        placeholder="Enter your full name" />
-                </div>
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                     <input type="email" id="email" name="email" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
                         placeholder="Enter your email address" />
                 </div>
-                <div>
-                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                    <input type="text" id="subject" name="subject" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                        placeholder="Subject of your message" />
-                </div>
-                <div>
-                    <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message</label>
-                    <textarea id="message" name="message" rows="5" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                        placeholder="Write your message here"></textarea>
-                </div>
                 <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
-                    <i class="fas fa-paper-plane mr-2"></i> Send Message
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                    <i class="fas fa-paper-plane mr-2"></i> Send Request
                 </button>
             </form>
+
         </div>
     </main>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': formData.get('_token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.success); // Display the success message
+                    window.location.reload(); // Reload the page
+                } else if (data.error) {
+                    alert(data.error); // Display the error message
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the request.');
+            });
+        });
+    </script>
 
     <!-- JavaScript for mobile menu -->
     <script>

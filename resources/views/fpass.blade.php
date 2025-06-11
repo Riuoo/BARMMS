@@ -35,17 +35,17 @@
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                 <input type="email" id="email" name="email" required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
                     placeholder="Enter your email" />
             </div>
             <button type="submit"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
                 <i class="fas fa-envelope mr-2"></i>
                 Send Reset Link
             </button>
         </form>
         <div class="mt-6 text-center">
-            <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">Back to Login</a>
+            <a href="/" class="text-green-600 hover:text-green-800 font-medium">Back to Login</a>
         </div>
     </div>
 </body>

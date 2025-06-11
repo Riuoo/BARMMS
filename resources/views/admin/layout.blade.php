@@ -95,6 +95,12 @@
                         <li>
 <a href="{{ route('admin.document-requests') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.document-requests') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                 <i class="fas fa-file-signature fa-fw mr-3 {{ request()->routeIs('admin.document-requests') ? 'text-white' : 'text-green-600' }}"></i>
+                                <span>Document Requests</span>
+                            </a>
+                        </li>
+                        <li>
+<a href="{{ route('admin.new-account-requests') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.new-account-requests') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <i class="fas fa-user-clock fa-fw mr-3 {{ request()->routeIs('admin.new-account-requests') ? 'text-white' : 'text-green-600' }}"></i>
                                 <span>Account Requests</span>
                             </a>
                         </li>
@@ -155,6 +161,12 @@
                         <li>
 <a href="{{ route('admin.document-requests') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.document-requests') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                 <i class="fas fa-file-signature fa-fw mr-3 {{ request()->routeIs('admin.document-requests') ? 'text-white' : 'text-green-600' }}"></i>
+                                <span>Document Requests</span>
+                            </a>
+                        </li>
+                        <li>
+<a href="{{ route('admin.new-account-requests') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.new-account-requests') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <i class="fas fa-user-clock fa-fw mr-3 {{ request()->routeIs('admin.new-account-requests') ? 'text-white' : 'text-green-600' }}"></i>
                                 <span>Account Requests</span>
                             </a>
                         </li>

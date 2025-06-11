@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -14,31 +12,44 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@barangay.gov.ph',
-            'role' => 'admin',
-            'address' => '123 Admin St, Barangay',
-            'password' => Hash::make('password123'),
-            'email_verified_at' => now(),
-        ]);
+        $userData = [
+            [
+                'name' => 'Admin User',
+                'email' => 'admin@example.com',
+                'password' => 'password',
+                'role' => 'admin',
+                'address' => 'Admin Address',
+            ],
+            [
+                'name' => 'Captain User',
+                'email' => 'captain@example.com',
+                'password' => 'password',
+                'role' => 'captain',
+                'address' => 'Captain Address',
+            ],
+            [
+                'name' => 'Secretary User',
+                'email' => 'secretary@example.com',
+                'password' => 'password',
+                'role' => 'secretary',
+                'address' => 'Secretary Address',
+            ],
+            [
+                'name' => 'Normal User',
+                'email' => 'user@example.com',
+                'password' => 'password',
+                'role' => 'user',
+                'address' => 'User Address',
+            ],
+        ];
 
-        User::create([
-            'name' => 'Barangay Captain',
-            'email' => 'captain@barangay.gov.ph',
-            'role' => 'captain',
-            'address' => '456 Captain Rd, Barangay',
-            'password' => Hash::make('captain123'),
-            'email_verified_at' => now(),
-        ]);
+        foreach ($userData as $data) {
+            $existingUser = User::where('email', $data['email'])->first();
+            if (!$existingUser) {
+                User::create($data);
+            }
+        }
 
-        User::create([
-            'name' => 'Secretary',
-            'email' => 'secretary@barangay.gov.ph',
-            'role' => 'secretary',
-            'address' => '789 Secretary Ln, Barangay',
-            'password' => Hash::make('secretary123'),
-            'email_verified_at' => now(),
-        ]);
+        $this->command->info('Seeded 4 users successfully.');
     }
 }

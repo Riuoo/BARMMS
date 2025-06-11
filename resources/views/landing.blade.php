@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Barangay Information System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
     <style>
         .hero-bg {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.pexels.com/photos/1485894/pexels-photo-1485894.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+            background-image: linear-gradient(
+                    rgba(0, 0, 0, 0.6),
+                    rgba(0, 0, 0, 0.6)
+                ),
+                url(
+                    "https://images.pexels.com/photos/1485894/pexels-photo-1485894.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                );
             background-size: cover;
             background-position: center;
         }
@@ -16,21 +25,40 @@
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
-    <nav class="bg-gray-900 text-white fixed w-full top-0 z-50 shadow-lg">
+    <nav
+        class="bg-gray-900 text-white fixed w-full top-0 z-50 shadow-lg"
+    >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0">
-                    <h1 class="text-xl font-bold">Barangay Information System</h1>
+                    <h1 class="text-xl font-bold">
+                        Barangay Information System
+                    </h1>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#home" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Home</a>
-                        <a href="#bulletin" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Bulletin Board</a>
-                        <a href="#contact" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contact</a>
+                        <a
+                            href="#home"
+                            class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                            >Home</a
+                        >
+                        <a
+                            href="#bulletin"
+                            class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                            >Bulletin Board</a
+                        >
+                        <a
+                            href="#contact"
+                            class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                            >Contact</a
+                        >
                     </div>
                 </div>
                 <div class="md:hidden">
-                    <button id="mobile-menu-button" class="text-gray-300 hover:text-white focus:outline-none">
+                    <button
+                        id="mobile-menu-button"
+                        class="text-gray-300 hover:text-white focus:outline-none"
+                    >
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
@@ -39,9 +67,21 @@
         <!-- Mobile menu -->
         <div id="mobile-menu" class="md:hidden hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-800">
-                <a href="#home" class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium">Home</a>
-                <a href="#bulletin" class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium">Bulletin Board</a>
-                <a href="#contact" class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium">Contact</a>
+                <a
+                    href="#home"
+                    class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium"
+                    >Home</a
+                >
+                <a
+                    href="#bulletin"
+                    class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium"
+                    >Bulletin Board</a
+                >
+                <a
+                    href="#contact"
+                    class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium"
+                    >Contact</a
+                >
             </div>
         </div>
     </nav>
@@ -52,56 +92,121 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <!-- Left Side - Welcome Content -->
                 <div class="text-white">
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Welcome to Our Barangay</h1>
-                    <p class="text-lg md:text-xl lg:text-2xl mb-8">Your gateway to community information and services</p>
-                    <a href="#bulletin" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition duration-300 inline-block">
+                    <h1
+                        class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6"
+                    >
+                        Welcome to Our Barangay
+                    </h1>
+                    <p class="text-lg md:text-xl lg:text-2xl mb-8">
+                        Your gateway to community information and services
+                    </p>
+                    <a
+                        href="#bulletin"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition duration-300 inline-block"
+                    >
                         View Bulletin Board
                     </a>
                 </div>
-                
+
                 <!-- Right Side - Login Form -->
-                <div class="bg-white bg-opacity-95 rounded-lg shadow-2xl p-8 max-w-md mx-auto w-full">
+                <div
+                    class="bg-white bg-opacity-95 rounded-lg shadow-2xl p-8 max-w-md mx-auto w-full"
+                >
                     <div class="text-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Login</h2>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                            Login
+                        </h2>
                         <p class="text-gray-600">Access your account</p>
                     </div>
-                    
-                    <form action="/login" method="POST" class="space-y-6">
-                        @csrf
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                            <input type="email" id="email" name="email" required 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                   placeholder="Enter your email">
-                        </div>
-                        
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                            <input type="password" id="password" name="password" required 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                   placeholder="Enter your password">
-                        </div>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="remember" name="remember" 
-                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                <label for="remember" class="ml-2 block text-sm text-gray-700">Remember me</label>
-                            </div>
-                            <a href="/forgot-password" class="text-sm text-blue-600 hover:text-blue-800">Forgot password?</a>
-                        </div>
-                        
-                        <button type="submit" 
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
-                            <i class="fas fa-sign-in-alt mr-2"></i>
-                            Sign In
-                        </button>
-                    </form>
-                    
+
+@if(session('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <strong class="font-bold">Error!</strong>
+        <span class="block sm:inline">{{ session('error') }}</span>
+    </div>
+@endif
+
+<form action="{{ route('login.post') }}" method="POST" class="space-y-6" novalidate>
+    @csrf
+    <div>
+        <label
+            for="email"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Email Address</label
+        >
+        <input
+            type="email"
+            id="email"
+            name="email"
+            value="{{ old('email') }}"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('email') border-red-500 @enderror"
+            placeholder="Enter your email"
+            required
+        />
+        @error('email')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div>
+        <label
+            for="password"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Password</label
+        >
+        <input
+            type="password"
+            id="password"
+            name="password"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('password') border-red-500 @enderror"
+            placeholder="Enter your password"
+            required
+        />
+        @error('password')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div class="flex items-center justify-between">
+        <div class="flex items-center">
+            <input
+                type="checkbox"
+                id="remember"
+                name="remember"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label
+                for="remember"
+                class="ml-2 block text-sm text-gray-700"
+                >Remember me</label
+            >
+        </div>
+        <a
+            href="{{ route('password.request') }}"
+            class="text-sm text-blue-600 hover:text-blue-800"
+            >Forgot password?</a
+        >
+    </div>
+
+    <button
+        type="submit"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
+    >
+        <i class="fas fa-sign-in-alt mr-2"></i>
+        Sign In
+    </button>
+</form>
+
+
                     <div class="mt-6 text-center">
                         <p class="text-sm text-gray-600">
-                            Don't have an account? 
-<a href="{{ route('admin.contact') }}" class="text-blue-600 hover:text-blue-800 font-medium">Contact Administrator</a>
+                            Don't have an account?
+                            <a
+                                href="{{ route('admin.contact') }}"
+                                class="text-blue-600 hover:text-blue-800 font-medium"
+                                >Contact Administrator</a
+                            >
+
                         </p>
                     </div>
                 </div>
@@ -112,74 +217,140 @@
     <!-- Bulletin Board Section -->
     <section id="bulletin" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Bulletin Board</h2>
-            
+            <h2
+                class="text-4xl font-bold text-center text-gray-900 mb-12"
+            >
+                Bulletin Board
+            </h2>
+
             <!-- Upcoming Events -->
             <div class="mb-16">
-                <h3 class="text-3xl font-bold text-gray-900 mb-8">Upcoming Events</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg shadow-lg p-6">
+                <h3 class="text-3xl font-bold text-gray-900 mb-8">
+                    Upcoming Events
+                </h3>
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                >
+                    <div
+                        class="bg-blue-50 border-l-4 border-blue-500 rounded-lg shadow-lg p-6"
+                    >
                         <div class="flex items-center mb-4">
-                            <i class="fas fa-calendar-alt text-blue-600 text-2xl mr-3"></i>
-                            <span class="text-sm text-blue-600 font-semibold">December 15, 2024</span>
+                            <i
+                                class="fas fa-calendar-alt text-blue-600 text-2xl mr-3"
+                            ></i>
+                            <span
+                                class="text-sm text-blue-600 font-semibold"
+                                >December 15, 2024</span
+                            >
                         </div>
-                        <h4 class="text-xl font-bold text-gray-900 mb-3">Community Christmas Party</h4>
-                        <p class="text-gray-700 mb-4">Join us for our annual Christmas celebration with games, food, and prizes for the whole family.</p>
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">
+                            Community Christmas Party
+                        </h4>
+                        <p class="text-gray-700 mb-4">
+                            Join us for our annual Christmas celebration with
+                            games, food, and prizes for the whole family.
+                        </p>
                         <div class="text-sm text-gray-600">
                             <i class="fas fa-map-marker-alt mr-2"></i>Barangay Hall
                         </div>
                     </div>
-                    
-                    <div class="bg-green-50 border-l-4 border-green-500 rounded-lg shadow-lg p-6">
+
+                    <div
+                        class="bg-green-50 border-l-4 border-green-500 rounded-lg shadow-lg p-6"
+                    >
                         <div class="flex items-center mb-4">
-                            <i class="fas fa-calendar-alt text-green-600 text-2xl mr-3"></i>
-                            <span class="text-sm text-green-600 font-semibold">December 20, 2024</span>
+                            <i
+                                class="fas fa-calendar-alt text-green-600 text-2xl mr-3"
+                            ></i>
+                            <span
+                                class="text-sm text-green-600 font-semibold"
+                                >December 20, 2024</span
+                            >
                         </div>
-                        <h4 class="text-xl font-bold text-gray-900 mb-3">Health and Wellness Seminar</h4>
-                        <p class="text-gray-700 mb-4">Free health screening and wellness seminar for all residents. Bring your health records.</p>
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">
+                            Health and Wellness Seminar
+                        </h4>
+                        <p class="text-gray-700 mb-4">
+                            Free health screening and wellness seminar for all
+                            residents. Bring your health records.
+                        </p>
                         <div class="text-sm text-gray-600">
-                            <i class="fas fa-map-marker-alt mr-2"></i>Community Center
+                            <i class="fas fa-map-marker-alt mr-2"></i>Community
+                            Center
                         </div>
                     </div>
-                    
-                    <div class="bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-lg p-6">
+
+                    <div
+                        class="bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-lg p-6"
+                    >
                         <div class="flex items-center mb-4">
-                            <i class="fas fa-calendar-alt text-yellow-600 text-2xl mr-3"></i>
-                            <span class="text-sm text-yellow-600 font-semibold">January 5, 2025</span>
+                            <i
+                                class="fas fa-calendar-alt text-yellow-600 text-2xl mr-3"
+                            ></i>
+                            <span
+                                class="text-sm text-yellow-600 font-semibold"
+                                >January 5, 2025</span
+                            >
                         </div>
-                        <h4 class="text-xl font-bold text-gray-900 mb-3">Skills Training Workshop</h4>
-                        <p class="text-gray-700 mb-4">Learn new skills in cooking, sewing, and basic computer literacy. Registration required.</p>
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">
+                            Skills Training Workshop
+                        </h4>
+                        <p class="text-gray-700 mb-4">
+                            Learn new skills in cooking, sewing, and basic
+                            computer literacy. Registration required.
+                        </p>
                         <div class="text-sm text-gray-600">
-                            <i class="fas fa-map-marker-alt mr-2"></i>Training Center
+                            <i class="fas fa-map-marker-alt mr-2"></i>Training
+                            Center
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Barangay Achievements -->
             <div>
-                <h3 class="text-3xl font-bold text-gray-900 mb-8">Barangay Achievements</h3>
+                <h3 class="text-3xl font-bold text-gray-900 mb-8">
+                    Barangay Achievements
+                </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-lg p-8 text-white">
+                    <div
+                        class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-lg p-8 text-white"
+                    >
                         <div class="flex items-center mb-4">
-                            <i class="fas fa-trophy text-4xl mr-4"></i>
+                            <i
+                                class="fas fa-trophy text-4xl mr-4"
+                            ></i>
                             <div>
-                                <h4 class="text-2xl font-bold">Outstanding Barangay Award</h4>
+                                <h4 class="text-2xl font-bold">
+                                    Outstanding Barangay Award
+                                </h4>
                                 <p class="text-purple-100">November 2024</p>
                             </div>
                         </div>
-                        <p class="text-purple-100">Recognized as the Most Outstanding Barangay in Community Development and Public Service Excellence.</p>
+                        <p class="text-purple-100">
+                            Recognized as the Most Outstanding Barangay in
+                            Community Development and Public Service Excellence.
+                        </p>
                     </div>
-                    
-                    <div class="bg-gradient-to-r from-green-500 to-teal-500 rounded-lg shadow-lg p-8 text-white">
+
+                    <div
+                        class="bg-gradient-to-r from-green-500 to-teal-500 rounded-lg shadow-lg p-8 text-white"
+                    >
                         <div class="flex items-center mb-4">
-                            <i class="fas fa-leaf text-4xl mr-4"></i>
+                            <i
+                                class="fas fa-leaf text-4xl mr-4"
+                            ></i>
                             <div>
-                                <h4 class="text-2xl font-bold">Cleanest Barangay Award</h4>
+                                <h4 class="text-2xl font-bold">
+                                    Cleanest Barangay Award
+                                </h4>
                                 <p class="text-green-100">October 2024</p>
                             </div>
                         </div>
-                        <p class="text-green-100">Awarded for maintaining the cleanest and most environmentally-friendly community in the district.</p>
+                        <p class="text-green-100">
+                            Awarded for maintaining the cleanest and most
+                            environmentally-friendly community in the district.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -190,16 +361,24 @@
     <section id="contact" class="py-20 bg-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto">
-                <h2 class="text-4xl font-bold text-gray-900 mb-6">Contact Us</h2>
-                <p class="text-xl text-gray-600 mb-8">Get in touch with us for any inquiries or concerns.</p>
-                
+                <h2 class="text-4xl font-bold text-gray-900 mb-6">
+                    Contact Us
+                </h2>
+                <p class="text-xl text-gray-600 mb-8">
+                    Get in touch with us for any inquiries or concerns.
+                </p>
+
                 <div class="mb-8">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Office Hours:</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                        Office Hours:
+                    </h3>
                     <p class="text-gray-700">Monday to Friday: 8:00 AM - 5:00 PM</p>
                 </div>
-                
+
                 <div class="space-y-4">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Contact Information:</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                        Contact Information:
+                    </h3>
                     <div class="flex items-center justify-center">
                         <i class="fas fa-phone text-blue-600 mr-4"></i>
                         <span class="text-gray-700">(123) 456-7890</span>
@@ -222,41 +401,67 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <h3 class="text-2xl font-bold mb-4">Barangay Information System</h3>
-                    <p class="text-gray-300">Serving the community with dedication and excellence.</p>
+                    <h3 class="text-2xl font-bold mb-4">
+                        Barangay Information System
+                    </h3>
+                    <p class="text-gray-300">
+                        Serving the community with dedication and excellence.
+                    </p>
                 </div>
                 <div class="md:text-right">
                     <h3 class="text-2xl font-bold mb-4">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-300 hover:text-white transition duration-300">Home</a></li>
-                        <li><a href="#bulletin" class="text-gray-300 hover:text-white transition duration-300">Bulletin Board</a></li>
-                        <li><a href="#contact" class="text-gray-300 hover:text-white transition duration-300">Contact</a></li>
+                        <li>
+                            <a
+                                href="#home"
+                                class="text-gray-300 hover:text-white transition duration-300"
+                                >Home</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="#bulletin"
+                                class="text-gray-300 hover:text-white transition duration-300"
+                                >Bulletin Board</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="#contact"
+                                class="text-gray-300 hover:text-white transition duration-300"
+                                >Contact</a
+                            >
+                        </li>
                     </ul>
                 </div>
             </div>
-            <hr class="border-gray-700 my-8">
+            <hr class="border-gray-700 my-8" />
             <div class="text-center">
-                <p class="text-gray-300">&copy; 2024 Barangay Information System. All rights reserved.</p>
+                <p class="text-gray-300">
+                    &copy; 2024 Barangay Information System. All rights reserved.
+                </p>
             </div>
         </div>
     </footer>
 
     <!-- JavaScript for mobile menu -->
     <script>
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        });
+        document
+            .getElementById("mobile-menu-button")
+            .addEventListener("click", function () {
+                const mobileMenu = document.getElementById("mobile-menu");
+                mobileMenu.classList.toggle("hidden");
+            });
 
         // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+            anchor.addEventListener("click", function (e) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
+                const target = document.querySelector(this.getAttribute("href"));
                 if (target) {
                     target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
+                        behavior: "smooth",
+                        block: "start",
                     });
                 }
             });
