@@ -10,14 +10,12 @@ class CreateBlotterRequestsTable extends Migration
     {
         Schema::create('blotter_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->nullable()->index();
             $table->string('type');
             $table->text('description');
             $table->enum('status', ['pending', 'approved'])->default('pending');
             $table->string('media')->nullable()->comment('Path to image or video evidence');
             $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

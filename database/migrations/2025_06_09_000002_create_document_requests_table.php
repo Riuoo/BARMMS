@@ -10,13 +10,13 @@ class CreateDocumentRequestsTable extends Migration
     {
         Schema::create('document_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->index();
             $table->string('document_type');
             $table->text('description')->nullable();
             $table->enum('status', ['pending', 'approved'])->default('pending');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('barangay_profiles')->onDelete('cascade');
         });
     }
 

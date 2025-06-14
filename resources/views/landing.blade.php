@@ -16,7 +16,7 @@
                     rgba(0, 0, 0, 0.6)
                 ),
                 url(
-                    "https://images.pexels.com/photos/1485894/pexels-photo-1485894.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                    "/images/lower-malinao-brgy-bg.jpg"
                 );
             background-size: cover;
             background-position: center;
@@ -26,7 +26,7 @@
 <body class="bg-gray-50">
     <!-- Navigation -->
     <nav
-        class="bg-gray-900 text-white fixed w-full top-0 z-50 shadow-lg"
+        class="bg-green-600 text-white fixed w-full top-0 z-50 shadow-lg"
     >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -39,17 +39,17 @@
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a
                             href="#home"
-                            class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                            class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
                             >Home</a
                         >
                         <a
                             href="#bulletin"
-                            class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                            class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
                             >Bulletin Board</a
                         >
                         <a
                             href="#contact"
-                            class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                            class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
                             >Contact</a
                         >
                     </div>
@@ -102,7 +102,7 @@
                     </p>
                     <a
                         href="#bulletin"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition duration-300 inline-block"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition duration-300 inline-block"
                     >
                         View Bulletin Board
                     </a>
@@ -183,14 +183,14 @@
         </div>
         <a
             href="{{ route('password.request') }}"
-            class="text-sm text-blue-600 hover:text-blue-800"
+            class="text-sm text-green-600 hover:text-green-800"
             >Forgot password?</a
         >
     </div>
 
     <button
         type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
+        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
     >
         <i class="fas fa-sign-in-alt mr-2"></i>
         Sign In
@@ -203,7 +203,7 @@
                             Don't have an account?
                             <a
                                 href="{{ route('admin.contact') }}"
-                                class="text-blue-600 hover:text-blue-800 font-medium"
+                                class="text-green-600 hover:text-green-800 font-medium"
                                 >Contact Administrator</a
                             >
 
@@ -380,15 +380,15 @@
                         Contact Information:
                     </h3>
                     <div class="flex items-center justify-center">
-                        <i class="fas fa-phone text-blue-600 mr-4"></i>
+                        <i class="fas fa-phone text-green-600 mr-4"></i>
                         <span class="text-gray-700">(123) 456-7890</span>
                     </div>
                     <div class="flex items-center justify-center">
-                        <i class="fas fa-envelope text-blue-600 mr-4"></i>
+                        <i class="fas fa-envelope text-green-600 mr-4"></i>
                         <span class="text-gray-700">info@barangay.gov.ph</span>
                     </div>
                     <div class="flex items-center justify-center">
-                        <i class="fas fa-map-marker-alt text-blue-600 mr-4"></i>
+                        <i class="fas fa-map-marker-alt text-green-600 mr-4"></i>
                         <span class="text-gray-700">Barangay Hall, Main Street</span>
                     </div>
                 </div>

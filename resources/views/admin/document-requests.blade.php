@@ -46,7 +46,7 @@
                 <td class="p-2 sm:p-3 document-created">{{ $request->created_at->format('Y-m-d H:i') }}</td>
                 <td class="p-2 sm:p-3 whitespace-nowrap document-actions">
                     @if($request->status === 'pending')
-                    <form method="POST" action="/document-requests/{{ $request->id }}/approve" class="inline">
+                    <form method="POST" action="/admin/document-requests/{{ $request->id }}/approve" class="inline">
                         @csrf
                         @method('PUT')
                         <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
@@ -70,7 +70,7 @@
             <p><span class="font-semibold">Description:</span> <span class="card-description">{{ $request->description }}</span></p>
             <div class="mt-2 flex space-x-4">
                 @if($request->status === 'pending')
-                <form method="POST" action="/document-requests/{{ $request->id }}/approve" class="inline">
+                <form method="POST" action="/admin/document-requests/{{ $request->id }}/approve" class="inline">
                     @csrf
                     @method('PUT')
                     <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>

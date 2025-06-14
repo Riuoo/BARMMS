@@ -15,48 +15,34 @@ class AccountRequestSeeder extends Seeder
      */
     public function run()
     {
-        $userIds = \App\Models\User::pluck('id')->toArray();
+        $userIds = \App\Models\BarangayProfile::pluck('id')->toArray();
 
         if (empty($userIds)) {
-            $this->command->info('No users found, skipping account request seeding.');
+            $this->command->info('No barangay profiles found, skipping account request seeding.');
             return;
         }
 
         $dummyData = [
             [
                 'user_id' => $userIds[array_rand($userIds)],
-                'email' => 'user1@example.com',
+                'email' => 'rodericktajos01@gmail.com',
                 'status' => 'pending',
                 'created_at' => Carbon::now()->subDays(2),
                 'updated_at' => Carbon::now()->subDays(2),
             ],
             [
                 'user_id' => $userIds[array_rand($userIds)],
-                'email' => 'user2@example.com',
+                'email' => 'rodericktajos02@gmail.com',
                 'status' => 'pending',
                 'created_at' => Carbon::now()->subDays(5),
                 'updated_at' => Carbon::now()->subDays(5),
             ],
             [
                 'user_id' => $userIds[array_rand($userIds)],
-                'email' => 'user3@example.com',
+                'email' => 'khianeaquino01@gmai.com',
                 'status' => 'pending',
                 'created_at' => Carbon::now()->subDay(),
                 'updated_at' => Carbon::now()->subDay(),
-            ],
-            [
-                'user_id' => $userIds[array_rand($userIds)],
-                'email' => 'user4@example.com',
-                'status' => 'pending',
-                'created_at' => Carbon::now()->subDays(10),
-                'updated_at' => Carbon::now()->subDays(10),
-            ],
-            [
-                'user_id' => $userIds[array_rand($userIds)],
-                'email' => 'user5@example.com',
-                'status' => 'pending',
-                'created_at' => Carbon::now()->subHours(12),
-                'updated_at' => Carbon::now()->subHours(12),
             ],
         ];
 

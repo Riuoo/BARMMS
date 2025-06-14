@@ -4,18 +4,20 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAccountRequestsTable extends Migration
+class CreateResidencesTable extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('account_requests', function (Blueprint $table) {
+        Schema::create('residences', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->string('name');
             $table->string('email')->unique();
-            $table->string('status')->default('pending');
+            $table->string('password');
+            $table->string('role');
+            $table->string('address')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ class CreateAccountRequestsTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('account_requests');
+        Schema::dropIfExists('residences');
     }
 }

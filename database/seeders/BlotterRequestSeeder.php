@@ -4,17 +4,17 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\BlotterRequest;
-use App\Models\User;
+use App\Models\BarangayProfile;
 
 class BlotterRequestSeeder extends Seeder
 {
     public function run()
     {
-        // Get some user IDs to associate with blotter requests
-        $userIds = User::pluck('id')->toArray();
+        // Get some barangay profile IDs to associate with blotter requests
+        $userIds = BarangayProfile::pluck('id')->toArray();
 
         if (empty($userIds)) {
-            $this->command->info('No users found, skipping blotter request seeding.');
+            $this->command->info('No barangay profiles found, skipping blotter request seeding.');
             return;
         }
 

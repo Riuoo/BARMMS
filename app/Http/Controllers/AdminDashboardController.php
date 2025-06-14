@@ -2,216 +2,124 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\BarangayProfile;
+use App\Models\Residence;
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\AccountRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\TestEmail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redirect;
 use App\Mail\AccountApproved;
 
 class AdminDashboardController extends Controller
 {
-
-
-    
-
     public function index()
     {
-        // Dummy data for counts
-        $totalBlotterReports = 10;
-        $totalAccountRequests = 15;
-        $totalAccomplishedProjects = 5;
+        // Fetch counts
+        $totalBlotterReports = BlotterRequest::count();
+        $totalDocumentRequests = DocumentRequest::count();
+        $totalAccountRequests = AccountRequest::count();
 
-        return view('admin.dashboard', compact('totalBlotterReports', 'totalAccountRequests', 'totalAccomplishedProjects'));
+        $totalAccomplishedProjects = 0; // Placeholder
+        $totalHealthReports = 0; // Placeholder
+
+        return view('admin.dashboard', compact(
+            'totalBlotterReports', 
+            'totalDocumentRequests', 
+            'totalAccountRequests', 
+            'totalAccomplishedProjects', 
+            'totalHealthReports'
+        ));
     }
 
-    public function users(Request $request)
-    {
-        $query = User::query();
-
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('role', 'like', "%{$search}%")
-                  ->orWhere('address', 'like', "%{$search}%");
-            });
-        }
-
-        $users = $query->orderBy('name')->paginate(10)->withQueryString();
-
-        return view('admin.users', compact('users'));
-    }
-
-    public function userSuggestions(Request $request)
-    {
-        $search = $request->input('term', '');
-
-        $suggestions = User::where('name', 'like', "%{$search}%")
-            ->orWhere('email', 'like', "%{$search}%")
-            ->limit(10)
-            ->get(['id', 'name', 'email']);
-
-        return response()->json($suggestions);
-    }
-
-    public function liveSearchUsers(Request $request)
-    {
-        $search = $request->input('term', '');
-
-        $query = User::query();
-
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('address', 'like', "%{$search}%");
-            });
-        }
-
-        $users = $query->orderBy('name')->limit(20)->get();
-
-        return response()->json($users);
-    }
-
-    public function editUser($id)
-    {
-        $user = User::findOrFail($id);
-        return view('admin.edit_user', compact('user'));
-    }
-
-   public function updateUser(Request $request, $id)
+    // Separate update method for BarangayProfile
+    public function updateBarangayProfile(Request $request, $id)
     {
         try {
-            $user = User::findOrFail($id);
-            $user->name = $request->input('name');
-            $user->email = $request->input('email');
-            // Add other fields as needed
-            $user->save();
+            $barangayProfile = BarangayProfile::findOrFail($id);
 
-            return redirect()->route('admin.users')->with('success', 'User updated successfully.');
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:barangay_profiles,email,' . $id,
+                'role' => 'required|string|max:255',
+                'address' => 'required|string|max:500',
+                'password' => 'nullable|string|min:6|confirmed',
+            ]);
+
+            if (!empty($validatedData['password'])) {
+                $barangayProfile->password = bcrypt($validatedData['password']);
+            }
+
+            $barangayProfile->name = $validatedData['name'];
+            $barangayProfile->email = $validatedData['email'];
+            $barangayProfile->role = $validatedData['role'];
+            $barangayProfile->address = $validatedData['address'];
+            $barangayProfile->save();
+
+            return redirect()->route('admin.barangay-profiles')->with('success', 'Barangay profile updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.users')->with('error', 'Error updating user: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Error updating Barangay profile: ' . $e->getMessage()])->withInput();
         }
     }
 
-    public function deleteUser($id)
+    // Separate update method for Residence
+    public function updateResidence(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        try {
+            $residence = Residence::findOrFail($id);
 
-        return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
-    }
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:residences,email,' . $id,
+                'role' => 'required|string|max:255',
+                'address' => 'required|string|max:500',
+                'password' => 'nullable|string|min:6|confirmed',
+            ]);
 
-    public function blotterReports()
-    {
-        $blotterRequests = BlotterRequest::with('user')->orderBy('created_at', 'desc')->get();
-        return view('admin.blotter-reports', compact('blotterRequests'));
-    }
+            if (!empty($validatedData['password'])) {
+                $residence->password = bcrypt($validatedData['password']);
+            }
 
-    public function documentRequests()
-    {
-        $documentRequests = DocumentRequest::with('user')->orderBy('created_at', 'desc')->get();
-        return view('admin.document-requests', compact('documentRequests'));
-    }
+            $residence->name = $validatedData['name'];
+            $residence->email = $validatedData['email'];
+            $residence->role = $validatedData['role'];
+            $residence->address = $validatedData['address'];
+            $residence->save();
 
-    public function approveBlotterRequest($id)
-    {
-        $request = BlotterRequest::findOrFail($id);
-        $request->status = 'approved';
-        $request->save();
-
-        return redirect()->route('admin.blotter-reports')->with('success', 'Blotter request approved successfully.');
-    }
-
-    public function accomplishedProjects()
-    {
-        return view('admin.accomplished-projects');
-    }
-
-    public function approveDocumentRequest($id)
-    {
-        $request = DocumentRequest::findOrFail($id);
-        $request->status = 'approved';
-        $request->save();
-
-        return redirect()->route('admin.document-requests')->with('success', 'Document request approved successfully.');
-    }
-
-    public function liveSearchBlotterReports(Request $request)
-    {
-        $search = $request->input('term', '');
-
-        $query = BlotterRequest::with('user');
-
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('user', function ($q2) use ($search) {
-                    $q2->where('name', 'like', "%{$search}%");
-                })
-                ->orWhere('type', 'like', "%{$search}%");
-            });
+            return redirect()->route('admin.residences')->with('success', 'Residence updated successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Error updating Residence: ' . $e->getMessage()])->withInput();
         }
-
-        $blotterRequests = $query->orderBy('created_at')->limit(20)->get();
-
-        return response()->json($blotterRequests);
     }
 
-    public function liveSearchDocumentRequests(Request $request)
+    // Delete BarangayProfile
+    public function deleteBarangayProfile($id)
     {
-        $search = $request->input('term', '');
-
-        $query = DocumentRequest::with('user');
-
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('user', function ($q2) use ($search) {
-                    $q2->where('name', 'like', "%{$search}%");
-                })
-                ->orWhere('document_type', 'like', "%{$search}%");
-            });
+        try {
+            $barangayProfile = BarangayProfile::findOrFail($id);
+            $barangayProfile->delete();
+            return redirect()->route('admin.barangay-profiles')->with('success', 'Barangay profile deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.barangay-profiles')->with('error', 'Error deleting Barangay profile: ' . $e->getMessage());
         }
-
-        $documentRequests = $query->orderBy('created_at')->limit(20)->get();
-
-        return response()->json($documentRequests);
     }
 
-    public function updateProfile(Request $request)
+    // Delete Residence
+    public function deleteResidence($id)
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
-
-        $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
-        ]);
-
-        $user->email = $request->input('email');
-
-        if ($request->filled('password')) {
-            $user->password = bcrypt($request->input('password'));
+        try {
+            $residence = Residence::findOrFail($id);
+            $residence->delete();
+            return redirect()->route('admin.residences')->with('success', 'Residence deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.residences')->with('error', 'Error deleting Residence: ' . $e->getMessage());
         }
-
-        $user->save();
-
-        return redirect()->route('admin.profile')->with('success', 'Profile updated successfully.');
     }
 
-    public function accountRequests()
-    {
-        $accountRequests = AccountRequest::orderBy('created_at', 'desc')->get();
-        return view('admin.new-account-requests', compact('accountRequests'));
-    }
-
-
+    // Handle account request approval (unchanged)
     public function approveAccountRequest($id)
     {
         Log::info('approveAccountRequest method called with id: ' . $id);
@@ -221,38 +129,30 @@ class AdminDashboardController extends Controller
         try {
             DB::beginTransaction();
 
-            // Check if there is any pending account request with the same email, excluding the current request
+            // Check if pending duplicate request exists
             $existingRequest = AccountRequest::where('email', $accountRequest->email)
                 ->where('status', 'pending')
                 ->where('id', '!=', $accountRequest->id)
                 ->first();
 
-           if ($existingRequest) {
-                // Reject the existing request
+            if ($existingRequest) {
                 AccountRequest::where('id', $existingRequest->id)->update(['status' => 'rejected']);
                 DB::rollBack();
-                Log::warning('Duplicate account request found for email: ' . $accountRequest->email . '. Existing request rejected.');
-                return redirect()->route('admin.new-account-requests')->with('error', 'An account request with this email was already pending and has been rejected.');
+                Log::warning('Duplicate account request found for email: ' . $accountRequest->email);
+                return redirect()->route('admin.new-account-requests')
+                    ->with('error', 'An account request with this email was already pending and has been rejected.');
             }
 
-            // Generate a unique token if one doesn't already exist
             if (!$accountRequest->token) {
                 $accountRequest->token = Str::uuid();
             }
 
-            // Update the account request status to "approved"
-            AccountRequest::where('id', $id)->update(['status' => 'approved']);
+            $accountRequest->update(['status' => 'approved']);
 
-            // Send email with registration link
             $registrationLink = route('register.form', ['token' => $accountRequest->token]);
 
-            $data = [
-                'title' => 'Account Registration',
-                'content' => "Click the following link to register: <a href='{$registrationLink}'>{$registrationLink}</a>",
-            ];
-
-           try {
-                Mail::to($accountRequest->email)->send(new AccountApproved());
+            try {
+                Mail::to($accountRequest->email)->send(new AccountApproved($registrationLink));
                 Log::info('Email sent successfully to: ' . $accountRequest->email);
             } catch (\Exception $e) {
                 Log::error('Error sending email: ' . $e->getMessage());
@@ -260,14 +160,20 @@ class AdminDashboardController extends Controller
             }
 
             DB::commit();
-            } catch (\Exception $e) {
-                DB::rollBack();
-                $errorMessage = 'Error approving account request: ' . $e->getMessage();
-                Log::error($errorMessage);
-                return redirect()->route('admin.new-account-requests')->with('error', $errorMessage);
-            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error approving account request: ' . $e->getMessage());
+            return redirect()->route('admin.new-account-requests')->with('error', 'Error approving account request: ' . $e->getMessage());
+        }
 
-            return redirect()->route('admin.new-account-requests')->with('success', 'Account request approved successfully.');
-}
+        return redirect()->route('admin.new-account-requests')->with('success', 'Account request approved successfully.');
+    }
+
+    // New method to list account requests (needed)
+    public function accountRequests()
+    {
+        $accountRequests = AccountRequest::orderBy('created_at', 'desc')->get();
+        return view('admin.new-account-requests', compact('accountRequests'));
+    }
 
 }

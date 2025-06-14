@@ -18,6 +18,6 @@ class DocumentRequest extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(\App\Models\BarangayProfile::class);
     }
 }

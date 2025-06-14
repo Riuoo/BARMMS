@@ -24,6 +24,12 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <!-- Table for larger screens -->
     <table class="min-w-full border border-gray-300 table-auto hidden sm:table">
         <thead>
@@ -69,7 +75,7 @@
                     <form method="POST" action="{{ route('admin.blotter-approve', $request->id) }}" class="inline">
                         @csrf
                         @method('PUT')
-                        <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Done</button>
+                        <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
                     </form>
                     @else
                     <span class="text-green-600 font-semibold">Approved</span>
@@ -93,7 +99,7 @@
                 <form method="POST" action="{{ route('admin.blotter-approve', $request->id) }}" class="inline">
                     @csrf
                     @method('PUT')
-                    <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Done</button>
+                    <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
                 </form>
                 @else
                 <span class="text-green-600 font-semibold self-center">Approved</span>
@@ -137,7 +143,7 @@
         }
 
         modalContent.innerHTML = `
-            <p><strong>User:</strong> ${request.user?.name ?? 'N/A'}</p>
+            <p><strong>User:</strong> ${(request.user && request.user.name) ? request.user.name : 'N/A'}</p>
             <p><strong>Type:</strong> ${request.type}</p>
             <p><strong>Description:</strong> ${request.description}</p>
             <p><strong>Media:</strong> ${mediaContent}</p>

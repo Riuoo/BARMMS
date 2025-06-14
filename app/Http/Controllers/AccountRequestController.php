@@ -19,10 +19,23 @@ class AccountRequestController extends Controller
     public function approve(Request $request, AccountRequest $accountRequest)
     {
         $accountRequest->status = 'approved';
+        $accountRequest->user_id = $request->session()->get('user_id'); // Set admin user_id who approved
         $accountRequest->save();
 
-        Mail::to($accountRequest->email)->send(new AccountApproved());
+        Mail::to($accountRequest->email)->send(new AccountApproved($accountRequest->token));
 
-        return redirect()->route('admin.new-account-requests')->with('success', 'Account request approved and email sent.');
+        $adminUserId = $request->session()->get('user_id');
+        $adminUserName = 'Admin';
+        if ($adminUserId) {
+            $adminUser = \App\Models\BarangayProfile::find($adminUserId);
+            if (!$adminUser) {
+                $adminUser = \App\Models\Residence::find($adminUserId);
+            }
+            if ($adminUser) {
+                $adminUserName = $adminUser->name;
+            }
+        }
+
+        return redirect()->route('admin.new-account-requests')->with('success', "Account request approved by {$adminUserName} and email sent.");
     }
 }
