@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Barangay Information System</title>
+    <title>Lower Malinao System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
         rel="stylesheet"
@@ -15,11 +15,10 @@
                     rgba(0, 0, 0, 0.6),
                     rgba(0, 0, 0, 0.6)
                 ),
-                url(
-                    "/images/lower-malinao-brgy-bg.jpg"
-                );
-            background-size: cover;
-            background-position: center;
+                url("/images/lower-malinao-brgy-bg-f.png");
+            background-size: cover; /* Ensures the image covers the entire section */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents the image from repeating */
         }
     </style>
 </head>
@@ -32,7 +31,7 @@
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0">
                     <h1 class="text-xl font-bold">
-                        Barangay Information System
+                        Lower Malinao System
                     </h1>
                 </div>
                 <div class="hidden md:block">
@@ -95,7 +94,7 @@
                     <h1
                         class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6"
                     >
-                        Welcome to Our Barangay
+                        Welcome to Lower Malinao
                     </h1>
                     <p class="text-lg md:text-xl lg:text-2xl mb-8">
                         Your gateway to community information and services
@@ -112,12 +111,15 @@
                 <div
                     class="bg-white bg-opacity-95 rounded-lg shadow-2xl p-8 max-w-md mx-auto w-full"
                 >
-                    <div class="text-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">
-                            Login
-                        </h2>
-                        <p class="text-gray-600">Access your account</p>
+                    <div class="flex items-center justify-center gap-4">
+                        <img src="/images/lower-malinao-brgy-logo.png" alt="Lower Malinao Barangay Logo" class="h-20 w-auto" />
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                                Barangay Portal
+                            </h2>
+                        </div>
                     </div>
+                    <p class="text-gray-600 text-center">Access your account</p>
 
 @if(session('error'))
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">

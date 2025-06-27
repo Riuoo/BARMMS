@@ -51,6 +51,14 @@ class BarangayProfileSeeder extends Seeder
             'role' => 'councilor',
             'address' => '202 Councilor St.',
         ]);
+
+        BarangayProfile::create([
+            'name' => 'Test User',
+            'email' => 'rodericktajos01@gmail.com',
+            'password' => bcrypt('password123'),
+            'role' => 'admin',
+            'address' => '202 Councilor St.',
+        ]);
     }
 }
  

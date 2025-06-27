@@ -1,25 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\BlotterRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
-class BlotterReportController extends Controller
+class BlotterReportController
 {
-    /**
-     * Display the list of blotter reports.
-     */
-    public function index()
+    public function blotterReport()
     {
-        $blotterRequests = BlotterRequest::with('user')->orderBy('created_at', 'desc')->get();
-
-        return view('admin.blotter-reports', compact('blotterRequests'));
+    $blotterRequests = BlotterRequest::with('user')->get();
+    return view('admin.blotter-reports', compact('blotterRequests'));
     }
 
-    /**
-     * Approve a blotter report.
-     */
     public function approve($id)
     {
         try {

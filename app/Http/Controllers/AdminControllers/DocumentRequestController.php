@@ -1,16 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\DocumentRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
-class DocumentRequestController extends Controller
+class DocumentRequestController
 {
     /**
      * Approve a document request.
      */
+
+    public function documentRequest()
+    {
+        $documentRequests = DocumentRequest::with('user')->get();
+        return view('admin.document-requests', compact('documentRequests'));
+    }
     public function approve($id)
     {
         try {

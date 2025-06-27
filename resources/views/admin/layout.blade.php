@@ -18,7 +18,7 @@
                 </svg>
             </button>
             <div class="flex items-center space-x-2 text-green-600 font-bold text-2xl">
-                <img src="/images/lower-malinao-brgy-logo.jpg" alt="Lower Malinao Barangay Logo" class="h-12 w-auto" />
+                <img src="/images/lower-malinao-brgy-logo.png" alt="Lower Malinao Barangay Logo" class="h-12 w-auto" />
                 <span>Lower Malinao</span>
             </div>
         </div>
@@ -32,9 +32,19 @@
                 <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-64 bg-white text-black rounded shadow-lg z-10 p-4" style="display: none;" role="dialog" aria-modal="true" aria-label="Notifications dropdown">
                     <p class="font-semibold mb-2">Notifications</p>
                     <ul class="list-disc list-inside text-sm">
-                        <li>New blotter report submitted</li>
-                        <li>Account request approved</li>
-                        <li>Project accomplished updated</li>
+                        {{-- Dynamic Notification Messages --}}
+                        @if(isset($pendingBlotterReports) && $pendingBlotterReports > 0)
+                            <li><a href="{{ route('admin.blotter-reports') }}" class="text-blue-600 hover:underline">{{ $pendingBlotterReports }} new blotter report(s)</a></li>
+                        @endif
+                        @if(isset($pendingDocumentRequests) && $pendingDocumentRequests > 0)
+                            <li><a href="{{ route('admin.document-requests') }}" class="text-blue-600 hover:underline">{{ $pendingDocumentRequests }} new document request(s)</a></li>
+                        @endif
+                        @if(isset($pendingAccountRequests) && $pendingAccountRequests > 0)
+                            <li><a href="{{ route('admin.new-account-requests') }}" class="text-blue-600 hover:underline">{{ $pendingAccountRequests }} new account request(s)</a></li>
+                        @endif
+                        @if((isset($totalPendingNotifications) && $totalPendingNotifications == 0) || !isset($totalPendingNotifications))
+                            <li>No new notifications.</li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -85,7 +95,7 @@
     <div class="flex flex-grow overflow-x-hidden min-h-[calc(100vh-4rem)]">
         <!-- Desktop Sidebar -->
             <aside class="hidden md:block min-w-[17rem] text-gray-900 flex flex-col pt-5 px-1" aria-label="Sidebar navigation">
-                <nav class="flex flex-col space-y-6 overflow-y-auto max-h-[calc(100vh-4rem)] px-2">
+                <nav class="flex flex-col overflow-y-auto max-h-[calc(100vh-4rem)] px-2">
                     @php
                         // Helper to determine active states (optional)
                         function isActiveRoute($pattern) {
@@ -103,6 +113,13 @@
                                     <span>Dashboard</span>
                                 </a>
                             </li>
+                        </ul>
+                    </section>
+
+                    <!-- User Management -->
+                    <section class="mb-6" aria-label="User management">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
+                        <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.barangay-profiles') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.barangay-profiles*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.barangay-profiles*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-users fa-fw mr-3 {{ request()->routeIs('admin.barangay-profiles*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
@@ -118,7 +135,7 @@
                         </ul>
                     </section>
 
-                    <!-- Reports & Requests -->
+<!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
                         <ul class="flex flex-col space-y-2">
@@ -191,7 +208,7 @@
                 class="fixed inset-y-0 left-0 z-50 w-64 bg-white text-gray-900 flex flex-col pt-5 px-1 md:hidden"
                 style="display:none"
             >
-                <nav class="flex flex-col space-y-6 overflow-y-auto max-h-[calc(100vh-4rem)] px-2">
+                <nav class="flex flex-col overflow-y-auto max-h-[calc(100vh-4rem)] px-2">
                     <!-- Duplicate all sections from desktop exactly -->
 
                     <!-- Main section -->
@@ -204,6 +221,13 @@
                                     <span>Dashboard</span>
                                 </a>
                             </li>
+                        </ul>
+                    </section>
+
+                    <!-- User Management -->
+                    <section class="mb-6" aria-label="User management">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
+                        <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.barangay-profiles') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.barangay-profiles*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-users fa-fw mr-3 {{ request()->routeIs('admin.barangay-profiles*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>

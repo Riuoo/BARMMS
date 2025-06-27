@@ -1,23 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;
 
 use App\Models\Residence;
 use App\Models\BarangayProfile;
-use App\Models\BlotterRequest;
-use App\Models\DocumentRequest;
-use Illuminate\Support\Facades\Log;
-use App\Models\AccountRequest;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\RegistrationController;
-use App\Http\Controllers\AccountRequestController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\BlotterReportController;
-use App\Http\Controllers\DocumentRequestController;
-use Illuminate\Support\Str;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\AdminControllers\RegistrationController;
+use App\Http\Controllers\AdminControllers\AccountRequestController;
+use App\Http\Controllers\AdminControllers\AdminProfileController;
+use App\Http\Controllers\AdminControllers\AdminDashboardController;
+use App\Http\Controllers\AdminControllers\BarangayProfileController;
+use App\Http\Controllers\AdminControllers\ResidenceController;
+use App\Http\Controllers\AdminControllers\BlotterReportController;
+use App\Http\Controllers\AdminControllers\DocumentRequestController;
+use App\Http\Controllers\AdminControllers\AccomplishProjectController;
+use App\Http\Controllers\AdminControllers\HealthReportController;
+use App\Http\Controllers\AdminControllers\HealthStatusController;
 
 // Landing page route
 Route::get('/', function () {
@@ -26,36 +29,20 @@ Route::get('/', function () {
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 
+// Route for guest users to request an account
 Route::get('/admin/contact', function () {
     return view('admin_contact');
 })->name('admin.contact')->middleware('guest');
 
-// Account Request Route
-Route::post('/admin/contact', function (Request $request) {
-    try {
-        $request->validate([
-            'email' => 'required|email',
-        ]);
+// Forgot Password Routes
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+// Reset Password Routes
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-        $token = Str::random(32);
-
-        $accountRequest = new AccountRequest();
-        $accountRequest->email = $request->email;
-        $accountRequest->status = 'pending';
-        $accountRequest->token = $token;
-        $accountRequest->save();
-
-        return response()->json(['success' => 'Request sent successfully! We will contact you soon.']);
-    } catch (\Illuminate\Database\QueryException $e) {
-        if(strpos($e->getMessage(), 'Unique') !== false) {
-            return response()->json(['error' => 'An account request with this email address already exists.']);
-        }
-        return response()->json(['error' => 'Error submitting request: ' . $e->getMessage()]);
-    } catch (\Exception $e) {
-        Log::error('Error submitting request: ' . $e->getMessage());
-        return response()->json(['error' => 'Error submitting request: ' . $e->getMessage()]);
-    }
-})->name('admin.contact')->middleware('guest');
+// Account Request Route (from contact form submission)
+Route::post('/admin/contact', [AccountRequestController::class, 'store'])->name('admin.contact.store')->middleware('guest'); // Renamed route for clarity
 
 // Authentication route with distinct user tables
 Route::post('/login', function (Request $request) {
@@ -100,193 +87,67 @@ Route::post('/login', function (Request $request) {
     }
 })->name('login.post')->middleware('guest');
 
-// Forgot Password Routes
-Route::get('/forgot-password', function () {
-    return view('fpass');
-})->name('password.request')->middleware('guest');
-
-Route::post('/forgot-password', function () {
-    return back()->with('status', 'Password reset link sent! (Not implemented)');
-})->middleware('guest');
-
-// Account Request Routes
-
-Route::prefix('admin')->group(function () {
-    Route::resource('account-requests', AccountRequestController::class)->only(['index']);
-    Route::put('account-requests/{accountRequest}/approve', [AccountRequestController::class, 'approve'])->name('admin.account-requests.approve');
-});
-
-// Registration routes
+// Registration routes (accessible via token, not directly admin)
 Route::get('/register/{token}', [RegistrationController::class, 'showRegistrationForm'])->name('register.form');
 Route::post('/register', [RegistrationController::class, 'register'])->name('register');
 
-// Admin dashboard
-Route::get('/admin/dashboard', function () {
-    $userRole = Session::get('user_role');
-    if ($userRole !== 'barangay_staff' && $userRole !== 'barangay') {
-        return redirect()->route('landing');
-    }
-    return view('admin.dashboard');
-})->name('admin.dashboard');
-
-// Barangay Profiles routes
-Route::get('/admin/barangay-profiles', function () {
-    $userRole = Session::get('user_role');
-    if ($userRole !== 'barangay_staff' && $userRole !== 'barangay') {
-        return redirect()->route('landing');
-    }
-    $barangayProfiles = BarangayProfile::all();
-    return view('admin.barangay-profiles', compact('barangayProfiles'));
-})->name('admin.barangay-profiles');
-
-Route::get('/admin/barangay-profiles/{id}/edit', function ($id) {
-    $userRole = Session::get('user_role');
-    if ($userRole !== 'barangay_staff' && $userRole !== 'barangay') {
-        return redirect()->route('landing');
-    }
-    $barangayProfile = BarangayProfile::findOrFail($id);
-    return view('admin.edit_barangay_profile', compact('barangayProfile'));
-})->name('admin.barangay-profiles.edit');
-
-Route::put('/admin/barangay-profiles/{id}', [AdminDashboardController::class, 'updateBarangayProfile'])->name('admin.barangay-profiles.update');
-
-Route::delete('/admin/barangay-profiles/{id}', [AdminDashboardController::class, 'deleteBarangayProfile'])->name('admin.barangay-profiles.delete');
-
-// Residences routes
-Route::get('/admin/residences', function () {
-    $userRole = Session::get('user_role');
-    if ($userRole !== 'barangay_staff' && $userRole !== 'barangay') {
-        return redirect()->route('landing');
-    }
-    $residences = Residence::all();
-    return view('admin.residences', compact('residences'));
-})->name('admin.residences');
-
-Route::get('/admin/residences/{id}/edit', function ($id) {
-    $userRole = Session::get('user_role');
-    if ($userRole !== 'barangay_staff' && $userRole !== 'barangay') {
-        return redirect()->route('landing');
-    }
-    $residence = Residence::findOrFail($id);
-    return view('admin.edit_residence_profile', compact('residence'));
-})->name('admin.residences.edit');
-
-Route::put('/admin/residences/{id}', [AdminDashboardController::class, 'updateResidence'])->name('admin.residences.update');
-
-Route::delete('/admin/residences/{id}', [AdminDashboardController::class, 'deleteResidence'])->name('admin.residences.delete');
-
-// Account Requests listing and approval
-Route::get('/admin/new-account-requests', [AdminDashboardController::class, 'accountRequests'])->name('admin.new-account-requests');
-Route::put('/admin/new-account-requests/{id}/approve', [AdminDashboardController::class, 'approveAccountRequest'])->name('admin.account-approve');
-
-// Profile routes for viewing and updating profile
-Route::get('/admin/profile', function () {
-    $userRole = Session::get('user_role');
-    if (!in_array($userRole, ['barangay_staff', 'barangay'])) {
-        return redirect()->route('landing');
-    }
-
-    $userId = Session::get('user_id');
-    $currentUser = BarangayProfile::find($userId) ?? Residence::find($userId);
-
-    if (!$currentUser) {
-        return redirect()->route('landing');
-    }
-
-    return view('admin.profile', compact('currentUser'));
-})->name('admin.profile');
-
-Route::put('/admin/profile/update', function (Request $request) {
-    $userRole = Session::get('user_role');
-    if (!in_array($userRole, ['barangay_staff', 'barangay'])) {
-        return redirect()->route('landing');
-    }
-
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'nullable|min:6|confirmed',
-    ]);
-
-    $userId = Session::get('user_id');
-    $user = BarangayProfile::find($userId) ?? Residence::find($userId);
-
-    if (!$user) {
-        return redirect()->route('landing');
-    }
-
-    $user->email = $request->email;
-
-    if ($request->filled('password')) {
-        $user->password = Hash::make($request->password);
-    }
-
-    $user->save();
-
-    return redirect()->route('admin.profile')->with('success', 'Profile updated successfully.');
-})->name('admin.profile.update');
-
-// Residents dashboard route for residence users
+// Residents dashboard route for residence users (might need its own middleware if not admin)
 Route::get('/residents', function () {
+    // This check remains here as it's specific to 'residence' role, not 'admin.role'
     if (Session::get('user_role') !== 'residence') {
         return redirect()->route('landing');
     }
     return view('residents.dashboard');
 })->name('residents');
 
-
-
-Route::get('/admin/blotter-reports', function () {
-    $userRole = Session::get('user_role');
-    if (!in_array($userRole, ['barangay_staff', 'barangay'])) {
-        return redirect()->route('landing');
-    }
-    $blotterRequests = BlotterRequest::with('user')->get();
-    return view('admin.blotter-reports', compact('blotterRequests'));
-})->name('admin.blotter-reports');
-Route::put('/admin/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])
-    ->name('admin.blotter-approve');
-
-// Document Requests route
-Route::get('/admin/document-requests', function () {
-    $userRole = Session::get('user_role');
-    if (!in_array($userRole, ['barangay_staff', 'barangay'])) {
-        return redirect()->route('landing');
-    }
-    $documentRequests = DocumentRequest::with('user')->get();
-    return view('admin.document-requests', compact('documentRequests'));
-})->name('admin.document-requests');
-Route::put('/admin/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])
-    ->name('admin.document-approve');
-
-// Accomplished Projects Route
-Route::get('/admin/accomplished-projects', function () {
-    $userRole = Session::get('user_role');
-    if (!in_array($userRole, ['barangay_staff', 'barangay'])) {
-        return redirect()->route('landing');
-    }
-    return view('admin.accomplished-projects');
-})->name('admin.accomplished-projects');
-
-// Health Status Route
-Route::get('/admin/health-status', function () {
-    $userRole = Session::get('user_role');
-    if (!in_array($userRole, ['barangay_staff', 'barangay'])) {
-        return redirect()->route('landing');
-    }
-    return view('admin.health-status');
-})->name('admin.health-status');
-
-// Health Reports Route
-Route::get('/admin/health-reports', function () {
-    $userRole = Session::get('user_role');
-    if (!in_array($userRole, ['barangay_staff', 'barangay'])) {
-        return redirect()->route('landing');
-    }
-    return view('admin.health-reports');
-})->name('admin.health-reports');
-
 // Logout route
 Route::post('/logout', function () {
     Session::flush();
     return redirect()->route('landing');
 })->name('logout');
+
+
+// --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
+Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')->group(function () {
+
+    // Admin Dashboard
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+    // Barangay Profiles routes
+    Route::get('/barangay-profiles', [BarangayProfileController::class, 'barangayProfile'])->name('admin.barangay-profiles');
+    Route::get('/barangay-profiles/{id}/edit', [BarangayProfileController::class, 'edit'])->name('admin.barangay-profiles.edit');
+    Route::put('/barangay-profiles/{id}', [BarangayProfileController::class, 'update'])->name('admin.barangay-profiles.update');
+    Route::delete('/barangay-profiles/{id}', [BarangayProfileController::class, 'delete'])->name('admin.barangay-profiles.delete');
+
+    // Residences routes
+    Route::get('/residences', [ResidenceController::class, 'residenceProfile'])->name('admin.residences');
+    Route::get('/residences/{id}/edit', [ResidenceController::class, 'edit'])->name('admin.residences.edit');
+    Route::put('/residences/{id}', [ResidenceController::class, 'update'])->name('admin.residences.update');
+    Route::delete('/residences/{id}', [ResidenceController::class, 'delete'])->name('admin.residences.delete');
+
+    // Account Requests listing and approval
+    Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.new-account-requests');
+    Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');
+
+    // Profile routes for viewing and updating profile
+    Route::get('/profile', [AdminProfileController::class, 'profile'])->name('admin.profile');
+    Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+
+    // Blotter Reports route
+    Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
+    Route::put('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-approve');
+
+    // Document Requests route
+    Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
+    Route::put('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-approve');
+
+    // Accomplished Projects Route
+    Route::get('/accomplished-projects', [AccomplishProjectController::class, 'accomplishProject'])->name('admin.accomplished-projects');
+
+    // Health Status Route
+    Route::get('/health-status', [HealthStatusController::class, 'healthStatus'])->name('admin.health-status');
+
+    // Health Reports Route
+    Route::get('/health-reports', [HealthReportController::class, 'healthReport'])->name('admin.health-reports');
+
+});

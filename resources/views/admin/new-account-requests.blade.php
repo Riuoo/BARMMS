@@ -23,6 +23,12 @@
             {{ session('success') }}
         </div>
     @endif
+    
+    @if(session('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <!-- Table for larger screens -->
     <table class="min-w-full border border-gray-300 table-auto hidden sm:table">

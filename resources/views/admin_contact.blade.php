@@ -11,17 +11,17 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
     <!-- Navigation -->
-    <nav class="bg-gray-900 text-white fixed w-full top-0 z-50 shadow-lg">
+    <nav class="bg-green-600 text-white fixed w-full top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0">
-                    <h1 class="text-xl font-bold">Barangay Information System</h1>
+                    <h1 class="text-xl font-bold">Lower Malinao System</h1>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="{{ route('landing') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Home</a>
-                        <a href="#bulletin" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Bulletin Board</a>
-                        <a href="#contact" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contact</a>
+                        <a href="{{ route('landing') }}" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Home</a>
+                        <a href="#bulletin" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Bulletin Board</a>
+                        <a href="#contact" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contact</a>
                     </div>
                 </div>
                 <div class="md:hidden">
@@ -33,10 +33,10 @@
         </div>
         <!-- Mobile menu -->
         <div id="mobile-menu" class="md:hidden hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-800">
-                <a href="{{ route('landing') }}" class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium">Home</a>
-                <a href="#bulletin" class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium">Bulletin Board</a>
-                <a href="#contact" class="block hover:bg-gray-700 px-3 py-2 rounded-md text-base font-medium">Contact</a>
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-green-600">
+                <a href="{{ route('landing') }}" class="block hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#bulletin" class="block hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Bulletin Board</a>
+                <a href="#contact" class="block hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Contact</a>
             </div>
         </div>
     </nav>
