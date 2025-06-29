@@ -26,11 +26,11 @@ class ViewComposerServiceProvider extends ServiceProvider
         // Compose data for the admin layout
         View::composer('admin.layout', function ($view) {
             // Only fetch if a user is logged in and has an admin role
-            // This prevents errors if the layout is used on public pages or for non-admin users
             if (session()->has('user_role') && in_array(session('user_role'), ['barangay_staff', 'barangay'])) {
-                $pendingBlotterReports = BlotterRequest::where('status', 'pending')->count();
-                $pendingDocumentRequests = DocumentRequest::where('status', 'pending')->count();
-                $pendingAccountRequests = AccountRequest::where('status', 'pending')->count();
+                // Fetch only unread notifications for the header count
+                $pendingBlotterReports = BlotterRequest::where('status', 'pending')->where('is_read', false)->count();
+                $pendingDocumentRequests = DocumentRequest::where('status', 'pending')->where('is_read', false)->count();
+                $pendingAccountRequests = AccountRequest::where('status', 'pending')->where('is_read', false)->count();
                 
                 $totalPendingNotifications = $pendingBlotterReports + $pendingDocumentRequests + $pendingAccountRequests;
                 
@@ -42,7 +42,6 @@ class ViewComposerServiceProvider extends ServiceProvider
                 ));
             } else {
                 // Provide default values if not logged in or not admin
-                // This prevents "Undefined variable" errors on public pages or for non-admin users
                 $view->with([
                     'pendingBlotterReports' => 0,
                     'pendingDocumentRequests' => 0,

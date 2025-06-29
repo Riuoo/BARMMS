@@ -19,6 +19,7 @@ use App\Http\Controllers\AdminControllers\ResidenceController;
 use App\Http\Controllers\AdminControllers\BlotterReportController;
 use App\Http\Controllers\AdminControllers\DocumentRequestController;
 use App\Http\Controllers\AdminControllers\AccomplishProjectController;
+use App\Http\Controllers\AdminControllers\AdminNotificationController;
 use App\Http\Controllers\AdminControllers\HealthReportController;
 use App\Http\Controllers\AdminControllers\HealthStatusController;
 
@@ -100,13 +101,6 @@ Route::get('/residents', function () {
     return view('residents.dashboard');
 })->name('residents');
 
-// Logout route
-Route::post('/logout', function () {
-    Session::flush();
-    return redirect()->route('landing');
-})->name('logout');
-
-
 // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
 Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')->group(function () {
 
@@ -150,4 +144,15 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     // Health Reports Route
     Route::get('/health-reports', [HealthReportController::class, 'healthReport'])->name('admin.health-reports');
 
+    // Route to mark all notifications as read
+    Route::post('/notifications/mark-all-as-read', [AdminNotificationController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-as-read');
+    Route::get('/notifications/count', [AdminNotificationController::class, 'getNotificationCounts'])->name('admin.notifications.count');
+    Route::get('/notifications', [AdminNotificationController::class, 'showNotifications'])->name('admin.notifications');
+
 });
+
+// Logout route
+Route::post('/logout', function () {
+    Session::flush();
+    return redirect()->route('landing');
+})->name('logout');

@@ -22,30 +22,23 @@
                 <span>Lower Malinao</span>
             </div>
         </div>
-        <div class="flex items-center space-x-6">
+        <div class="flex items-center space-x-4">
             <!-- Notifications -->
             <div class="relative cursor-pointer" title="Notifications" x-data="{ open: false }" @click="open = !open">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" role="img" aria-label="Notifications Icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" role="img" aria-label="Notifications Icon">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <span class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-2 text-xs">3</span>
-                <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-64 bg-white text-black rounded shadow-lg z-10 p-4" style="display: none;" role="dialog" aria-modal="true" aria-label="Notifications dropdown">
-                    <p class="font-semibold mb-2">Notifications</p>
-                    <ul class="list-disc list-inside text-sm">
-                        {{-- Dynamic Notification Messages --}}
-                        @if(isset($pendingBlotterReports) && $pendingBlotterReports > 0)
-                            <li><a href="{{ route('admin.blotter-reports') }}" class="text-blue-600 hover:underline">{{ $pendingBlotterReports }} new blotter report(s)</a></li>
-                        @endif
-                        @if(isset($pendingDocumentRequests) && $pendingDocumentRequests > 0)
-                            <li><a href="{{ route('admin.document-requests') }}" class="text-blue-600 hover:underline">{{ $pendingDocumentRequests }} new document request(s)</a></li>
-                        @endif
-                        @if(isset($pendingAccountRequests) && $pendingAccountRequests > 0)
-                            <li><a href="{{ route('admin.new-account-requests') }}" class="text-blue-600 hover:underline">{{ $pendingAccountRequests }} new account request(s)</a></li>
-                        @endif
-                        @if((isset($totalPendingNotifications) && $totalPendingNotifications == 0) || !isset($totalPendingNotifications))
-                            <li>No new notifications.</li>
-                        @endif
+                {{-- Notification count badge --}}
+                <span id="notification-count-badge" class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs" style="display: none; line-height: 1;"></span>
+                
+                <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-64 bg-white text-black rounded-lg shadow-lg z-10 p-4 border border-gray-200" style="display: none;" role="dialog" aria-modal="true" aria-label="Notifications dropdown">
+                    <p class="font-semibold mb-2 text-center">Notifications</p>
+                    <div class="border-b border-black mb-2"></div>
+                    <ul class="list-none" id="notification-list-dropdown">
+                        <li>Loading notifications...</li>
                     </ul>
+                    <div class="border-t border-black my-2"></div>
+                    <a href="{{ route('admin.notifications') }}" class="block text-center text-green-600 hover:underline text-xs">View All Notifications</a>
                 </div>
             </div>
 
@@ -135,7 +128,7 @@
                         </ul>
                     </section>
 
-<!-- Reports & Requests -->
+                    <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
                         <ul class="flex flex-col space-y-2">
@@ -310,5 +303,82 @@
 
     <!-- AlpineJS for menu toggle -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationBadge = document.getElementById('notification-count-badge');
+            const notificationListDropdown = document.getElementById('notification-list-dropdown');
+
+            function updateNotifications() {
+                fetch('{{ route('admin.notifications.count') }}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Update the badge
+                        if (data.total > 0) {
+                            notificationBadge.textContent = data.total;
+                            notificationBadge.style.display = 'block';
+                        } else {
+                            notificationBadge.style.display = 'none';
+                        }
+
+                        // Update the dropdown list
+                        let listHtml = '';
+                        if (data.blotter_reports > 0) {
+                            listHtml += `
+                                <li class="text-center">
+                                    <a href="{{ route('admin.blotter-reports') }}" class="block text-green-600 hover:bg-green-100 rounded-lg transition duration-200">
+                                        <strong class="block">${data.blotter_reports} new blotter report(s)</strong>
+                                        <small class="text-gray-500">${new Date().toLocaleDateString()}</small>
+                                    </a>
+                                </li>
+                                <li class="border-t border-gray-100"></li>`;
+                        }
+                        if (data.document_requests > 0) {
+                            listHtml += `
+                                <li class="text-center">
+                                    <a href="{{ route('admin.document-requests') }}" class="block text-green-600 hover:bg-green-100 rounded-lg transition duration-200">
+                                        <strong class="block">${data.document_requests} new document request(s)</strong>
+                                        <small class="text-gray-500">${new Date().toLocaleDateString()}</small>
+                                    </a>
+                                </li>
+                                <li class="border-t border-gray-100"></li>`;
+                        }
+                        if (data.account_requests > 0) {
+                            listHtml += `
+                                <li class="text-center">
+                                    <a href="{{ route('admin.new-account-requests') }}" class="block text-green-600 hover:bg-green-100 rounded-lg transition duration-200">
+                                        <strong class="block">${data.account_requests} new account request(s)</strong>
+                                        <small class="text-gray-500">${new Date().toLocaleDateString()}</small>
+                                    </a>
+                                </li>
+                                <li class="border-t border-gray-100"></li>`;
+                        }
+
+                        if (listHtml === '') {
+                            listHtml = '<li class="text-gray-500 text-center">No new notifications.</li>';
+                        } else {
+                            listHtml = listHtml.slice(0, -37); // Remove last border divider if there are items
+                        }
+                        notificationListDropdown.innerHTML = listHtml;
+
+
+                    })
+                    .catch(error => {
+                        console.error('Error fetching notifications:', error);
+                        notificationListDropdown.innerHTML = '<li>Error loading notifications.</li>';
+                    });
+            }
+
+            updateNotifications();
+
+            setInterval(updateNotifications, 30000);
+        });
+    </script>
 </body>
 </html>
