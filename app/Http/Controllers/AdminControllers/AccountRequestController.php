@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\AccountRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail; // Required for Mail::to()
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -82,7 +81,7 @@ class AccountRequestController
 
             try {
                 // Send the email with the registration link
-                Mail::to($accountRequest->email)->send(new AccountApproved($registrationLink));
+                Mail::to($accountRequest->email)->send(new AccountApproved($accountRequest->token));
                 Log::info('Email sent successfully to: ' . $accountRequest->email);
             } catch (\Exception $e) {
                 Log::error('Error sending email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
@@ -116,55 +115,4 @@ class AccountRequestController
 
         return redirect()->route('admin.new-account-requests')->with('success', "Account request approved by {$adminUserName} and email sent.");
     }
-
-    /**
-     * Store a new account request from the contact form.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email|unique:account_requests,email',
-        ]);
-
-        try {
-            AccountRequest::create([
-                'email' => $request->email,
-                'status' => 'pending',
-                'token' => Str::uuid(), // Generate a token immediately upon request
-            ]);
-            return response()->json(['success' => 'Your account request has been submitted successfully. Please wait for administrator approval.']);
-        } catch (\Exception $e) {
-            Log::error('Error storing account request: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to submit account request. Please try again later.'], 500);
-        }
-    }
-
-    // The 'approve' method below is redundant and should be removed.
-    // The logic has been moved and improved in approveAccountRequest($id).
-    /*
-    public function approve(Request $request, AccountRequest $accountRequest)
-    {
-        $accountRequest->status = 'approved';
-        $accountRequest->user_id = $request->session()->get('user_id'); // Set admin user_id who approved
-        $accountRequest->save();
-
-        Mail::to($accountRequest->email)->send(new AccountApproved($accountRequest->token));
-
-        $adminUserId = $request->session()->get('user_id');
-        $adminUserName = 'Admin';
-        if ($adminUserId) {
-            $adminUser = \App\Models\BarangayProfile::find($adminUserId);
-            if (!$adminUser) {
-                $adminUser = \App\Models\Residence::find($adminUserId);
-            }
-            if ($adminUser) {
-                $adminUserName = $adminUser->name;
-            }
-        }
-        return redirect()->route('admin.new-account-requests')->with('success', "Account request approved by {$adminUserName} and email sent.");
-    }
-    */
 }

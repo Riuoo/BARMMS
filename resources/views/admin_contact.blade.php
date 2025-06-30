@@ -92,7 +92,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while submitting the request.');
+                alert('This email has already been submitted. Please check your email for a response.');
             });
         });
     </script>

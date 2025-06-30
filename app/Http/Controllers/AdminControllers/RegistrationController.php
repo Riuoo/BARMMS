@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\AccountRequest;
-use App\Models\User;
-use App\Models\BarangayProfile;
 use App\Models\Residence;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -27,10 +25,11 @@ class RegistrationController
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users',
+            'email' => 'required|email|max:255|unique:residences,email', // Ensure email is unique in residences table
+            'address' => 'required|string|max:500', // Added address validation
             'password' => 'required|string|min:8|confirmed',
             'token' => 'required|string',
-            'role' => 'required|string',
+            // 'role' is now hardcoded in the form, so no need to validate it here from user input
         ]);
 
         if ($validator->fails()) {
@@ -43,34 +42,21 @@ class RegistrationController
             return redirect()->route('landing')->with('error', 'Invalid registration link.');
         }
 
-        if ($request->role === 'barangay') {
-            $user = BarangayProfile::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => 'barangay',
-            ]);
-        } elseif ($request->role === 'residence') {
-            $user = Residence::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => 'residence',
-            ]);
-        } else {
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => 'user', // Default role
-            ]);
-        }
+        // Create a new Residence user
+        $user = Residence::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'resident', // Explicitly set role to 'resident'
+            'address' => $request->address, // Save the address
+        ]);
 
+        // Update the account request status
         $accountRequest->status = 'completed';
-        $accountRequest->token = null;
+        $accountRequest->token = null; // Invalidate the token after use
         $accountRequest->save();
 
-        // Optionally, log the user in
+        // Optionally, log the user in (uncomment if desired)
         // auth()->login($user);
 
         return redirect()->route('landing')->with('success', 'Registration successful! You can now log in.');

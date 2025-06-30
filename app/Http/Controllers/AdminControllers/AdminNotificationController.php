@@ -6,7 +6,7 @@ use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\AccountRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // Import DB facade
+use Illuminate\Support\Facades\DB;
 
 class AdminNotificationController
 {

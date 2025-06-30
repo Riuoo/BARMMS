@@ -5,7 +5,6 @@ namespace App\Http\Controllers\AdminControllers;
 use App\Models\AccountRequest;
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
-use Illuminate\Support\Facades\Session;
 
 class AdminDashboardController
 {

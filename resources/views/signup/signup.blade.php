@@ -1,14 +1,26 @@
-@section('content')
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create your account</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome (if needed for icons in the form) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-lg shadow">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Create your account
+                Create your resident account
             </h2>
         </div>
         <form class="mt-8 space-y-6" action="{{ route('register') }}" method="POST">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}">
+            <input type="hidden" name="role" value="residence"> {{-- Hardcode role to residence --}}
+
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
                     <label for="name" class="sr-only">Full Name</label>
@@ -20,7 +32,13 @@
                     <label for="email" class="sr-only">Email address</label>
                     <input id="email" name="email" type="email" autocomplete="email" required
                         class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                        placeholder="Email address" value="{{ old('email') }}">
+                        placeholder="Email address" value="{{ $accountRequest->email ?? old('email') }}" @if($accountRequest->email) readonly @endif>
+                </div>
+                <div>
+                    <label for="address" class="sr-only">Address</label>
+                    <input id="address" name="address" type="text" autocomplete="address" required
+                        class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                        placeholder="Full Address" value="{{ old('address') }}">
                 </div>
                 <div>
                     <label for="password" class="sr-only">Password</label>
@@ -54,5 +72,5 @@
             </div>
         </form>
     </div>
-</div>
-@endsection
+</body>
+</html>

@@ -1,15 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
-use App\Models\Residence;
-use App\Models\BarangayProfile;
+use App\Helpers\AuthHelper;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\LoginControllers\ContactAdminController;
 use App\Http\Controllers\AdminControllers\RegistrationController;
 use App\Http\Controllers\AdminControllers\AccountRequestController;
 use App\Http\Controllers\AdminControllers\AdminProfileController;
@@ -31,9 +30,8 @@ Route::get('/', function () {
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 
 // Route for guest users to request an account
-Route::get('/admin/contact', function () {
-    return view('admin_contact');
-})->name('admin.contact')->middleware('guest');
+Route::get('/admin/contact', [ContactAdminController::class, 'contactAdmin'])->name('admin.contact');
+Route::post('/admin/contact', [ContactAdminController::class, 'store'])->name('admin.contact.store');
 
 // Forgot Password Routes
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
@@ -42,51 +40,30 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-// Account Request Route (from contact form submission)
-Route::post('/admin/contact', [AccountRequestController::class, 'store'])->name('admin.contact.store')->middleware('guest'); // Renamed route for clarity
-
 // Authentication route with distinct user tables
 Route::post('/login', function (Request $request) {
-    $credentials = $request->only('email', 'password');
-
-    $request->validate([
+    $credentials = $request->validate([
         'email' => 'required|email',
-        'password' => 'required',
+        'password' => 'required'
     ]);
+    // Attempt to log in using the helper
+    if ($user = AuthHelper::attemptLogin($credentials, $request->remember)) {
+        $request->session()->regenerate();
 
-    $barangayProfile = BarangayProfile::where('email', $credentials['email'])->first();
-    $residence = Residence::where('email', $credentials['email'])->first();
+        // Set user ID and role in the session
+        session(['user_id' => $user->id]);
+        $role = $user instanceof App\Models\BarangayProfile ? 'barangay' : 'residence';
+        session(['user_role' => $role]);
 
-    $authenticatedUser = null;
-    $role = null;
-
-    if ($barangayProfile && Hash::check($credentials['password'], $barangayProfile->password)) {
-        $authenticatedUser = $barangayProfile;
-        if (in_array($barangayProfile->role, ['admin', 'captain', 'secretary', 'treasurer', 'councilor'])) {
-            $role = 'barangay_staff';
-        } else {
-            $role = 'barangay';
-        }
-    } elseif ($residence && Hash::check($credentials['password'], $residence->password)) {
-        $authenticatedUser = $residence;
-        $role = 'residence';
+        return redirect()->intended(
+            $role === 'barangay' ? route('admin.dashboard') : route('residents')
+        );
     }
 
-    if (!$authenticatedUser) {
-        return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
-    }
-
-    Session::put('user_id', $authenticatedUser->id);
-    Session::put('user_role', $role);
-
-    if ($role === 'barangay_staff') {
-        return redirect()->route('admin.dashboard');
-    } elseif ($role === 'residence') {
-        return redirect()->route('residents');
-    } else {
-        return redirect()->route('landing');
-    }
-})->name('login.post')->middleware('guest');
+    return back()->withErrors([
+        'email' => 'The provided credentials do not match our records.',
+    ])->onlyInput('email');
+})->name('login.post');
 
 // Registration routes (accessible via token, not directly admin)
 Route::get('/register/{token}', [RegistrationController::class, 'showRegistrationForm'])->name('register.form');

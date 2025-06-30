@@ -128,6 +128,13 @@
     </div>
 @endif
 
+@if(session('success'))
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <strong class="font-bold">Success!</strong>
+        <span class="block sm:inline">{{ session('success') }}</span>
+    </div>
+@endif
+
 <form action="{{ route('login.post') }}" method="POST" class="space-y-6" novalidate>
     @csrf
     <div>
@@ -170,18 +177,11 @@
     </div>
 
     <div class="flex items-center justify-between">
-        <div class="flex items-center">
-            <input
-                type="checkbox"
-                id="remember"
-                name="remember"
-                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label
-                for="remember"
-                class="ml-2 block text-sm text-gray-700"
-                >Remember me</label
-            >
+        <div class="form-group">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                <label class="form-check-label" for="remember">Remember Me</label>
+            </div>
         </div>
         <a
             href="{{ route('password.request') }}"

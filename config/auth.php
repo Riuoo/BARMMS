@@ -38,7 +38,11 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'barangay_profiles', // Default to barangay_profiles
+        ],
+        'residence' => [
+            'driver' => 'session',
+            'provider' => 'residences',
         ],
     ],
 
@@ -60,15 +64,14 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'barangay_profiles' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => App\Models\BarangayProfile::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'residences' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Residence::class,
+        ],
     ],
 
     /*
