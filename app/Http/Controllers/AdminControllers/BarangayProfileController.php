@@ -4,7 +4,7 @@ namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\BarangayProfile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
 
 class BarangayProfileController
 {
@@ -12,6 +12,36 @@ class BarangayProfileController
     {
         $barangayProfiles = BarangayProfile::all();
         return view('admin.barangay-profiles', compact('barangayProfiles'));
+    }
+
+    public function create()
+    {
+        return view('admin.create_barangay_profile');
+    }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:barangay_profiles,email',
+            'role' => 'required|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        try {
+            BarangayProfile::create([
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'role' => $validatedData['role'],
+                'address' => $validatedData['address'],
+                'password' => Hash::make($validatedData['password']),
+            ]);
+
+            return redirect()->route('admin.barangay-profiles')->with('success', 'New Barangay profile added successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Error adding Barangay profile: ' . $e->getMessage()])->withInput();
+        }
     }
 
     public function edit($id)
@@ -34,7 +64,7 @@ class BarangayProfileController
             ]);
 
             if (!empty($validatedData['password'])) {
-                $barangayProfile->password = bcrypt($validatedData['password']);
+                $barangayProfile->password = Hash::make($validatedData['password']);
             }
 
             $barangayProfile->name = $validatedData['name'];

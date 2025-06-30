@@ -86,12 +86,16 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
 
     // Barangay Profiles routes
     Route::get('/barangay-profiles', [BarangayProfileController::class, 'barangayProfile'])->name('admin.barangay-profiles');
+    Route::get('/barangay-profiles/create', [BarangayProfileController::class, 'create'])->name('admin.barangay-profiles.create');
+    Route::post('/barangay-profiles', [BarangayProfileController::class, 'store'])->name('admin.barangay-profiles.store');
     Route::get('/barangay-profiles/{id}/edit', [BarangayProfileController::class, 'edit'])->name('admin.barangay-profiles.edit');
     Route::put('/barangay-profiles/{id}', [BarangayProfileController::class, 'update'])->name('admin.barangay-profiles.update');
     Route::delete('/barangay-profiles/{id}', [BarangayProfileController::class, 'delete'])->name('admin.barangay-profiles.delete');
 
     // Residences routes
     Route::get('/residences', [ResidenceController::class, 'residenceProfile'])->name('admin.residences');
+    Route::get('/residences/create', [ResidenceController::class, 'create'])->name('admin.residences.create');
+    Route::post('/residences', [ResidenceController::class, 'store'])->name('admin.residences.store');
     Route::get('/residences/{id}/edit', [ResidenceController::class, 'edit'])->name('admin.residences.edit');
     Route::put('/residences/{id}', [ResidenceController::class, 'update'])->name('admin.residences.update');
     Route::delete('/residences/{id}', [ResidenceController::class, 'delete'])->name('admin.residences.delete');

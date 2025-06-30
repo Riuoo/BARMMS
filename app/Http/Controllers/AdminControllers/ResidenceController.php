@@ -4,7 +4,7 @@ namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\Residence;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
 
 class ResidenceController
 {
@@ -12,6 +12,34 @@ class ResidenceController
     {
         $residences = Residence::all();
         return view('admin.residences', compact('residences'));
+    }
+
+    public function create()
+    {
+        return view('admin.create_residence_profile');
+    }
+    
+
+        public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:residences,email',
+            'address' => 'required|string|max:500',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+        try {
+            Residence::create([
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'role' => 'resident',
+                'address' => $validatedData['address'],
+                'password' => Hash::make($validatedData['password']),
+            ]);
+            return redirect()->route('admin.residences')->with('success', 'New resident added successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Error adding resident: ' . $e->getMessage()])->withInput();
+        }
     }
 
     public function edit($id)

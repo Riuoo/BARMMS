@@ -6,17 +6,18 @@
     <div class="max-w-7xl mx-auto bg-white rounded shadow p-4 sm:p-6 lg:p-8 overflow-x-auto">
         <h1 class="text-2xl font-bold mb-6">Residence Information</h1>
 
-        <div class="mb-6">
-            <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search residences</label>
+        <div class="mb-6 flex justify-between items-center">
+            <label for="searchInput" class="block text-sm font-medium text-gray-700 sr-only">Search residents</label>
             <input
                 type="text"
                 id="searchInput"
                 name="search"
-                placeholder="Type to search residences..."
+                placeholder="Type to search residents..."
                 autocomplete="off"
                 class="w-full max-w-md px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
                 aria-label="Search residences"
             />
+            <a href="{{ route('admin.residences.create') }}" class="ml-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition whitespace-nowrap">Add New Resident</a>
         </div>
 
         <table class="min-w-full border border-gray-300 table-auto hidden sm:table">

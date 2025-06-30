@@ -60,7 +60,7 @@
         <div class="content">
             <p>Dear User,</p>
             <p>Your account request has been approved!</p>
-            <p>You can now <a href="{{ url('/register/form/' . $token) }}" class="button">Sign Up</a> to the system.</p>
+            <p>You can now <a href="{{ url('/register/' . $token) }}" class="button">Sign Up</a> to the system.</p>
         </div>
         <div class="footer">
             <p>Contact us at: <a href="mailto:support@example.com">support@example.com</a></p>
