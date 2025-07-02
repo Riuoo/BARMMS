@@ -5,14 +5,16 @@ namespace App\Http\Controllers\AdminControllers;
 use App\Models\AccountRequest;
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
+use App\Models\Residents;
 
 class AdminDashboardController
 {
     public function index()
     {
         // --- Fetch Data for Dashboard Cards ---
-        $totalBlotterReports = BlotterRequest::count();
+        $totalResidents = Residents::count();
         $totalAccountRequests = AccountRequest::count();
+        $totalBlotterReports = BlotterRequest::count();
         $totalDocumentRequests = DocumentRequest::count();
 
         // Dummy values for now, replace with actual queries when models exist
@@ -20,8 +22,9 @@ class AdminDashboardController
         $totalHealthReports = 10; // Replace with actual query
 
         return view('admin.dashboard', compact(
-            'totalBlotterReports',
+            'totalResidents',
             'totalAccountRequests',
+            'totalBlotterReports',
             'totalDocumentRequests',
             'totalAccomplishedProjects',
             'totalHealthReports'

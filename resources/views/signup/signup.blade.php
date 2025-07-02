@@ -19,7 +19,7 @@
         <form class="mt-8 space-y-6" action="{{ route('register') }}" method="POST">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}">
-            <input type="hidden" name="role" value="residence"> {{-- Hardcode role to residence --}}
+            <input type="hidden" name="role" value="resident"> {{-- Hardcode role to resident --}}
 
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>

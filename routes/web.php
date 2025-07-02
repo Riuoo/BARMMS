@@ -14,7 +14,7 @@ use App\Http\Controllers\AdminControllers\AccountRequestController;
 use App\Http\Controllers\AdminControllers\AdminProfileController;
 use App\Http\Controllers\AdminControllers\AdminDashboardController;
 use App\Http\Controllers\AdminControllers\BarangayProfileController;
-use App\Http\Controllers\AdminControllers\ResidenceController;
+use App\Http\Controllers\AdminControllers\ResidentController;
 use App\Http\Controllers\AdminControllers\BlotterReportController;
 use App\Http\Controllers\AdminControllers\DocumentRequestController;
 use App\Http\Controllers\AdminControllers\AccomplishProjectController;
@@ -52,7 +52,7 @@ Route::post('/login', function (Request $request) {
 
         // Set user ID and role in the session
         session(['user_id' => $user->id]);
-        $role = $user instanceof App\Models\BarangayProfile ? 'barangay' : 'residence';
+        $role = $user instanceof App\Models\BarangayProfile ? 'barangay' : 'resident';
         session(['user_role' => $role]);
 
         return redirect()->intended(
@@ -69,10 +69,10 @@ Route::post('/login', function (Request $request) {
 Route::get('/register/{token}', [RegistrationController::class, 'showRegistrationForm'])->name('register.form');
 Route::post('/register', [RegistrationController::class, 'register'])->name('register');
 
-// Residents dashboard route for residence users (might need its own middleware if not admin)
+// Residents dashboard route for resident users (might need its own middleware if not admin)
 Route::get('/residents', function () {
-    // This check remains here as it's specific to 'residence' role, not 'admin.role'
-    if (Session::get('user_role') !== 'residence') {
+    // This check remains here as it's specific to 'resident' role, not 'admin.role'
+    if (Session::get('user_role') !== 'resident') {
         return redirect()->route('landing');
     }
     return view('residents.dashboard');
@@ -92,13 +92,13 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::put('/barangay-profiles/{id}', [BarangayProfileController::class, 'update'])->name('admin.barangay-profiles.update');
     Route::delete('/barangay-profiles/{id}', [BarangayProfileController::class, 'delete'])->name('admin.barangay-profiles.delete');
 
-    // Residences routes
-    Route::get('/residences', [ResidenceController::class, 'residenceProfile'])->name('admin.residences');
-    Route::get('/residences/create', [ResidenceController::class, 'create'])->name('admin.residences.create');
-    Route::post('/residences', [ResidenceController::class, 'store'])->name('admin.residences.store');
-    Route::get('/residences/{id}/edit', [ResidenceController::class, 'edit'])->name('admin.residences.edit');
-    Route::put('/residences/{id}', [ResidenceController::class, 'update'])->name('admin.residences.update');
-    Route::delete('/residences/{id}', [ResidenceController::class, 'delete'])->name('admin.residences.delete');
+    // Residents routes
+    Route::get('/residents', [ResidentController::class, 'residentProfile'])->name('admin.residents');
+    Route::get('/residents/create', [ResidentController::class, 'create'])->name('admin.residents.create');
+    Route::post('/residents', [ResidentController::class, 'store'])->name('admin.residents.store');
+    Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('admin.residents.edit');
+    Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
+    Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
 
     // Account Requests listing and approval
     Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.new-account-requests');
@@ -129,6 +129,7 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::post('/notifications/mark-all-as-read', [AdminNotificationController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-as-read');
     Route::get('/notifications/count', [AdminNotificationController::class, 'getNotificationCounts'])->name('admin.notifications.count');
     Route::get('/notifications', [AdminNotificationController::class, 'showNotifications'])->name('admin.notifications');
+    Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
 
 });
 

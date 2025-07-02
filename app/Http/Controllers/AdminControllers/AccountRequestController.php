@@ -102,11 +102,11 @@ class AccountRequestController
         // Prepare success message with admin name
         $adminUserName = 'Admin';
         if ($adminUserId) {
-            // Attempt to find the admin's name from either BarangayProfile or Residence model
+            // Attempt to find the admin's name from either BarangayProfile or Residents model
             // This assumes admin users are stored in one of these tables
             $adminUser = \App\Models\BarangayProfile::find($adminUserId);
             if (!$adminUser) {
-                $adminUser = \App\Models\Residence::find($adminUserId);
+                $adminUser = \App\Models\Residents::find($adminUserId);
             }
             if ($adminUser && property_exists($adminUser, 'name')) {
                 $adminUserName = $adminUser->name;

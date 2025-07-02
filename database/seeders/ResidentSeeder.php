@@ -3,16 +3,16 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Residence;
+use App\Models\Residents;
 
-class ResidenceSeeder extends Seeder
+class ResidentSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Residence::create([
+        Residents::create([
             'name' => 'Sample Residence',
             'email' => 'residence@example.com',
             'password' => bcrypt('password123'),
@@ -20,7 +20,7 @@ class ResidenceSeeder extends Seeder
             'address' => '456 Residence Ave.',
         ]);
 
-        Residence::create([
+        Residents::create([
             'name' => 'John Doe',
             'email' => 'johndoe@example.com',
             'password' => bcrypt('password123'),
@@ -28,14 +28,14 @@ class ResidenceSeeder extends Seeder
             'address' => '789 John St.',
         ]);
 
-        Residence::create([
+        Residents::create([
             'name' => 'Jane Smith',
             'email' => 'janesmith@example.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
             'address' => '101 Jane Ave.',
         ]);
-        Residence::create([
+        Residents::create([
             'name' => 'John Smith',
             'email' => 'johnsmith@example.com',
             'password' => bcrypt('password123'),

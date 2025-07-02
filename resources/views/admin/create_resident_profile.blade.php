@@ -1,10 +1,10 @@
 @extends('admin.layout')
 
-@section('title', 'Add New Residence')
+@section('title', 'Add New Resident')
 
 @section('content')
     <div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
-        <h1 class="text-2xl font-bold mb-6">Add New Residence</h1>
+        <h1 class="text-2xl font-bold mb-6">Add New Resident</h1>
 
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -22,7 +22,7 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.residences.store') }}" method="POST">
+        <form action="{{ route('admin.residents.store') }}" method="POST">
             @csrf
 
             <div class="mb-4">
@@ -51,7 +51,7 @@
             </div>
 
             <div class="flex justify-end space-x-2">
-                <a href="{{ route('admin.residences') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</a>
+                <a href="{{ route('admin.residents') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</a>
                 <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Resident</button>
             </div>
         </form>

@@ -30,7 +30,7 @@
                 </svg>
                 {{-- Notification count badge --}}
                 <span id="notification-count-badge" class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs" style="display: none; line-height: 1;"></span>
-                
+
                 <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-64 bg-white text-black rounded-lg shadow-lg z-10 p-4 border border-gray-200" style="display: none;" role="dialog" aria-modal="true" aria-label="Notifications dropdown">
                     <p class="font-semibold mb-2 text-center">Notifications</p>
                     <div class="border-b border-black mb-2"></div>
@@ -48,16 +48,16 @@
                     <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
                     <span class="font-semibold">Admin Name</span>
                 </button>
-                <div 
-                    x-show="open" 
-                    @click.away="open = false" 
+                <div
+                    x-show="open"
+                    @click.away="open = false"
                     x-transition
                     class="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg transition-opacity z-10 p-4"
                     style="display: none;"
                     role="menu" aria-label="User menu"
                 >
-                    <a href="{{ route('admin.profile') }}" 
-                    class="block px-4 py-2 hover:bg-gray-200 rounded" 
+                    <a href="{{ route('admin.profile') }}"
+                    class="block px-4 py-2 hover:bg-gray-200 rounded"
                     role="menuitem" tabindex="-1">
                     Profile
                     </a>
@@ -120,9 +120,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.residences') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.residences*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.residences*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-home fa-fw mr-3 {{ request()->routeIs('admin.residences*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Residence Information</span>
+                                <a href="{{ route('admin.residents') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.residents*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.residents*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-home fa-fw mr-3 {{ request()->routeIs('admin.residents*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Resident Information</span>
                                 </a>
                             </li>
                         </ul>
@@ -177,14 +177,13 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.health-reports') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.health-reports*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.health-reports*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-file-medical fa-fw mr-3 {{ request()->routeIs('admin.health-reports*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                <a href="{{ route('admin.health-reports') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.health-reports*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true">
                                     <span>Health Reports</span>
                                 </a>
                             </li>
                         </ul>
                     </section>
-                    
+
                 </nav>
             </aside>
 
@@ -228,10 +227,11 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.residences') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.residences*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-home fa-fw mr-3 {{ request()->routeIs('admin.residences*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Residence Information</span>
+                                <a href="{{ route('admin.residents') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.residents*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-home fa-fw mr-3 {{ request()->routeIs('admin.residents*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Resident Information</span>
                                 </a>
+                            </a>
                             </li>
                         </ul>
                     </section>
@@ -305,20 +305,59 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
     <script>
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             const notificationBadge = document.getElementById('notification-count-badge');
             const notificationListDropdown = document.getElementById('notification-list-dropdown');
+
+            // --- NEW FUNCTION: timeAgo ---
+            function timeAgo(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const seconds = Math.floor((now - date) / 1000);
+
+                let interval = seconds / 31536000; // seconds in a year
+                if (interval > 1) {
+                    return Math.floor(interval) + " year" + (Math.floor(interval) === 1 ? "" : "s") + " ago";
+                }
+                interval = seconds / 2592000; // seconds in a month
+                if (interval > 1) {
+                    return Math.floor(interval) + " month" + (Math.floor(interval) === 1 ? "" : "s") + " ago";
+                }
+                interval = seconds / 86400; // seconds in a day
+                if (interval > 1) {
+                    return Math.floor(interval) + " day" + (Math.floor(interval) === 1 ? "" : "s") + " ago";
+                }
+                interval = seconds / 3600; // seconds in an hour
+                if (interval > 1) {
+                    return Math.floor(interval) + " hour" + (Math.floor(interval) === 1 ? "" : "s") + " ago";
+                }
+                interval = seconds / 60; // seconds in a minute
+                if (interval > 1) {
+                    return Math.floor(interval) + " minute" + (Math.floor(interval) === 1 ? "" : "s") + " ago";
+                }
+                return Math.floor(seconds) + " second" + (Math.floor(seconds) === 1 ? "" : "s") + " ago";
+            }
+            // --- END NEW FUNCTION ---
+
 
             function updateNotifications() {
                 fetch('{{ route('admin.notifications.count') }}')
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error('Network response was not ok ' + response.statusText);
+                            // If response is not OK, log the status and text
+                            console.error('Network response was not ok:', response.status, response.statusText);
+                            // Try to parse as text to see if it's an error page HTML
+                            return response.text().then(text => {
+                                console.error('Response body:', text);
+                                throw new Error('Server responded with status ' + response.status);
+                            });
                         }
                         return response.json();
                     })
                     .then(data => {
+                        console.log('API Response Data:', data); // Log the entire data object
+
                         // Update the badge
                         if (data.total > 0) {
                             notificationBadge.textContent = data.total;
@@ -327,46 +366,35 @@
                             notificationBadge.style.display = 'none';
                         }
 
-                        // Update the dropdown list
+                        // Update the dropdown list with individual notifications
                         let listHtml = '';
-                        if (data.blotter_reports > 0) {
-                            listHtml += `
-                                <li class="text-center">
-                                    <a href="{{ route('admin.blotter-reports') }}" class="block text-green-600 hover:bg-green-100 rounded-lg transition duration-200">
-                                        <strong class="block">${data.blotter_reports} new blotter report(s)</strong>
-                                        <small class="text-gray-500">${new Date().toLocaleDateString()}</small>
-                                    </a>
-                                </li>
-                                <li class="border-t border-gray-100"></li>`;
-                        }
-                        if (data.document_requests > 0) {
-                            listHtml += `
-                                <li class="text-center">
-                                    <a href="{{ route('admin.document-requests') }}" class="block text-green-600 hover:bg-green-100 rounded-lg transition duration-200">
-                                        <strong class="block">${data.document_requests} new document request(s)</strong>
-                                        <small class="text-gray-500">${new Date().toLocaleDateString()}</small>
-                                    </a>
-                                </li>
-                                <li class="border-t border-gray-100"></li>`;
-                        }
-                        if (data.account_requests > 0) {
-                            listHtml += `
-                                <li class="text-center">
-                                    <a href="{{ route('admin.new-account-requests') }}" class="block text-green-600 hover:bg-green-100 rounded-lg transition duration-200">
-                                        <strong class="block">${data.account_requests} new account request(s)</strong>
-                                        <small class="text-gray-500">${new Date().toLocaleDateString()}</small>
-                                    </a>
-                                </li>
-                                <li class="border-t border-gray-100"></li>`;
-                        }
-
-                        if (listHtml === '') {
-                            listHtml = '<li class="text-gray-500 text-center">No new notifications.</li>';
+                        // Ensure data.notifications is an array before checking length
+                        if (Array.isArray(data.notifications) && data.notifications.length > 0) {
+                            data.notifications.forEach(notification => {
+                                console.log('Processing notification:', notification); // Log each notification object
+                                listHtml += `
+                                    <li class="text-center py-1">
+                                        <a href="${notification.link}"
+                                           class="notification-link block text-green-600 hover:bg-green-100 rounded-lg transition duration-200 p-2"
+                                           data-type="${notification.type}" data-id="${notification.id}">
+                                            <strong class="block">${notification.message}</strong>
+                                            <small class="text-gray-500">${timeAgo(notification.created_at)}</small>
+                                        </a>
+                                    </li>
+                                    <li class="border-t border-gray-100 my-1"></li>`;
+                            });
+                            // Remove the last border if there are items
+                            // Safer way to remove last border:
+                            if (listHtml.endsWith('<li class="border-t border-gray-100 my-1"></li>')) {
+                                listHtml = listHtml.slice(0, -('<li class="border-t border-gray-100 my-1"></li>'.length));
+                            }
                         } else {
-                            listHtml = listHtml.slice(0, -37); // Remove last border divider if there are items
+                            listHtml = '<li class="text-gray-500 text-center py-2">No new notifications.</li>';
                         }
                         notificationListDropdown.innerHTML = listHtml;
 
+                        // Attach event listeners to the new links
+                        attachNotificationLinkListeners();
 
                     })
                     .catch(error => {
@@ -375,8 +403,57 @@
                     });
             }
 
+            function attachNotificationLinkListeners() {
+                document.querySelectorAll('.notification-link').forEach(link => {
+                    // Remove existing listener to prevent multiple calls
+                    link.removeEventListener('click', handleNotificationClick);
+                    // Add new listener
+                    link.addEventListener('click', handleNotificationClick);
+                });
+            }
+
+            function handleNotificationClick(event) {
+                const link = event.currentTarget;
+                const type = link.dataset.type;
+                const id = link.dataset.id;
+
+                if (type && id) {
+                    // Send AJAX request to mark as read
+                    fetch(`/admin/notifications/mark-as-read/${type}/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Laravel CSRF token
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(data.message);
+                        // After marking as read, update the notifications list
+                        updateNotifications();
+                        // Allow the default link behavior to navigate
+                        window.location.href = link.href;
+                    })
+                    .catch(error => {
+                        console.error('Error marking notification as read:', error);
+                        // Even if marking fails, still navigate to the link
+                        window.location.href = link.href;
+                    });
+
+                    // Prevent default navigation immediately to handle it after AJAX
+                    event.preventDefault();
+                }
+            }
+
             updateNotifications();
 
+            // Re-fetch notifications every 30 seconds
             setInterval(updateNotifications, 30000);
         });
     </script>

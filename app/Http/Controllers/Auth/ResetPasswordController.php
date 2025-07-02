@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Models\Residence;
+use App\Models\Residents;
 use App\Models\BarangayProfile;
 
 class ResetPasswordController
@@ -54,8 +54,8 @@ class ResetPasswordController
         }
 
         // Update password in the correct table
-        $user = Residence::where('email', $request->email)->first();
-        $userType = 'residence';
+        $user = Residents::where('email', $request->email)->first();
+        $userType = 'resident';
 
         if (!$user) {
             $user = BarangayProfile::where('email', $request->email)->first();

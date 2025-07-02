@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-use App\Models\Residence;
+use App\Models\Residents;
 use App\Models\BarangayProfile;
 
 class ForgotPasswordController
@@ -28,7 +28,7 @@ class ForgotPasswordController
         $request->validate(['email' => 'required|email']);
 
         // Check email in both tables
-        $user = Residence::where('email', $request->email)->first() 
+        $user = Residents::where('email', $request->email)->first() 
                 ?? BarangayProfile::where('email', $request->email)->first();
 
         if (!$user) {

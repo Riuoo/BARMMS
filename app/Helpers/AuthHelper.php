@@ -3,7 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\BarangayProfile;
-use App\Models\Residence;
+use App\Models\Residents;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,8 +19,8 @@ class AuthHelper
             return $user;
         }
 
-        // Check Residence if BarangayProfile not found
-        $user = Residence::where('email', $credentials['email'])->first();
+        // Check Resident if BarangayProfile not found
+        $user = Residents::where('email', $credentials['email'])->first();
         
         if ($user && Hash::check($credentials['password'], $user->password)) {
             Auth::login($user, $remember);

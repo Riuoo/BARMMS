@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             BlotterRequestSeeder::class,
             DocumentRequestSeeder::class,
             BarangayProfileSeeder::class,
-            ResidenceSeeder::class,
+            ResidentSeeder::class,
         ]);
     }
 }

@@ -19,6 +19,6 @@ class BlotterRequest extends Model
 
     public function user()
     {
-        return $this->belongsTo(Residence::class);
+        return $this->belongsTo(Residents::class);
     }
 }

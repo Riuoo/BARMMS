@@ -5,7 +5,7 @@ namespace App\Http\Controllers\AdminControllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\BarangayProfile;
-use App\Models\Residence;
+use App\Models\Residents;
 use Illuminate\Support\Facades\Session;
 
 class AdminProfileController
@@ -13,7 +13,7 @@ class AdminProfileController
     public function profile()
     {
     $userId = Session::get('user_id');
-    $currentUser = BarangayProfile::find($userId) ?? Residence::find($userId);
+    $currentUser = BarangayProfile::find($userId) ?? Residents::find($userId);
 
     if (!$currentUser) {
         return redirect()->route('landing');
@@ -30,7 +30,7 @@ class AdminProfileController
         ]);
 
         $userId = Session::get('user_id');
-        $user = BarangayProfile::find($userId) ?? Residence::find($userId);
+        $user = BarangayProfile::find($userId) ?? Residents::find($userId);
 
         if (!$user) {
             return redirect()->route('landing');

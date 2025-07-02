@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\AccountRequest;
-use App\Models\Residence;
+use App\Models\Residents;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -25,7 +25,7 @@ class RegistrationController
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:residences,email', // Ensure email is unique in residences table
+            'email' => 'required|email|max:255|unique:residents,email', // Ensure email is unique in residents table
             'address' => 'required|string|max:500', // Added address validation
             'password' => 'required|string|min:8|confirmed',
             'token' => 'required|string',
@@ -42,8 +42,8 @@ class RegistrationController
             return redirect()->route('landing')->with('error', 'Invalid registration link.');
         }
 
-        // Create a new Residence user
-        $user = Residence::create([
+        // Create a new Residents user
+        $user = Residents::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
