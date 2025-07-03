@@ -42,5 +42,19 @@ class ResidentSeeder extends Seeder
             'role' => 'resident',
             'address' => '102 Jane Ave.',
         ]);
+        Residents::create([
+            'name' => 'Test 123',
+            'email' => 'test1@example.com',
+            'password' => bcrypt('password123'),
+            'role' => 'resident',
+            'address' => '103 Jane Ave.',
+        ]);
+        Residents::create([
+            'name' => 'Test 12345',
+            'email' => 'test2@example.com',
+            'password' => bcrypt('password123'),
+            'role' => 'resident',
+            'address' => '104 Jane Ave.',
+        ]);
     }
 }

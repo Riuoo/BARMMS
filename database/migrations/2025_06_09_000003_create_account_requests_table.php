@@ -18,6 +18,8 @@ class CreateAccountRequestsTable extends Migration
             $table->string('status')->default('pending');
             $table->string('token')->nullable();
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('barangay_profiles')->onDelete('cascade');
         });
     }
 

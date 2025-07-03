@@ -15,6 +15,9 @@ return new class extends Migration
         Schema::table('barangay_profiles', function (Blueprint $table) {
             $table->rememberToken(); // Adds a nullable varchar(100) column
         });
+        Schema::table('residents', function (Blueprint $table) {
+            $table->rememberToken(); // Adds a nullable varchar(100) column
+        });
     }
 
     /**
@@ -24,6 +27,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('barangay_profiles', function (Blueprint $table) {
+            $table->dropRememberToken();
+        });
+        Schema::table('residents', function (Blueprint $table) {
             $table->dropRememberToken();
         });
     }

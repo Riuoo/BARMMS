@@ -6,8 +6,8 @@
 <div class="max-w-7xl mx-auto bg-white rounded shadow p-4 sm:p-6 lg:p-8 overflow-x-auto">
     <h1 class="text-2xl font-bold mb-6">Account Requests</h1>
 
-    <div class="mb-6">
-        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search by Email</label>
+    <div class="mb-6 flex justify-between items-center">
+        <label for="searchInput" class="block text-sm font-medium text-gray-700 sr-only">Search by Email</label>
         <input
             type="text"
             id="searchInput"
@@ -53,8 +53,6 @@
                         @method('PUT')
                         <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
                     </form>
-                    @else
-                    <span class="text-green-600 font-semibold">Approved</span>
                     @endif
                 </td>
             </tr>

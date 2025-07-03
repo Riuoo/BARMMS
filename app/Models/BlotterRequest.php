@@ -11,6 +11,7 @@ class BlotterRequest extends Model
 
     protected $fillable = [
         'user_id',
+        'recipient_name',
         'type',
         'description',
         'status',

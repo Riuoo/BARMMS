@@ -6,8 +6,8 @@
 <div class="max-w-7xl mx-auto bg-white rounded shadow p-4 sm:p-6 lg:p-8 overflow-x-auto">
     <h1 class="text-2xl font-bold mb-6">Document Requests</h1>
 
-    <div class="mb-6">
-        <label for="documentSearchInput" class="block text-sm font-medium text-gray-700 mb-2">Search document requests</label>
+    <div class="mb-6 flex justify-between items-center">
+        <label for="documentSearchInput" class="block text-sm font-medium text-gray-700 sr-only">Search document requests</label>
         <input
             type="text"
             id="documentSearchInput"
@@ -16,6 +16,7 @@
             class="w-full max-w-md px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
             aria-label="Search document requests"
         />
+        <a href="{{ route('admin.document-requests.create') }}" class="ml-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition whitespace-nowrap">Create New Document</a>
     </div>
 
     @if(session('success'))
@@ -46,13 +47,15 @@
                 <td class="p-2 sm:p-3 document-created">{{ $request->created_at->format('Y-m-d H:i') }}</td>
                 <td class="p-2 sm:p-3 whitespace-nowrap document-actions">
                     @if($request->status === 'pending')
-                    <form method="POST" action="/admin/document-requests/{{ $request->id }}/approve" class="inline">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
-                    </form>
-                    @else
-                    <span class="text-green-600 font-semibold">Approved</span>
+                        <form action="{{ route('admin.document-approve', $request->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
+                        </form>
+                    @elseif($request->status === 'approved')
+                        <a href="{{ route('admin.document-requests.pdf', $request->id) }}" 
+                           class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">
+                           Generate PDF
+                        </a>
                     @endif
                 </td>
             </tr>

@@ -21,6 +21,7 @@ use App\Http\Controllers\AdminControllers\AccomplishProjectController;
 use App\Http\Controllers\AdminControllers\AdminNotificationController;
 use App\Http\Controllers\AdminControllers\HealthReportController;
 use App\Http\Controllers\AdminControllers\HealthStatusController;
+use App\Models\DocumentRequest;
 
 // Landing page route
 Route::get('/', function () {
@@ -110,11 +111,21 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
 
     // Blotter Reports route
     Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
-    Route::put('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-approve');
+    Route::post('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-approve');
+    Route::post('/blotter-reports/{id}/complete', [BlotterReportController::class, 'markAsComplete'])->name('admin.blotter-reports.complete');
+    Route::get('/blotter-reports/{id}/summon', [BlotterReportController::class, 'generateSummonPDF'])->name('admin.blotter-reports.summon-pdf');
+    Route::post('/blotter-reports/{id}/new-summons', [BlotterReportController::class, 'generateNewSummons'])->name('admin.blotter-reports.new-summons');
+    Route::get('/blotter-reports/{id}/resolution', [BlotterReportController::class, 'generateResolutionPDF'])->name('admin.blotter-reports.resolution-pdf');
+    Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');
+    Route::post('/blotter-reports', [BlotterReportController::class, 'store'])->name('admin.blotter-reports.store');
+    Route::get('/search/residents', [BlotterReportController::class, 'searchResidents'])->name('admin.search.residents');
 
     // Document Requests route
     Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
-    Route::put('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-approve');
+    Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-approve');
+    Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
+    Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
+    Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
 
     // Accomplished Projects Route
     Route::get('/accomplished-projects', [AccomplishProjectController::class, 'accomplishProject'])->name('admin.accomplished-projects');

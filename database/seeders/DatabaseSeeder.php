@@ -14,8 +14,6 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            BlotterRequestSeeder::class,
-            DocumentRequestSeeder::class,
             BarangayProfileSeeder::class,
             ResidentSeeder::class,
         ]);

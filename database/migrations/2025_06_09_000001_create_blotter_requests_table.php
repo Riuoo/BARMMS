@@ -11,11 +11,18 @@ class CreateBlotterRequestsTable extends Migration
         Schema::create('blotter_requests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->string('recipient_name')->nullable();
             $table->string('type');
             $table->text('description');
-            $table->enum('status', ['pending', 'approved'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
             $table->string('media')->nullable()->comment('Path to image or video evidence');
             $table->timestamps();
+            $table->dateTime('approved_at')->nullable();
+            $table->dateTime('summon_date')->nullable();
+            $table->integer('attempts')->default(0);
+            $table->dateTime('completed_at')->nullable();
+
+            $table->foreign('user_id')->references('id')->on('barangay_profiles')->onDelete('cascade');
         });
     }
 
