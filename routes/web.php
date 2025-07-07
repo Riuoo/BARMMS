@@ -101,14 +101,11 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
     Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
 
-    // Account Requests listing and approval
-    Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.new-account-requests');
-    Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');
-
+    
     // Profile routes for viewing and updating profile
     Route::get('/profile', [AdminProfileController::class, 'profile'])->name('admin.profile');
     Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
-
+    
     // Blotter Reports route
     Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
     Route::post('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-approve');
@@ -119,14 +116,18 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');
     Route::post('/blotter-reports', [BlotterReportController::class, 'store'])->name('admin.blotter-reports.store');
     Route::get('/search/residents', [BlotterReportController::class, 'searchResidents'])->name('admin.search.residents');
-
+    
     // Document Requests route
     Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
     Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-approve');
     Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
     Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
     Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
-
+    
+    // Account Requests listing and approval
+    Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.new-account-requests');
+    Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');
+    
     // Accomplished Projects Route
     Route::get('/accomplished-projects', [AccomplishProjectController::class, 'accomplishProject'])->name('admin.accomplished-projects');
 

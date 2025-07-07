@@ -121,84 +121,70 @@
                     </div>
                     <p class="text-gray-600 text-center">Access your account</p>
 
-@if(session('error'))
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-        <strong class="font-bold">Error!</strong>
-        <span class="block sm:inline">{{ session('error') }}</span>
-    </div>
-@endif
+                    @if(session('error'))
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline">{{ session('error') }}</span>
+                        </div>
+                    @endif
 
-@if(session('success'))
-    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-        <strong class="font-bold">Success!</strong>
-        <span class="block sm:inline">{{ session('success') }}</span>
-    </div>
-@endif
+                    @if(session('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <strong class="font-bold">Success!</strong>
+                            <span class="block sm:inline">{{ session('success') }}</span>
+                        </div>
+                    @endif
 
-<form action="{{ route('login.post') }}" method="POST" class="space-y-6" novalidate>
-    @csrf
-    <div>
-        <label
-            for="email"
-            class="block text-sm font-medium text-gray-700 mb-2"
-            >Email Address</label
-        >
-        <input
-            type="email"
-            id="email"
-            name="email"
-            value="{{ old('email') }}"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('email') border-red-500 @enderror"
-            placeholder="Enter your email"
-            required
-        />
-        @error('email')
-            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-        @enderror
-    </div>
+                    <form action="{{ route('login.post') }}" method="POST" class="space-y-6" novalidate>
+                        @csrf
+                        <div>
+                            <label
+                                for="email"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                                >Email Address</label
+                            >
+                            <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('email') border-red-500 @enderror" placeholder="Enter your email" required
+                            />
+                            @error('email')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-    <div>
-        <label
-            for="password"
-            class="block text-sm font-medium text-gray-700 mb-2"
-            >Password</label
-        >
-        <input
-            type="password"
-            id="password"
-            name="password"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('password') border-red-500 @enderror"
-            placeholder="Enter your password"
-            required
-        />
-        @error('password')
-            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-        @enderror
-    </div>
+                        <div>
+                            <label
+                                for="password"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                                >Password</label
+                            >
+                            <input type="password" id="password" name="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('password') border-red-500 @enderror" placeholder="Enter your password" required
+                            />
+                            @error('password')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-    <div class="flex items-center justify-between">
-        <div class="form-group">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                <label class="form-check-label" for="remember">Remember Me</label>
-            </div>
-        </div>
-        <a
-            href="{{ route('password.request') }}"
-            class="text-sm text-green-600 hover:text-green-800"
-            >Forgot password?</a
-        >
-    </div>
+                        <div class="flex items-center justify-between">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                                    <label class="form-check-label" for="remember">Remember Me</label>
+                                </div>
+                            </div>
+                            <a
+                                href="{{ route('password.request') }}"
+                                class="text-sm text-green-600 hover:text-green-800"
+                                >Forgot password?</a
+                            >
+                        </div>
 
-    <button
-        type="submit"
-        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
-    >
-        <i class="fas fa-sign-in-alt mr-2"></i>
-        Sign In
-    </button>
-</form>
-
+                        <button
+                            type="submit"
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
+                        >
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Sign In
+                        </button>
+                    </form>
 
                     <div class="mt-6 text-center">
                         <p class="text-sm text-gray-600">

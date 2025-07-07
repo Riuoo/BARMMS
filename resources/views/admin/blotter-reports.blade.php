@@ -19,7 +19,9 @@
                 aria-label="Search blotter reports"
             />
         </div>
-        <a href="{{ route('admin.blotter-reports.create') }}" class="ml-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Create New Blotter</a>
+        <a href="{{ route('admin.blotter-reports.create') }}" class="ml-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+            <i class="fas fa-plus mr-1"></i>Create New Blotter
+        </a>
     </div>
 
     @if(session('success'))
@@ -38,45 +40,50 @@
     <table class="min-w-full border border-gray-300 table-auto">
         <thead>
             <tr class="bg-green-600 text-white">
-                <th class="p-2 sm:p-3 text-left">Complainant</th>
-                <th class="p-2 sm:p-3 text-left">Recipient</th>
-                <th class="p-2 sm:p-3 text-left">Type</th>
-                <th class="p-2 sm:p-3 text-left">Description</th>
-                <th class="p-2 sm:p-3 text-left">Media</th>
-                <th class="p-2 sm:p-3 text-left">Status</th>
-                <th class="p-2 sm:p-3 text-left">Created At</th>
-                <th class="p-2 sm:p-3 text-left">Actions</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Complainant</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Recipient</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Type</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Description</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Media</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Status</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Created At</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach($blotterRequests as $request)
             <tr class="border-t border-gray-300 hover:bg-gray-100">
-                <td class="p-2 sm:p-3">{{ $request->user->name ?? 'N/A' }}</td>
-                <td class="p-2 sm:p-3">{{ $request->recipient_name }}</td>
-                <td class="p-2 sm:p-3">{{ $request->type }}</td>
-                <td class="p-2 sm:p-3">{{ $request->description }}</td>
-                <td class="p-2 sm:p-3">
+                <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ $request->user->name ?? 'N/A' }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3">{{ $request->recipient_name }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3">{{ $request->type }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3">{{ $request->description }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3">
                     @if($request->media)
                         <img src="{{ asset('storage/' . $request->media) }}" alt="Evidence Image" class="max-w-xs max-h-32 rounded">
                     @else
                         No media
                     @endif
                 </td>
-                <td class="p-2 sm:p-3">{{ ucfirst($request->status) }}</td>
-                <td class="p-2 sm:p-3">{{ $request->created_at->format('Y-m-d H:i') }}</td>
-                <td class="p-2 sm:p-3 whitespace-nowrap">
+                <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ ucfirst($request->status) }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ $request->created_at->format('Y-m-d H:i') }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 whitespace-nowrap text-center">
                     @if($request->status === 'pending')
                         {{-- Existing Approve button --}}
                         <form action="{{ route('admin.blotter-reports.approve', $request->id) }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
+                            <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">
+                                <i class="fas fa-check mr-1"></i>Approve
+                            </button>
                         </form>
                     @elseif($request->status === 'approved')
                         {{-- Changed to open modal --}}
-                        <button type="button" onclick="openNewSummonModal({{ $request->id }})" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Generate New Summons</button>
+                        <button type="button" onclick="openNewSummonModal({{ $request->id }})" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">
+                            <i class="fas fa-file-alt mr-1"></i>New Summon
+                        </button>
                         <form action="{{ route('admin.blotter-reports.complete', $request->id) }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Mark as Complete</button>
+                            <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                <i class="fas fa-check-circle mr-1"></i>Mark as Complete</button>
                         </form>
                     @endif
                 </td>

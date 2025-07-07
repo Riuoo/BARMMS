@@ -34,24 +34,26 @@
     <table class="min-w-full border border-gray-300 table-auto hidden sm:table">
         <thead>
             <tr class="bg-green-600 text-white">
-                <th class="p-2 sm:p-3 text-left">Email</th>
-                <th class="p-2 sm:p-3 text-left">Status</th>
-                <th class="p-2 sm:p-3 text-left">Created At</th>
-                <th class="p-2 sm:p-3 text-left">Actions</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Email</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Status</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Created At</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Actions</th>
             </tr>
         </thead>
         <tbody id="accountRequestsTableBody">
             @foreach($accountRequests as $request)
             <tr class="border-t border-gray-300 hover:bg-gray-100">
-                <td class="p-2 sm:p-3">{{ $request->email }}</td>
-                <td class="p-2 sm:p-3">{{ ucfirst($request->status) }}</td>
-                <td class="p-2 sm:p-3">{{ optional($request->created_at)->format('Y-m-d H:i') ?? 'N/A' }}</td>
-                <td class="p-2 sm:p-3 whitespace-nowrap">
+                <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ $request->email }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ ucfirst($request->status) }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ optional($request->created_at)->format('Y-m-d H:i') ?? 'N/A' }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 whitespace-nowrap text-center">
                     @if($request->status === 'pending')
                     <form method="POST" action="{{ route('admin.account-requests.approve', $request->id) }}" class="inline">
                         @csrf
                         @method('PUT')
-                        <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
+                        <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">
+                            <i class="fas fa-check mr-1"></i>Approve
+                        </button>
                     </form>
                     @endif
                 </td>
@@ -74,8 +76,6 @@
                     @method('PUT')
                     <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
                 </form>
-                @else
-                <span class="text-green-600 font-semibold self-center">Approved</span>
                 @endif
             </div>
         </div>

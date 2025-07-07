@@ -16,7 +16,9 @@
             class="w-full max-w-md px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
             aria-label="Search document requests"
         />
-        <a href="{{ route('admin.document-requests.create') }}" class="ml-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition whitespace-nowrap">Create New Document</a>
+        <a href="{{ route('admin.document-requests.create') }}" class="ml-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition whitespace-nowrap">
+            <i class="fas fa-plus mr-1"></i>Create New Document
+        </a>
     </div>
 
     @if(session('success'))
@@ -29,32 +31,33 @@
     <table class="min-w-full border border-gray-300 table-auto hidden sm:table">
         <thead>
             <tr class="bg-green-600 text-white">
-                <th class="p-2 sm:p-3 text-left">User</th>
-                <th class="p-2 sm:p-3 text-left">Document Type</th>
-                <th class="p-2 sm:p-3 text-left">Description</th>
-                <th class="p-2 sm:p-3 text-left">Status</th>
-                <th class="p-2 sm:p-3 text-left">Created At</th>
-                <th class="p-2 sm:p-3 text-left">Actions</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">User</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Document Type</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Description</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Status</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Created At</th>
+                <th class="border border-gray-300 p-2 sm:p-3 text-center">Actions</th>
             </tr>
         </thead>
         <tbody id="documentTableBody">
             @foreach($documentRequests as $request)
             <tr class="border-t border-gray-300 hover:bg-gray-100">
-                <td class="p-2 sm:p-3 user-name">{{ $request->user->name ?? 'N/A' }}</td>
-                <td class="p-2 sm:p-3 document-type">{{ $request->document_type }}</td>
-                <td class="p-2 sm:p-3 document-description">{{ $request->description }}</td>
-                <td class="p-2 sm:p-3 document-status">{{ ucfirst($request->status) }}</td>
-                <td class="p-2 sm:p-3 document-created">{{ $request->created_at->format('Y-m-d H:i') }}</td>
-                <td class="p-2 sm:p-3 whitespace-nowrap document-actions">
+                <td class="border border-gray-300 p-2 sm:p-3 text-center user-name">{{ $request->user->name ?? 'N/A' }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 document-type">{{ $request->document_type }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 document-description">{{ $request->description }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 text-center document-status">{{ ucfirst($request->status) }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 text-center document-created">{{ $request->created_at->format('Y-m-d H:i') }}</td>
+                <td class="border border-gray-300 p-2 sm:p-3 text-center whitespace-nowrap document-actions">
                     @if($request->status === 'pending')
                         <form action="{{ route('admin.document-approve', $request->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
+                            <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">
+                                <i class="fas fa-check mr-1"></i>Approve</button>
                         </form>
                     @elseif($request->status === 'approved')
                         <a href="{{ route('admin.document-requests.pdf', $request->id) }}" 
                            class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">
-                           Generate PDF
+                           <i class="fas fa-file-pdf mr-1"></i>Generate PDF
                         </a>
                     @endif
                 </td>
