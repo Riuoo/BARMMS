@@ -40,9 +40,9 @@ return [
             'driver' => 'session',
             'provider' => 'barangay_profiles', // Default to barangay_profiles
         ],
-        'residence' => [
+        'residents' => [
             'driver' => 'session',
-            'provider' => 'residences',
+            'provider' => 'residents',
         ],
     ],
 
@@ -68,9 +68,9 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\BarangayProfile::class,
         ],
-        'residences' => [
+        'residents' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Residence::class,
+            'model' => App\Models\Residents::class,
         ],
     ],
 

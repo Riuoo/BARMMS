@@ -1,165 +1,25 @@
-@extends('admin.layout')
+@extends('resident.layout')
 
-@section('title', 'Admin Dashboard')
+@section('title', 'Resident Dashboard')
 
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">Welcome, {{ $barangay_profile->name }}!</h1>
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Welcome, {{ $resident->name }}!</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Total Residents Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-teal-500 rounded-md p-3">
-                        <i class="fas fa-users text-white text-2xl"></i>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Residents</dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900">
-                                    {{ $totalResidents }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-                <div class="text-sm">
-                    <a href="{{ route('admin.residents') }}" class="font-medium text-teal-600 hover:text-teal-900">
-                        View all residents <span aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Account Requests Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-orange-500 rounded-md p-3">
-                        <i class="fas fa-user-plus text-white text-2xl"></i>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Account Requests</dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900">
-                                    {{ $totalAccountRequests }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-                <div class="text-sm">
-                    <a href="{{ route('admin.new-account-requests') }}" class="font-medium text-orange-600 hover:text-orange-900">
-                        Manage account requests <span aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Blotter Reports Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                        <i class="fas fa-file-alt text-white text-2xl"></i>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Blotter Reports</dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900">
-                                    {{ $totalBlotterReports }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-                <div class="text-sm">
-                    <a href="{{ route('admin.blotter-reports') }}" class="font-medium text-blue-600 hover:text-blue-900">
-                        View all blotter reports <span aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Document Requests Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
-                        <i class="fas fa-file-signature text-white text-2xl"></i>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Document Requests</dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900">
-                                    {{ $totalDocumentRequests }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-                <div class="text-sm">
-                    <a href="{{ route('admin.document-requests') }}" class="font-medium text-purple-600 hover:text-purple-900">
-                        Manage document requests <span aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Accomplished Projects Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
-                        <i class="fas fa-check-circle text-white text-2xl"></i>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Accomplished Projects</dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900">
-                                    {{ $totalAccomplishedProjects }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-                <div class="text-sm">
-                    <a href="{{ route('admin.accomplished-projects') }}" class="font-medium text-yellow-600 hover:text-yellow-900">
-                        View accomplished projects <span aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Health Reports Card -->
+        <!-- Request Blotter Card -->
         <div class="bg-white overflow-hidden shadow rounded-lg">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
-                        <i class="fas fa-heartbeat text-white text-2xl"></i>
+                        <i class="fas fa-file-alt text-white text-2xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Health Reports</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Request Blotter</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900">
-                                    {{ $totalHealthReports }}
+                                    New Report
                                 </div>
                             </dd>
                         </dl>
@@ -168,8 +28,148 @@
             </div>
             <div class="bg-gray-50 px-5 py-3">
                 <div class="text-sm">
-                    <a href="{{ route('admin.health-reports') }}" class="font-medium text-red-600 hover:text-red-900">
-                        View health reports <span aria-hidden="true">&rarr;</span>
+                    <a href="{{ route('resident.request_blotter_report') }}" class="font-medium text-red-600 hover:text-red-900">
+                        Make a new blotter report <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Document Card -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                        <i class="fas fa-file-signature text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Request Document</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    New Request
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ route('resident.request_document_request') }}" class="font-medium text-blue-600 hover:text-blue-900">
+                        Request a new document <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Track Requests Card -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                        <i class="fas fa-clipboard-list text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">My Requests</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    View Status
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ route('resident.my-requests') }}" class="font-medium text-green-600 hover:text-green-900">
+                        Track all your requests <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Status Card (Recommendation) -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                        <i class="fas fa-heartbeat text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Health Status</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    Report Health Concerns
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ route('resident.health-status') }}" class="font-medium text-purple-600 hover:text-purple-900">
+                        Submit a health report <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Announcements/News Card (Recommendation) -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                        <i class="fas fa-bullhorn text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Announcements</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    Stay Updated
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ route('resident.announcements') }}" class="font-medium text-yellow-600 hover:text-yellow-900">
+                        View latest news and updates <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Management Card (Recommendation) -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-gray-500 rounded-md p-3">
+                        <i class="fas fa-user-circle text-white text-2xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">My Profile</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    Manage Account
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ route('resident.profile') }}" class="font-medium text-gray-600 hover:text-gray-900">
+                        Update your personal information <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>

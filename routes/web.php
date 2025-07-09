@@ -8,7 +8,7 @@ use App\Helpers\AuthHelper;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\LoginControllers\ContactAdminController;
+use App\Http\Controllers\Auth\ContactAdminController;
 use App\Http\Controllers\AdminControllers\RegistrationController;
 use App\Http\Controllers\AdminControllers\AccountRequestController;
 use App\Http\Controllers\AdminControllers\AdminProfileController;
@@ -21,7 +21,8 @@ use App\Http\Controllers\AdminControllers\AccomplishProjectController;
 use App\Http\Controllers\AdminControllers\AdminNotificationController;
 use App\Http\Controllers\AdminControllers\HealthReportController;
 use App\Http\Controllers\AdminControllers\HealthStatusController;
-use App\Models\DocumentRequest;
+use App\Http\Controllers\ResidentControllers\ResidentController2;
+use App\Http\Controllers\ResidentControllers\ResidentProfileController;
 
 // Landing page route
 Route::get('/', function () {
@@ -57,7 +58,7 @@ Route::post('/login', function (Request $request) {
         session(['user_role' => $role]);
 
         return redirect()->intended(
-            $role === 'barangay' ? route('admin.dashboard') : route('residents')
+            $role === 'barangay' ? route('admin.dashboard') : route('resident.dashboard')
         );
     }
 
@@ -69,15 +70,6 @@ Route::post('/login', function (Request $request) {
 // Registration routes (accessible via token, not directly admin)
 Route::get('/register/{token}', [RegistrationController::class, 'showRegistrationForm'])->name('register.form');
 Route::post('/register', [RegistrationController::class, 'register'])->name('register');
-
-// Residents dashboard route for resident users (might need its own middleware if not admin)
-Route::get('/residents', function () {
-    // This check remains here as it's specific to 'resident' role, not 'admin.role'
-    if (Session::get('user_role') !== 'resident') {
-        return redirect()->route('landing');
-    }
-    return view('residents.dashboard');
-})->name('residents');
 
 // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
 Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')->group(function () {
@@ -108,7 +100,7 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     
     // Blotter Reports route
     Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
-    Route::post('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-approve');
+    Route::post('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-reports.approve');
     Route::post('/blotter-reports/{id}/complete', [BlotterReportController::class, 'markAsComplete'])->name('admin.blotter-reports.complete');
     Route::get('/blotter-reports/{id}/summon', [BlotterReportController::class, 'generateSummonPDF'])->name('admin.blotter-reports.summon-pdf');
     Route::post('/blotter-reports/{id}/new-summons', [BlotterReportController::class, 'generateNewSummons'])->name('admin.blotter-reports.new-summons');
@@ -143,6 +135,26 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/notifications', [AdminNotificationController::class, 'showNotifications'])->name('admin.notifications');
     Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
 
+});
+
+
+Route::middleware([\App\Http\Middleware\CheckResidentRole::class])->prefix('resident')->group(function () {
+    Route::get('/dashboard', [ResidentController2::class, 'dashboard'])->name('resident.dashboard');
+    // Blotter Requests
+    Route::get('/request_blotter_report', [ResidentController2::class, 'requestBlotter'])->name('resident.request_blotter_report');
+    Route::post('/request_blotter_report', [ResidentController2::class, 'storeBlotter'])->name('resident.request_blotter_report');
+    // Document Requests
+    Route::get('/request_document_request', [ResidentController2::class, 'requestDocument'])->name('resident.request_document_request');
+    Route::post('/request_document_request', [ResidentController2::class, 'storeDocument'])->name('resident.request_document_request');
+    // My Requests (Tracking)
+    Route::get('/my-requests', [ResidentController2::class, 'myRequests'])->name('resident.my-requests');
+    // Resident Profile
+    Route::get('/profile', [ResidentProfileController::class, 'profile'])->name('resident.profile');
+    Route::put('/profile', [ResidentProfileController::class, 'updateProfile'])->name('resident.profile.update');
+    // Health Status (Recommendation)
+    Route::get('/health-status', [ResidentController2::class, 'healthStatus'])->name('resident.health-status');
+    // Announcements (Recommendation)
+    Route::get('/announcements', [ResidentController2::class, 'announcements'])->name('resident.announcements');
 });
 
 // Logout route

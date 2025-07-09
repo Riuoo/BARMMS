@@ -46,7 +46,7 @@
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none" aria-haspopup="true" :aria-expanded="open.toString()">
                     <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
-                    <span class="font-semibold">Admin Name</span>
+                    <span class="font-semibold">{{ Auth::user()->name }}</span>
                 </button>
                 <div
                     x-show="open"
@@ -110,6 +110,7 @@
                     </section>
 
                     <!-- User Management -->
+                    @if(auth()->user()->role === 'admin')
                     <section class="mb-6" aria-label="User management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
                         <ul class="flex flex-col space-y-2">
@@ -127,6 +128,7 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
@@ -177,7 +179,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.health-reports') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.health-reports*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true">
+                                <a href="{{ route('admin.health-reports') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.health-reports*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.health-reports*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-file-medical fa-fw mr-3 {{ request()->routeIs('admin.health-reports*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Health Reports</span>
                                 </a>
                             </li>
@@ -217,6 +220,7 @@
                     </section>
 
                     <!-- User Management -->
+                    @if(auth()->user()->role === 'admin')
                     <section class="mb-6" aria-label="User management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
                         <ul class="flex flex-col space-y-2">
@@ -235,6 +239,7 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">

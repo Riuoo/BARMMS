@@ -1,34 +1,34 @@
 <?php
 
-namespace App\Http\Controllers\AdminControllers;
+namespace App\Http\Controllers\ResidentControllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\BarangayProfile;
+use App\Models\Residents;
 use Illuminate\Support\Facades\Session;
 
-class AdminProfileController
+class ResidentProfileController
 {
     public function profile()
     {
     $userId = Session::get('user_id');
-    $currentUser = BarangayProfile::find($userId);
+    $resident = Residents::find($userId);
 
-    if (!$currentUser) {
+    if (!$resident) {
         return redirect()->route('landing');
     }
 
-    return view('admin.profile', compact('currentUser'));
+    return view('resident.profile', compact('resident'));
     }
 
-    public function update(Request $request)
+    public function updateProfile(Request $request)
     {
         $request->validate([
             'password' => 'nullable|min:8|confirmed',
         ]);
 
         $userId = Session::get('user_id');
-        $user = BarangayProfile::find($userId);
+        $user = Residents::find($userId);
 
         if (!$user) {
             return redirect()->route('landing');
@@ -40,6 +40,6 @@ class AdminProfileController
 
         $user->save();
 
-        return redirect()->route('admin.profile')->with('success', 'Profile updated successfully.');
+        return redirect()->route('resident.profile')->with('success', 'Profile updated successfully.');
     }
 }

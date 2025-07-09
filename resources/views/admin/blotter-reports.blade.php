@@ -69,11 +69,9 @@
                 <td class="border border-gray-300 p-2 sm:p-3 whitespace-nowrap text-center">
                     @if($request->status === 'pending')
                         {{-- Existing Approve button --}}
-                        <form action="{{ route('admin.blotter-reports.approve', $request->id) }}" method="POST" class="inline">
+                        <form action="{{ route('admin.blotter-reports', $request->id) }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">
-                                <i class="fas fa-check mr-1"></i>Approve
-                            </button>
+                            <button type="button" onclick="openApproveModal({{ $request->id }})" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
                         </form>
                     @elseif($request->status === 'approved')
                         {{-- Changed to open modal --}}
@@ -104,9 +102,9 @@
             <p><span class="font-semibold">Description:</span> <span class="card-description">{{ $request->description }}</span></p>
             <div class="mt-2 flex space-x-4">
                 @if($request->status === 'pending')
-                <button onclick="openApproveModal({{ $request->id }})" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
+                    <button type="button" onclick="openApproveModal({{ $request->id }})" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Approve</button>
                 @else
-                <span class="text-green-600 font-semibold self-center">Approved</span>
+                    <span class="text-green-600 font-semibold self-center">Approved</span>
                 @endif
                 <button onclick="openModal({{ $request->id }})" class="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition">Details</button>
             </div>

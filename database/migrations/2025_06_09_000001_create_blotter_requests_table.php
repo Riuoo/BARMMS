@@ -22,7 +22,7 @@ class CreateBlotterRequestsTable extends Migration
             $table->integer('attempts')->default(0);
             $table->dateTime('completed_at')->nullable();
 
-            $table->foreign('user_id')->references('id')->on('barangay_profiles')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('residents')->onDelete('cascade');
         });
     }
 

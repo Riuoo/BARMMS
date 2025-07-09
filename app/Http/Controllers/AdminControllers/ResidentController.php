@@ -10,6 +10,11 @@ class ResidentController
 {
     public function residentProfile()
     {
+        if (auth()->user()->role !== 'admin') {
+            // Abort the request with a 403 Unauthorized error
+            abort(403, 'Unauthorized');
+        }
+        
         $residents = Residents::all();
         return view('admin.residents', compact('residents'));
     }

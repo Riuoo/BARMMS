@@ -18,6 +18,8 @@ class BlotterReportController
 
     public function approve(Request $request, $id)
     {
+        Log::info('Approve method called for blotter ID: ' . $id);
+
         $validated = $request->validate([
             'summon_date' => 'required|date|after:today'
         ]);
@@ -25,25 +27,24 @@ class BlotterReportController
         try {
             $blotter = BlotterRequest::findOrFail($id);
 
-            // Check if attempts exceed 3
-            if ($blotter->attempts >= 3) {
-                return back()->with('error', 'Maximum attempts reached for generating new summons.');
+            if ($blotter->status === 'approved') {
+                return redirect()->back()->with('error', 'This blotter report has already been approved.');
             }
 
             $blotter->status = 'approved';
             $blotter->approved_at = now();
             $blotter->summon_date = $validated['summon_date'];
-            $blotter->attempts++; // Increment attempts
+            $blotter->attempts++;
             $blotter->save();
 
-            // Generate immediate summon PDF
-            $pdf = Pdf::loadView('admin.pdfs.summons_pdf', ['blotter' => $blotter]);
-            $filename = "summon_notice_{$blotter->id}_{$blotter->user->name}.pdf";
+            Log::info('Blotter report approved successfully', ['blotter_id' => $blotter->id]);
 
-            return $pdf->download($filename);
+            // Generate PDF
+            $pdf = Pdf::loadView('admin.pdfs.summons_pdf', ['blotter' => $blotter]);
+            return $pdf->download("summon_notice_{$blotter->id}.pdf");
         } catch (\Exception $e) {
-            Log::error("Blotter approval failed: " . $e->getMessage());
-            return back()->with('error', 'Failed to approve blotter: ' . $e->getMessage());
+            Log::error("Error approving blotter report: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to approve blotter report: ' . $e->getMessage());
         }
     }
 

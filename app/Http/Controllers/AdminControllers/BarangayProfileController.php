@@ -10,6 +10,11 @@ class BarangayProfileController
 {
     public function barangayProfile()
     {
+        if (auth()->user()->role !== 'admin') {
+            // Abort the request with a 403 Unauthorized error
+            abort(403, 'Unauthorized');
+        }
+        
         $barangayProfiles = BarangayProfile::all();
         return view('admin.barangay-profiles', compact('barangayProfiles'));
     }

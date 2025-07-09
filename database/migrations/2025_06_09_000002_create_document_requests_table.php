@@ -13,7 +13,7 @@ class CreateDocumentRequestsTable extends Migration
             $table->unsignedBigInteger('user_id')->index();
             $table->string('document_type');
             $table->text('description')->nullable();
-            $table->enum('status', ['pending', 'approved'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('barangay_profiles')->onDelete('cascade');

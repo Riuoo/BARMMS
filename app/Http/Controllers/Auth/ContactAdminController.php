@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\LoginControllers;
+namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use App\Models\AccountRequest;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\Residents;
 class ContactAdminController
 {
     public function contactAdmin()
@@ -23,8 +23,22 @@ class ContactAdminController
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:account_requests,email',
+            'email' => 'required|email',
         ]);
+
+        // Check if the email already exists in the residents table
+        $residentExists = Residents::where('email', $request->email)->exists();
+
+        if ($residentExists) {
+            return response()->json(['error' => 'An account with this email already exists. Please log in instead.'], 400);
+        }
+
+        // Check if the email already exists in the account_requests table
+        $existingRequest = AccountRequest::where('email', $request->email)->first();
+
+        if ($existingRequest) {
+            return response()->json(['error' => 'An account request with this email is already pending. Please wait for administrator approval.'], 400);
+        }
 
         try {
             AccountRequest::create([
