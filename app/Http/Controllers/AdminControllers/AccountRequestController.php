@@ -50,8 +50,9 @@ class AccountRequestController
                 AccountRequest::where('id', $existingRequest->id)->update(['status' => 'rejected']);
                 DB::rollBack();
                 Log::warning('Duplicate account request found for email: ' . $accountRequest->email . '. Older request rejected.');
-                return redirect()->route('admin.new-account-requests')
-                    ->with('error', 'An account request with this email was already pending and has been rejected. Please try approving the correct one.');
+                notify()->error('An account request with this email was already pending and has been rejected. Please try approving the correct one.');
+                return redirect()->route('admin.new-account-requests');
+
             }
 
             // Generate token if it doesn't exist (should ideally be generated on request creation, but good fallback)
@@ -88,7 +89,9 @@ class AccountRequestController
                 // If email sending fails, you might want to rollback the approval or just warn
                 // For now, we'll proceed with the approval but show an error about the email
                 DB::rollBack(); // Rollback the transaction if email fails
-                return redirect()->route('admin.new-account-requests')->with('error', 'Account request approved, but email sending failed. Error: ' . $e->getMessage());
+                notify()->error('Account request approved, but email sending failed. Error: ' . $e->getMessage());
+                return redirect()->route('admin.new-account-requests');
+            
             }
 
             DB::commit(); // Commit the transaction if everything above succeeded
@@ -96,7 +99,9 @@ class AccountRequestController
         } catch (\Exception $e) {
             DB::rollBack(); // Rollback if any error occurred within the transaction
             Log::error('Error approving account request ' . $accountRequest->id . ': ' . $e->getMessage());
-            return redirect()->route('admin.new-account-requests')->with('error', 'Error approving account request: ' . $e->getMessage());
+            notify()->error('Error approving account request: ' . $e->getMessage());
+            return redirect()->route('admin.new-account-requests');
+            
         }
 
         // Prepare success message with admin name
@@ -113,6 +118,8 @@ class AccountRequestController
             }
         }
 
-        return redirect()->route('admin.new-account-requests')->with('success', "Account request approved by {$adminUserName} and email sent.");
+        notify()->success("Account request approved by {$adminUserName} and email sent.");
+        return redirect()->route('admin.new-account-requests');
+            
     }
 }

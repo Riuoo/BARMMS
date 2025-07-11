@@ -32,7 +32,7 @@
     <div class="footer">
         <div class="signature">
             <div class="signature-line"></div>
-            <p>{{ auth()->user()->name }}</p>
+            <p>{{ $adminUser->name ?? 'Barangay Captain' }}</p>
             <p>Barangay Captain</p>
         </div>
     </div>

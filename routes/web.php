@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
-use App\Helpers\AuthHelper;
+
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -48,23 +48,33 @@ Route::post('/login', function (Request $request) {
         'email' => 'required|email',
         'password' => 'required'
     ]);
-    // Attempt to log in using the helper
-    if ($user = AuthHelper::attemptLogin($credentials, $request->remember)) {
+
+    // Check BarangayProfile first
+    $user = \App\Models\BarangayProfile::where('email', $credentials['email'])->first();
+    
+    if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+        // Don't use Auth::login() for barangay profiles, just use session
         $request->session()->regenerate();
-
-        // Set user ID and role in the session
         session(['user_id' => $user->id]);
-        $role = $user instanceof App\Models\BarangayProfile ? 'barangay' : 'resident';
-        session(['user_role' => $role]);
-
-        return redirect()->intended(
-            $role === 'barangay' ? route('admin.dashboard') : route('resident.dashboard')
-        );
+        session(['user_role' => 'barangay']);
+        
+        return redirect()->intended(route('admin.dashboard'));
     }
 
-    return back()->withErrors([
-        'email' => 'The provided credentials do not match our records.',
-    ])->onlyInput('email');
+    // Check Resident if BarangayProfile not found
+    $user = \App\Models\Residents::where('email', $credentials['email'])->first();
+    
+    if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+        // Don't use Auth::login() for residents, just use session
+        $request->session()->regenerate();
+        session(['user_id' => $user->id]);
+        session(['user_role' => 'resident']);
+        
+        return redirect()->intended(route('resident.dashboard'));
+    }
+
+    notify()->error('The provided credentials do not match our records.');
+    return back()->onlyInput('email');
 })->name('login.post');
 
 // Registration routes (accessible via token, not directly admin)
@@ -100,6 +110,7 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     
     // Blotter Reports route
     Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
+    Route::get('/blotter-reports/{id}/details', [BlotterReportController::class, 'getDetails'])->name('admin.blotter-reports.details');
     Route::post('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-reports.approve');
     Route::post('/blotter-reports/{id}/complete', [BlotterReportController::class, 'markAsComplete'])->name('admin.blotter-reports.complete');
     Route::get('/blotter-reports/{id}/summon', [BlotterReportController::class, 'generateSummonPDF'])->name('admin.blotter-reports.summon-pdf');
@@ -111,7 +122,8 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     
     // Document Requests route
     Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
-    Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-approve');
+    Route::get('/document-requests/{id}/details', [DocumentRequestController::class, 'getDetails'])->name('admin.document-requests.details');
+    Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-requests.approve');
     Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
     Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
     Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
@@ -134,6 +146,7 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/notifications/count', [AdminNotificationController::class, 'getNotificationCounts'])->name('admin.notifications.count');
     Route::get('/notifications', [AdminNotificationController::class, 'showNotifications'])->name('admin.notifications');
     Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
+    Route::post('/notifications/mark-all-as-read-ajax', [AdminNotificationController::class, 'markAllAsReadAjax'])->name('admin.notifications.mark-all-as-read-ajax');
 
 });
 

@@ -40,6 +40,8 @@ class AdminProfileController
 
         $user->save();
 
-        return redirect()->route('admin.profile')->with('success', 'Profile updated successfully.');
+        notify()->success('Profile updated successfully.');
+        return redirect()->route('admin.profile');
+            
     }
 }

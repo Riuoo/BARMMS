@@ -23,7 +23,8 @@ class ResetPasswordController
             ->first();
 
         if (!$resetRecord || Carbon::parse($resetRecord->created_at)->addHours(1)->isPast()) {
-            return redirect()->route('password.request')->withErrors(['email' => 'Invalid or expired token.']);
+            notify()->error('Invalid or expired token.');
+            return redirect()->route('password.request');
         }
 
         return view('reset-password', [
@@ -50,7 +51,8 @@ class ResetPasswordController
             ->first();
 
         if (!$resetRecord) {
-            return back()->withErrors(['email' => 'Invalid token or email.']);
+            notify()->error('Invalid token or email.');
+            return back();
         }
 
         // Update password in the correct table
@@ -63,7 +65,8 @@ class ResetPasswordController
         }
 
         if (!$user) {
-            return back()->withErrors(['email' => 'User not found.']);
+            notify()->error('User not found.');
+            return back();
         }
 
         $user->password = Hash::make($request->password);
@@ -72,6 +75,7 @@ class ResetPasswordController
         // Clear the token
         DB::table('password_resets')->where('email', $request->email)->delete();
 
-        return redirect('/login')->with('status', 'Password updated!');
+        notify()->success('Password updated!');
+        return redirect('/login');
     }
 }

@@ -32,7 +32,8 @@ class ForgotPasswordController
                 ?? BarangayProfile::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors(['email' => 'Email not found in our records.']);
+            notify()->error('Email not found in our records.');
+            return back();
         }
 
         // Generate and store token
@@ -48,6 +49,7 @@ class ForgotPasswordController
             new \App\Mail\PasswordResetMail($token, $request->email)
         );
 
-        return back()->with('status', 'Password reset link sent!');
+        notify()->success('Password reset link sent!');
+        return back();
     }
 }

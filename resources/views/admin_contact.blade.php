@@ -8,8 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @notifyCss
+    <style>
+        .notify {
+            z-index: 1001 !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
+    @include('notify::components.notify')
     <!-- Navigation -->
     <nav class="bg-green-600 text-white fixed w-full top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,35 +75,6 @@
         </div>
     </main>
 
-    <script>
-        document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            const formData = new FormData(this);
-
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': formData.get('_token')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.success); // Display the success message
-                    window.location.reload(); // Reload the page
-                } else if (data.error) {
-                    alert(data.error); // Display the error message
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('This email has already been submitted. Please check your email for a response.');
-            });
-        });
-    </script>
-
     <!-- JavaScript for mobile menu -->
     <script>
         document.getElementById('mobile-menu-button').addEventListener('click', function () {
@@ -104,5 +82,6 @@
             mobileMenu.classList.toggle('hidden');
         });
     </script>
+    @notifyJs
 </body>
 </html>

@@ -25,6 +25,18 @@ class ViewComposerServiceProvider extends ServiceProvider
     {
         // Compose data for the admin layout
         View::composer('admin.layout', function ($view) {
+            // Get the correct user data for admins
+            $currentAdminUser = null;
+            
+            if (session()->has('user_role') && session('user_role') === 'barangay') {
+                $userId = session('user_id');
+                if ($userId) {
+                    $currentAdminUser = \App\Models\BarangayProfile::find($userId);
+                }
+            }
+            
+            $view->with('currentAdminUser', $currentAdminUser);
+            
             // Only fetch if a user is logged in and has an admin role
             if (session()->has('user_role') && in_array(session('user_role'), ['barangay_staff', 'barangay'])) {
                 // Fetch only unread notifications for the header count
@@ -49,6 +61,19 @@ class ViewComposerServiceProvider extends ServiceProvider
                     'totalPendingNotifications' => 0,
                 ]);
             }
+        });
+
+        // Compose data for the resident layout
+        View::composer('resident.layout', function ($view) {
+            // Get the correct user data for residents
+            $currentUser = null;
+            
+            if (session()->has('user_role') && session('user_role') === 'resident') {
+                $userId = session('user_id');
+                $currentUser = \App\Models\Residents::find($userId);
+            }
+            
+            $view->with('currentUser', $currentUser);
         });
     }
 }

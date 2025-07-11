@@ -30,14 +30,16 @@ class ContactAdminController
         $residentExists = Residents::where('email', $request->email)->exists();
 
         if ($residentExists) {
-            return response()->json(['error' => 'An account with this email already exists. Please log in instead.'], 400);
+            notify()->error('This email is already registered. Please log in or use a different email address.');
+            return back();
         }
 
         // Check if the email already exists in the account_requests table
         $existingRequest = AccountRequest::where('email', $request->email)->first();
 
         if ($existingRequest) {
-            return response()->json(['error' => 'An account request with this email is already pending. Please wait for administrator approval.'], 400);
+            notify()->error('An account request for this email is already pending. Please wait for administrator approval or check your email for updates.');
+            return back();
         }
 
         try {
@@ -46,10 +48,12 @@ class ContactAdminController
                 'status' => 'pending',
                 'token' => Str::uuid(),
             ]);
-            return response()->json(['success' => 'Your account request has been submitted successfully. Please wait for administrator approval.']);
+            notify()->success('Your account request was submitted! Please check your email for updates from the administrator.');
+            return back();
         } catch (\Exception $e) {
             Log::error('Error storing account request: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to submit account request. Please try again later.'], 500);
+            notify()->error('There was a problem submitting your request. Please try again later or contact support.');
+            return back();
         }
     }
 }

@@ -6,8 +6,16 @@
     <title>@yield('title', 'Resident Page')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    @notifyCss
+    <style>
+        .notify {
+            z-index: 1001 !important;
+        }
+    </style>
 </head>
-<body x-data="{ sidebarOpen: false }" class="flex flex-col min-h-screen bg-gray-100 font-sans">
+<body x-data="{ sidebarOpen: false }" class="flex flex-col min-h-screen bg-gray-100 font-sans" data-notify-timeout="{{ config('notify.timeout', 5000) }}">
+    @include('notify::components.notify')
 
     <!-- Header -->
     <header class="bg-white text-gray-900 flex items-center justify-between p-4 shadow-md">
@@ -27,13 +35,13 @@
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none" aria-haspopup="true" :aria-expanded="open.toString()">
                     <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
-                    <span class="font-semibold">{{ Auth::user()->name}}</span>
+                    <span class="font-semibold">{{ $currentUser->name ?? 'Resident' }}</span>
                 </button>
                 <div
                     x-show="open"
                     @click.away="open = false"
                     x-transition
-                    class="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg transition-opacity z-10 p-4"
+                    class="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg transition-opacity z-50 p-4"
                     style="display: none;"
                     role="menu" aria-label="User menu"
                 >
@@ -240,8 +248,42 @@
             @yield('content')
         </main>
     </div>
-
-    <!-- AlpineJS for menu toggle -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Custom notification auto-removal system -->
+    <script>
+        // Auto-remove notifications after timeout (non-conflicting with Alpine.js)
+        document.addEventListener('DOMContentLoaded', function() {
+            const notifications = document.querySelectorAll('.notify');
+            const timeout = parseInt(document.body.dataset.notifyTimeout) || 5000; // Get from data attribute or default to 5 seconds
+            
+            notifications.forEach(notification => {
+                // Add click to dismiss functionality
+                notification.addEventListener('click', function() {
+                    fadeOutAndRemove(notification);
+                });
+                
+                // Auto-remove after timeout
+                setTimeout(() => {
+                    fadeOutAndRemove(notification);
+                }, timeout);
+            });
+            
+            // Helper function to fade out and remove notification
+            function fadeOutAndRemove(notification) {
+                if (notification && notification.parentNode) {
+                    // Add fade-out effect
+                    notification.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    
+                    // Remove after fade animation
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 500);
+                }
+            }
+        });
+    </script>
 </body>
 </html>

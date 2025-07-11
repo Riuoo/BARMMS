@@ -10,7 +10,7 @@ class ResidentController
 {
     public function residentProfile()
     {
-        if (auth()->user()->role !== 'admin') {
+        if (session('user_role') !== 'barangay') {
             // Abort the request with a 403 Unauthorized error
             abort(403, 'Unauthorized');
         }
@@ -41,9 +41,13 @@ class ResidentController
                 'address' => $validatedData['address'],
                 'password' => Hash::make($validatedData['password']),
             ]);
-            return redirect()->route('admin.residents')->with('success', 'New resident added successfully.');
+            notify()->success('New resident added successfully.');
+            return redirect()->route('admin.residents');
+            
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Error adding resident: ' . $e->getMessage()])->withInput();
+            notify()->error('Error adding resident: ' . $e->getMessage());
+            return back()->withInput();
+            
         }
     }
 
@@ -76,9 +80,13 @@ class ResidentController
             $resident->address = $validatedData['address'];
             $resident->save();
 
-            return redirect()->route('admin.residents')->with('success', 'Resident updated successfully.');
+            notify()->success('Resident updated successfully.');
+            return redirect()->route('admin.residents');
+            
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Error updating Resident: ' . $e->getMessage()])->withInput();
+            notify()->error('Error updating Resident: ' . $e->getMessage());
+            return back()->withInput();
+            
         }
     }
 
@@ -87,9 +95,13 @@ class ResidentController
         try {
             $resident = Residents::findOrFail($id);
             $resident->delete();
-            return redirect()->route('admin.residents')->with('success', 'Resident deleted successfully.');
+            notify()->success('Resident deleted successfully.');
+            return redirect()->route('admin.residents');
+            
         } catch (\Exception $e) {
-            return redirect()->route('admin.residents')->with('error', 'Error deleting Resident: ' . $e->getMessage());
+            notify()->error('Error deleting Resident: ' . $e->getMessage());
+            return redirect()->route('admin.residents');
+            
         }
     }
 }

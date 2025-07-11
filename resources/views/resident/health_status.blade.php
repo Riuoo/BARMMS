@@ -45,7 +45,7 @@
 
         <div class="mb-4">
             <label for="contact_number" class="block font-medium mb-1">Preferred Contact Number</label>
-            <input type="text" id="contact_number" name="contact_number" value="{{ old('contact_number', Auth::user()->contact_number ?? '') }}" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="e.g., 09123456789">
+            <input type="text" id="contact_number" name="contact_number" value="{{ old('contact_number', $currentUser->contact_number ?? '') }}" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="e.g., 09123456789">
         </div>
 
         <div class="flex justify-end space-x-2">

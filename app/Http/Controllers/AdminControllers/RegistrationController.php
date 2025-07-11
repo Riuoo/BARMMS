@@ -15,7 +15,9 @@ class RegistrationController
         $accountRequest = AccountRequest::where('token', $token)->where('status', 'approved')->first();
 
         if (!$accountRequest) {
-            return redirect()->route('landing')->with('error', 'Invalid registration link.');
+            notify()->error('Invalid registration link.');
+            return redirect()->route('landing');
+            
         }
 
         return view('signup.signup', compact('token', 'accountRequest'));
@@ -39,7 +41,9 @@ class RegistrationController
         $accountRequest = AccountRequest::where('token', $request->token)->where('status', 'approved')->first();
 
         if (!$accountRequest) {
-            return redirect()->route('landing')->with('error', 'Invalid registration link.');
+            notify()->error('Invalid registration link.');
+            return redirect()->route('landing');
+            
         }
 
         // Create a new Residents user
@@ -59,6 +63,8 @@ class RegistrationController
         // Optionally, log the user in (uncomment if desired)
         // auth()->login($user);
 
-        return redirect()->route('landing')->with('success', 'Registration successful! You can now log in.');
+        notify()->success('Registration successful! You can now log in.');
+        return redirect()->route('landing');
+            
     }
 }

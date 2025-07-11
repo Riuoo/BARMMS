@@ -17,22 +17,45 @@ class DocumentRequestController
         return view('admin.document-requests', compact('documentRequests'));
     }
 
+    public function getDetails($id)
+    {
+        try {
+            $documentRequest = DocumentRequest::with('user')->findOrFail($id);
+            
+            return response()->json([
+                'user_name' => $documentRequest->user->name ?? 'N/A',
+                'document_type' => $documentRequest->document_type,
+                'purpose' => $documentRequest->description,
+                'status' => $documentRequest->status,
+                'created_at' => $documentRequest->created_at->format('M d, Y \a\t g:i A'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching document request details: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch details'], 500);
+        }
+    }
+
     public function approve($id)
     {
         try {
             $documentRequest = DocumentRequest::findOrFail($id);
 
             if ($documentRequest->status !== 'pending') {
-                return redirect()->back()->with('error', 'Document request already processed.');
+                notify()->error('Document request already processed.');
+                return redirect()->back();
             }
 
             $documentRequest->status = 'approved';
             $documentRequest->save();
 
-            return redirect()->back()->with('success', 'Document request approved successfully.');
+            // Generate the PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdfs.document_request_pdf', compact('documentRequest'));
+            $filename = 'document_request_' . $documentRequest->id . '.pdf';
+            return $pdf->download($filename);
         } catch (\Exception $e) {
             Log::error('Error approving document request: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to approve document request.');
+            notify()->error('Failed to approve document request.');
+            return redirect()->back();
         }
     }
 
@@ -49,7 +72,7 @@ class DocumentRequestController
             return $pdf->download('document_request_' . $documentRequest->id . '.pdf');
         } catch (\Exception $e) {
             Log::error('Error generating document request PDF: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to generate PDF: ' . $e->getMessage()], 500);
+            notify()->error('Failed to generate PDF: ' . $e->getMessage());
         }
     }
 
@@ -80,7 +103,9 @@ class DocumentRequestController
             return $pdf->download($filename);
         } catch (\Exception $e) {
             Log::error('Error creating document request: ' . $e->getMessage());
-            return back()->with('error', 'Error creating document request: ' . $e->getMessage())->withInput();
+            notify()->error('Error creating document request: ' . $e->getMessage());
+            return back()->withInput();
+            
         }
     }
 }

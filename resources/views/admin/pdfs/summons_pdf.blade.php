@@ -35,7 +35,7 @@
         <p>Issued on: {{ now()->format('F j, Y') }}</p>
         <div class="signature">
             <p>_________________________</p>
-            <p>{{ auth()->user()->name }}</p>
+            <p>{{ $adminUser->name ?? 'Barangay Official' }}</p>
             <p>Barangay Official</p>
         </div>
     </div>

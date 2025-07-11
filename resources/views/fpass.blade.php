@@ -8,8 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @notifyCss
+    <style>
+        .notify {
+            z-index: 1001 !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    @include('notify::components.notify')
     <!-- Navigation -->
     <nav class="bg-green-600 text-white fixed w-full top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,5 +88,6 @@
             </form>
         </div>
     </main>
+    @notifyJs
 </body>
 </html>

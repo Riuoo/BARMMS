@@ -10,7 +10,7 @@ class BarangayProfileController
 {
     public function barangayProfile()
     {
-        if (auth()->user()->role !== 'admin') {
+        if (session('user_role') !== 'barangay') {
             // Abort the request with a 403 Unauthorized error
             abort(403, 'Unauthorized');
         }
@@ -43,9 +43,13 @@ class BarangayProfileController
                 'password' => Hash::make($validatedData['password']),
             ]);
 
-            return redirect()->route('admin.barangay-profiles')->with('success', 'New Barangay profile added successfully.');
+            notify()->success('New Barangay profile added successfully.');
+            return redirect()->route('admin.barangay-profiles');
+            
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Error adding Barangay profile: ' . $e->getMessage()])->withInput();
+            notify()->error('Error adding Barangay profile: ' . $e->getMessage());
+            return back()->withInput();
+            
         }
     }
 
@@ -78,9 +82,13 @@ class BarangayProfileController
             $barangayProfile->address = $validatedData['address'];
             $barangayProfile->save();
 
-            return redirect()->route('admin.barangay-profiles')->with('success', 'Barangay profile updated successfully.');
+            notify()->success('Barangay profile updated successfully.');
+            return redirect()->route('admin.barangay-profiles');
+            
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Error updating Barangay profile: ' . $e->getMessage()])->withInput();
+            notify()->error('Error updating Barangay profile: ' . $e->getMessage());
+            return back()->withInput();
+            
         }
     }
 
@@ -89,9 +97,13 @@ class BarangayProfileController
         try {
             $barangayProfile = BarangayProfile::findOrFail($id);
             $barangayProfile->delete();
-            return redirect()->route('admin.barangay-profiles')->with('success', 'Barangay profile deleted successfully.');
+            notify()->success('Barangay profile deleted successfully.');
+            return redirect()->route('admin.barangay-profiles');
+            
         } catch (\Exception $e) {
-            return redirect()->route('admin.barangay-profiles')->with('error', 'Error deleting Barangay profile: ' . $e->getMessage());
+            notify()->error('Error deleting Barangay profile: ' . $e->getMessage());
+            return redirect()->route('admin.barangay-profiles');
+            
         }
     }
 }

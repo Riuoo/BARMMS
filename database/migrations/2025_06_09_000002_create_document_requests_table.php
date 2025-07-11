@@ -16,7 +16,7 @@ class CreateDocumentRequestsTable extends Migration
             $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('barangay_profiles')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('residents')->onDelete('cascade');
         });
     }
 

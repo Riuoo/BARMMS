@@ -54,11 +54,12 @@ class ResidentController2
             'description' => 'required|string',
             'media' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
-        // Use Auth::id() for the currently authenticated user's ID
-        $userId = Auth::id();
+        // Get user ID from session
+        $userId = Session::get('user_id');
         if (!$userId) {
-            Log::warning('Resident user ID not found in Auth for blotter submission.');
-            return redirect()->route('landing')->with('error', 'You must be logged in to submit a report.');
+            \Log::warning('Resident user ID not found in session for blotter submission.');
+            notify()->error('You must be logged in to submit a report.');
+            return redirect()->route('landing');
         }
         $blotter = new BlotterRequest();
         $blotter->user_id = $userId; // Set the user ID
@@ -66,16 +67,18 @@ class ResidentController2
         $blotter->type = $request->type;
         $blotter->description = $request->description;
         $blotter->status = 'pending'; // Default status for residents
-        $blotter->attempts = 1; // Assuming this is the first attempt
+        $blotter->attempts = 0; // Assuming this is the first attempt
         if ($request->hasFile('media')) {
             $blotter->media = $request->file('media')->store('blotter_media', 'public');
         }
         try {
             $blotter->save(); // Save the blotter report to the database
-            return redirect()->route('resident.my-requests')->with('success', 'Blotter report submitted successfully.');
+            notify()->success('Blotter report submitted successfully.');
+            return redirect()->route('resident.my-requests');
         } catch (\Exception $e) {
-            Log::error("Error creating blotter report: " . $e->getMessage());
-            return back()->with('error', 'Error creating blotter: ' . $e->getMessage());
+            \Log::error("Error creating blotter report: " . $e->getMessage());
+            notify()->error('Error creating blotter: ' . $e->getMessage());
+            return back();
         }
     }
 
@@ -100,11 +103,12 @@ class ResidentController2
             'document_type' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
-        // Use Auth::id() for the currently authenticated user's ID
-        $userId = Auth::id();
+        // Get user ID from session
+        $userId = Session::get('user_id');
         if (!$userId) {
-            Log::warning('Resident user ID not found in Auth for document submission.');
-            return redirect()->route('landing')->with('error', 'You must be logged in to submit a document request.');
+            \Log::warning('Resident user ID not found in session for document submission.');
+            notify()->error('You must be logged in to submit a document request.');
+            return redirect()->route('landing');
         }
         $documentRequest = new DocumentRequest();
         $documentRequest->user_id = $userId; // Set the user ID
@@ -113,10 +117,12 @@ class ResidentController2
         $documentRequest->status = 'pending'; // Default status for residents
         try {
             $documentRequest->save(); // Save the document request to the database
-            return redirect()->route('resident.my-requests')->with('success', 'Document request submitted successfully.');
+            notify()->success('Document request submitted successfully.');
+            return redirect()->route('resident.my-requests');
         } catch (\Exception $e) {
-            Log::error("Error creating document request: " . $e->getMessage());
-            return back()->with('error', 'Error creating document request: ' . $e->getMessage());
+            \Log::error("Error creating document request: " . $e->getMessage());
+            notify()->error('Error creating document request: ' . $e->getMessage());
+            return back();
         }
     }
 

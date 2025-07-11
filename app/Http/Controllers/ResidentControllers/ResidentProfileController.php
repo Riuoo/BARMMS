@@ -31,6 +31,7 @@ class ResidentProfileController
         $user = Residents::find($userId);
 
         if (!$user) {
+            notify()->error('User not found.');
             return redirect()->route('landing');
         }
 
@@ -40,6 +41,7 @@ class ResidentProfileController
 
         $user->save();
 
-        return redirect()->route('resident.profile')->with('success', 'Profile updated successfully.');
+        notify()->success('Profile updated successfully.');
+        return redirect()->route('resident.profile');
     }
 }
