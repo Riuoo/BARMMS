@@ -35,7 +35,7 @@
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none" aria-haspopup="true" :aria-expanded="open.toString()">
                     <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
-                    <span class="font-semibold">{{ $currentUser->name ?? 'Resident' }}</span>
+                    <span class="font-semibold hidden sm:inline">{{ $currentUser->name ?? 'Resident' }}</span>
                 </button>
                 <div
                     x-show="open"

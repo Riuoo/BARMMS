@@ -18,8 +18,36 @@ class BlotterRequest extends Model
         'media',
     ];
 
+    protected $casts = [
+        'media' => 'array',
+    ];
+
     public function user()
     {
         return $this->belongsTo(Residents::class);
+    }
+
+    /**
+     * Get the media files as an array
+     */
+    public function getMediaFilesAttribute()
+    {
+        return $this->media ?? [];
+    }
+
+    /**
+     * Check if the blotter has media files
+     */
+    public function hasMedia()
+    {
+        return !empty($this->media);
+    }
+
+    /**
+     * Get the count of media files
+     */
+    public function getMediaCountAttribute()
+    {
+        return count($this->media ?? []);
     }
 }

@@ -13,7 +13,7 @@ class BlotterReportController
     public function blotterReport()
     {
         $blotterRequests = BlotterRequest::with('user')->get();
-        return view('admin.blotter-reports', compact('blotterRequests'));
+        return view('admin.requests.blotter-reports', compact('blotterRequests'));
     }
 
     public function getDetails($id)
@@ -21,18 +21,27 @@ class BlotterReportController
         try {
             $blotterRequest = BlotterRequest::with('user')->findOrFail($id);
             
+            // Prepare media files for response
+            $mediaFiles = null;
+            if ($blotterRequest->media) {
+                $mediaFiles = [];
+                foreach ($blotterRequest->media as $file) {
+                    $mediaFiles[] = [
+                        'name' => $file['name'] ?? 'Attached File',
+                        'url' => asset('storage/' . $file['path']),
+                        'type' => $file['type'] ?? 'unknown',
+                        'size' => $file['size'] ?? 0,
+                    ];
+                }
+            }
+            
             return response()->json([
                 'user_name' => $blotterRequest->user->name ?? 'N/A',
                 'recipient_name' => $blotterRequest->recipient_name,
                 'description' => $blotterRequest->description,
                 'status' => $blotterRequest->status,
                 'created_at' => $blotterRequest->created_at->format('M d, Y \a\t g:i A'),
-                'media_files' => $blotterRequest->media ? [
-                    [
-                        'name' => 'Attached File',
-                        'url' => asset('storage/' . $blotterRequest->media)
-                    ]
-                ] : null,
+                'media_files' => $mediaFiles,
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching blotter request details: ' . $e->getMessage());
@@ -145,7 +154,7 @@ class BlotterReportController
     public function create()
     {
         $residents = Residents::all();
-        return view('admin.create_blotter_report', compact('residents'));
+        return view('admin.requests.create_blotter_report', compact('residents'));
     }
 
     public function store(Request $request)
@@ -155,7 +164,7 @@ class BlotterReportController
             'recipient_name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'description' => 'required|string',
-            'media' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240',
             'summon_date' => 'required|date|after:today'
         ]);
         try {
@@ -168,10 +177,24 @@ class BlotterReportController
             $blotter->approved_at = now();
             $blotter->summon_date = $validated['summon_date'];
             $blotter->attempts = 1;
+            
+            // Handle multiple file uploads
             if ($request->hasFile('media')) {
-                $blotter->media = $request->file('media')->store('blotter_media', 'public');
+                $mediaFiles = [];
+                foreach ($request->file('media') as $file) {
+                    $path = $file->store('blotter_media', 'public');
+                    $mediaFiles[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'type' => $file->getMimeType(),
+                        'size' => $file->getSize(),
+                    ];
+                }
+                $blotter->media = $mediaFiles;
             }
+            
             $blotter->save();
+            
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
@@ -185,11 +208,10 @@ class BlotterReportController
             ]);
             $filename = "summon_notice_{$blotter->id}.pdf";
             
-            return $pdf->download($filename); // Download the PDF
+            return $pdf->download($filename);
         } catch (\Exception $e) {
             notify()->error('Error creating blotter: ' . $e->getMessage());
             return back();
-            
         }
     }
 

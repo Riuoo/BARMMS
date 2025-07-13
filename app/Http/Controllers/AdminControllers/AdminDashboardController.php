@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\AccountRequest;
+use App\Models\AccomplishedProject;
 use App\Models\BarangayProfile;
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
@@ -22,11 +23,11 @@ class AdminDashboardController
         $totalBlotterReports = BlotterRequest::count();
         $totalDocumentRequests = DocumentRequest::count();
 
-        // Dummy values for now, replace with actual queries when models exist
-        $totalAccomplishedProjects = 15; // Replace with actual query
-        $totalHealthReports = 10; // Replace with actual query
+        // Fetch actual accomplished projects count
+        $totalAccomplishedProjects = AccomplishedProject::count();
+        $totalHealthReports = 10; // Replace with actual query when health reports model exists
 
-        return view('admin.dashboard', compact(
+        return view('admin.modals.dashboard', compact(
             'barangay_profile',
             'totalResidents',
             'totalAccountRequests',

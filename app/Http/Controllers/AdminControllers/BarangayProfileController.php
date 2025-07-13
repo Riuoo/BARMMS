@@ -16,12 +16,12 @@ class BarangayProfileController
         }
         
         $barangayProfiles = BarangayProfile::all();
-        return view('admin.barangay-profiles', compact('barangayProfiles'));
+        return view('admin.barangay-profiles.barangay-profiles', compact('barangayProfiles'));
     }
 
     public function create()
     {
-        return view('admin.create_barangay_profile');
+        return view('admin.barangay-profiles.create_barangay_profile');
     }
 
     public function store(Request $request)
@@ -56,7 +56,7 @@ class BarangayProfileController
     public function edit($id)
     {    
         $barangayProfile = BarangayProfile::findOrFail($id);
-        return view('admin.edit_barangay_profile', compact('barangayProfile'));
+        return view('admin.barangay-profiles.edit_barangay_profile', compact('barangayProfile'));
     }
 
     public function update(Request $request, $id)

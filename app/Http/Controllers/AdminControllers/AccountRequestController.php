@@ -20,7 +20,7 @@ class AccountRequestController
     public function accountRequest()
     {
         $accountRequests = AccountRequest::orderBy('created_at', 'desc')->get();
-        return view('admin.new-account-requests', compact('accountRequests'));
+        return view('admin.requests.new-account-requests', compact('accountRequests'));
     }
 
     /**

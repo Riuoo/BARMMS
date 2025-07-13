@@ -3,20 +3,91 @@
 @section('title', 'Resident Dashboard')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">Welcome, {{ $resident->name }}!</h1>
+<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome, {{ $resident->name }}!</h1>
+                <p class="text-gray-600">Manage your requests and stay updated with barangay services</p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>{{ now()->format('l, F d, Y') }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-alt text-red-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Blotter Reports</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-signature text-blue-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Document Requests</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $documentRequests->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Pending</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $healthStatusReports->where('status', 'pending')->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Completed</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $healthStatusReports->where('status', 'resolved')->count() }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <!-- Request Blotter Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
+            <div class="p-6">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
+                    <div class="flex-shrink-0 bg-red-500 rounded-lg p-3">
                         <i class="fas fa-file-alt text-white text-2xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Request Blotter</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Blotter Report</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900">
                                     New Report
@@ -26,25 +97,25 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-5 py-3">
+            <div class="bg-gray-50 px-6 py-4">
                 <div class="text-sm">
-                    <a href="{{ route('resident.request_blotter_report') }}" class="font-medium text-red-600 hover:text-red-900">
-                        Make a new blotter report <span aria-hidden="true">&rarr;</span>
+                    <a href="{{ route('resident.request_blotter_report') }}" class="font-medium text-red-600 hover:text-red-900 transition duration-200">
+                        Submit incident report <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- Request Document Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
+            <div class="p-6">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                    <div class="flex-shrink-0 bg-blue-500 rounded-lg p-3">
                         <i class="fas fa-file-signature text-white text-2xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Request Document</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Document Request</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900">
                                     New Request
@@ -54,20 +125,20 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-5 py-3">
+            <div class="bg-gray-50 px-6 py-4">
                 <div class="text-sm">
-                    <a href="{{ route('resident.request_document_request') }}" class="font-medium text-blue-600 hover:text-blue-900">
-                        Request a new document <span aria-hidden="true">&rarr;</span>
+                    <a href="{{ route('resident.request_document_request') }}" class="font-medium text-blue-600 hover:text-blue-900 transition duration-200">
+                        Request official document <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- Track Requests Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
+            <div class="p-6">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                    <div class="flex-shrink-0 bg-green-500 rounded-lg p-3">
                         <i class="fas fa-clipboard-list text-white text-2xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
@@ -75,27 +146,27 @@
                             <dt class="text-sm font-medium text-gray-500 truncate">My Requests</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900">
-                                    View Status
+                                    Track Status
                                 </div>
                             </dd>
                         </dl>
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-5 py-3">
+            <div class="bg-gray-50 px-6 py-4">
                 <div class="text-sm">
-                    <a href="{{ route('resident.my-requests') }}" class="font-medium text-green-600 hover:text-green-900">
-                        Track all your requests <span aria-hidden="true">&rarr;</span>
+                    <a href="{{ route('resident.my-requests') }}" class="font-medium text-green-600 hover:text-green-900 transition duration-200">
+                        View all your requests <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Health Status Card (Recommendation) -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+        <!-- Health Status Card -->
+        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
+            <div class="p-6">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                    <div class="flex-shrink-0 bg-purple-500 rounded-lg p-3">
                         <i class="fas fa-heartbeat text-white text-2xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
@@ -103,27 +174,27 @@
                             <dt class="text-sm font-medium text-gray-500 truncate">Health Status</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900">
-                                    Report Health Concerns
+                                    Report Health
                                 </div>
                             </dd>
                         </dl>
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-5 py-3">
+            <div class="bg-gray-50 px-6 py-4">
                 <div class="text-sm">
-                    <a href="{{ route('resident.health-status') }}" class="font-medium text-purple-600 hover:text-purple-900">
-                        Submit a health report <span aria-hidden="true">&rarr;</span>
+                    <a href="{{ route('resident.health-status') }}" class="font-medium text-purple-600 hover:text-purple-900 transition duration-200">
+                        Submit health concerns <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Announcements/News Card (Recommendation) -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+        <!-- Announcements Card -->
+        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
+            <div class="p-6">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                    <div class="flex-shrink-0 bg-yellow-500 rounded-lg p-3">
                         <i class="fas fa-bullhorn text-white text-2xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
@@ -138,20 +209,20 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-5 py-3">
+            <div class="bg-gray-50 px-6 py-4">
                 <div class="text-sm">
-                    <a href="{{ route('resident.announcements') }}" class="font-medium text-yellow-600 hover:text-yellow-900">
-                        View latest news and updates <span aria-hidden="true">&rarr;</span>
+                    <a href="{{ route('resident.announcements') }}" class="font-medium text-yellow-600 hover:text-yellow-900 transition duration-200">
+                        View latest updates <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Profile Management Card (Recommendation) -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+        <!-- Profile Management Card -->
+        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
+            <div class="p-6">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-gray-500 rounded-md p-3">
+                    <div class="flex-shrink-0 bg-gray-500 rounded-lg p-3">
                         <i class="fas fa-user-circle text-white text-2xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
@@ -166,14 +237,75 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-5 py-3">
+            <div class="bg-gray-50 px-6 py-4">
                 <div class="text-sm">
-                    <a href="{{ route('resident.profile') }}" class="font-medium text-gray-600 hover:text-gray-900">
-                        Update your personal information <span aria-hidden="true">&rarr;</span>
+                    <a href="{{ route('resident.profile') }}" class="font-medium text-gray-600 hover:text-gray-900 transition duration-200">
+                        Update personal info <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Recent Activity Section -->
+    @if($blotterRequests->isNotEmpty() || $documentRequests->isNotEmpty())
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
+        <div class="space-y-4">
+            @foreach($blotterRequests->take(3) as $request)
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-alt text-red-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-900">Blotter Report</p>
+                        <p class="text-sm text-gray-500">vs {{ $request->recipient_name }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        @if($request->status === 'pending') bg-yellow-100 text-yellow-800
+                        @elseif($request->status === 'approved') bg-blue-100 text-blue-800
+                        @elseif($request->status === 'completed') bg-green-100 text-green-800
+                        @endif">
+                        {{ ucfirst($request->status) }}
+                    </span>
+                    <span class="text-sm text-gray-500">{{ $request->created_at->diffForHumans() }}</span>
+                </div>
+            </div>
+            @endforeach
+
+            @foreach($documentRequests->take(3) as $request)
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-signature text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-900">{{ $request->document_type }}</p>
+                        <p class="text-sm text-gray-500">{{ Str::limit($request->purpose, 30) }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        @if($request->status === 'pending') bg-yellow-100 text-yellow-800
+                        @elseif($request->status === 'approved') bg-green-100 text-green-800
+                        @elseif($request->status === 'completed') bg-purple-100 text-purple-800
+                        @endif">
+                        {{ ucfirst($request->status) }}
+                    </span>
+                    <span class="text-sm text-gray-500">{{ $request->created_at->diffForHumans() }}</span>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        <div class="mt-4 text-center">
+            <a href="{{ route('resident.my-requests') }}" class="text-sm font-medium text-green-600 hover:text-green-900">
+                View all activity <span aria-hidden="true">&rarr;</span>
+            </a>
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

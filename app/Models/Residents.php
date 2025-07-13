@@ -16,6 +16,12 @@ class Residents extends Authenticatable
         'password',
         'role',
         'address',
+        'age',
+        'family_size',
+        'education_level',
+        'income_level',
+        'employment_status',
+        'health_status',
     ];
 
     protected $hidden = [
@@ -29,5 +35,20 @@ class Residents extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function patientRecord()
+    {
+        return $this->hasOne(PatientRecord::class, 'resident_id');
+    }
+
+    public function medicalLogbooks()
+    {
+        return $this->hasMany(MedicalLogbook::class, 'resident_id');
+    }
+
+    public function vaccinationRecords()
+    {
+        return $this->hasMany(VaccinationRecord::class, 'resident_id');
     }
 }

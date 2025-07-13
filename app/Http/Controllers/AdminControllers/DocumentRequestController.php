@@ -14,7 +14,7 @@ class DocumentRequestController
     {
         // Eager load the user relationship
         $documentRequests = DocumentRequest::with('user')->get();
-        return view('admin.document-requests', compact('documentRequests'));
+        return view('admin.requests.document-requests', compact('documentRequests'));
     }
 
     public function getDetails($id)
@@ -79,7 +79,7 @@ class DocumentRequestController
     public function create()
     {
         $residents = Residents::all();
-        return view('admin.create_document_request', compact('residents'));
+        return view('admin.requests.create_document_request', compact('residents'));
     }
 
     public function store(Request $request)
@@ -94,7 +94,7 @@ class DocumentRequestController
                 'user_id' => $validated['user_id'],
                 'document_type' => $validated['document_type'],
                 'description' => $validated['description'],
-                'status' => 'completed',
+                'status' => 'approved',
             ]);
             // Automatically generate and download the PDF after creation
             $pdf = Pdf::loadView('admin.pdfs.document_request_pdf', compact('documentRequest'));

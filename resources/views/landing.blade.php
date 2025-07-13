@@ -48,6 +48,20 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -67,6 +81,7 @@
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="#home" class="hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Home</a>
                         <a href="#bulletin" class="hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Bulletin Board</a>
+                        <!-- <a href="{{ route('public.accomplishments') }}" class="hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Accomplishments</a> -->
                         <a href="#contact" class="hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contact</a>
                         <!-- <a href="{{ route('admin.contact') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-300">Request Account</a> -->
                     </div>
@@ -83,6 +98,7 @@
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/95 backdrop-blur-md border-t border-gray-200">
                 <a href="#home" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Home</a>
                 <a href="#bulletin" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Bulletin Board</a>
+                <!-- <a href="{{ route('public.accomplishments') }}" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Accomplishments</a> -->
                 <a href="#contact" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Contact</a>
                 <!-- <a href="{{ route('admin.contact') }}" class="block bg-green-600 text-white px-3 py-2 rounded-md text-base font-medium">Request Account</a> -->
             </div>
@@ -214,62 +230,96 @@
     <section id="bulletin" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-gray-900 mb-4">Community Bulletin Board</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Stay updated with the latest announcements, events, and important information from your barangay</p>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Community Accomplishments</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Discover the transformative projects and initiatives that have improved our community's quality of life</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Announcement Cards -->
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-blue-600 rounded-full p-3 mr-4">
-                            <i class="fas fa-bullhorn text-white"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Important Announcements</h3>
-                            <p class="text-sm text-gray-600">Latest updates</p>
-                        </div>
+                @php
+                    $featuredProjects = \App\Models\AccomplishedProject::where('is_featured', true)
+                        ->orderBy('completion_date', 'desc')
+                        ->take(6)
+                        ->get();
+                @endphp
+                
+                @forelse($featuredProjects as $project)
+                <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden border border-gray-100">
+                    <!-- Project Image Placeholder -->
+                    <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <i class="fas fa-project-diagram text-4xl text-gray-400"></i>
                     </div>
-                    <p class="text-gray-700 mb-4">Stay informed about community events, health advisories, and important notices from your barangay officials.</p>
-                    <a href="#" class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center">
-                        Read more <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-
-                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-green-600 rounded-full p-3 mr-4">
-                            <i class="fas fa-calendar-alt text-white"></i>
+                    
+                    <!-- Project Content -->
+                    <div class="p-6">
+                        <!-- Category Badge -->
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium {{ $project->category_color }}">
+                                {{ $project->category }}
+                            </span>
+                            <span class="text-yellow-500">
+                                <i class="fas fa-star"></i>
+                            </span>
                         </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Community Events</h3>
-                            <p class="text-sm text-gray-600">Upcoming activities</p>
+                        
+                        <!-- Project Title -->
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $project->title }}</h3>
+                        
+                        <!-- Project Description -->
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ Str::limit($project->description, 120) }}</p>
+                        
+                        <!-- Project Details -->
+                        <div class="space-y-2 mb-4">
+                            @if($project->location)
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="fas fa-map-marker-alt mr-2 text-green-600"></i>
+                                <span>{{ $project->location }}</span>
+                            </div>
+                            @endif
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="fas fa-calendar mr-2 text-blue-600"></i>
+                                <span>{{ $project->completion_date->format('M Y') }}</span>
+                            </div>
+                            @if($project->budget)
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="fas fa-money-bill mr-2 text-green-600"></i>
+                                <span>{{ $project->formatted_budget }}</span>
+                            </div>
+                            @endif
                         </div>
+                        
+                        <!-- Impact Preview -->
+                        @if($project->impact)
+                        <div class="pt-4 border-t border-gray-100">
+                            <p class="text-sm text-gray-600">
+                                <strong>Impact:</strong> {{ Str::limit($project->impact, 80) }}
+                            </p>
+                        </div>
+                        @endif
                     </div>
-                    <p class="text-gray-700 mb-4">Discover local events, meetings, and activities happening in your community.</p>
-                    <a href="#" class="text-green-600 hover:text-green-800 font-medium text-sm flex items-center">
-                        View events <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
                 </div>
-
-                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-purple-600 rounded-full p-3 mr-4">
-                            <i class="fas fa-heartbeat text-white"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Health Updates</h3>
-                            <p class="text-sm text-gray-600">Wellness information</p>
-                        </div>
+                @empty
+                <div class="col-span-full text-center py-12">
+                    <div class="text-gray-400 mb-4">
+                        <i class="fas fa-project-diagram text-6xl"></i>
                     </div>
-                    <p class="text-gray-700 mb-4">Get the latest health advisories, vaccination schedules, and wellness information.</p>
-                    <a href="#" class="text-purple-600 hover:text-purple-800 font-medium text-sm flex items-center">
-                        Health info <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Featured Projects Yet</h3>
+                    <p class="text-gray-600">Our community accomplishments will be displayed here soon.</p>
                 </div>
+                @endforelse
             </div>
+            
+            @if($featuredProjects->count() > 0)
+            <div class="text-center mt-12">
+                <a href="{{ route('public.accomplishments') }}" class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-300">
+                    <i class="fas fa-eye mr-2"></i>
+                    View All Projects
+                </a>
+            </div>
+            @endif
         </div>
     </section>
+
+
 
     <!-- Enhanced Contact Section -->
     <section id="contact" class="py-20 bg-gray-50">

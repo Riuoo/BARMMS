@@ -3,67 +3,585 @@
 @section('title', 'My Requests')
 
 @section('content')
-<div class="max-w-7xl mx-auto bg-white rounded shadow p-4 sm:p-6 lg:p-8 overflow-x-auto">
-    <h1 class="text-2xl font-bold mb-6">My Requests</h1>
+<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">My Requests</h1>
+                <p class="text-gray-600">Track and manage all your submitted requests</p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <div class="flex space-x-2">
+                    <a href="{{ route('resident.request_blotter_report') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        New Blotter Report
+                    </a>
+                    <a href="{{ route('resident.request_document_request') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        New Document Request
+                    </a>
+                    <a href="{{ route('resident.health-status') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Report Health Concern
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Success/Error Messages -->
     @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ session('success') }}
+        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-800">{{ session('success') }}</p>
+                </div>
+            </div>
         </div>
     @endif
 
-    <h2 class="text-xl font-semibold mb-4">My Blotter Reports</h2>
-    @if($blotterRequests->isEmpty())
-        <p class="text-gray-600 mb-6">You have not submitted any blotter reports yet.</p>
-    @else
-        <table class="min-w-full border border-gray-300 table-auto mb-8">
-            <thead>
-                <tr class="bg-red-600 text-white">
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Recipient</th>
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Type</th>
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Description</th>
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Status</th>
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Submitted On</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($blotterRequests as $request)
-                <tr class="border-t border-gray-300 hover:bg-gray-100">
-                    <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ $request->recipient_name }}</td>
-                    <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ $request->type }}</td>
-                    <td class="border border-gray-300 p-2 sm:p-3">{{ $request->description }}</td>
-                    <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ ucfirst($request->status) }}</td>
-                    <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ $request->created_at->format('Y-m-d H:i') }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    @if(session('error'))
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-800">{{ session('error') }}</p>
+                </div>
+            </div>
+        </div>
     @endif
 
-    <h2 class="text-xl font-semibold mb-4">My Document Requests</h2>
-    @if($documentRequests->isEmpty())
-        <p class="text-gray-600">You have not submitted any document requests yet.</p>
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-alt text-red-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Blotter Reports</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-signature text-blue-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Document Requests</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $documentRequests->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Pending</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $healthStatusRequests->where('status', 'pending')->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-heartbeat text-purple-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Health Concerns</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $healthStatusRequests->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Completed</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $healthStatusRequests->where('status', 'resolved')->count() }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex flex-wrap gap-2">
+                <button class="filter-btn active px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800" data-filter="all">
+                    All Requests
+                </button>
+                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="blotter">
+                    Blotter Reports
+                </button>
+                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="document">
+                    Document Requests
+                </button>
+                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="health">
+                    Health Concerns
+                </button>
+                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="pending">
+                    Pending
+                </button>
+                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="completed">
+                    Completed
+                </button>
+            </div>
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search requests..." class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Requests List -->
+    @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $healthStatusRequests->isEmpty())
+        <div class="text-center py-12">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
+            <p class="text-gray-500">You haven't submitted any requests yet.</p>
+            <div class="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+                <a href="{{ route('resident.request_blotter_report') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    Submit Blotter Report
+                </a>
+                <a href="{{ route('resident.request_document_request') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    Request Document
+                </a>
+            </div>
+        </div>
     @else
-        <table class="min-w-full border border-gray-300 table-auto">
-            <thead>
-                <tr class="bg-blue-600 text-white">
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Document Type</th>
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Description</th>
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Status</th>
-                    <th class="border border-gray-300 p-2 sm:p-3 text-center">Submitted On</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($documentRequests as $request)
-                <tr class="border-t border-gray-300 hover:bg-gray-100">
-                    <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ $request->document_type }}</td>
-                    <td class="border border-gray-300 p-2 sm:p-3">{{ $request->description }}</td>
-                    <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ ucfirst($request->status) }}</td>
-                    <td class="border border-gray-300 p-2 sm:p-3 text-center">{{ $request->created_at->format('Y-m-d H:i') }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <!-- Desktop Table (hidden on mobile) -->
+        <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-tag mr-2"></i>
+                                    Type
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-align-left mr-2"></i>
+                                    Details
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Status
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    Submitted
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="requestsTableBody">
+                        @foreach($blotterRequests as $request)
+                        <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="blotter" data-status="{{ $request->status }}">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-file-alt text-red-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">Blotter Report</div>
+                                        <div class="text-sm text-gray-500">vs {{ $request->recipient_name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ Str::limit($request->description, 50) }}</div>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-align-left mr-1"></i>
+                                    Incident Details
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($request->status === 'pending')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Pending
+                                    </span>
+                                @elseif($request->status === 'approved')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Approved
+                                    </span>
+                                @elseif($request->status === 'completed')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Completed
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    {{ $request->created_at->diffForHumans() }}
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+
+                        @foreach($documentRequests as $request)
+                        <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="document" data-status="{{ $request->status }}">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-file-signature text-blue-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ $request->document_type }}</div>
+                                        <div class="text-sm text-gray-500">Document Request</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ Str::limit($request->purpose, 50) }}</div>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-align-left mr-1"></i>
+                                    Purpose
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($request->status === 'pending')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Pending
+                                    </span>
+                                @elseif($request->status === 'approved')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Approved
+                                    </span>
+                                @elseif($request->status === 'completed')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Completed
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    {{ $request->created_at->diffForHumans() }}
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+
+                        @foreach($healthStatusRequests as $request)
+                        <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="health" data-status="{{ $request->status }}">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-heartbeat text-purple-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ $request->concern_type }}</div>
+                                        <div class="text-sm text-gray-500">Health Concern</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ Str::limit($request->description, 50) }}</div>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Severity: {{ $request->severity }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($request->status === 'pending')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Pending
+                                    </span>
+                                @elseif($request->status === 'reviewed')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Reviewed
+                                    </span>
+                                @elseif($request->status === 'in_progress')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                        <i class="fas fa-spinner mr-1"></i>
+                                        In Progress
+                                    </span>
+                                @elseif($request->status === 'resolved')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Resolved
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    {{ $request->created_at->diffForHumans() }}
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile Cards (hidden on desktop) -->
+        <div class="md:hidden space-y-4" id="requestsMobileCards">
+            @foreach($blotterRequests as $request)
+            <div class="request-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-type="blotter" data-status="{{ $request->status }}">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-alt text-red-600"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-gray-900">Blotter Report</h3>
+                            <p class="text-sm text-gray-500">vs {{ $request->recipient_name }}</p>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
+                                @if($request->status === 'pending') bg-yellow-100 text-yellow-800
+                                @elseif($request->status === 'approved') bg-blue-100 text-blue-800
+                                @elseif($request->status === 'completed') bg-green-100 text-green-800
+                                @endif">
+                                <i class="fas fa-tag mr-1"></i>
+                                {{ ucfirst($request->status) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-align-left mr-1"></i>
+                        {{ Str::limit($request->description, 80) }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-calendar mr-1"></i>
+                        {{ $request->created_at->diffForHumans() }}
+                    </p>
+                </div>
+            </div>
+            @endforeach
+
+            @foreach($documentRequests as $request)
+            <div class="request-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-type="document" data-status="{{ $request->status }}">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-signature text-blue-600"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-gray-900">{{ $request->document_type }}</h3>
+                            <p class="text-sm text-gray-500">Document Request</p>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
+                                @if($request->status === 'pending') bg-yellow-100 text-yellow-800
+                                @elseif($request->status === 'approved') bg-green-100 text-green-800
+                                @elseif($request->status === 'completed') bg-purple-100 text-purple-800
+                                @endif">
+                                <i class="fas fa-tag mr-1"></i>
+                                {{ ucfirst($request->status) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-align-left mr-1"></i>
+                        {{ Str::limit($request->purpose, 80) }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-calendar mr-1"></i>
+                        {{ $request->created_at->diffForHumans() }}
+                    </p>
+                </div>
+            </div>
+            @endforeach
+
+            @foreach($healthStatusRequests as $request)
+            <div class="request-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-type="health" data-status="{{ $request->status }}">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-purple-600"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-gray-900">{{ $request->concern_type }}</h3>
+                            <p class="text-sm text-gray-500">Health Concern</p>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
+                                @if($request->status === 'pending') bg-yellow-100 text-yellow-800
+                                @elseif($request->status === 'reviewed') bg-blue-100 text-blue-800
+                                @elseif($request->status === 'in_progress') bg-orange-100 text-orange-800
+                                @elseif($request->status === 'resolved') bg-green-100 text-green-800
+                                @endif">
+                                <i class="fas fa-tag mr-1"></i>
+                                {{ ucfirst(str_replace('_', ' ', $request->status)) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        Severity: {{ $request->severity }}
+                    </p>
+                    <p class="text-sm text-gray-600 mt-1">
+                        <i class="fas fa-align-left mr-1"></i>
+                        {{ Str::limit($request->description, 80) }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-calendar mr-1"></i>
+                        {{ $request->created_at->diffForHumans() }}
+                    </p>
+                </div>
+            </div>
+            @endforeach
+        </div>
     @endif
+
+    <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden">No requests match your search criteria.</p>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const requestItems = document.querySelectorAll('.request-item');
+    const requestCards = document.querySelectorAll('.request-card');
+    
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            
+            // Update active button
+            filterBtns.forEach(b => {
+                b.classList.remove('active', 'bg-green-100', 'text-green-800');
+                b.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            this.classList.add('active', 'bg-green-100', 'text-green-800');
+            this.classList.remove('bg-gray-100', 'text-gray-600');
+            
+            // Filter requests
+            const allItems = [...requestItems, ...requestCards];
+            allItems.forEach(item => {
+                const type = item.dataset.type;
+                const status = item.dataset.status;
+                
+                let show = false;
+                if (filter === 'all') {
+                    show = true;
+                } else if (filter === 'blotter' && type === 'blotter') {
+                    show = true;
+                } else if (filter === 'document' && type === 'document') {
+                    show = true;
+                } else if (filter === 'pending' && status === 'pending') {
+                    show = true;
+                } else if (filter === 'completed' && status === 'completed') {
+                    show = true;
+                }
+                
+                item.style.display = show ? '' : 'none';
+            });
+            
+            updateCounts();
+        });
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        const allItems = [...requestItems, ...requestCards];
+        allItems.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        updateCounts();
+    });
+    
+    // Update counts
+    function updateCounts() {
+        let totalVisible = 0, blotter = 0, document = 0, pending = 0, completed = 0;
+        
+        if (window.innerWidth >= 768) { // Desktop
+            const visibleItems = Array.from(requestItems).filter(item => item.style.display !== 'none');
+            totalVisible = visibleItems.length;
+            blotter = visibleItems.filter(item => item.dataset.type === 'blotter').length;
+            document = visibleItems.filter(item => item.dataset.type === 'document').length;
+            pending = visibleItems.filter(item => item.dataset.status === 'pending').length;
+            completed = visibleItems.filter(item => item.dataset.status === 'completed').length;
+        } else { // Mobile
+            const visibleCards = Array.from(requestCards).filter(item => item.style.display !== 'none');
+            totalVisible = visibleCards.length;
+            blotter = visibleCards.filter(item => item.dataset.type === 'blotter').length;
+            document = visibleCards.filter(item => item.dataset.type === 'document').length;
+            pending = visibleCards.filter(item => item.dataset.status === 'pending').length;
+            completed = visibleCards.filter(item => item.dataset.status === 'completed').length;
+        }
+        
+        // Update statistics cards
+        document.querySelectorAll('.bg-white.rounded-lg.shadow-sm.border.border-gray-200.p-4').forEach((card, index) => {
+            const countElement = card.querySelector('.text-2xl.font-bold.text-gray-900');
+            if (countElement) {
+                if (index === 0) countElement.textContent = blotter;
+                else if (index === 1) countElement.textContent = document;
+                else if (index === 2) countElement.textContent = pending;
+                else if (index === 3) countElement.textContent = completed;
+            }
+        });
+    }
+    
+    // Initial count update
+    updateCounts();
+    // Update counts on window resize
+    window.addEventListener('resize', updateCounts);
+});
+</script>
 @endsection

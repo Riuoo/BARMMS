@@ -8,6 +8,6 @@ class HealthStatusController
 {
     public function healthStatus()
     {
-        return view('admin.health-status');
+        return view('admin.health.health-status');
     }
 }

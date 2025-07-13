@@ -18,7 +18,7 @@ class AdminProfileController
         return redirect()->route('landing');
     }
 
-    return view('admin.profile', compact('currentUser'));
+    return view('admin.barangay-profiles.profile', compact('currentUser'));
     }
 
     public function update(Request $request)

@@ -16,12 +16,12 @@ class ResidentController
         }
         
         $residents = Residents::all();
-        return view('admin.residents', compact('residents'));
+        return view('admin.residents.residents', compact('residents'));
     }
 
     public function create()
     {
-        return view('admin.create_resident_profile');
+        return view('admin.residents.create_resident_profile');
     }
     
 
@@ -32,6 +32,12 @@ class ResidentController
             'email' => 'required|email|unique:residents,email',
             'address' => 'required|string|max:500',
             'password' => 'required|string|min:6|confirmed',
+            'age' => 'nullable|integer|min:1|max:120',
+            'family_size' => 'nullable|integer|min:1|max:20',
+            'education_level' => 'nullable|string|in:No Education,Elementary,High School,Vocational,College,Post Graduate',
+            'income_level' => 'nullable|string|in:Low,Lower Middle,Middle,Upper Middle,High',
+            'employment_status' => 'nullable|string|in:Unemployed,Part-time,Self-employed,Full-time',
+            'health_status' => 'nullable|string|in:Critical,Poor,Fair,Good,Excellent',
         ]);
         try {
             Residents::create([
@@ -40,6 +46,12 @@ class ResidentController
                 'role' => 'resident',
                 'address' => $validatedData['address'],
                 'password' => Hash::make($validatedData['password']),
+                'age' => $validatedData['age'] ?? null,
+                'family_size' => $validatedData['family_size'] ?? null,
+                'education_level' => $validatedData['education_level'] ?? null,
+                'income_level' => $validatedData['income_level'] ?? null,
+                'employment_status' => $validatedData['employment_status'] ?? null,
+                'health_status' => $validatedData['health_status'] ?? null,
             ]);
             notify()->success('New resident added successfully.');
             return redirect()->route('admin.residents');
@@ -54,7 +66,7 @@ class ResidentController
     public function edit($id)
     {
         $resident = Residents::findOrFail($id);
-        return view('admin.edit_resident_profile', compact('resident'));
+        return view('admin.residents.edit_resident_profile', compact('resident'));
     }
 
     public function update(Request $request, $id)
@@ -68,6 +80,12 @@ class ResidentController
                 'role' => 'required|string|max:255',
                 'address' => 'required|string|max:500',
                 'password' => 'nullable|string|min:6|confirmed',
+                'age' => 'nullable|integer|min:1|max:120',
+                'family_size' => 'nullable|integer|min:1|max:20',
+                'education_level' => 'nullable|string|in:No Education,Elementary,High School,Vocational,College,Post Graduate',
+                'income_level' => 'nullable|string|in:Low,Lower Middle,Middle,Upper Middle,High',
+                'employment_status' => 'nullable|string|in:Unemployed,Part-time,Self-employed,Full-time',
+                'health_status' => 'nullable|string|in:Critical,Poor,Fair,Good,Excellent',
             ]);
 
             if (!empty($validatedData['password'])) {
@@ -78,6 +96,12 @@ class ResidentController
             $resident->email = $validatedData['email'];
             $resident->role = $validatedData['role'];
             $resident->address = $validatedData['address'];
+            $resident->age = $validatedData['age'] ?? null;
+            $resident->family_size = $validatedData['family_size'] ?? null;
+            $resident->education_level = $validatedData['education_level'] ?? null;
+            $resident->income_level = $validatedData['income_level'] ?? null;
+            $resident->employment_status = $validatedData['employment_status'] ?? null;
+            $resident->health_status = $validatedData['health_status'] ?? null;
             $resident->save();
 
             notify()->success('Resident updated successfully.');

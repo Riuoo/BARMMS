@@ -1,0 +1,173 @@
+@extends('admin.modals.layout')
+
+@section('title', 'Edit Accomplished Project')
+
+@section('content')
+<div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Edit Accomplished Project</h1>
+            <p class="text-gray-600 mt-2">Update project information and details</p>
+        </div>
+        <a href="{{ route('admin.accomplished-projects') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Projects
+        </a>
+    </div>
+
+    <!-- Form -->
+    <form action="{{ route('admin.accomplished-projects.update', $project->id) }}" method="POST" class="space-y-6">
+        @csrf
+        @method('PUT')
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Project Title -->
+            <div class="md:col-span-2">
+                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Project Title *</label>
+                <input type="text" id="title" name="title" value="{{ old('title', $project->title) }}" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('title') border-red-500 @enderror" 
+                    placeholder="Enter project title" required />
+                @error('title')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                <select name="category" id="category" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('category') border-red-500 @enderror" required>
+                    <option value="">Select Category</option>
+                    <option value="Infrastructure" {{ old('category', $project->category) == 'Infrastructure' ? 'selected' : '' }}>Infrastructure</option>
+                    <option value="Health" {{ old('category', $project->category) == 'Health' ? 'selected' : '' }}>Health</option>
+                    <option value="Education" {{ old('category', $project->category) == 'Education' ? 'selected' : '' }}>Education</option>
+                    <option value="Agriculture" {{ old('category', $project->category) == 'Agriculture' ? 'selected' : '' }}>Agriculture</option>
+                    <option value="Social Services" {{ old('category', $project->category) == 'Social Services' ? 'selected' : '' }}>Social Services</option>
+                    <option value="Environment" {{ old('category', $project->category) == 'Environment' ? 'selected' : '' }}>Environment</option>
+                    <option value="Livelihood" {{ old('category', $project->category) == 'Livelihood' ? 'selected' : '' }}>Livelihood</option>
+                </select>
+                @error('category')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Location -->
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <input type="text" id="location" name="location" value="{{ old('location', $project->location) }}" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('location') border-red-500 @enderror" 
+                    placeholder="Enter project location" />
+                @error('location')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Budget -->
+            <div>
+                <label for="budget" class="block text-sm font-medium text-gray-700 mb-2">Budget (₱)</label>
+                <input type="number" id="budget" name="budget" value="{{ old('budget', $project->budget) }}" step="0.01"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('budget') border-red-500 @enderror" 
+                    placeholder="Enter project budget" />
+                @error('budget')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Funding Source -->
+            <div>
+                <label for="funding_source" class="block text-sm font-medium text-gray-700 mb-2">Funding Source</label>
+                <input type="text" id="funding_source" name="funding_source" value="{{ old('funding_source', $project->funding_source) }}" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('funding_source') border-red-500 @enderror" 
+                    placeholder="e.g., Department of Health" />
+                @error('funding_source')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Start Date -->
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+                <input type="date" id="start_date" name="start_date" value="{{ old('start_date', $project->start_date->format('Y-m-d')) }}" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('start_date') border-red-500 @enderror" required />
+                @error('start_date')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Completion Date -->
+            <div>
+                <label for="completion_date" class="block text-sm font-medium text-gray-700 mb-2">Completion Date *</label>
+                <input type="date" id="completion_date" name="completion_date" value="{{ old('completion_date', $project->completion_date->format('Y-m-d')) }}" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('completion_date') border-red-500 @enderror" required />
+                @error('completion_date')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Implementing Agency -->
+            <div>
+                <label for="implementing_agency" class="block text-sm font-medium text-gray-700 mb-2">Implementing Agency</label>
+                <input type="text" id="implementing_agency" name="implementing_agency" value="{{ old('implementing_agency', $project->implementing_agency) }}" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('implementing_agency') border-red-500 @enderror" 
+                    placeholder="e.g., Barangay Council" />
+                @error('implementing_agency')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Description -->
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Project Description *</label>
+                <textarea id="description" name="description" rows="4" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('description') border-red-500 @enderror" 
+                    placeholder="Describe the project in detail..." required>{{ old('description', $project->description) }}</textarea>
+                @error('description')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Beneficiaries -->
+            <div class="md:col-span-2">
+                <label for="beneficiaries" class="block text-sm font-medium text-gray-700 mb-2">Beneficiaries</label>
+                <textarea id="beneficiaries" name="beneficiaries" rows="3" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('beneficiaries') border-red-500 @enderror" 
+                    placeholder="Who benefited from this project?">{{ old('beneficiaries', $project->beneficiaries) }}</textarea>
+                @error('beneficiaries')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Impact -->
+            <div class="md:col-span-2">
+                <label for="impact" class="block text-sm font-medium text-gray-700 mb-2">Impact</label>
+                <textarea id="impact" name="impact" rows="3" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('impact') border-red-500 @enderror" 
+                    placeholder="What was the impact of this project on the community?">{{ old('impact', $project->impact) }}</textarea>
+                @error('impact')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Featured Checkbox -->
+            <div class="md:col-span-2">
+                <label class="flex items-center">
+                    <input type="checkbox" name="is_featured" id="is_featured" value="1" {{ old('is_featured', $project->is_featured) ? 'checked' : '' }} 
+                        class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                    <span class="ml-2 text-sm text-gray-700">Feature this project on the landing page</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+            <a href="{{ route('admin.accomplished-projects') }}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-300">
+                Cancel
+            </a>
+            <button type="submit" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition duration-300 flex items-center">
+                <i class="fas fa-save mr-2"></i>
+                Update Project
+            </button>
+        </div>
+    </form>
+</div>
+@endsection 

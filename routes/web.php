@@ -21,6 +21,13 @@ use App\Http\Controllers\AdminControllers\AccomplishProjectController;
 use App\Http\Controllers\AdminControllers\AdminNotificationController;
 use App\Http\Controllers\AdminControllers\HealthReportController;
 use App\Http\Controllers\AdminControllers\HealthStatusController;
+use App\Http\Controllers\AdminControllers\PatientRecordController;
+use App\Http\Controllers\AdminControllers\VaccinationRecordController;
+use App\Http\Controllers\AdminControllers\MedicalLogbookController;
+use App\Http\Controllers\AdminControllers\HealthCenterActivityController;
+use App\Http\Controllers\AdminControllers\ClusteringController;
+use App\Http\Controllers\AdminControllers\DecisionTreeController;
+use App\Http\Controllers\AdminControllers\HealthStatusRequestController;
 use App\Http\Controllers\ResidentControllers\ResidentController2;
 use App\Http\Controllers\ResidentControllers\ResidentProfileController;
 
@@ -28,6 +35,16 @@ use App\Http\Controllers\ResidentControllers\ResidentProfileController;
 Route::get('/', function () {
     return view('landing');
 })->name('landing');
+
+// Public accomplished projects page
+Route::get('/accomplishments', function () {
+    $projects = \App\Models\AccomplishedProject::orderBy('completion_date', 'desc')->paginate(12);
+    $totalProjects = \App\Models\AccomplishedProject::count();
+    $totalBudget = \App\Models\AccomplishedProject::sum('budget');
+    $featuredProjects = \App\Models\AccomplishedProject::where('is_featured', true)->get();
+    
+    return view('public.accomplishments', compact('projects', 'totalProjects', 'totalBudget', 'featuredProjects'));
+})->name('public.accomplishments');
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 
@@ -132,14 +149,76 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.new-account-requests');
     Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');
     
-    // Accomplished Projects Route
+    // Accomplished Projects Routes
     Route::get('/accomplished-projects', [AccomplishProjectController::class, 'accomplishProject'])->name('admin.accomplished-projects');
+    Route::get('/accomplished-projects/create', [AccomplishProjectController::class, 'create'])->name('admin.accomplished-projects.create');
+    Route::get('/accomplished-projects/{id}', [AccomplishProjectController::class, 'show'])->name('admin.accomplished-projects.show');
+    Route::get('/accomplished-projects/{id}/edit', [AccomplishProjectController::class, 'edit'])->name('admin.accomplished-projects.edit');
+    Route::post('/accomplished-projects', [AccomplishProjectController::class, 'store'])->name('admin.accomplished-projects.store');
+    Route::put('/accomplished-projects/{id}', [AccomplishProjectController::class, 'update'])->name('admin.accomplished-projects.update');
+    Route::delete('/accomplished-projects/{id}', [AccomplishProjectController::class, 'destroy'])->name('admin.accomplished-projects.destroy');
+    Route::post('/accomplished-projects/{id}/toggle-featured', [AccomplishProjectController::class, 'toggleFeatured'])->name('admin.accomplished-projects.toggle-featured');
 
     // Health Status Route
     Route::get('/health-status', [HealthStatusController::class, 'healthStatus'])->name('admin.health-status');
+    
+    // Health Status Requests from Residents
+    Route::get('/health-status-requests', [HealthStatusRequestController::class, 'index'])->name('admin.health-status-requests');
+    Route::get('/health-status-requests/search', [HealthStatusRequestController::class, 'search'])->name('admin.health-status-requests.search');
+    Route::get('/health-status-requests/{id}', [HealthStatusRequestController::class, 'show'])->name('admin.health-status-requests.show');
+    Route::put('/health-status-requests/{id}/status', [HealthStatusRequestController::class, 'updateStatus'])->name('admin.health-status-requests.update-status');
+    Route::get('/health-status-requests/export', [HealthStatusRequestController::class, 'export'])->name('admin.health-status-requests.export');
 
     // Health Reports Route
     Route::get('/health-reports', [HealthReportController::class, 'healthReport'])->name('admin.health-reports');
+    Route::get('/health-reports/comprehensive', [HealthReportController::class, 'generateComprehensiveReport'])->name('admin.health-reports.comprehensive');
+    Route::get('/health-reports/export', [HealthReportController::class, 'exportReport'])->name('admin.health-reports.export');
+
+    // Patient Records Routes
+    Route::get('/patient-records', [PatientRecordController::class, 'index'])->name('admin.patient-records.index');
+    Route::get('/patient-records/create', [PatientRecordController::class, 'create'])->name('admin.patient-records.create');
+    Route::post('/patient-records', [PatientRecordController::class, 'store'])->name('admin.patient-records.store');
+    Route::get('/patient-records/{id}', [PatientRecordController::class, 'show'])->name('admin.patient-records.show');
+    Route::get('/patient-records/{id}/edit', [PatientRecordController::class, 'edit'])->name('admin.patient-records.edit');
+    Route::put('/patient-records/{id}', [PatientRecordController::class, 'update'])->name('admin.patient-records.update');
+    Route::delete('/patient-records/{id}', [PatientRecordController::class, 'destroy'])->name('admin.patient-records.destroy');
+    Route::get('/patient-records/search', [PatientRecordController::class, 'search'])->name('admin.patient-records.search');
+
+    // Vaccination Records Routes
+    Route::get('/vaccination-records', [VaccinationRecordController::class, 'index'])->name('admin.vaccination-records.index');
+    Route::get('/vaccination-records/create', [VaccinationRecordController::class, 'create'])->name('admin.vaccination-records.create');
+    Route::post('/vaccination-records', [VaccinationRecordController::class, 'store'])->name('admin.vaccination-records.store');
+    Route::get('/vaccination-records/{id}', [VaccinationRecordController::class, 'show'])->name('admin.vaccination-records.show');
+    Route::get('/vaccination-records/{id}/edit', [VaccinationRecordController::class, 'edit'])->name('admin.vaccination-records.edit');
+    Route::put('/vaccination-records/{id}', [VaccinationRecordController::class, 'update'])->name('admin.vaccination-records.update');
+    Route::delete('/vaccination-records/{id}', [VaccinationRecordController::class, 'destroy'])->name('admin.vaccination-records.destroy');
+    Route::get('/vaccination-records/search', [VaccinationRecordController::class, 'search'])->name('admin.vaccination-records.search');
+    Route::get('/vaccination-records/due', [VaccinationRecordController::class, 'dueVaccinations'])->name('admin.vaccination-records.due');
+    Route::get('/vaccination-records/report', [VaccinationRecordController::class, 'generateReport'])->name('admin.vaccination-records.report');
+
+    // Medical Logbooks Routes
+    Route::get('/medical-logbooks', [MedicalLogbookController::class, 'index'])->name('admin.medical-logbooks.index');
+    Route::get('/medical-logbooks/create', [MedicalLogbookController::class, 'create'])->name('admin.medical-logbooks.create');
+    Route::post('/medical-logbooks', [MedicalLogbookController::class, 'store'])->name('admin.medical-logbooks.store');
+    Route::get('/medical-logbooks/{id}', [MedicalLogbookController::class, 'show'])->name('admin.medical-logbooks.show');
+    Route::get('/medical-logbooks/{id}/edit', [MedicalLogbookController::class, 'edit'])->name('admin.medical-logbooks.edit');
+    Route::put('/medical-logbooks/{id}', [MedicalLogbookController::class, 'update'])->name('admin.medical-logbooks.update');
+    Route::delete('/medical-logbooks/{id}', [MedicalLogbookController::class, 'destroy'])->name('admin.medical-logbooks.destroy');
+    Route::get('/medical-logbooks/search', [MedicalLogbookController::class, 'search'])->name('admin.medical-logbooks.search');
+    Route::get('/medical-logbooks/report', [MedicalLogbookController::class, 'generateReport'])->name('admin.medical-logbooks.report');
+
+    // Health Center Activities Routes
+    Route::get('/health-center-activities', [HealthCenterActivityController::class, 'index'])->name('admin.health-center-activities.index');
+    Route::get('/health-center-activities/create', [HealthCenterActivityController::class, 'create'])->name('admin.health-center-activities.create');
+    Route::post('/health-center-activities', [HealthCenterActivityController::class, 'store'])->name('admin.health-center-activities.store');
+    Route::get('/health-center-activities/{id}', [HealthCenterActivityController::class, 'show'])->name('admin.health-center-activities.show');
+    Route::get('/health-center-activities/{id}/edit', [HealthCenterActivityController::class, 'edit'])->name('admin.health-center-activities.edit');
+    Route::put('/health-center-activities/{id}', [HealthCenterActivityController::class, 'update'])->name('admin.health-center-activities.update');
+    Route::delete('/health-center-activities/{id}', [HealthCenterActivityController::class, 'destroy'])->name('admin.health-center-activities.destroy');
+    Route::get('/health-center-activities/search', [HealthCenterActivityController::class, 'search'])->name('admin.health-center-activities.search');
+    Route::get('/health-center-activities/upcoming', [HealthCenterActivityController::class, 'upcoming'])->name('admin.health-center-activities.upcoming');
+    Route::get('/health-center-activities/completed', [HealthCenterActivityController::class, 'completed'])->name('admin.health-center-activities.completed');
+    Route::get('/health-center-activities/report', [HealthCenterActivityController::class, 'generateReport'])->name('admin.health-center-activities.report');
 
     // Route to mark all notifications as read
     Route::post('/notifications/mark-all-as-read', [AdminNotificationController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-as-read');
@@ -147,6 +226,22 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/notifications', [AdminNotificationController::class, 'showNotifications'])->name('admin.notifications');
     Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
     Route::post('/notifications/mark-all-as-read-ajax', [AdminNotificationController::class, 'markAllAsReadAjax'])->name('admin.notifications.mark-all-as-read-ajax');
+
+    // Clustering Analysis Routes
+    Route::get('/clustering', [ClusteringController::class, 'index'])->name('admin.clustering');
+    Route::post('/clustering/perform', [ClusteringController::class, 'performClustering'])->name('admin.clustering.perform');
+    Route::get('/clustering/optimal-k', [ClusteringController::class, 'getOptimalK'])->name('admin.clustering.optimal-k');
+    Route::get('/clustering/export', [ClusteringController::class, 'export'])->name('admin.clustering.export');
+    Route::get('/clustering/stats', [ClusteringController::class, 'getClusterStats'])->name('admin.clustering.stats');
+
+    // Decision Tree Analysis Routes
+    Route::get('/decision-tree', [DecisionTreeController::class, 'index'])->name('admin.decision-tree');
+    Route::post('/decision-tree/perform', [DecisionTreeController::class, 'performAnalysis'])->name('admin.decision-tree.perform');
+    Route::post('/decision-tree/predict', [DecisionTreeController::class, 'predictForResident'])->name('admin.decision-tree.predict');
+    Route::get('/decision-tree/stats', [DecisionTreeController::class, 'getStatistics'])->name('admin.decision-tree.stats');
+    Route::get('/decision-tree/export', [DecisionTreeController::class, 'exportRules'])->name('admin.decision-tree.export');
+    Route::get('/decision-tree/features', [DecisionTreeController::class, 'getFeatureImportance'])->name('admin.decision-tree.features');
+    Route::get('/decision-tree/visualization', [DecisionTreeController::class, 'getTreeVisualization'])->name('admin.decision-tree.visualization');
 
 });
 
@@ -166,6 +261,7 @@ Route::middleware([\App\Http\Middleware\CheckResidentRole::class])->prefix('resi
     Route::put('/profile', [ResidentProfileController::class, 'updateProfile'])->name('resident.profile.update');
     // Health Status (Recommendation)
     Route::get('/health-status', [ResidentController2::class, 'healthStatus'])->name('resident.health-status');
+    Route::post('/health-status', [ResidentController2::class, 'storeHealthStatus'])->name('resident.health-status.store');
     // Announcements (Recommendation)
     Route::get('/announcements', [ResidentController2::class, 'announcements'])->name('resident.announcements');
 });
