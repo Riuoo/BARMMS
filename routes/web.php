@@ -271,3 +271,4 @@ Route::post('/logout', function () {
     Session::flush();
     return redirect()->route('landing');
 })->name('logout');
+

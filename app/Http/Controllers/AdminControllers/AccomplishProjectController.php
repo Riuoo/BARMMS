@@ -49,14 +49,35 @@ class AccomplishProjectController
             'funding_source' => 'nullable|string',
             'implementing_agency' => 'nullable|string',
             'is_featured' => 'boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
-            AccomplishedProject::create($request->all());
+            $data = $request->all();
+            
+            // Handle is_featured field properly
+            $data['is_featured'] = $request->has('is_featured') ? true : false;
+            
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                
+                // Ensure uploads directory exists
+                $uploadPath = public_path('uploads/projects');
+                if (!file_exists($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                
+                $image->move($uploadPath, $imageName);
+                $data['image'] = 'uploads/projects/' . $imageName;
+            }
+
+            AccomplishedProject::create($data);
             notify()->success('Project created successfully!', 'Success');
             return redirect()->route('admin.accomplished-projects');
         } catch (\Exception $e) {
-            notify()->error('Failed to create project. Please try again.', 'Error');
+            notify()->error('Failed to create project: ' . $e->getMessage(), 'Error');
             return back()->withInput();
         }
     }
@@ -78,14 +99,48 @@ class AccomplishProjectController
             'funding_source' => 'nullable|string',
             'implementing_agency' => 'nullable|string',
             'is_featured' => 'boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
-            $project->update($request->all());
+            $data = $request->all();
+            
+            // Handle is_featured field properly
+            $data['is_featured'] = $request->has('is_featured') ? true : false;
+            
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($project->image && file_exists(public_path($project->image))) {
+                    unlink(public_path($project->image));
+                }
+                
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                
+                // Ensure uploads directory exists
+                $uploadPath = public_path('uploads/projects');
+                if (!file_exists($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                
+                $image->move($uploadPath, $imageName);
+                $data['image'] = 'uploads/projects/' . $imageName;
+            }
+            
+            // Handle image removal
+            if ($request->has('remove_image') && $request->remove_image == '1') {
+                if ($project->image && file_exists(public_path($project->image))) {
+                    unlink(public_path($project->image));
+                }
+                $data['image'] = null;
+            }
+
+            $project->update($data);
             notify()->success('Project updated successfully!', 'Success');
             return redirect()->route('admin.accomplished-projects');
         } catch (\Exception $e) {
-            notify()->error('Failed to update project. Please try again.', 'Error');
+            notify()->error('Failed to update project: ' . $e->getMessage(), 'Error');
             return back()->withInput();
         }
     }
@@ -94,6 +149,12 @@ class AccomplishProjectController
     {
         try {
             $project = AccomplishedProject::findOrFail($id);
+            
+            // Delete image file if exists
+            if ($project->image && file_exists(public_path($project->image))) {
+                unlink(public_path($project->image));
+            }
+            
             $project->delete();
             notify()->success('Project deleted successfully!', 'Success');
         } catch (\Exception $e) {

@@ -57,4 +57,9 @@ class AccomplishedProject extends Model
 
         return $colors[$this->category] ?? 'bg-gray-100 text-gray-800';
     }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset($this->image) : null;
+    }
 } 

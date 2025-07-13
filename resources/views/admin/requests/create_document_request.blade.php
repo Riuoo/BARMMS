@@ -61,7 +61,7 @@
 
         <!-- Buttons -->
         <div class="flex justify-end space-x-2">
-            <a href="{{ route('admin.document-requests') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Back to Document Requests</a>
+            <a href="{{ route('admin.document-requests') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</a>
             <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Submit Request</button>
         </div>
     </form>

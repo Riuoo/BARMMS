@@ -17,7 +17,7 @@
     </div>
 
     <!-- Form -->
-    <form action="{{ route('admin.accomplished-projects.update', $project->id) }}" method="POST" class="space-y-6">
+    <form action="{{ route('admin.accomplished-projects.update', $project->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')
         
@@ -29,6 +29,51 @@
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('title') border-red-500 @enderror" 
                     placeholder="Enter project title" required />
                 @error('title')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Project Image -->
+            <div class="md:col-span-2">
+                <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Project Image</label>
+                
+                <!-- Current Image Display -->
+                @if($project->image)
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-2">Current Image:</p>
+                    <div class="inline-block">
+                        <img src="{{ asset($project->image) }}" alt="Current project image" class="h-32 w-auto rounded-lg border border-gray-200">
+                    </div>
+                </div>
+                @endif
+                
+                <!-- Image Upload Area -->
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
+                    <div class="space-y-1 text-center">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                        <div class="flex text-sm text-gray-600">
+                            <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500">
+                                <span>Upload a file</span>
+                                <input id="image" name="image" type="file" class="sr-only" accept="image/*" onchange="previewImage(this)" />
+                            </label>
+                            <p class="pl-1">or drag and drop</p>
+                        </div>
+                        <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
+                    </div>
+                </div>
+                
+                <!-- Image Preview -->
+                <div id="imagePreview" class="mt-4 hidden">
+                    <p class="text-sm text-gray-600 mb-2">Selected Image:</p>
+                    <div class="relative inline-block">
+                        <img id="previewImg" src="" alt="Selected image preview" class="h-32 w-auto rounded-lg border border-gray-200">
+                        <button type="button" onclick="removeSelectedImage()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                @error('image')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
@@ -170,4 +215,35 @@
         </div>
     </form>
 </div>
+
+<script>
+function previewImage(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Show preview
+            const previewImg = document.getElementById('previewImg');
+            const imagePreview = document.getElementById('imagePreview');
+            
+            if (previewImg && imagePreview) {
+                previewImg.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeSelectedImage() {
+    // Clear the file input
+    document.getElementById('image').value = '';
+    
+    // Hide the preview
+    const imagePreview = document.getElementById('imagePreview');
+    if (imagePreview) {
+        imagePreview.classList.add('hidden');
+    }
+}
+</script>
 @endsection 

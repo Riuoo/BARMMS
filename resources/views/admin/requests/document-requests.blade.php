@@ -347,7 +347,7 @@
                         </form>
                     @endif
                     
-                    @if($request->status === 'approved' || $request->status === 'completed')
+                    @if($request->status === 'approved')
                         <a href="{{ route('admin.document-requests.pdf', $request->id) }}" target="_blank"
                            class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition duration-200">
                             <i class="fas fa-file-pdf mr-1"></i>

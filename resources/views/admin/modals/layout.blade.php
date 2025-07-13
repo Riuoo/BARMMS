@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', 'Admin Page')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -918,6 +919,280 @@
             document.querySelectorAll('.search-container').forEach(container => {
                 enhancedSearch.init(container.id);
             });
+        });
+    </script>
+
+    <!-- Notification System JavaScript -->
+    <script>
+        // Global notification system
+        window.notificationSystem = {
+            // Initialize notification system
+            init: function() {
+                this.loadNotifications();
+                this.startPolling();
+                this.bindEvents();
+            },
+
+            // Load notifications from server
+            loadNotifications: function() {
+                const url = document.body.dataset.notificationsUrl;
+                if (!url) {
+                    console.error('Notification URL not found');
+                    return;
+                }
+
+                console.log('Loading notifications from:', url);
+
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => {
+                    console.log('Notification response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Notification data received:', data);
+                    this.updateNotificationBadge(data.total);
+                    this.updateNotificationDropdown(data.notifications);
+                    this.updateNotificationCount(data.total);
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+            },
+
+            // Update notification badge
+            updateNotificationBadge: function(count) {
+                const badge = document.getElementById('notification-count-badge');
+                if (badge) {
+                    if (count > 0) {
+                        badge.textContent = count > 99 ? '99+' : count;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            },
+
+            // Update notification dropdown
+            updateNotificationDropdown: function(notifications) {
+                const container = document.getElementById('notification-list-dropdown');
+                if (!container) return;
+
+                if (notifications.length === 0) {
+                    container.innerHTML = `
+                        <div class="flex items-center justify-center py-8">
+                            <div class="text-center">
+                                <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
+                                <p class="text-gray-500 text-sm">No new notifications</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                notifications.forEach(notification => {
+                    const timeAgo = this.getTimeAgo(notification.created_at);
+                    const priorityClass = notification.priority === 'high' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
+                    
+                    html += `
+                        <div class="notification-item ${priorityClass} bg-white border-r border-b border-gray-200 p-4 hover:bg-gray-50 transition duration-200" data-id="${notification.id}" data-type="${notification.type}" onclick="notificationSystem.markAsViewed(${notification.id}, '${notification.type}')">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900 mb-1">${notification.message}</p>
+                                    <p class="text-xs text-gray-500">${timeAgo}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="event.stopPropagation(); notificationSystem.markAsRead('${notification.type}', ${notification.id})" class="text-gray-400 hover:text-green-600 transition duration-200" title="Mark as read">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); notificationSystem.viewDetails('${notification.type}', ${notification.id})" class="text-gray-400 hover:text-blue-600 transition duration-200" title="View details">
+                                        <i class="fas fa-external-link-alt text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            },
+
+            // Update notification count in dropdown header
+            updateNotificationCount: function(count) {
+                const countElement = document.getElementById('dropdown-notification-count');
+                if (countElement) {
+                    countElement.textContent = count;
+                }
+            },
+
+            // Mark notification as read
+            markAsRead: function(type, id) {
+                // Get notification message for confirmation
+                const notificationElement = document.querySelector(`[data-id="${id}"][data-type="${type}"]`);
+                const messageElement = notificationElement?.querySelector('p');
+                const notificationMessage = messageElement ? messageElement.textContent : 'this notification';
+                
+                // Show confirmation dialog
+                if (!confirm(`Are you sure you want to mark "${notificationMessage}" as read?\n\nThis action cannot be undone.`)) {
+                    return;
+                }
+                
+                fetch(`/admin/notifications/mark-as-read/${type}/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove the notification from the dropdown
+                    if (notificationElement) {
+                        notificationElement.style.opacity = '0.5';
+                        setTimeout(() => {
+                            notificationElement.remove();
+                            this.loadNotifications(); // Reload to update counts
+                        }, 300);
+                    }
+                    toast.success('Notification marked as read');
+                })
+                .catch(error => {
+                    console.error('Error marking notification as read:', error);
+                    toast.error('Failed to mark notification as read');
+                });
+            },
+
+            // Mark all notifications as read
+            markAllAsRead: function() {
+                // Get current notification count
+                const currentCount = document.getElementById('dropdown-notification-count')?.textContent || '0';
+                
+                // Show confirmation dialog
+                if (!confirm(`Are you sure you want to mark all ${currentCount} notifications as read?\n\nThis action cannot be undone and will mark ALL unread notifications as read.`)) {
+                    return;
+                }
+                
+                fetch('/admin/notifications/mark-all-as-read-ajax', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.updateNotificationBadge(0);
+                        this.updateNotificationCount(0);
+                        this.updateNotificationDropdown([]);
+                        toast.success(data.message);
+                    } else {
+                        toast.error(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking all notifications as read:', error);
+                    toast.error('Failed to mark all notifications as read');
+                });
+            },
+
+            // Mark notification as viewed (but not read)
+            markAsViewed: function(id, type) {
+                // Add a subtle visual indicator that this notification has been viewed
+                const notificationElement = document.querySelector(`[data-id="${id}"][data-type="${type}"]`);
+                if (notificationElement) {
+                    notificationElement.classList.add('viewed');
+                    notificationElement.style.opacity = '0.8';
+                    // Add a small indicator
+                    const indicator = document.createElement('div');
+                    indicator.className = 'absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full';
+                    notificationElement.style.position = 'relative';
+                    notificationElement.appendChild(indicator);
+                }
+            },
+
+            // View notification details
+            viewDetails: function(type, id) {
+                let url = '';
+                switch (type) {
+                    case 'blotter_report':
+                        url = '/admin/blotter-reports';
+                        break;
+                    case 'document_request':
+                        url = '/admin/document-requests';
+                        break;
+                    case 'account_request':
+                        url = '/admin/new-account-requests';
+                        break;
+                    default:
+                        toast.error('Unknown notification type');
+                        return;
+                }
+                
+                // Open in same tab
+                window.location.href = url;
+            },
+
+            // Get time ago string
+            getTimeAgo: function(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - date) / 1000);
+
+                if (diffInSeconds < 60) {
+                    return 'Just now';
+                } else if (diffInSeconds < 3600) {
+                    const minutes = Math.floor(diffInSeconds / 60);
+                    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+                } else if (diffInSeconds < 86400) {
+                    const hours = Math.floor(diffInSeconds / 3600);
+                    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+                } else {
+                    const days = Math.floor(diffInSeconds / 86400);
+                    return `${days} day${days > 1 ? 's' : ''} ago`;
+                }
+            },
+
+            // Start polling for new notifications
+            startPolling: function() {
+                // Poll every 30 seconds
+                setInterval(() => {
+                    this.loadNotifications();
+                }, 30000);
+            },
+
+            // Bind event listeners
+            bindEvents: function() {
+                // Bind mark all as read button
+                window.markAllAsRead = () => {
+                    this.markAllAsRead();
+                };
+            }
+        };
+
+        // Initialize notification system when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                notificationSystem.init();
+            } catch (error) {
+                console.error('Failed to initialize notification system:', error);
+                // Fallback: hide notification badge if system fails
+                const badge = document.getElementById('notification-count-badge');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+            }
         });
     </script>
 </html>

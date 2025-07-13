@@ -14,5 +14,6 @@ class AccountRequest extends Model
         'email',
         'status',
         'token',
+        'is_read',
     ];
 }

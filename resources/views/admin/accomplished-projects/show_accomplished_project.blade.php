@@ -20,6 +20,12 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
+            <!-- Project Image -->
+            @if($project->image)
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <img src="{{ asset($project->image) }}" alt="{{ $project->title }}" class="w-full h-64 object-cover">
+            </div>
+            @endif
             <!-- Project Title and Category -->
             <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-4">

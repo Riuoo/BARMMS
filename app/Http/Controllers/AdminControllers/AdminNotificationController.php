@@ -7,6 +7,7 @@ use App\Models\DocumentRequest;
 use App\Models\AccountRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AdminNotificationController
@@ -73,65 +74,94 @@ class AdminNotificationController
 
     public function getNotificationCounts()
     {
-        $notificationsData = [];
-        
-        // Process Blotter Reports
-        BlotterRequest::where('is_read', false)->get()->each(function ($report) use (&$notificationsData) {
-            $notificationsData[] = [
-                'id' => $report->id,
-                'type' => 'blotter_report',
-                'message' => 'New blotter report from ' . ($report->user->name ?? 'Unknown Resident'),
-                'created_at' => Carbon::parse($report->created_at)->toDateTimeString(),
-                'link' => route('admin.blotter-reports'),
-                'priority' => 'high'
-            ];
-        });
-        
-        // Process Document Requests
-        DocumentRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
-            $notificationsData[] = [
-                'id' => $request->id,
-                'type' => 'document_request',
-                'message' => 'Document request from ' . ($request->user->name ?? 'Unknown Resident'),
-                'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
-                'link' => route('admin.document-requests'),
-                'priority' => 'medium'
-            ];
-        });
+        try {
+            $notificationsData = [];
+            
+            // Process Blotter Reports
+            BlotterRequest::where('is_read', false)->get()->each(function ($report) use (&$notificationsData) {
+                try {
+                    $notificationsData[] = [
+                        'id' => $report->id,
+                        'type' => 'blotter_report',
+                        'message' => 'New blotter report from ' . ($report->user->name ?? 'Unknown Resident'),
+                        'created_at' => Carbon::parse($report->created_at)->toDateTimeString(),
+                        'link' => route('admin.blotter-reports'),
+                        'priority' => 'high'
+                    ];
+                } catch (\Exception $e) {
+                    // Skip this notification if there's an error
+                    Log::error('Error processing blotter report notification: ' . $e->getMessage());
+                }
+            });
+            
+            // Process Document Requests
+            DocumentRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
+                try {
+                    $notificationsData[] = [
+                        'id' => $request->id,
+                        'type' => 'document_request',
+                        'message' => 'Document request from ' . ($request->user->name ?? 'Unknown Resident'),
+                        'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
+                        'link' => route('admin.document-requests'),
+                        'priority' => 'medium'
+                    ];
+                } catch (\Exception $e) {
+                    // Skip this notification if there's an error
+                    Log::error('Error processing document request notification: ' . $e->getMessage());
+                }
+            });
 
-        // Process Account Requests
-        AccountRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
-            $notificationsData[] = [
-                'id' => $request->id,
-                'type' => 'account_request',
-                'message' => 'Account request from ' . $request->email,
-                'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
-                'link' => route('admin.new-account-requests'),
-                'priority' => 'high'
-            ];
-        });
-        
-        // Convert to collection and sort by priority and date
-        $allUnreadNotifications = collect($notificationsData);
-        
-        // Sort by priority (high first) then by date (latest first)
-        $sortedNotifications = $allUnreadNotifications->sortBy([
-            ['priority', 'desc'],
-            ['created_at', 'desc']
-        ])->values();
-        
-        // Limit to 5 notifications for dropdown
-        $limitedNotifications = $sortedNotifications->take(5);
-        
-        return response()->json([
-            'total' => $sortedNotifications->count(),
-            'notifications' => $limitedNotifications->toArray(),
-            'summary' => [
-                'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
-                'document_requests' => DocumentRequest::where('is_read', false)->count(),
-                'account_requests' => AccountRequest::where('is_read', false)->count(),
-            ]
-        ]);
+            // Process Account Requests
+            AccountRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
+                try {
+                    $notificationsData[] = [
+                        'id' => $request->id,
+                        'type' => 'account_request',
+                        'message' => 'Account request from ' . $request->email,
+                        'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
+                        'link' => route('admin.new-account-requests'),
+                        'priority' => 'high'
+                    ];
+                } catch (\Exception $e) {
+                    // Skip this notification if there's an error
+                    Log::error('Error processing account request notification: ' . $e->getMessage());
+                }
+            });
+            
+            // Convert to collection and sort by priority and date
+            $allUnreadNotifications = collect($notificationsData);
+            
+            // Sort by priority (high first) then by date (latest first)
+            $sortedNotifications = $allUnreadNotifications->sortBy([
+                ['priority', 'desc'],
+                ['created_at', 'desc']
+            ])->values();
+            
+            // Limit to 5 notifications for dropdown
+            $limitedNotifications = $sortedNotifications->take(5);
+            
+            return response()->json([
+                'total' => $sortedNotifications->count(),
+                'notifications' => $limitedNotifications->toArray(),
+                'summary' => [
+                    'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
+                    'document_requests' => DocumentRequest::where('is_read', false)->count(),
+                    'account_requests' => AccountRequest::where('is_read', false)->count(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getNotificationCounts: ' . $e->getMessage());
+            return response()->json([
+                'total' => 0,
+                'notifications' => [],
+                'summary' => [
+                    'blotter_reports' => 0,
+                    'document_requests' => 0,
+                    'account_requests' => 0,
+                ],
+                'error' => 'Failed to load notifications'
+            ], 500);
+        }
     }
 
     /**
@@ -170,21 +200,29 @@ class AdminNotificationController
     public function markAsRead(Request $request, $type, $id)
     {
         try {
+            $updated = false;
+            
             switch ($type) {
                 case 'blotter_report':
-                    BlotterRequest::where('id', $id)->update(['is_read' => true]);
+                    $updated = BlotterRequest::where('id', $id)->update(['is_read' => true]) > 0;
                     break;
                 case 'document_request':
-                    DocumentRequest::where('id', $id)->update(['is_read' => true]);
+                    $updated = DocumentRequest::where('id', $id)->update(['is_read' => true]) > 0;
                     break;
                 case 'account_request':
-                    AccountRequest::where('id', $id)->update(['is_read' => true]);
+                    $updated = AccountRequest::where('id', $id)->update(['is_read' => true]) > 0;
                     break;
                 default:
                     return response()->json(['message' => 'Invalid notification type.'], 400);
             }
-            return response()->json(['message' => 'Notification marked as read.']);
+            
+            if ($updated) {
+                return response()->json(['message' => 'Notification marked as read.']);
+            } else {
+                return response()->json(['message' => 'Notification not found or already marked as read.'], 404);
+            }
         } catch (\Exception $e) {
+            Log::error('Error marking notification as read: ' . $e->getMessage());
             return response()->json(['message' => 'Failed to mark notification as read: ' . $e->getMessage()], 500);
         }
     }
