@@ -107,8 +107,8 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check text-green-600 text-sm"></i>
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-blue-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
@@ -120,8 +120,8 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check-circle text-purple-600 text-sm"></i>
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
@@ -185,7 +185,7 @@
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
+                                <div class="flex items-center justify-center">
                                     <i class="fas fa-cogs mr-2"></i>
                                     Actions
                                 </div>
@@ -213,26 +213,26 @@
                                         {{ Str::limit($request->description, 50) }}
                                     </div>
                                     @if(strlen($request->description) > 50)
-                                        <button onclick="showFullDescription('{{ addslashes($request->description) }}', '{{ $request->user->name ?? 'N/A' }}')" 
+                                        <button onclick="showFullDescription({{ json_encode($request->description) }}, {{ json_encode($request->user->name ?? 'N/A') }})"
                                                 class="text-xs text-blue-600 hover:text-blue-800 underline mt-1">
                                             View Full
                                         </button>
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 justify-center">
                                 @if($request->status === 'pending')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                         <i class="fas fa-clock mr-1"></i>
                                         Pending
                                     </span>
                                 @elseif($request->status === 'approved')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         <i class="fas fa-check mr-1"></i>
                                         Approved
                                     </span>
                                 @elseif($request->status === 'completed')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         <i class="fas fa-check-circle mr-1"></i>
                                         Completed
                                     </span>
@@ -247,7 +247,7 @@
                                         <div class="inline-block">
                                             <form action="{{ route('admin.document-requests.approve', $request->id) }}" method="POST" class="inline">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                                                     <i class="fas fa-check mr-1"></i>
                                                     Approve
                                                 </button>
@@ -261,6 +261,15 @@
                                                 <i class="fas fa-file-pdf mr-1"></i>
                                                 Generate PDF
                                             </a>
+                                        </div>
+                                        <div class="inline-block">
+                                            <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                    Complete
+                                                </button>
+                                            </form>
                                         </div>
                                     @endif
                                 </div>
@@ -288,8 +297,8 @@
                             <div class="flex items-center mt-1">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                     @if($request->status === 'pending') bg-yellow-100 text-yellow-800
-                                    @elseif($request->status === 'approved') bg-green-100 text-green-800
-                                    @elseif($request->status === 'completed') bg-purple-100 text-purple-800
+                                    @elseif($request->status === 'approved') bg-blue-100 text-blue-800
+                                    @elseif($request->status === 'completed') bg-green-100 text-green-800
                                     @endif">
                                     <i class="fas fa-tag mr-1"></i>
                                     {{ ucfirst($request->status) }}
@@ -311,7 +320,7 @@
                             <span class="description-short">{{ Str::limit($request->description, 80) }}</span>
                             @if(strlen($request->description) > 80)
                                 <span class="description-full hidden">{{ $request->description }}</span>
-                                <button onclick="toggleDescription({{ $request->id }})" 
+                                <button onclick="toggleDescription('{{ $request->id }}')" 
                                         class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
                                     Read More
                                 </button>
@@ -330,7 +339,7 @@
 
                 <!-- Actions Section -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                    <button onclick="viewDocumentDetails({{ $request->id }})"
+                    <button onclick="viewDocumentDetails('{{ $request->id }}')"
                             type="button"
                             class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
                         <i class="fas fa-eye mr-1"></i>
@@ -340,7 +349,7 @@
                     @if($request->status === 'pending')
                         <form action="{{ route('admin.document-requests.approve', $request->id) }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
+                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
                                 <i class="fas fa-check mr-1"></i>
                                 Approve
                             </button>
@@ -353,6 +362,13 @@
                             <i class="fas fa-file-pdf mr-1"></i>
                             Generate PDF
                         </a>
+                        <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Complete
+                            </button>
+                        </form>
                     @endif
                 </div>
             </div>
@@ -396,7 +412,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            updateCounts();
+            // Update counts
+            function updateCounts() {
+                // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+                // This function is now empty or can be removed if not used elsewhere.
+            }
+            // Initial count update
+            // updateCounts(); // No longer needed
+            // Update counts on window resize
+            // window.removeEventListener('resize', updateCounts); // No longer needed
         });
     });
     
@@ -414,34 +438,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 item.style.display = 'none';
             }
         });
-        updateCounts();
+        // Update counts
+        function updateCounts() {
+            // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+            // This function is now empty or can be removed if not used elsewhere.
+        }
+        // Initial count update
+        // updateCounts(); // No longer needed
+        // Update counts on window resize
+        // window.removeEventListener('resize', updateCounts); // No longer needed
     });
     
     // Update counts
     function updateCounts() {
-        let totalVisible = 0, pending = 0, approved = 0, completed = 0;
-        if (window.innerWidth >= 768) { // Desktop
-            const visibleItems = Array.from(documentItems).filter(item => item.style.display !== 'none');
-            totalVisible = visibleItems.length;
-            pending = visibleItems.filter(item => item.dataset.status === 'pending').length;
-            approved = visibleItems.filter(item => item.dataset.status === 'approved').length;
-            completed = visibleItems.filter(item => item.dataset.status === 'completed').length;
-        } else { // Mobile
-            const visibleCards = Array.from(documentCards).filter(item => item.style.display !== 'none');
-            totalVisible = visibleCards.length;
-            pending = visibleCards.filter(item => item.dataset.status === 'pending').length;
-            approved = visibleCards.filter(item => item.dataset.status === 'approved').length;
-            completed = visibleCards.filter(item => item.dataset.status === 'completed').length;
-        }
-        document.getElementById('total-count').textContent = totalVisible;
-        document.getElementById('pending-count').textContent = pending;
-        document.getElementById('approved-count').textContent = approved;
-        document.getElementById('completed-count').textContent = completed;
+        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+        // This function is now empty or can be removed if not used elsewhere.
     }
     // Initial count update
-    updateCounts();
+    // updateCounts(); // No longer needed
     // Update counts on window resize
-    window.addEventListener('resize', updateCounts);
+    // window.removeEventListener('resize', updateCounts); // No longer needed
 });
 
 // Function to toggle description visibility

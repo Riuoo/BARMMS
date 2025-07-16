@@ -199,7 +199,7 @@
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
+                                <div class="flex items-center justify-center">
                                     <i class="fas fa-cogs mr-2"></i>
                                     Actions
                                 </div>
@@ -213,7 +213,7 @@
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0">
                                     </div>
-                                    <div class="ml-4">
+                                    <div>
                                         <div class="text-sm font-medium text-gray-900">{{ $request->user->name ?? 'N/A' }}</div>
                                     </div>
                                 </div>
@@ -299,7 +299,7 @@
                                 <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
+                                <div class="flex items-center justify-center space-x-2">
                                     @if($request->status === 'pending')
                                         <button onclick="openApproveModal({{ $request->id }})" 
                                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
@@ -484,7 +484,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            updateCounts();
+            // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+            // This function is now empty or can be removed if not used elsewhere.
         });
     });
     
@@ -502,34 +503,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 item.style.display = 'none';
             }
         });
-        updateCounts();
+        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+        // This function is now empty or can be removed if not used elsewhere.
     });
     
     // Update counts
     function updateCounts() {
-        let totalVisible = 0, pending = 0, approved = 0, completed = 0;
-        if (window.innerWidth >= 768) { // Desktop
-            const visibleItems = Array.from(blotterItems).filter(item => item.style.display !== 'none');
-            totalVisible = visibleItems.length;
-            pending = visibleItems.filter(item => item.dataset.status === 'pending').length;
-            approved = visibleItems.filter(item => item.dataset.status === 'approved').length;
-            completed = visibleItems.filter(item => item.dataset.status === 'completed').length;
-        } else { // Mobile
-            const visibleCards = Array.from(blotterCards).filter(item => item.style.display !== 'none');
-            totalVisible = visibleCards.length;
-            pending = visibleCards.filter(item => item.dataset.status === 'pending').length;
-            approved = visibleCards.filter(item => item.dataset.status === 'approved').length;
-            completed = visibleCards.filter(item => item.dataset.status === 'completed').length;
-        }
-        document.getElementById('total-count').textContent = totalVisible;
-        document.getElementById('pending-count').textContent = pending;
-        document.getElementById('approved-count').textContent = approved;
-        document.getElementById('completed-count').textContent = completed;
+        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+        // This function is now empty or can be removed if not used elsewhere.
     }
     // Initial count update
-    updateCounts();
+    // updateCounts(); // No longer needed
     // Update counts on window resize
-    window.addEventListener('resize', updateCounts);
+    // window.removeEventListener('resize', updateCounts); // No longer needed
 });
 
 // Function to view all media files

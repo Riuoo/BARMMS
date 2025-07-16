@@ -290,12 +290,12 @@
                                         Pending
                                     </span>
                                 @elseif($request->status === 'approved')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         <i class="fas fa-check mr-1"></i>
                                         Approved
                                     </span>
                                 @elseif($request->status === 'completed')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         <i class="fas fa-check-circle mr-1"></i>
                                         Completed
                                     </span>
@@ -345,14 +345,14 @@
                                         Reviewed
                                     </span>
                                 @elseif($request->status === 'in_progress')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         <i class="fas fa-spinner mr-1"></i>
                                         In Progress
                                     </span>
-                                @elseif($request->status === 'resolved')
+                                @elseif($request->status === 'resolved' || $request->status === 'completed')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         <i class="fas fa-check-circle mr-1"></i>
-                                        Resolved
+                                        {{ ucfirst($request->status) }}
                                     </span>
                                 @endif
                             </td>
@@ -418,8 +418,8 @@
                             <p class="text-sm text-gray-500">Document Request</p>
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
                                 @if($request->status === 'pending') bg-yellow-100 text-yellow-800
-                                @elseif($request->status === 'approved') bg-green-100 text-green-800
-                                @elseif($request->status === 'completed') bg-purple-100 text-purple-800
+                                @elseif($request->status === 'approved') bg-blue-100 text-blue-800
+                                @elseif($request->status === 'completed') bg-green-100 text-green-800
                                 @endif">
                                 <i class="fas fa-tag mr-1"></i>
                                 {{ ucfirst($request->status) }}
@@ -453,8 +453,8 @@
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
                                 @if($request->status === 'pending') bg-yellow-100 text-yellow-800
                                 @elseif($request->status === 'reviewed') bg-blue-100 text-blue-800
-                                @elseif($request->status === 'in_progress') bg-orange-100 text-orange-800
-                                @elseif($request->status === 'resolved') bg-green-100 text-green-800
+                                @elseif($request->status === 'in_progress') bg-blue-100 text-blue-800
+                                @elseif($request->status === 'resolved' || $request->status === 'completed') bg-green-100 text-green-800
                                 @endif">
                                 <i class="fas fa-tag mr-1"></i>
                                 {{ ucfirst(str_replace('_', ' ', $request->status)) }}

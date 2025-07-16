@@ -48,6 +48,11 @@ class DocumentRequestController
             $documentRequest->status = 'approved';
             $documentRequest->save();
 
+            // Notify the resident that their document is ready for pickup
+            if ($documentRequest->user) {
+                $documentRequest->user->notify(new \App\Notifications\DocumentRequestApproved());
+            }
+
             // Generate the PDF
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdfs.document_request_pdf', compact('documentRequest'));
             $filename = 'document_request_' . $documentRequest->id . '.pdf';
@@ -73,6 +78,25 @@ class DocumentRequestController
         } catch (\Exception $e) {
             Log::error('Error generating document request PDF: ' . $e->getMessage());
             notify()->error('Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
+
+    public function markAsComplete($id)
+    {
+        try {
+            $documentRequest = DocumentRequest::findOrFail($id);
+            if ($documentRequest->status !== 'approved') {
+                notify()->error('Only approved requests can be marked as completed.');
+                return back();
+            }
+            $documentRequest->status = 'completed';
+            $documentRequest->save();
+            notify()->success('Document request marked as completed.');
+            return back();
+        } catch (\Exception $e) {
+            Log::error('Error marking document request as completed: ' . $e->getMessage());
+            notify()->error('Failed to mark as completed: ' . $e->getMessage());
+            return back();
         }
     }
 

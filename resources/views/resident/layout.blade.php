@@ -176,7 +176,7 @@
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('resident.dashboard') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.dashboard') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <a href="{{ route('resident.dashboard') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.dashboard') }} transition duration-300 text-base">
                                     <i class="fas fa-th-large fa-fw mr-3 {{ request()->routeIs('resident.dashboard') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Dashboard</span>
                                 </a>
@@ -189,19 +189,19 @@
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Requests</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('resident.request_blotter_report') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_blotter_report') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <a href="{{ route('resident.request_blotter_report') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_blotter_report') }} transition duration-300 text-base">
                                     <i class="fas fa-file-alt fa-fw mr-3 {{ request()->routeIs('resident.request_blotter_report') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>New Blotter Report</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('resident.request_document_request') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_document_request') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <a href="{{ route('resident.request_document_request') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_document_request') }} transition duration-300 text-base">
                                     <i class="fas fa-file-signature fa-fw mr-3 {{ request()->routeIs('resident.request_document_request') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>New Document Request</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('resident.my-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.my-requests') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <a href="{{ route('resident.my-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.my-requests') }} transition duration-300 text-base">
                                     <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.my-requests') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>My Requests</span>
                                 </a>
@@ -214,7 +214,7 @@
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Monitoring</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('resident.health-status') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.health-status') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <a href="{{ route('resident.health-status') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.health-status') }} transition duration-300 text-base">
                                     <i class="fas fa-heartbeat fa-fw mr-3 {{ request()->routeIs('resident.health-status') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Report Health Concerns</span>
                                 </a>
@@ -227,13 +227,13 @@
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Information & Profile</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('resident.announcements') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.announcements') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <a href="{{ route('resident.announcements') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.announcements') }} transition duration-300 text-base">
                                     <i class="fas fa-bullhorn fa-fw mr-3 {{ request()->routeIs('resident.announcements') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Announcements</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('resident.profile') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.profile') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <a href="{{ route('resident.profile') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.profile') }} transition duration-300 text-base">
                                     <i class="fas fa-user-circle fa-fw mr-3 {{ request()->routeIs('resident.profile') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>My Profile</span>
                                 </a>

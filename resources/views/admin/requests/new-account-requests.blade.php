@@ -63,6 +63,9 @@
                 <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="approved">
                     Approved
                 </button>
+                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="completed">
+                    Completed
+                </button>
             </div>
         </div>
     </div>
@@ -98,8 +101,8 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check text-green-600 text-sm"></i>
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-blue-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
@@ -111,13 +114,13 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-calendar-plus text-purple-600 text-sm"></i>
+                    <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-emerald-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">This Month</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="month-count">{{ $accountRequests->where('created_at', '>=', now()->startOfMonth())->count() }}</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Completed</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="completed-count">{{ $accountRequests->where('status', 'completed')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -158,7 +161,7 @@
                                     </div>
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <div class="flex items-center">
+                                    <div class="flex items-center justify-center">
                                         <i class="fas fa-cogs mr-2"></i>
                                         Actions
                                     </div>
@@ -170,27 +173,26 @@
                             <tr class="account-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                <i class="fas fa-envelope text-blue-600"></i>
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
+                                        <div>
                                             <div class="text-sm font-medium text-gray-900">{{ $request->email }}</div>
-                                            <div class="text-sm text-gray-500">New Account Request</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 justify-center">
                                     @if($request->status === 'pending')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                             <i class="fas fa-clock mr-1"></i>
                                             Pending
                                         </span>
                                     @elseif($request->status === 'approved')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             <i class="fas fa-check mr-1"></i>
                                             Approved
+                                        </span>
+                                    @elseif($request->status === 'completed')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Completed
                                         </span>
                                     @endif
                                 </td>
@@ -253,9 +255,14 @@
                                     Pending
                                 </span>
                                 @elseif($request->status === 'approved')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                     <i class="fas fa-check mr-1"></i>
                                     Approved
+                                </span>
+                                @elseif($request->status === 'completed')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Completed
                                 </span>
                                 @endif
                             </div>
@@ -328,7 +335,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            updateCounts();
+            // Update counts
+            function updateCounts() {
+                // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+                // This function is now empty or can be removed if not used elsewhere.
+            }
+            // Initial count update
+            // updateCounts(); // No longer needed
+            // Update counts on window resize
+            // window.removeEventListener('resize', updateCounts); // No longer needed
         });
     });
     
@@ -350,28 +365,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update counts
     function updateCounts() {
-        const visibleItems = Array.from(accountItems).filter(item => 
-            item.style.display !== 'none'
-        );
-        
-        document.getElementById('total-count').textContent = visibleItems.length;
-        document.getElementById('pending-count').textContent = visibleItems.filter(item => 
-            item.dataset.status === 'pending'
-        ).length;
-        document.getElementById('approved-count').textContent = visibleItems.filter(item => 
-            item.dataset.status === 'approved'
-        ).length;
-        
-        const now = new Date();
-        const thisMonth = visibleItems.filter(item => {
-            const createdDate = new Date(item.dataset.created);
-            return createdDate.getMonth() === now.getMonth() && createdDate.getFullYear() === now.getFullYear();
-        }).length;
-        document.getElementById('month-count').textContent = thisMonth;
+        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+        // This function is now empty or can be removed if not used elsewhere.
     }
     
     // Initial count update
-    updateCounts();
+    // updateCounts(); // No longer needed
+    // Update counts on window resize
+    // window.removeEventListener('resize', updateCounts); // No longer needed
 });
 </script>
 @endsection

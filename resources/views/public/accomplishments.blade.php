@@ -103,10 +103,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @forelse($projects as $project)
                 <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden border border-gray-100">
-                    <!-- Project Image Placeholder -->
-                    <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                        <i class="fas fa-project-diagram text-4xl text-gray-400"></i>
-                    </div>
+                    @if($project->image_url)
+                        <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
+                            <img src="{{ $project->image_url }}" alt="{{ $project->title }} image" class="object-cover h-full w-full">
+                        </div>
+                    @else
+                        <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                            <i class="fas fa-project-diagram text-4xl text-gray-400"></i>
+                        </div>
+                    @endif
                     
                     <!-- Project Content -->
                     <div class="p-6">

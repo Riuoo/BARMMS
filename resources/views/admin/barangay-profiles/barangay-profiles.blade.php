@@ -110,7 +110,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Captains</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="captain-count">{{ $barangayProfiles->where('role', 'Barangay Captain')->count() }}</p>
+                                         <p class="text-lg md:text-2xl font-bold text-gray-900" id="captain-count">{{ $barangayProfiles->where('role', 'Captain')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -136,7 +136,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Other Staff</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="other-count">{{ $barangayProfiles->whereNotIn('role', ['Barangay Captain', 'Councilor'])->count() }}</p>
+                                         <p class="text-lg md:text-2xl font-bold text-gray-900" id="other-count">{{ $barangayProfiles->whereNotIn('role', ['Captain', 'Councilor'])->count() }}</p>
                 </div>
             </div>
         </div>
@@ -189,7 +189,7 @@
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
+                                <div class="flex items-center justify-center">
                                     <i class="fas fa-cogs mr-2"></i>
                                     Actions
                                 </div>
@@ -201,27 +201,17 @@
                         <tr class="official-item hover:bg-gray-50 transition duration-150" data-role="{{ strtolower(str_replace(' ', '-', $user->role)) }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-user text-green-600"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
+                                    <div>
                                         <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
-                                        <div class="text-sm text-gray-500">ID: {{ $user->id }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $user->email }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-envelope mr-1"></i>
-                                    Contact
-                                </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                    @if($user->role === 'Barangay Captain') bg-yellow-100 text-yellow-800
+                                <span class="inline-flex items-center py-0.5 rounded-full text-xs font-medium 
+                                    @if($user->role === 'Captain') bg-yellow-100 text-yellow-800
                                     @elseif($user->role === 'Councilor') bg-purple-100 text-purple-800
                                     @elseif($user->role === 'Secretary') bg-blue-100 text-blue-800
                                     @elseif($user->role === 'Treasurer') bg-green-100 text-green-800
@@ -233,19 +223,15 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $user->address ?: 'No address provided' }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-map-marker-alt mr-1"></i>
-                                    Location
-                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
+                                <div class="flex items-center justify-center space-x-2">
                                     <a href="{{ route('admin.barangay-profiles.edit', $user->id) }}" 
                                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                                         <i class="fas fa-edit mr-1"></i>
                                         Edit
                                     </a>
-                                    <button onclick="deleteOfficial({{ $user->id }}, '{{ $user->name }}')" 
+                                    <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
                                             class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                                         <i class="fas fa-trash-alt mr-1"></i>
                                         Delete
@@ -275,7 +261,7 @@
                         <p class="text-sm text-gray-500 truncate">{{ $user->email }}</p>
                         <div class="mt-2">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                                @if($user->role === 'Barangay Captain') bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800
+                                                                 @if($user->role === 'Captain') bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800
                                 @elseif($user->role === 'Councilor') bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800
                                 @elseif($user->role === 'Secretary') bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800
                                 @elseif($user->role === 'Treasurer') bg-gradient-to-r from-green-100 to-green-200 text-green-800
@@ -305,7 +291,7 @@
                         <i class="fas fa-edit mr-2"></i>
                         Edit Profile
                     </a>
-                    <button onclick="deleteOfficial({{ $user->id }}, '{{ $user->name }}')" 
+                    <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
                             class="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 shadow-sm">
                         <i class="fas fa-trash-alt mr-2"></i>
                         Delete
@@ -379,7 +365,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            updateCounts();
+            // Update counts
+            function updateCounts() {
+                // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+                // This function is now empty or can be removed if not used elsewhere.
+            }
+            // Initial count update
+            // updateCounts(); // No longer needed
+            // Update counts on window resize
+            // window.addEventListener('resize', updateCounts); // No longer needed
         });
     });
     
@@ -401,29 +395,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update counts
     function updateCounts() {
-        let totalVisible = 0, captainCount = 0, councilorCount = 0, otherCount = 0;
-        if (window.innerWidth >= 768) { // Desktop
-            const visibleItems = Array.from(officialItems).filter(item => item.style.display !== 'none');
-            totalVisible = visibleItems.length;
-            captainCount = visibleItems.filter(item => item.dataset.role === 'barangay-captain').length;
-            councilorCount = visibleItems.filter(item => item.dataset.role === 'councilor').length;
-            otherCount = visibleItems.filter(item => item.dataset.role !== 'barangay-captain' && item.dataset.role !== 'councilor').length;
-        } else { // Mobile
-            const visibleCards = Array.from(officialCards).filter(item => item.style.display !== 'none');
-            totalVisible = visibleCards.length;
-            captainCount = visibleCards.filter(item => item.dataset.role === 'barangay-captain').length;
-            councilorCount = visibleCards.filter(item => item.dataset.role === 'councilor').length;
-            otherCount = visibleCards.filter(item => item.dataset.role !== 'barangay-captain' && item.dataset.role !== 'councilor').length;
-        }
-        document.getElementById('total-count').textContent = totalVisible;
-        document.getElementById('captain-count').textContent = captainCount;
-        document.getElementById('councilor-count').textContent = councilorCount;
-        document.getElementById('other-count').textContent = otherCount;
+        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+        // This function is now empty or can be removed if not used elsewhere.
     }
     // Initial count update
-    updateCounts();
+    // updateCounts(); // No longer needed
     // Update counts on window resize
-    window.addEventListener('resize', updateCounts);
+    // window.addEventListener('resize', updateCounts); // No longer needed
 });
 
 // Delete functionality

@@ -3,47 +3,191 @@
 @section('title', 'Edit Barangay Profile')
 
 @section('content')
-    <div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
-        <h1 class="text-2xl font-bold mb-6">Edit Barangay Profile</h1>
+<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit Barangay Profile</h1>
+                <p class="text-gray-600">Update barangay official information and credentials</p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <a href="{{ route('admin.barangay-profiles') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Barangay Profiles
+                </a>
+            </div>
+        </div>
+    </div>
 
-        <form action="{{ route('admin.barangay-profiles.update', $barangayProfile->id) }}" method="POST">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-800">{{ session('success') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">There were some errors with your submission</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc pl-5 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <form action="{{ route('admin.barangay-profiles.update', $barangayProfile->id) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
 
-            <div class="mb-4">
-                <label for="name" class="block font-medium mb-1">Name</label>
-                <input type="text" id="name" name="name" value="{{ old('name', $barangayProfile->name) }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
+            <!-- Basic Information -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <i class="fas fa-user-tie mr-2 text-green-600"></i>
+                    Basic Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Full Name <span class="text-gray-500">(Read Only)</span>
+                        </label>
+                        <input type="text" 
+                               id="name" 
+                               name="name" 
+                               value="{{ old('name', $barangayProfile->name) }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
+                               readonly>
+                        <p class="mt-1 text-sm text-gray-500">Basic information cannot be modified</p>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address <span class="text-gray-500">(Read Only)</span>
+                        </label>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               value="{{ old('email', $barangayProfile->email) }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
+                               readonly>
+                        <p class="mt-1 text-sm text-gray-500">Contact email cannot be changed</p>
+                    </div>
+
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                            Official Role <span class="text-gray-500">(Read Only)</span>
+                        </label>
+                        <input type="text" 
+                               id="role" 
+                               name="role" 
+                               value="{{ old('role', $barangayProfile->role) }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
+                               readonly>
+                        <p class="mt-1 text-sm text-gray-500">Official position is fixed</p>
+                    </div>
+
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                            Address <span class="text-gray-500">(Read Only)</span>
+                        </label>
+                        <input type="text" 
+                               id="address" 
+                               name="address" 
+                               value="{{ old('address', $barangayProfile->address) }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
+                               readonly>
+                        <p class="mt-1 text-sm text-gray-500">Address information is read-only</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-4">
-                <label for="email" class="block font-medium mb-1">Email</label>
-                <input type="email" id="email" name="email" value="{{ old('email', $barangayProfile->email) }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
+            <!-- Security Information -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <i class="fas fa-lock mr-2 text-red-600"></i>
+                    Security Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200">
+                        <p class="mt-1 text-sm text-gray-500">Leave blank to keep current password</p>
+                    </div>
+
+                    <div>
+                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                        <input type="password" 
+                               id="password_confirmation" 
+                               name="password_confirmation" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200">
+                        <p class="mt-1 text-sm text-gray-500">Confirm the new password</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-4">
-                <label for="role" class="block font-medium mb-1">Role</label>
-                <input type="text" id="role" name="role" value="{{ old('role', $barangayProfile->role) }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
-            </div>
-
-            <div class="mb-4">
-                <label for="address" class="block font-medium mb-1">Address</label>
-                <input type="text" id="address" name="address" value="{{ old('address', $barangayProfile->address) }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
-            </div>
-
-            <div class="mb-4">
-                <label for="password" class="block font-medium mb-1">Password (leave blank to keep current)</label>
-                <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded px-3 py-2">
-            </div>
-
-            <div class="mb-4">
-                <label for="password_confirmation" class="block font-medium mb-1">Confirm Password</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded px-3 py-2">
-            </div>
-
-            <div class="flex justify-end space-x-2">
-                <a href="{{ route('admin.barangay-profiles') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</a>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Update</button>
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    All changes will be saved immediately
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{{ route('admin.barangay-profiles') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-save mr-2"></i>
+                        Update Profile
+                    </button>
+                </div>
             </div>
         </form>
     </div>
+
+    <!-- Information Card -->
+    <div class="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-green-400"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-green-800">Profile Update Information</h3>
+                <div class="mt-2 text-sm text-green-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>All basic information is required for barangay officials</li>
+                        <li>Email address will be used for system notifications</li>
+                        <li>Password changes are optional and secure</li>
+                        <li>All information is kept confidential and secure</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection 

@@ -187,7 +187,7 @@
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
+                                <div class="flex items-center justify-center">
                                     <i class="fas fa-cogs mr-2"></i>
                                     Actions
                                 </div>
@@ -199,61 +199,28 @@
                         <tr class="resident-item hover:bg-gray-50 transition duration-150" data-status="active" data-created="{{ $resident->created_at->format('Y-m-d') }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-home text-blue-600"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
+                                    <div>
                                         <div class="text-sm font-medium text-gray-900">{{ $resident->name }}</div>
-                                        <div class="text-sm text-gray-500">ID: {{ $resident->id }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->email }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-envelope mr-1"></i>
-                                    Contact
-                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->address ?: 'No address provided' }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-map-marker-alt mr-1"></i>
-                                    Location
-                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">
                                     @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
-                                        <div class="space-y-1">
-                                            @if($resident->age)
-                                                <div><i class="fas fa-birthday-cake mr-1"></i> Age: {{ $resident->age }}</div>
-                                            @endif
-                                            @if($resident->family_size)
-                                                <div><i class="fas fa-users mr-1"></i> Family: {{ $resident->family_size }}</div>
-                                            @endif
-                                            @if($resident->education_level)
-                                                <div><i class="fas fa-graduation-cap mr-1"></i> {{ $resident->education_level }}</div>
-                                            @endif
-                                            @if($resident->income_level)
-                                                <div><i class="fas fa-money-bill mr-1"></i> {{ $resident->income_level }}</div>
-                                            @endif
-                                            @if($resident->employment_status)
-                                                <div><i class="fas fa-briefcase mr-1"></i> {{ $resident->employment_status }}</div>
-                                            @endif
-                                            @if($resident->health_status)
-                                                <div><i class="fas fa-heartbeat mr-1"></i> {{ $resident->health_status }}</div>
-                                            @endif
-                                        </div>
+                                        <button onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
+                                                class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            View Demographics
+                                        </button>
                                     @else
                                         <span class="text-gray-400">No demographic data</span>
                                     @endif
-                                </div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-user-friends mr-1"></i>
-                                    Demographics
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -264,13 +231,13 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
+                                <div class="flex items-center justify-center space-x-2">
                                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
                                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                                         <i class="fas fa-edit mr-1"></i>
                                         Edit
                                     </a>
-                                    <button onclick="deleteResident({{ $resident->id }}, '{{ $resident->name }}')" 
+                                    <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
                                             class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                                         <i class="fas fa-trash-alt mr-1"></i>
                                         Delete
@@ -303,6 +270,14 @@
                                 <i class="fas fa-user-check mr-1.5"></i>
                                 Active Resident
                             </span>
+                            @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
+                                <button 
+                                    class="block md:hidden mt-2 text-blue-600 hover:text-blue-800 font-medium cursor-pointer text-xs underline"
+                                    onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    View Demographics
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -319,10 +294,11 @@
 
                 <!-- Demographics section -->
                 @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
-                <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+                <div class="mb-4 p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition duration-200 hidden md:block" onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')">
                     <h4 class="text-sm font-medium text-gray-900 mb-2 flex items-center">
                         <i class="fas fa-user-friends mr-2 text-blue-600"></i>
                         Demographics
+                        <i class="fas fa-external-link-alt ml-auto text-blue-500 text-xs"></i>
                     </h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                         @if($resident->age)
@@ -362,6 +338,7 @@
                             </div>
                         @endif
                     </div>
+                    <p class="text-xs text-blue-600 mt-2 font-medium">Click to view full details</p>
                 </div>
                 @endif
 
@@ -380,7 +357,7 @@
                         <i class="fas fa-edit mr-2"></i>
                         Edit Profile
                     </a>
-                    <button onclick="deleteResident({{ $resident->id }}, '{{ $resident->name }}')" 
+                    <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
                             class="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 shadow-sm">
                         <i class="fas fa-trash-alt mr-2"></i>
                         Delete
@@ -394,7 +371,35 @@
     <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
 </div>
 
-
+<!-- Demographics Modal -->
+<div id="demographicsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-user-friends text-blue-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900" id="modalResidentName"></h3>
+                    <p class="text-sm text-gray-500">Demographic Information</p>
+                </div>
+            </div>
+            <button onclick="closeDemographicsModal()" class="text-gray-400 hover:text-gray-600 transition duration-200">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <div id="demographicsContent" class="space-y-6">
+            <!-- Content will be loaded dynamically -->
+        </div>
+        
+        <div class="flex justify-end mt-6 pt-4 border-t border-gray-200">
+            <button onclick="closeDemographicsModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
@@ -461,7 +466,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            updateCounts();
+            // Update counts
+            function updateCounts() {
+                // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+                // This function is now empty or can be removed if not used elsewhere.
+            }
+            // Initial count update
+            // updateCounts(); // No longer needed
+            // Update counts on window resize
+            // window.addEventListener('resize', updateCounts); // No longer needed
         });
     });
     
@@ -483,40 +496,154 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update counts
     function updateCounts() {
-        let totalVisible = 0, activeCount = 0, monthCount = 0, addressCount = 0;
-        if (window.innerWidth >= 768) { // Desktop
-            const visibleItems = Array.from(residentItems).filter(item => item.style.display !== 'none');
-            totalVisible = visibleItems.length;
-            activeCount = visibleItems.length;
-            monthCount = visibleItems.filter(item => {
-                const created = item.dataset.created;
-                const now = new Date();
-                const createdDate = new Date(created);
-                return (now - createdDate) < (30 * 24 * 60 * 60 * 1000); // 30 days
-            }).length;
-            addressCount = visibleItems.filter(item => item.querySelector('.text-sm.text-gray-900') && item.querySelector('.text-sm.text-gray-900').textContent !== 'No address provided').length;
-        } else { // Mobile
-            const visibleCards = Array.from(residentCards).filter(item => item.style.display !== 'none');
-            totalVisible = visibleCards.length;
-            activeCount = visibleCards.length;
-            monthCount = visibleCards.filter(item => {
-                const created = item.dataset.created;
-                const now = new Date();
-                const createdDate = new Date(created);
-                return (now - createdDate) < (30 * 24 * 60 * 60 * 1000); // 30 days
-            }).length;
-            addressCount = visibleCards.filter(item => item.querySelector('.text-sm.text-gray-600')).length;
-        }
-        document.getElementById('total-count').textContent = totalVisible;
-        document.getElementById('active-count').textContent = activeCount;
-        document.getElementById('month-count').textContent = monthCount;
-        document.getElementById('address-count').textContent = addressCount;
+        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
+        // This function is now empty or can be removed if not used elsewhere.
     }
     // Initial count update
-    updateCounts();
+    // updateCounts(); // No longer needed
     // Update counts on window resize
-    window.addEventListener('resize', updateCounts);
+    // window.addEventListener('resize', updateCounts); // No longer needed
 });
+
+// Demographics Modal Functions
+function showDemographicsModal(residentId, residentName) {
+    document.getElementById('modalResidentName').textContent = residentName;
+    
+    // Find the resident data from the current page
+    const residentData = findResidentData(residentId);
+    if (residentData) {
+        displayDemographics(residentData);
+    } else {
+        // If not found on page, you could make an AJAX call here
+        document.getElementById('demographicsContent').innerHTML = '<p class="text-gray-500">Demographic data not available.</p>';
+    }
+    
+    document.getElementById('demographicsModal').classList.remove('hidden');
+    document.getElementById('demographicsModal').classList.add('flex');
+}
+
+function closeDemographicsModal() {
+    document.getElementById('demographicsModal').classList.add('hidden');
+    document.getElementById('demographicsModal').classList.remove('flex');
+}
+
+function findResidentData(residentId) {
+    // This function would need to be implemented based on your data structure
+    // For now, we'll create a mock implementation
+    // You might want to store resident data in a JavaScript object or make an AJAX call
+    
+    // Example implementation - you'll need to adapt this to your actual data
+    const residents = @json($residents);
+    return residents.find(resident => resident.id === residentId);
+}
+
+function displayDemographics(resident) {
+    const content = document.getElementById('demographicsContent');
+    
+    let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
+    
+    // Personal Information
+    html += `
+        <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-user mr-2 text-blue-600"></i>
+                Personal Information
+            </h4>
+            <div class="space-y-3">
+                ${resident.age ? `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Age:</span>
+                        <span class="text-sm text-gray-900">${resident.age} years old</span>
+                    </div>
+                ` : ''}
+                ${resident.family_size ? `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Family Size:</span>
+                        <span class="text-sm text-gray-900">${resident.family_size} members</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    // Education & Employment
+    html += `
+        <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-graduation-cap mr-2 text-green-600"></i>
+                Education & Employment
+            </h4>
+            <div class="space-y-3">
+                ${resident.education_level ? `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Education Level:</span>
+                        <span class="text-sm text-gray-900">${resident.education_level}</span>
+                    </div>
+                ` : ''}
+                ${resident.employment_status ? `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Employment Status:</span>
+                        <span class="text-sm text-gray-900">${resident.employment_status}</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    // Financial Information
+    html += `
+        <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-money-bill mr-2 text-yellow-600"></i>
+                Financial Information
+            </h4>
+            <div class="space-y-3">
+                ${resident.income_level ? `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Income Level:</span>
+                        <span class="text-sm text-gray-900">${resident.income_level}</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    // Health Information
+    html += `
+        <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-heartbeat mr-2 text-red-600"></i>
+                Health Information
+            </h4>
+            <div class="space-y-3">
+                ${resident.health_status ? `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Health Status:</span>
+                        <span class="text-sm text-gray-900">${resident.health_status}</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    html += '</div>';
+    
+    // If no demographic data
+    if (!resident.age && !resident.family_size && !resident.education_level && 
+        !resident.income_level && !resident.employment_status && !resident.health_status) {
+        html = `
+            <div class="text-center py-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-friends text-gray-400 text-xl"></i>
+                </div>
+                <h4 class="text-lg font-medium text-gray-900 mb-2">No Demographic Data</h4>
+                <p class="text-gray-500">This resident doesn't have any demographic information recorded yet.</p>
+            </div>
+        `;
+    }
+    
+    content.innerHTML = html;
+}
 
 // Delete functionality
 function deleteResident(id, name) {

@@ -142,6 +142,7 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/document-requests/{id}/details', [DocumentRequestController::class, 'getDetails'])->name('admin.document-requests.details');
     Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-requests.approve');
     Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
+    Route::post('/document-requests/{id}/complete', [DocumentRequestController::class, 'markAsComplete'])->name('admin.document-requests.complete');
     Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
     Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
     

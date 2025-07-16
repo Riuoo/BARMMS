@@ -1139,9 +1139,27 @@
                         toast.error('Unknown notification type');
                         return;
                 }
-                
-                // Open in same tab
-                window.location.href = url;
+
+                // Mark as read before redirecting
+                fetch(`/admin/notifications/mark-as-read/${type}/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Optionally update UI here
+                    window.location.href = url;
+                })
+                .catch(error => {
+                    console.error('Error marking notification as read:', error);
+                    // Still redirect even if marking as read fails
+                    window.location.href = url;
+                });
             },
 
             // Get time ago string
