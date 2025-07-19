@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             ResidentSeeder::class,
             BlotterRequestSeeder::class,
             DocumentRequestSeeder::class,
+            DocumentTemplateSeeder::class,
             AccomplishedProjectSeeder::class,
         ]);
     }

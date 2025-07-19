@@ -64,39 +64,51 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 sm:p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-blue-100 text-xs sm:text-sm font-medium">Total Projects</p>
-                    <p class="text-2xl sm:text-3xl font-bold">{{ $totalProjects }}</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 sm:p-6 text-white h-full">
+            <div class="flex items-center justify-between h-full">
+                <div class="flex-1">
+                    <p class="text-blue-100 text-xs sm:text-sm font-medium mb-1">Total Projects</p>
+                    <p class="text-2xl sm:text-3xl font-bold">{{ $stats['total_projects'] }}</p>
                 </div>
-                <div class="bg-blue-400 rounded-full p-2 sm:p-3">
+                <div class="bg-blue-400 rounded-full p-2 sm:p-3 flex-shrink-0">
                     <i class="fas fa-project-diagram text-lg sm:text-xl"></i>
                 </div>
             </div>
         </div>
         
-        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-green-100 text-xs sm:text-sm font-medium">Total Budget</p>
-                    <p class="text-2xl sm:text-3xl font-bold">₱{{ number_format($totalBudget, 2) }}</p>
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white h-full">
+            <div class="flex items-center justify-between h-full">
+                <div class="flex-1">
+                    <p class="text-green-100 text-xs sm:text-sm font-medium mb-1">Total Budget</p>
+                    <p class="text-2xl sm:text-3xl font-bold">₱{{ number_format($stats['total_budget'], 2) }}</p>
                 </div>
-                <div class="bg-green-400 rounded-full p-2 sm:p-3">
+                <div class="bg-green-400 rounded-full p-2 sm:p-3 flex-shrink-0">
                     <i class="fas fa-money-bill-wave text-lg sm:text-xl"></i>
                 </div>
             </div>
         </div>
         
-        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white sm:col-span-2 lg:col-span-1">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-purple-100 text-xs sm:text-sm font-medium">Featured Projects</p>
-                    <p class="text-2xl sm:text-3xl font-bold">{{ $featuredProjects->count() }}</p>
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white h-full">
+            <div class="flex items-center justify-between h-full">
+                <div class="flex-1">
+                    <p class="text-purple-100 text-xs sm:text-sm font-medium mb-1">Featured Projects</p>
+                    <p class="text-2xl sm:text-3xl font-bold">{{ $stats['featured_projects'] }}</p>
                 </div>
-                <div class="bg-purple-400 rounded-full p-2 sm:p-3">
+                <div class="bg-purple-400 rounded-full p-2 sm:p-3 flex-shrink-0">
                     <i class="fas fa-star text-lg sm:text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 sm:p-6 text-white h-full">
+            <div class="flex items-center justify-between h-full">
+                <div class="flex-1">
+                    <p class="text-orange-100 text-xs sm:text-sm font-medium mb-1">Recent Projects</p>
+                    <p class="text-2xl sm:text-3xl font-bold">{{ $stats['recent_projects'] }}</p>
+                </div>
+                <div class="bg-orange-400 rounded-full p-2 sm:p-3 flex-shrink-0">
+                    <i class="fas fa-clock text-lg sm:text-xl"></i>
                 </div>
             </div>
         </div>
@@ -161,19 +173,19 @@
                         <span class="sm:hidden">View</span>
                     </a>
                     <div class="flex items-center space-x-1 sm:space-x-2">
-                        <a href="{{ route('admin.accomplished-projects.edit', $project->id) }}" class="text-gray-600 hover:text-gray-800 p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 transition duration-200">
+                        <a href="{{ route('admin.accomplished-projects.edit', $project->id) }}" class="text-gray-600 hover:text-gray-800 p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 transition duration-200 flex items-center justify-center w-8 h-8">
                             <i class="fas fa-edit text-sm sm:text-base"></i>
                         </a>
-                        <form action="{{ route('admin.accomplished-projects.toggle-featured', $project->id) }}" method="POST" class="inline">
+                        <form action="{{ route('admin.accomplished-projects.toggle-featured', $project->id) }}" method="POST" class="inline m-0 p-0">
                             @csrf
-                            <button type="submit" class="text-yellow-600 hover:text-yellow-800 p-1.5 sm:p-2 rounded-lg hover:bg-yellow-50 transition duration-200">
+                            <button type="submit" class="text-yellow-600 hover:text-yellow-800 p-1.5 sm:p-2 rounded-lg hover:bg-yellow-50 transition duration-200 flex items-center justify-center w-8 h-8">
                                 <i class="fas fa-star text-sm sm:text-base"></i>
                             </button>
                         </form>
-                        <form action="{{ route('admin.accomplished-projects.destroy', $project->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this project? This action cannot be undone.')">
+                        <form action="{{ route('admin.accomplished-projects.destroy', $project->id) }}" method="POST" class="inline m-0 p-0" onsubmit="return confirm('Are you sure you want to delete this project? This action cannot be undone.')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 p-1.5 sm:p-2 rounded-lg hover:bg-red-50 transition duration-200">
+                            <button type="submit" class="text-red-600 hover:text-red-800 p-1.5 sm:p-2 rounded-lg hover:bg-red-50 transition duration-200 flex items-center justify-center w-8 h-8">
                                 <i class="fas fa-trash text-sm sm:text-base"></i>
                             </button>
                         </form>
@@ -238,6 +250,8 @@ function closeDetailsModal() {
 @endsection
 
 <script>
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const categoryFilter = document.getElementById('categoryFilter');

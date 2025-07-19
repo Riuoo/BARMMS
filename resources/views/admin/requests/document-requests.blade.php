@@ -11,10 +11,14 @@
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Document Requests</h1>
                 <p class="text-gray-600">Manage and process document requests from residents</p>
             </div>
-            <div class="mt-4 sm:mt-0">
+            <div class="mt-4 sm:mt-0 space-x-2">
                 <a href="{{ route('admin.document-requests.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Create New Request
+                </a>
+                <a href="{{ route('admin.templates.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                    <i class="fas fa-file-code mr-2"></i>
+                    Manage Templates
                 </a>
             </div>
         </div>
@@ -213,8 +217,9 @@
                                         {{ Str::limit($request->description, 50) }}
                                     </div>
                                     @if(strlen($request->description) > 50)
-                                        <button onclick="showFullDescription({{ json_encode($request->description) }}, {{ json_encode($request->user->name ?? 'N/A') }})"
-                                                class="text-xs text-blue-600 hover:text-blue-800 underline mt-1">
+                                        <button data-description="{{ $request->description }}" 
+                                                data-user-name="{{ $request->user->name ?? 'N/A' }}"
+                                                class="view-full-btn text-xs text-blue-600 hover:text-blue-800 underline mt-1">
                                             View Full
                                         </button>
                                     @endif
@@ -516,6 +521,18 @@ function closeDescriptionModal() {
         modal.remove();
     }
 }
+
+// Add event listeners for view full buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners for view full buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('view-full-btn')) {
+            const description = e.target.getAttribute('data-description');
+            const userName = e.target.getAttribute('data-user-name');
+            showFullDescription(description, userName);
+        }
+    });
+});
 
 // Document functions are defined in the partial file (admin.modals.document-modals)
 </script>

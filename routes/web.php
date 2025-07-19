@@ -9,27 +9,29 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ContactAdminController;
-use App\Http\Controllers\AdminControllers\RegistrationController;
-use App\Http\Controllers\AdminControllers\AccountRequestController;
-use App\Http\Controllers\AdminControllers\AdminProfileController;
-use App\Http\Controllers\AdminControllers\AdminDashboardController;
-use App\Http\Controllers\AdminControllers\BarangayProfileController;
-use App\Http\Controllers\AdminControllers\ResidentController;
-use App\Http\Controllers\AdminControllers\BlotterReportController;
-use App\Http\Controllers\AdminControllers\DocumentRequestController;
-use App\Http\Controllers\AdminControllers\AccomplishProjectController;
-use App\Http\Controllers\AdminControllers\AdminNotificationController;
-use App\Http\Controllers\AdminControllers\HealthReportController;
-use App\Http\Controllers\AdminControllers\HealthStatusController;
-use App\Http\Controllers\AdminControllers\PatientRecordController;
-use App\Http\Controllers\AdminControllers\VaccinationRecordController;
-use App\Http\Controllers\AdminControllers\MedicalLogbookController;
-use App\Http\Controllers\AdminControllers\HealthCenterActivityController;
-use App\Http\Controllers\AdminControllers\ClusteringController;
-use App\Http\Controllers\AdminControllers\DecisionTreeController;
-use App\Http\Controllers\AdminControllers\HealthStatusRequestController;
+use App\Http\Controllers\AdminControllers\UserManagementControllers\RegistrationController;
+use App\Http\Controllers\AdminControllers\ReportRequestControllers\AccountRequestController;
+use App\Http\Controllers\AdminControllers\UserManagementControllers\AdminProfileController;
+use App\Http\Controllers\AdminControllers\MainControllers\AdminDashboardController;
+use App\Http\Controllers\AdminControllers\UserManagementControllers\BarangayProfileController;
+use App\Http\Controllers\AdminControllers\UserManagementControllers\ResidentController;
+use App\Http\Controllers\AdminControllers\ReportRequestControllers\BlotterReportController;
+use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentRequestController;
+use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentTemplateController;
+use App\Http\Controllers\AdminControllers\ProjectControllers\AccomplishProjectController;
+use App\Http\Controllers\AdminControllers\NotificationControllers\AdminNotificationController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthReportController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthStatusController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\PatientRecordController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\VaccinationRecordController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicalLogbookController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthCenterActivityController;
+use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringController;
+use App\Http\Controllers\AdminControllers\AlgorithmControllers\DecisionTreeController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthStatusRequestController;
 use App\Http\Controllers\ResidentControllers\ResidentController2;
 use App\Http\Controllers\ResidentControllers\ResidentProfileController;
+use App\Http\Controllers\PublicController;
 
 // Landing page route
 Route::get('/', function () {
@@ -37,14 +39,7 @@ Route::get('/', function () {
 })->name('landing');
 
 // Public accomplished projects page
-Route::get('/accomplishments', function () {
-    $projects = \App\Models\AccomplishedProject::orderBy('completion_date', 'desc')->paginate(12);
-    $totalProjects = \App\Models\AccomplishedProject::count();
-    $totalBudget = \App\Models\AccomplishedProject::sum('budget');
-    $featuredProjects = \App\Models\AccomplishedProject::where('is_featured', true)->get();
-    
-    return view('public.accomplishments', compact('projects', 'totalProjects', 'totalBudget', 'featuredProjects'));
-})->name('public.accomplishments');
+Route::get('/accomplishments', [PublicController::class, 'accomplishments'])->name('public.accomplishments');
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 
@@ -59,40 +54,8 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-// Authentication route with distinct user tables
-Route::post('/login', function (Request $request) {
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required'
-    ]);
-
-    // Check BarangayProfile first
-    $user = \App\Models\BarangayProfile::where('email', $credentials['email'])->first();
-    
-    if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
-        // Don't use Auth::login() for barangay profiles, just use session
-        $request->session()->regenerate();
-        session(['user_id' => $user->id]);
-        session(['user_role' => 'barangay']);
-        
-        return redirect()->intended(route('admin.dashboard'));
-    }
-
-    // Check Resident if BarangayProfile not found
-    $user = \App\Models\Residents::where('email', $credentials['email'])->first();
-    
-    if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
-        // Don't use Auth::login() for residents, just use session
-        $request->session()->regenerate();
-        session(['user_id' => $user->id]);
-        session(['user_role' => 'resident']);
-        
-        return redirect()->intended(route('resident.dashboard'));
-    }
-
-    notify()->error('The provided credentials do not match our records.');
-    return back()->onlyInput('email');
-})->name('login.post');
+// Authentication route
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
 // Registration routes (accessible via token, not directly admin)
 Route::get('/register/{token}', [RegistrationController::class, 'showRegistrationForm'])->name('register.form');
@@ -145,6 +108,15 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::post('/document-requests/{id}/complete', [DocumentRequestController::class, 'markAsComplete'])->name('admin.document-requests.complete');
     Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
     Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
+
+    // Document Templates Management
+    Route::get('/templates', [DocumentTemplateController::class, 'index'])->name('admin.templates.index');
+    Route::get('/templates/create', [DocumentTemplateController::class, 'create'])->name('admin.templates.create');
+    Route::post('/templates', [DocumentTemplateController::class, 'store'])->name('admin.templates.store');
+    Route::get('/templates/{template}/edit', [DocumentTemplateController::class, 'edit'])->name('admin.templates.edit');
+    Route::put('/templates/{template}', [DocumentTemplateController::class, 'update'])->name('admin.templates.update');
+    Route::post('/templates/{template}/reset', [DocumentTemplateController::class, 'reset'])->name('admin.templates.reset');
+    Route::post('/templates/{template}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
     
     // Account Requests listing and approval
     Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.new-account-requests');
@@ -247,6 +219,8 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
 });
 
 
+
+
 Route::middleware([\App\Http\Middleware\CheckResidentRole::class])->prefix('resident')->group(function () {
     Route::get('/dashboard', [ResidentController2::class, 'dashboard'])->name('resident.dashboard');
     // Blotter Requests
@@ -272,4 +246,3 @@ Route::post('/logout', function () {
     Session::flush();
     return redirect()->route('landing');
 })->name('logout');
-

@@ -6,7 +6,6 @@ use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\HealthStatus;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Residents;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;

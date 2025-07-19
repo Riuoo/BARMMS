@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
+use App\Models\BarangayProfile;
+use App\Models\Residents;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController
 {
@@ -13,13 +16,45 @@ class LoginController
 
     public function login(Request $request)
     {
-        // Login validation and session management removed as requested
-        return redirect()->route('landing');
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        // Check BarangayProfile first
+        $user = BarangayProfile::where('email', $credentials['email'])->first();
+        
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Don't use Auth::login() for barangay profiles, just use session
+            $request->session()->regenerate();
+            session(['user_id' => $user->id]);
+            session(['user_role' => 'barangay']);
+            
+            return redirect()->intended(route('admin.dashboard'));
+        }
+
+        // Check Resident if BarangayProfile not found
+        $user = Residents::where('email', $credentials['email'])->first();
+        
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Don't use Auth::login() for residents, just use session
+            $request->session()->regenerate();
+            session(['user_id' => $user->id]);
+            session(['user_role' => 'resident']);
+            
+            return redirect()->intended(route('resident.dashboard'));
+        }
+
+        notify()->error('The provided credentials do not match our records.');
+        return back()->onlyInput('email');
     }
 
     public function logout(Request $request)
     {
-        // Logout session invalidation removed as requested
+        // Clear all session data
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
         return redirect('/');
     }
 }
