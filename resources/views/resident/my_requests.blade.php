@@ -88,13 +88,26 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clipboard-list text-indigo-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Community Complaints</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $communityComplaints->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
                         <i class="fas fa-clock text-yellow-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $healthStatusRequests->where('status', 'pending')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $healthStatusRequests->where('status', 'pending')->count() + $communityComplaints->where('status', 'pending')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -120,7 +133,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $healthStatusRequests->where('status', 'resolved')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $healthStatusRequests->where('status', 'resolved')->count() + $communityComplaints->where('status', 'resolved')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -135,6 +148,9 @@
                 </button>
                 <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="blotter">
                     Blotter Reports
+                </button>
+                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="complaint">
+                    Community Complaints
                 </button>
                 <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="document">
                     Document Requests
@@ -159,7 +175,7 @@
     </div>
 
     <!-- Requests List -->
-    @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $healthStatusRequests->isEmpty())
+    @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $healthStatusRequests->isEmpty() && $communityComplaints->isEmpty())
         <div class="text-center py-12">
             <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
@@ -170,6 +186,10 @@
                 <a href="{{ route('resident.request_blotter_report') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Submit Blotter Report
+                </a>
+                <a href="{{ route('resident.request_community_complaint') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    Community Complaint
                 </a>
                 <a href="{{ route('resident.request_document_request') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
@@ -353,6 +373,66 @@
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         <i class="fas fa-check-circle mr-1"></i>
                                         {{ ucfirst($request->status) }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    {{ $request->created_at->diffForHumans() }}
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+
+                        @foreach($communityComplaints as $request)
+                        <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="complaint" data-status="{{ $request->status }}">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-clipboard-list text-indigo-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ $request->title }}</div>
+                                        <div class="text-sm text-gray-500">{{ $request->category }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ Str::limit($request->description, 50) }}</div>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    {{ $request->location ?: 'Location not specified' }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($request->status === 'pending')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Pending
+                                    </span>
+                                @elseif($request->status === 'under_review')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Under Review
+                                    </span>
+                                @elseif($request->status === 'in_progress')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-spinner mr-1"></i>
+                                        In Progress
+                                    </span>
+                                @elseif($request->status === 'resolved')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Resolved
+                                    </span>
+                                @elseif($request->status === 'closed')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        Closed
                                     </span>
                                 @endif
                             </td>

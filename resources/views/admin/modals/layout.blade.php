@@ -347,6 +347,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="{{ route('admin.community-complaints') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.community-complaints*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.community-complaints*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('admin.community-complaints*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Complaints</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('admin.document-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.document-requests*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.document-requests*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-file-signature fa-fw mr-3 {{ request()->routeIs('admin.document-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Document Requests</span>
@@ -498,6 +504,12 @@
                                 <a href="{{ route('admin.blotter-reports') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.blotter-reports*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-file-alt fa-fw mr-3 {{ request()->routeIs('admin.blotter-reports*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Blotter Reports</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.community-complaints') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.community-complaints*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('admin.community-complaints*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Complaints</span>
                                 </a>
                             </li>
                             <li>

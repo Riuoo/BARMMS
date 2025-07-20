@@ -27,12 +27,13 @@ class ResidentController2
         return redirect()->route('landing');
     }
 
-    // Fetch the resident's blotter and document requests for dashboard statistics
+    // Fetch the resident's blotter, document requests, and community complaints for dashboard statistics
     $blotterRequests = BlotterRequest::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
     $documentRequests = DocumentRequest::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
     $healthStatusReports = HealthStatus::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+    $communityComplaints = \App\Models\CommunityComplaint::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
 
-    return view('resident.dashboard', compact('resident', 'blotterRequests', 'documentRequests', 'healthStatusReports'));
+    return view('resident.dashboard', compact('resident', 'blotterRequests', 'documentRequests', 'healthStatusReports', 'communityComplaints'));
     }
 
     /**
@@ -103,6 +104,76 @@ class ResidentController2
     }
 
     /**
+     * Show the form for creating a new community complaint.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function requestCommunityComplaint()
+    {
+        return view('resident.request_community_complaint');
+    }
+
+    /**
+     * Store a newly requested community complaint in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function storeCommunityComplaint(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string',
+            'description' => 'required|string',
+            'location' => 'nullable|string|max:255',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240', // 10MB max per file
+        ]);
+        
+        // Get user ID from session
+        $userId = Session::get('user_id');
+        if (!$userId) {
+            Log::warning('Resident user ID not found in session for complaint submission.');
+            notify()->error('You must be logged in to submit a complaint.');
+            return redirect()->route('landing');
+        }
+        
+        $complaint = new \App\Models\CommunityComplaint();
+        $complaint->user_id = $userId;
+        $complaint->title = $request->title;
+        $complaint->category = $request->category;
+        $complaint->description = $request->description;
+        $complaint->location = $request->location;
+        $complaint->priority = $request->priority;
+        $complaint->status = 'pending';
+        
+        // Handle multiple file uploads
+        if ($request->hasFile('media')) {
+            $mediaFiles = [];
+            foreach ($request->file('media') as $file) {
+                $path = $file->store('complaint_media', 'public');
+                $mediaFiles[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'type' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                ];
+            }
+            $complaint->media = $mediaFiles;
+        }
+        
+        try {
+            $complaint->save();
+            notify()->success('Community complaint submitted successfully.');
+            return redirect()->route('resident.my-requests');
+        } catch (\Exception $e) {
+            Log::error("Error creating community complaint: " . $e->getMessage());
+            notify()->error('Error creating complaint: ' . $e->getMessage());
+            return back();
+        }
+    }
+
+    /**
      * Show the form for creating a new document request.
      *
      * @return \Illuminate\View\View
@@ -147,7 +218,7 @@ class ResidentController2
     }
 
     /**
-     * Display a listing of the resident's blotter and document requests.
+     * Display a listing of the resident's blotter, document requests, and community complaints.
      *
      * @return \Illuminate\View\View
      */
@@ -157,8 +228,9 @@ class ResidentController2
         $blotterRequests = BlotterRequest::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
         $documentRequests = DocumentRequest::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
         $healthStatusRequests = HealthStatus::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+        $communityComplaints = \App\Models\CommunityComplaint::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
 
-        return view('resident.my_requests', compact('blotterRequests', 'documentRequests', 'healthStatusRequests'));
+        return view('resident.my_requests', compact('blotterRequests', 'documentRequests', 'healthStatusRequests', 'communityComplaints'));
     }
     /**
      * Show the health status reporting page (Recommendation).

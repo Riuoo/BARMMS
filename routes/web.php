@@ -17,6 +17,7 @@ use App\Http\Controllers\AdminControllers\UserManagementControllers\BarangayProf
 use App\Http\Controllers\AdminControllers\UserManagementControllers\ResidentController;
 use App\Http\Controllers\AdminControllers\ReportRequestControllers\BlotterReportController;
 use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentRequestController;
+use App\Http\Controllers\AdminControllers\ReportRequestControllers\CommunityComplaintController;
 use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentTemplateController;
 use App\Http\Controllers\AdminControllers\ProjectControllers\AccomplishProjectController;
 use App\Http\Controllers\AdminControllers\NotificationControllers\AdminNotificationController;
@@ -99,6 +100,11 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');
     Route::post('/blotter-reports', [BlotterReportController::class, 'store'])->name('admin.blotter-reports.store');
     Route::get('/search/residents', [BlotterReportController::class, 'searchResidents'])->name('admin.search.residents');
+    
+    // Community Complaints route
+    Route::get('/community-complaints', [CommunityComplaintController::class, 'index'])->name('admin.community-complaints');
+    Route::get('/community-complaints/{id}/details', [CommunityComplaintController::class, 'getDetails'])->name('admin.community-complaints.details');
+    Route::post('/community-complaints/{id}/update-status', [CommunityComplaintController::class, 'updateStatus'])->name('admin.community-complaints.update-status');
     
     // Document Requests route
     Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
@@ -226,6 +232,9 @@ Route::middleware([\App\Http\Middleware\CheckResidentRole::class])->prefix('resi
     // Blotter Requests
     Route::get('/request_blotter_report', [ResidentController2::class, 'requestBlotter'])->name('resident.request_blotter_report');
     Route::post('/request_blotter_report', [ResidentController2::class, 'storeBlotter'])->name('resident.request_blotter_report');
+    // Community Complaints
+    Route::get('/request_community_complaint', [ResidentController2::class, 'requestCommunityComplaint'])->name('resident.request_community_complaint');
+    Route::post('/request_community_complaint', [ResidentController2::class, 'storeCommunityComplaint'])->name('resident.request_community_complaint');
     // Document Requests
     Route::get('/request_document_request', [ResidentController2::class, 'requestDocument'])->name('resident.request_document_request');
     Route::post('/request_document_request', [ResidentController2::class, 'storeDocument'])->name('resident.request_document_request');

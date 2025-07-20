@@ -3,61 +3,259 @@
 @section('title', 'Profile')
 
 @section('content')
-<div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
-    <h1 class="text-2xl font-bold mb-6">Profile</h1>
-
-    @if(session('success'))
-        <div class="mb-4 p-3 bg-green-100 text-green-700 rounded" role="alert">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded" role="alert">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <!-- Display user info -->
-    <div class="mb-8 space-y-4">
-        <div>
-            <label class="block font-semibold mb-1">Name</label>
-            <input type="text" value="{{ $currentUser->name }}" disabled
-                class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" />
-        </div>
-        <div>
-            <label class="block font-semibold mb-1">Email</label>
-            <input type="email" value="{{ $currentUser->email }}" disabled
-                class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" />
-        </div>
-        <div>
-            <label class="block font-semibold mb-1">Address</label>
-            <input type="text" value="{{ $currentUser->address ?? 'N/A' }}" disabled
-                class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" />
+<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
+                <p class="text-gray-600">Manage your personal information and account settings</p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Change Password Form -->
-    <form method="POST" action="{{ route('admin.profile.update') }}">
-        @csrf
-        @method('PUT')
-        <div class="mb-4">
-            <label for="password" class="block font-semibold mb-1">New Password (leave blank to keep current)</label>
-            <input type="password" id="password" name="password" autocomplete="new-password"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-800">{{ session('success') }}</p>
+                </div>
+            </div>
         </div>
-        <div class="mb-4">
-            <label for="password_confirmation" class="block font-semibold mb-1">Confirm New Password</label>
-            <input type="password" id="password_confirmation" name="password_confirmation" autocomplete="new-password"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-800">{{ session('error') }}</p>
+                </div>
+            </div>
         </div>
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-            Change Password
-        </button>
-    </form>
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Personal Information Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-green-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Personal Information</h2>
+                    <p class="text-sm text-gray-500">Your account details</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user mr-2 text-gray-400"></i>
+                        Full Name
+                    </label>
+                    <input type="text" 
+                           value="{{ $currentUser->name }}" 
+                           disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                    <p class="mt-1 text-xs text-gray-500">Your registered name in the system</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-envelope mr-2 text-gray-400"></i>
+                        Email Address
+                    </label>
+                    <input type="email" 
+                           value="{{ $currentUser->email }}" 
+                           disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                    <p class="mt-1 text-xs text-gray-500">Your registered email address</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
+                        Address
+                    </label>
+                    <input type="text" 
+                           value="{{ $currentUser->address ?? 'Not provided' }}" 
+                           disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                    <p class="mt-1 text-xs text-gray-500">Your registered address</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-calendar mr-2 text-gray-400"></i>
+                        Member Since
+                    </label>
+                    <input type="text" 
+                           value="{{ $currentUser->created_at ? $currentUser->created_at->format('F d, Y') : 'N/A' }}" 
+                           disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                    <p class="mt-1 text-xs text-gray-500">Date when you registered</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Password Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-lock text-blue-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Change Password</h2>
+                    <p class="text-sm text-gray-500">Update your account password</p>
+                </div>
+            </div>
+
+            @if ($errors->any())
+                <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Password update failed</h3>
+                            <div class="mt-1 text-sm text-red-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('admin.profile.update') }}" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-key mr-2 text-gray-400"></i>
+                        New Password
+                    </label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           autocomplete="new-password"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
+                           placeholder="Enter new password" />
+                    <p class="mt-1 text-xs text-gray-500">Leave blank to keep your current password</p>
+                </div>
+
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-key mr-2 text-gray-400"></i>
+                        Confirm New Password
+                    </label>
+                    <input type="password" 
+                           id="password_confirmation" 
+                           name="password_confirmation" 
+                           autocomplete="new-password"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
+                           placeholder="Confirm new password" />
+                    <p class="mt-1 text-xs text-gray-500">Re-enter your new password to confirm</p>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" 
+                            class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                        <i class="fas fa-save mr-2"></i>
+                        Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Account Information Card -->
+    <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-info-circle text-purple-600 text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <h2 class="text-xl font-semibold text-gray-900">Account Information</h2>
+                <p class="text-sm text-gray-500">Important details about your account</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Account Status</h3>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">Active</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Your account is currently active and in good standing</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Last Login</h3>
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-600">{{ now()->format('M d, Y H:i') }}</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Your most recent login activity</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Password Last Changed</h3>
+                <div class="flex items-center">
+                    <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-600">Not available</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">When you last updated your password</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Account Type</h3>
+                <div class="flex items-center">
+                    <i class="fas fa-user-tag text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-600">Administrator</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Your role in the barangay system</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Information -->
+    <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-shield-alt text-yellow-400"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-yellow-800">Security Tips</h3>
+                <div class="mt-2 text-sm text-yellow-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Use a strong password with at least 8 characters</li>
+                        <li>Include a mix of letters, numbers, and special characters</li>
+                        <li>Never share your password with anyone</li>
+                        <li>Log out when using shared computers</li>
+                        <li>Contact system administrators if you suspect unauthorized access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
