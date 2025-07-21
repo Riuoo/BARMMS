@@ -199,13 +199,10 @@
                     <tbody class="bg-white divide-y divide-gray-200" id="documentTableBody">
                         @foreach($documentRequests as $request)
                         <tr class="document-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ $request->user->name ?? 'N/A' }}</div>
-                                    </div>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-row items-center gap-2">
+                                    <!-- Optional avatar/icon here -->
+                                    <span class="text-sm font-medium text-gray-900">{{ $request->user->name ?? 'N/A' }}</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -247,35 +244,29 @@
                                 <div class="text-sm text-gray-900"><i class="fas fa-calendar mr-1"></i>{{ $request->created_at->format('M d, Y') }}</div>   
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex flex-wrap items-center gap-2">
+                                <div class="flex flex-nowrap items-center gap-2">
                                     @if($request->status === 'pending')
-                                        <div class="inline-block">
-                                            <form action="{{ route('admin.document-requests.approve', $request->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                                    <i class="fas fa-check mr-1"></i>
-                                                    Approve
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <form action="{{ route('admin.document-requests.approve', $request->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                                <i class="fas fa-check mr-1"></i>
+                                                Approve
+                                            </button>
+                                        </form>
                                     @endif
                                     @if($request->status === 'approved')
-                                        <div class="inline-block">
-                                            <a href="{{ route('admin.document-requests.pdf', $request->id) }}" target="_blank"
-                                               class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                                <i class="fas fa-file-pdf mr-1"></i>
-                                                Generate PDF
-                                            </a>
-                                        </div>
-                                        <div class="inline-block">
-                                            <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                                                    <i class="fas fa-check-circle mr-1"></i>
-                                                    Complete
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <a href="{{ route('admin.document-requests.pdf', $request->id) }}" target="_blank"
+                                           class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                            <i class="fas fa-file-pdf mr-1"></i>
+                                            Generate PDF
+                                        </a>
+                                        <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Complete
+                                            </button>
+                                        </form>
                                     @endif
                                 </div>
                             </td>

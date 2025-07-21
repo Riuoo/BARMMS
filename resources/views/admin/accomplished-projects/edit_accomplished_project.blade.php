@@ -10,10 +10,6 @@
             <h1 class="text-3xl font-bold text-gray-900">Edit Accomplished Project</h1>
             <p class="text-gray-600 mt-2">Update project information and details</p>
         </div>
-        <a href="{{ route('admin.accomplished-projects') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i>
-            Back to Projects
-        </a>
     </div>
 
     <!-- Form -->
