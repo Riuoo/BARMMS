@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('patient_records', function (Blueprint $table) {
@@ -27,18 +24,14 @@ return new class extends Migration
             $table->decimal('weight_kg', 5, 2)->nullable();
             $table->decimal('bmi', 4, 2)->nullable();
             $table->text('current_medications')->nullable();
-            $table->text('lifestyle_factors')->nullable(); // smoking, alcohol, exercise
+            $table->text('lifestyle_factors')->nullable();
             $table->enum('risk_level', ['Low', 'Medium', 'High', 'Critical'])->default('Low');
             $table->text('notes')->nullable();
             $table->timestamps();
-
             $table->foreign('resident_id')->references('id')->on('residents')->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('patient_records');

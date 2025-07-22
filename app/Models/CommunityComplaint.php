@@ -15,12 +15,9 @@ class CommunityComplaint extends Model
         'category',
         'description',
         'location',
-        'priority',
         'status',
         'media',
         'is_read',
-        'admin_notes',
-        'resolution_notes',
         'assigned_at',
         'resolved_at',
     ];
@@ -62,20 +59,6 @@ class CommunityComplaint extends Model
     }
 
     /**
-     * Get priority color for UI
-     */
-    public function getPriorityColorAttribute()
-    {
-        return match($this->priority) {
-            'urgent' => 'red',
-            'high' => 'orange',
-            'medium' => 'yellow',
-            'low' => 'green',
-            default => 'gray'
-        };
-    }
-
-    /**
      * Get status color for UI
      */
     public function getStatusColorAttribute()
@@ -96,13 +79,5 @@ class CommunityComplaint extends Model
     public function scopeUnread($query)
     {
         return $query->where('is_read', false);
-    }
-
-    /**
-     * Scope for urgent complaints
-     */
-    public function scopeUrgent($query)
-    {
-        return $query->where('priority', 'urgent');
     }
 } 

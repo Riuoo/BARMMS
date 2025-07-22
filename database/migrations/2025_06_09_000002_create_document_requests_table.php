@@ -14,6 +14,7 @@ class CreateDocumentRequestsTable extends Migration
             $table->string('document_type');
             $table->text('description')->nullable();
             $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
+            $table->boolean('is_read')->default(false);
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('residents')->onDelete('cascade');

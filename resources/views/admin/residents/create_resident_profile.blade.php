@@ -3,61 +3,63 @@
 @section('title', 'Add New Resident')
 
 @section('content')
-    <div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
-        <h1 class="text-2xl font-bold mb-6">Add New Resident</h1>
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8">
+        <h1 class="text-3xl font-semibold text-gray-800 mb-8 text-center">Add New Resident</h1>
 
         @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {{ session('success') }}
+            <div class="mb-6">
+                <div class="bg-green-50 border border-green-400 text-green-700 px-4 py-3 rounded flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                    <span>{{ session('success') }}</span>
+                </div>
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+            <div class="mb-6">
+                <div class="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    <ul class="list-disc pl-5 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
         @endif
 
-        <form action="{{ route('admin.residents.store') }}" method="POST">
+        <form action="{{ route('admin.residents.store') }}" method="POST" class="space-y-6">
             @csrf
 
-            <div class="mb-4">
-                <label for="name" class="block font-medium mb-1">Name</label>
-                <input type="text" id="name" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input type="text" id="name" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
             </div>
 
-            <div class="mb-4">
-                <label for="email" class="block font-medium mb-1">Email</label>
-                <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
             </div>
 
-            <div class="mb-4">
-                <label for="address" class="block font-medium mb-1">Address</label>
-                <input type="text" id="address" name="address" value="{{ old('address') }}" required class="w-full border border-gray-300 rounded px-3 py-2">
+            <div>
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <input type="text" id="address" name="address" value="{{ old('address') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
             </div>
 
             <!-- Demographic Information -->
-            <div class="mb-6">
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
                 <h3 class="text-lg font-semibold mb-4 text-gray-700">Demographic Information</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="mb-4">
-                        <label for="age" class="block font-medium mb-1">Age</label>
-                        <input type="number" id="age" name="age" value="{{ old('age') }}" min="1" max="120" class="w-full border border-gray-300 rounded px-3 py-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                        <input type="number" id="age" name="age" value="{{ old('age') }}" min="1" max="120" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
                     </div>
-
-                    <div class="mb-4">
-                        <label for="family_size" class="block font-medium mb-1">Family Size</label>
-                        <input type="number" id="family_size" name="family_size" value="{{ old('family_size') }}" min="1" max="20" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <div>
+                        <label for="family_size" class="block text-sm font-medium text-gray-700 mb-1">Family Size</label>
+                        <input type="number" id="family_size" name="family_size" value="{{ old('family_size') }}" min="1" max="20" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
                     </div>
-
-                    <div class="mb-4">
-                        <label for="education_level" class="block font-medium mb-1">Education Level</label>
-                        <select id="education_level" name="education_level" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <div>
+                        <label for="education_level" class="block text-sm font-medium text-gray-700 mb-1">Education Level</label>
+                        <select id="education_level" name="education_level" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
                             <option value="">Select Education Level</option>
                             <option value="No Education" {{ old('education_level') == 'No Education' ? 'selected' : '' }}>No Education</option>
                             <option value="Elementary" {{ old('education_level') == 'Elementary' ? 'selected' : '' }}>Elementary</option>
@@ -67,10 +69,9 @@
                             <option value="Post Graduate" {{ old('education_level') == 'Post Graduate' ? 'selected' : '' }}>Post Graduate</option>
                         </select>
                     </div>
-
-                    <div class="mb-4">
-                        <label for="income_level" class="block font-medium mb-1">Income Level</label>
-                        <select id="income_level" name="income_level" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <div>
+                        <label for="income_level" class="block text-sm font-medium text-gray-700 mb-1">Income Level</label>
+                        <select id="income_level" name="income_level" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
                             <option value="">Select Income Level</option>
                             <option value="Low" {{ old('income_level') == 'Low' ? 'selected' : '' }}>Low</option>
                             <option value="Lower Middle" {{ old('income_level') == 'Lower Middle' ? 'selected' : '' }}>Lower Middle</option>
@@ -79,10 +80,9 @@
                             <option value="High" {{ old('income_level') == 'High' ? 'selected' : '' }}>High</option>
                         </select>
                     </div>
-
-                    <div class="mb-4">
-                        <label for="employment_status" class="block font-medium mb-1">Employment Status</label>
-                        <select id="employment_status" name="employment_status" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <div>
+                        <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
+                        <select id="employment_status" name="employment_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
                             <option value="">Select Employment Status</option>
                             <option value="Unemployed" {{ old('employment_status') == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
                             <option value="Part-time" {{ old('employment_status') == 'Part-time' ? 'selected' : '' }}>Part-time</option>
@@ -90,10 +90,9 @@
                             <option value="Full-time" {{ old('employment_status') == 'Full-time' ? 'selected' : '' }}>Full-time</option>
                         </select>
                     </div>
-
-                    <div class="mb-4">
-                        <label for="health_status" class="block font-medium mb-1">Health Status</label>
-                        <select id="health_status" name="health_status" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <div>
+                        <label for="health_status" class="block text-sm font-medium text-gray-700 mb-1">Health Status</label>
+                        <select id="health_status" name="health_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
                             <option value="">Select Health Status</option>
                             <option value="Critical" {{ old('health_status') == 'Critical' ? 'selected' : '' }}>Critical</option>
                             <option value="Poor" {{ old('health_status') == 'Poor' ? 'selected' : '' }}>Poor</option>
@@ -105,19 +104,20 @@
                 </div>
             </div>
 
-            <div class="mb-4">
-                <label for="password" class="block font-medium mb-1">Password</label>
-                <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded px-3 py-2" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
             </div>
 
-            <div class="mb-4">
-                <label for="password_confirmation" class="block font-medium mb-1">Confirm Password</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded px-3 py-2" required>
-            </div>
-
-            <div class="flex justify-end space-x-2">
-                <a href="{{ route('admin.residents') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</a>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Resident</button>
+            <div class="flex justify-between mt-8">
+                <a href="{{ route('admin.residents') }}" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Cancel</a>
+                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition">Add Resident</button>
             </div>
         </form>
     </div>

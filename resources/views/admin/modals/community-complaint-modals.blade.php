@@ -34,8 +34,9 @@
                 </button>
             </div>
             
-            <form id="updateStatusForm" method="POST">
+            <form id="updateStatusForm" method="POST" action="">
                 @csrf
+                @method('POST')
                 <input type="hidden" id="updateComplaintId" name="complaint_id">
                 
                 <div class="space-y-4">
@@ -52,24 +53,6 @@
                             <option value="resolved">Resolved</option>
                             <option value="closed">Closed</option>
                         </select>
-                    </div>
-                    
-                    <div>
-                        <label for="admin_notes" class="block text-sm font-medium text-gray-700 mb-2">
-                            Admin Notes (Optional)
-                        </label>
-                        <textarea id="admin_notes" name="admin_notes" rows="3" 
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                  placeholder="Add any internal notes or comments..."></textarea>
-                    </div>
-                    
-                    <div>
-                        <label for="resolution_notes" class="block text-sm font-medium text-gray-700 mb-2">
-                            Resolution Notes (Optional)
-                        </label>
-                        <textarea id="resolution_notes" name="resolution_notes" rows="3" 
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                  placeholder="Describe how the issue was resolved..."></textarea>
                     </div>
                 </div>
                 
@@ -192,4 +175,35 @@ document.addEventListener('keydown', function(event) {
 // Debug: Log when script loads
 console.log('Community complaint modals script loaded');
 console.log('openUpdateStatusModal function available:', typeof openUpdateStatusModal);
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add AJAX form submit for update status
+    const updateStatusForm = document.getElementById('updateStatusForm');
+    if (updateStatusForm) {
+        updateStatusForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const action = form.action;
+            fetch(action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': formData.get('_token'),
+                },
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .catch(error => {
+                alert('Failed to update status. Please try again.');
+            });
+        });
+    }
+});
 </script> 

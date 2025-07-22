@@ -16,6 +16,7 @@ class CreateAccountRequestsTable extends Migration
             $table->unsignedBigInteger('user_id')->nullable()->index();
             $table->string('email')->unique();
             $table->string('status')->default('pending');
+            $table->boolean('is_read')->default(false);
             $table->string('token')->nullable();
             $table->timestamps();
 

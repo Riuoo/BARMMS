@@ -106,6 +106,8 @@
                         <p class="mt-1 text-sm text-gray-500">Choose the most appropriate category for your complaint</p>
                     </div>
 
+                    {{-- Remove priority dropdown --}}
+                    {{--
                     <div>
                         <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">
                             Priority Level <span class="text-red-500">*</span>
@@ -122,6 +124,7 @@
                         </select>
                         <p class="mt-1 text-sm text-gray-500">Indicate how urgent this issue is</p>
                     </div>
+                    --}}
                 </div>
             </div>
 

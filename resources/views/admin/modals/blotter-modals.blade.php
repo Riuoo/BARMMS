@@ -40,7 +40,7 @@
                 </button>
             </div>
             
-            <form id="approveBlotterForm" method="POST">
+            <form id="approveBlotterForm" method="POST" onsubmit="return approveAndDownload(event)">
                 @csrf
                 
                 <div class="mb-4">
@@ -83,7 +83,7 @@
                 </button>
             </div>
             
-            <form id="newSummonForm" method="POST">
+            <form id="newSummonForm" method="POST" onsubmit="return summonAndDownload(event)">
                 @csrf
                 
                 <div class="mb-4">
@@ -247,6 +247,84 @@ function viewMedia(url) {
 
 function closeMediaViewer() {
     document.getElementById('mediaViewerModal').classList.add('hidden');
+}
+
+function refreshToBlotterReports() {
+    location.reload();
+}
+
+function approveAndDownload(event) {
+    event.preventDefault();
+    const form = event.target;
+    const action = form.action;
+    const blotterIdMatch = action.match(/blotter-reports\/(\d+)\/approve/);
+    const blotterId = blotterIdMatch ? blotterIdMatch[1] : '';
+    const formData = new FormData(form);
+    fetch(action, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/pdf',
+            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `blotter_approve_${blotterId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setTimeout(() => location.reload(), 1000);
+    })
+    .catch(error => {
+        alert('Error approving and downloading PDF.');
+        console.error(error);
+    });
+    return false;
+}
+
+function summonAndDownload(event) {
+    event.preventDefault();
+    const form = event.target;
+    const action = form.action;
+    const blotterIdMatch = action.match(/blotter-reports\/(\d+)\/new-summons/);
+    const blotterId = blotterIdMatch ? blotterIdMatch[1] : '';
+    const formData = new FormData(form);
+    fetch(action, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/pdf',
+            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `blotter_summon_${blotterId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setTimeout(() => location.reload(), 1000);
+    })
+    .catch(error => {
+        alert('Error generating summon and downloading PDF.');
+        console.error(error);
+    });
+    return false;
 }
 
 // Close modals when clicking outside

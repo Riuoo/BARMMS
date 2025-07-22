@@ -15,7 +15,8 @@ class CreateBlotterRequestsTable extends Migration
             $table->string('type');
             $table->text('description');
             $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
-            $table->string('media')->nullable()->comment('Path to image or video evidence');
+            $table->boolean('is_read')->default(false);
+            $table->json('media')->nullable()->comment('Path(s) to image or video evidence');
             $table->timestamps();
             $table->dateTime('approved_at')->nullable();
             $table->dateTime('summon_date')->nullable();

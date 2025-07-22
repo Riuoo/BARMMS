@@ -57,9 +57,6 @@
                 <button class="filter-btn active px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800" data-filter="all">
                     All Complaints
                 </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="urgent">
-                    Urgent
-                </button>
                 <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="pending">
                     Pending
                 </button>
@@ -77,7 +74,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 lg:gap-4 mb-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -107,13 +104,26 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+                    <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-search text-orange-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Urgent</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['urgent'] }}</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Under Review</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['under_review'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center">
+                        <i class="fas fa-tasks text-yellow-700 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">In Progress</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['in_progress'] }}</p>
                 </div>
             </div>
         </div>
@@ -127,6 +137,19 @@
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Resolved</p>
                     <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['resolved'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-times-circle text-purple-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Closed</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['closed'] }}</p>
                 </div>
             </div>
         </div>
@@ -150,12 +173,6 @@
                                 <div class="flex items-center">
                                     <i class="fas fa-tag mr-2"></i>
                                     Category
-                                </div>
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    Priority
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -186,7 +203,7 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($complaints as $complaint)
-                        <tr class="complaint-item hover:bg-gray-50 transition duration-150" data-status="{{ $complaint->status }}" data-priority="{{ $complaint->priority }}">
+                        <tr class="complaint-item hover:bg-gray-50 transition duration-150" data-status="{{ $complaint->status }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0">
@@ -198,8 +215,8 @@
                                                 {{ Str::limit($complaint->description, 50) }}
                                             </div>
                                             @if(strlen($complaint->description) > 50)
-                                                <button onclick="showFullDescription('{{ addslashes($complaint->description) }}', '{{ $complaint->title }}')" 
-                                                        class="text-xs text-blue-600 hover:text-blue-800 underline mt-1">
+                                                <button onclick="showFullDescription('{{ addslashes($complaint->description) }}', '{{ $complaint->title }}')"
+                                                        class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 md:hidden">
                                                     View Full
                                                 </button>
                                             @endif
@@ -216,20 +233,6 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                     <i class="fas fa-tag mr-1"></i>
                                     {{ $complaint->category }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $priorityColors = [
-                                        'urgent' => 'bg-red-100 text-red-800',
-                                        'high' => 'bg-orange-100 text-orange-800',
-                                        'medium' => 'bg-yellow-100 text-yellow-800',
-                                        'low' => 'bg-green-100 text-green-800'
-                                    ];
-                                @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $priorityColors[$complaint->priority] }}">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                                    {{ ucfirst($complaint->priority) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
@@ -255,13 +258,8 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <button onclick="viewComplaintDetails({{ $complaint->id }})" 
-                                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
-                                        <i class="fas fa-eye mr-1"></i>
-                                        View
-                                    </button>
                                     @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
-                                        <button onclick="openUpdateStatusModal({{ $complaint->id }})" 
+                                        <button onclick="openUpdateStatusModal({{ $complaint->id }})"
                                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                                             <i class="fas fa-edit mr-1"></i>
                                             Update
@@ -279,7 +277,7 @@
         <!-- Mobile Cards (hidden on desktop) -->
         <div class="md:hidden space-y-4">
             @foreach($complaints as $complaint)
-            <div class="complaint-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $complaint->status }}" data-priority="{{ $complaint->priority }}">
+            <div class="complaint-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $complaint->status }}">
                 <!-- Header Section -->
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center flex-1 min-w-0">
@@ -320,32 +318,24 @@
                             <span class="description-short">{{ Str::limit($complaint->description, 80) }}</span>
                             @if(strlen($complaint->description) > 80)
                                 <span class="description-full hidden">{{ $complaint->description }}</span>
-                                <button onclick="toggleDescription({{ $complaint->id }})" 
+                                <button onclick="toggleDescription({{ $complaint->id }})"
                                         class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
                                     Read More
+                                </button>
+                                <button onclick="showFullDescription('{{ addslashes($complaint->description) }}', '{{ $complaint->title }}')"
+                                        class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 md:hidden">
+                                    View Full
                                 </button>
                             @endif
                         </p>
                     </div>
                 </div>
 
-                <!-- Category and Priority Section -->
+                <!-- Category Section -->
                 <div class="mb-3 flex flex-wrap gap-2">
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                         <i class="fas fa-tag mr-1"></i>
                         {{ $complaint->category }}
-                    </span>
-                    @php
-                        $priorityColors = [
-                            'urgent' => 'bg-red-100 text-red-800',
-                            'high' => 'bg-orange-100 text-orange-800',
-                            'medium' => 'bg-yellow-100 text-yellow-800',
-                            'low' => 'bg-green-100 text-green-800'
-                        ];
-                    @endphp
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $priorityColors[$complaint->priority] }}">
-                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                        {{ ucfirst($complaint->priority) }}
                     </span>
                 </div>
 
@@ -361,14 +351,13 @@
 
                 <!-- Actions Section -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                    <button onclick="viewComplaintDetails({{ $complaint->id }})" 
-                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
+                    <button onclick="viewComplaintDetails({{ $complaint->id }})"
+                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200 md:hidden">
                         <i class="fas fa-eye mr-1"></i>
                         View Details
                     </button>
-                    
                     @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
-                        <button onclick="openUpdateStatusModal({{ $complaint->id }})" 
+                        <button onclick="openUpdateStatusModal({{ $complaint->id }})"
                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
                             <i class="fas fa-edit mr-1"></i>
                             Update
@@ -417,17 +406,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const allItems = [...complaintItems, ...complaintCards];
             allItems.forEach(item => {
                 const status = item.dataset.status;
-                const priority = item.dataset.priority;
-                
                 let show = false;
                 if (filter === 'all') {
-                    show = true;
-                } else if (filter === 'urgent' && priority === 'urgent') {
                     show = true;
                 } else if (status === filter) {
                     show = true;
                 }
-                
                 item.style.display = show ? '' : 'none';
             });
         });
@@ -529,28 +513,18 @@ function viewComplaintDetails(id) {
                         <h4 class="font-medium text-gray-900 mb-2">Title</h4>
                         <p class="text-gray-600">${data.title}</p>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Category</h4>
-                            <p class="text-gray-600">${data.category}</p>
-                        </div>
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Priority</h4>
-                            <p class="text-gray-600">${data.priority.charAt(0).toUpperCase() + data.priority.slice(1)}</p>
-                        </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Category</h4>
+                        <p class="text-gray-600">${data.category}</p>
                     </div>
-                    
                     <div>
                         <h4 class="font-medium text-gray-900 mb-2">Location</h4>
                         <p class="text-gray-600">${data.location || 'Not specified'}</p>
                     </div>
-                    
                     <div>
                         <h4 class="font-medium text-gray-900 mb-2">Description</h4>
                         <p class="text-gray-600">${data.description}</p>
                     </div>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="font-medium text-gray-900 mb-2">Submitted By</h4>
@@ -561,7 +535,6 @@ function viewComplaintDetails(id) {
                             <p class="text-gray-600">${data.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
                         </div>
                     </div>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <h4 class="font-medium text-gray-900 mb-2">Submitted</h4>
@@ -576,21 +549,6 @@ function viewComplaintDetails(id) {
                             <p class="text-gray-600">${data.resolved_at}</p>
                         </div>
                     </div>
-                    
-                    ${data.admin_notes ? `
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Admin Notes</h4>
-                            <p class="text-gray-600">${data.admin_notes}</p>
-                        </div>
-                    ` : ''}
-                    
-                    ${data.resolution_notes ? `
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Resolution Notes</h4>
-                            <p class="text-gray-600">${data.resolution_notes}</p>
-                        </div>
-                    ` : ''}
-                    
                     ${data.media_files && data.media_files.length > 0 ? `
                         <div>
                             <h4 class="font-medium text-gray-900 mb-2">Attached Files (${data.media_files.length})</h4>

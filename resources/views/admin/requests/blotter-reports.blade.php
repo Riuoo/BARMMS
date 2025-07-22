@@ -235,7 +235,7 @@
                                         {{ Str::limit($request->description, 50) }}
                                     </div>
                                     @if(strlen($request->description) > 50)
-                                        <button onclick="showFullDescription('{{ addslashes($request->description) }}', '{{ $request->user->name ?? 'N/A' }}')" 
+                                        <button onclick="showFullDescription({{ json_encode($request->description) }}, {{ json_encode($request->user->name ?? 'N/A') }})" 
                                                 class="text-xs text-blue-600 hover:text-blue-800 underline mt-1">
                                             View Full
                                         </button>
@@ -312,9 +312,9 @@
                                             <i class="fas fa-file-alt mr-1"></i>
                                             New Summon
                                         </button>
-                                        <form action="{{ route('admin.blotter-reports.complete', $request->id) }}" method="POST" class="inline">
+                                        <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
                                             @csrf
-                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
                                                 <i class="fas fa-check-circle mr-1"></i>
                                                 Complete
                                             </button>
@@ -434,7 +434,7 @@
                             <i class="fas fa-file-alt mr-1"></i>
                             New Summon
                         </button>
-                        <form action="{{ route('admin.blotter-reports.complete', $request->id) }}" method="POST" class="inline">
+                        <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
                             @csrf
                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
                                 <i class="fas fa-check-circle mr-1"></i>
@@ -668,5 +668,39 @@ function formatFileSize(bytes) {
 }
 
 // Modal functions are defined in the partial file (admin.modals.blotter-modals)
+
+function completeAndDownload(event, blotterId) {
+    event.preventDefault();
+    // Find the CSRF token for this form
+    const form = event.target;
+    const csrfToken = form.querySelector('input[name="_token"]').value;
+    fetch(`/admin/blotter-reports/${blotterId}/complete`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/pdf'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `blotter_report_${blotterId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setTimeout(() => location.reload(), 1000);
+    })
+    .catch(error => {
+        alert('Error completing and downloading PDF.');
+        console.error(error);
+    });
+    return false;
+}
 </script>
 @endsection

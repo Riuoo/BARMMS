@@ -19,7 +19,7 @@ class CommunityComplaintController
             'under_review' => $complaints->where('status', 'under_review')->count(),
             'in_progress' => $complaints->where('status', 'in_progress')->count(),
             'resolved' => $complaints->where('status', 'resolved')->count(),
-            'urgent' => $complaints->where('priority', 'urgent')->count(),
+            'closed' => $complaints->where('status', 'closed')->count(),
             'unread' => $complaints->where('is_read', false)->count(),
         ];
         
@@ -56,10 +56,7 @@ class CommunityComplaintController
                 'category' => $complaint->category,
                 'description' => $complaint->description,
                 'location' => $complaint->location,
-                'priority' => $complaint->priority,
                 'status' => $complaint->status,
-                'admin_notes' => $complaint->admin_notes,
-                'resolution_notes' => $complaint->resolution_notes,
                 'created_at' => $complaint->created_at->format('M d, Y \a\t g:i A'),
                 'assigned_at' => $complaint->assigned_at ? $complaint->assigned_at->format('M d, Y \a\t g:i A') : 'Not assigned',
                 'resolved_at' => $complaint->resolved_at ? $complaint->resolved_at->format('M d, Y \a\t g:i A') : 'Not resolved',
@@ -75,22 +72,12 @@ class CommunityComplaintController
     {
         $validated = $request->validate([
             'status' => 'required|in:pending,under_review,in_progress,resolved,closed',
-            'admin_notes' => 'nullable|string',
-            'resolution_notes' => 'nullable|string',
         ]);
 
         try {
             $complaint = CommunityComplaint::findOrFail($id);
             
             $complaint->status = $validated['status'];
-            
-            if ($validated['admin_notes']) {
-                $complaint->admin_notes = $validated['admin_notes'];
-            }
-            
-            if ($validated['resolution_notes']) {
-                $complaint->resolution_notes = $validated['resolution_notes'];
-            }
             
             // Set timestamps based on status
             if ($validated['status'] === 'under_review' && !$complaint->assigned_at) {

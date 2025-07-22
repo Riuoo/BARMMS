@@ -126,7 +126,6 @@ class ResidentController2
             'category' => 'required|string',
             'description' => 'required|string',
             'location' => 'nullable|string|max:255',
-            'priority' => 'required|in:low,medium,high,urgent',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240', // 10MB max per file
         ]);
         
@@ -144,7 +143,6 @@ class ResidentController2
         $complaint->category = $request->category;
         $complaint->description = $request->description;
         $complaint->location = $request->location;
-        $complaint->priority = $request->priority;
         $complaint->status = 'pending';
         
         // Handle multiple file uploads

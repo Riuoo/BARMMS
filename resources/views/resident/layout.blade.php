@@ -18,7 +18,7 @@
     @include('notify::components.notify')
 
     <!-- Header -->
-    <header class="bg-white text-gray-900 flex items-center justify-between p-4 shadow-md">
+    <header class="fixed top-0 left-0 w-full bg-white text-gray-900 flex items-center justify-between p-4 shadow-md z-50">
         <div class="flex items-center space-x-4">
             <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-gray-900 focus:outline-none mr-2" aria-label="Toggle sidebar">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -74,10 +74,10 @@
         aria-hidden="true"
     ></div>
 
-    <div class="flex flex-grow overflow-x-hidden min-h-[calc(100vh-4rem)]">
+    <div class="flex flex-grow overflow-x-hidden min-h-[calc(100vh-4rem)] md:ml-[17rem] pt-16">
         <!-- Desktop Sidebar -->
-            <aside class="hidden md:block min-w-[17rem] text-gray-900 flex flex-col pt-5 px-1" aria-label="Sidebar navigation">
-                <nav class="flex flex-col overflow-y-auto max-h-[calc(100vh-4rem)] px-2">
+            <aside class="hidden md:block fixed left-0 top-16 h-[calc(100vh-4rem)] min-w-[17rem] w-[17rem] bg-white shadow z-40 border-r border-gray-200 overflow-y-auto" aria-label="Sidebar navigation">
+                <nav class="flex flex-col max-h-full px-2 pt-10">
                     @php
                         function isActiveResidentRoute($pattern) {
                             return request()->routeIs($pattern) ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300';
@@ -159,6 +159,7 @@
                             </li>
                         </ul>
                     </section>
+                    <div class="flex-shrink-0 h-12"></div>
                 </nav>
             </aside>
 
