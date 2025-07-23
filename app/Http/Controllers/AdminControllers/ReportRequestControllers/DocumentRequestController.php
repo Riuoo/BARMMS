@@ -13,7 +13,10 @@ class DocumentRequestController
     public function documentRequest()
     {
         // Eager load the user relationship
-        $documentRequests = DocumentRequest::with('user')->get();
+        $documentRequests = DocumentRequest::with('user')
+            ->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
+            ->orderByDesc('created_at')
+            ->get();
         return view('admin.requests.document-requests', compact('documentRequests'));
     }
 
@@ -35,22 +38,27 @@ class DocumentRequestController
         }
     }
 
+    // Add this method to process placeholders in the HTML template
+    protected function processTemplatePlaceholders($html, $documentRequest, $adminUser)
+    {
+        $replacements = [
+            '{{user_name}}' => $documentRequest->user ? $documentRequest->user->name : '',
+            '{{document_type}}' => $documentRequest->document_type,
+            '{{purpose}}' => $documentRequest->description,
+            '{{admin_name}}' => $adminUser ? $adminUser->name : '',
+            // Add more as needed
+        ];
+        return strtr($html, $replacements);
+    }
+
     public function approve($id)
     {
         try {
-            $documentRequest = DocumentRequest::findOrFail($id);
+            $documentRequest = DocumentRequest::with('user')->findOrFail($id);
 
             if ($documentRequest->status !== 'pending') {
                 notify()->error('Document request already processed.');
                 return redirect()->back();
-            }
-
-            $documentRequest->status = 'approved';
-            $documentRequest->save();
-
-            // Notify the resident that their document is ready for pickup
-            if ($documentRequest->user) {
-                $documentRequest->user->notify(new \App\Notifications\DocumentRequestApproved());
             }
 
             // Get admin user data from session
@@ -59,45 +67,47 @@ class DocumentRequestController
                 $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
             }
 
-            // Log the document request for debugging
-            Log::info('Document request details (approve): ' . json_encode([
-                'id' => $documentRequest->id,
-                'document_type' => $documentRequest->document_type,
-                'status' => $documentRequest->status
-            ]));
+            // Fetch the template from the database (case-insensitive, trimmed)
+            $template = \App\Models\DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
 
-            // Determine the appropriate PDF template based on document type
-            $template = $this->getPdfTemplate($documentRequest->document_type, $documentRequest);
-            
-            // Validate template exists
-            if (empty($template)) {
-                throw new \Exception('PDF template not found for document type: ' . $documentRequest->document_type);
+            if (!$template) {
+                notify()->error('No template found for this document type.');
+                return redirect()->back();
             }
-            
-            // If the template is HTML (from database), load it directly
-            if (strpos($template, '<!DOCTYPE html>') === 0) {
-                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($template);
-            } else {
-                // Check if the view exists
-                if (!view()->exists($template)) {
-                    Log::error('View does not exist: ' . $template);
-                    throw new \Exception('PDF template view does not exist: ' . $template);
-                }
-                
-                // Load the view template
-                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($template, [
-                    'documentRequest' => $documentRequest,
-                    'adminUser' => $adminUser
-                ]);
-            }
-            
-            // Generate filename based on document type
+
+            // Prepare values for placeholders
+            $values = [
+                'resident_name' => $documentRequest->user ? $documentRequest->user->name : '',
+                'resident_address' => $documentRequest->user ? $documentRequest->user->address : '',
+                'civil_status' => $documentRequest->user ? $documentRequest->user->civil_status : '',
+                'purpose' => $documentRequest->description,
+                'day' => date('jS'),
+                'month' => date('F'),
+                'year' => date('Y'),
+                'barangay_name' => $adminUser ? $adminUser->barangay_name : '',
+                'municipality_name' => $adminUser ? $adminUser->municipality_name : '',
+                'province_name' => $adminUser ? $adminUser->province_name : '',
+                'official_name' => $adminUser ? $adminUser->name : '',
+                'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
+            ];
+
+            // Generate the HTML using the template's generateHtml method
+            $html = $template->generateHtml($values);
+
+            // Generate the PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+
+            // Mark as approved
+            $documentRequest->status = 'approved';
+            $documentRequest->save();
+
+            // Download the PDF
             $filename = $this->generateFilename($documentRequest);
-            
             return $pdf->download($filename);
+
         } catch (\Exception $e) {
-            Log::error('Error approving document request: ' . $e->getMessage());
-            notify()->error('Failed to approve document request.');
+            \Log::error('Error approving document request: ' . $e->getMessage());
+            notify()->error('Failed to approve document request. ' . $e->getMessage());
             return redirect()->back();
         }
     }
@@ -106,36 +116,54 @@ class DocumentRequestController
     public function generatePdf(Request $request, $id)
     {
         try {
-            $documentRequest = DocumentRequest::findOrFail($id);
-            
+            $documentRequest = DocumentRequest::with('user')->findOrFail($id);
+
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
                 $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
             }
-            
-            // Log the document request for debugging
-            Log::info('Document request details (generatePdf): ' . json_encode([
-                'id' => $documentRequest->id,
-                'document_type' => $documentRequest->document_type,
-                'status' => $documentRequest->status
-            ]));
-            
-            // Determine the appropriate PDF template based on document type
-            $template = $this->getPdfTemplate($documentRequest->document_type, $documentRequest);
-            
-            // Validate template exists
-            if (empty($template)) {
-                throw new \Exception('PDF template not found for document type: ' . $documentRequest->document_type);
+
+            // Fetch the template from the database (case-insensitive, trimmed)
+            $template = \App\Models\DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
+
+            if (!$template) {
+                notify()->error('No template found for this document type.');
+                return redirect()->back();
             }
-            
-            // Load the HTML template
-            $pdf = Pdf::loadHTML($template);
-            
-            // Generate filename based on document type
+
+            // Prepare values for placeholders
+            $values = [
+                'resident_name' => $documentRequest->user ? $documentRequest->user->name : '',
+                'resident_address' => $documentRequest->user ? $documentRequest->user->address : '',
+                'civil_status' => $documentRequest->user ? $documentRequest->user->civil_status : '',
+                'purpose' => $documentRequest->description,
+                'day' => date('jS'),
+                'month' => date('F'),
+                'year' => date('Y'),
+                'barangay_name' => $adminUser ? $adminUser->barangay_name : '',
+                'municipality_name' => $adminUser ? $adminUser->municipality_name : '',
+                'province_name' => $adminUser ? $adminUser->province_name : '',
+                'official_name' => $adminUser ? $adminUser->name : '',
+                'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
+            ];
+
+            // Generate the HTML using the template's generateHtml method
+            $html = $template->generateHtml($values);
+
+            // Generate the PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+
+            // If status is 'approved', mark as 'completed'
+            if ($documentRequest->status === 'approved') {
+                $documentRequest->status = 'completed';
+                $documentRequest->save();
+            }
+
+            // Download the PDF
             $filename = $this->generateFilename($documentRequest);
-            
             return $pdf->download($filename);
+
         } catch (\Exception $e) {
             Log::error('Error generating document request PDF: ' . $e->getMessage());
             notify()->error('Failed to generate PDF: ' . $e->getMessage());
@@ -230,5 +258,26 @@ class DocumentRequestController
             return back()->withInput();
             
         }
+    }
+
+    // Add this method to select the PDF template based on document type
+    protected function getPdfTemplate($documentType, $documentRequest)
+    {
+        $documentType = trim($documentType);
+        Log::info('Looking for template with document_type: [' . $documentType . ']');
+        $template = \App\Models\DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower($documentType)])->first();
+        if ($template && $template->html) {
+            return $template->html;
+        }
+        return '';
+    }
+
+    // Add this method to generate a filename for the PDF
+    protected function generateFilename($documentRequest)
+    {
+        $type = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($documentRequest->document_type));
+        $user = $documentRequest->user ? preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($documentRequest->user->name)) : 'unknown_user';
+        $id = $documentRequest->id;
+        return $type . '_' . $user . '_' . $id . '.pdf';
     }
 }

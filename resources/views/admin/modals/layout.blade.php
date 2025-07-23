@@ -359,12 +359,6 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.templates.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.templates*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.templates*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-file-code fa-fw mr-3 {{ request()->routeIs('admin.templates*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Document Templates</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('admin.new-account-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.new-account-requests*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.new-account-requests*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-user-clock fa-fw mr-3 {{ request()->routeIs('admin.new-account-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Account Requests</span>

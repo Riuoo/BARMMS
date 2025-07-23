@@ -30,6 +30,7 @@ return new class extends Migration
             $table->enum('health_status', [
                 'Critical', 'Poor', 'Fair', 'Good', 'Excellent'
             ])->nullable();
+            $table->boolean('active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

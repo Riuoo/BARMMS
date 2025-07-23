@@ -81,6 +81,14 @@
                         <i class="fas fa-coins mr-1"></i>
                         Treasurer
                     </button>
+                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="active">
+                        <i class="fas fa-user-check mr-1"></i>
+                        Active
+                    </button>
+                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="inactive">
+                        <i class="fas fa-user-slash mr-1"></i>
+                        Inactive
+                    </button>
                 </div>
             </div>
         </div>
@@ -110,7 +118,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Captains</p>
-                                         <p class="text-lg md:text-2xl font-bold text-gray-900" id="captain-count">{{ $barangayProfiles->where('role', 'Captain')->count() }}</p>
+                                         <p class="text-lg md:text-2xl font-bold text-gray-900" id="captain-count">{{ $barangayProfiles->where('role', 'captain')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -123,7 +131,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Councilors</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="councilor-count">{{ $barangayProfiles->where('role', 'Councilor')->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="councilor-count">{{ $barangayProfiles->where('role', 'councilor')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -136,7 +144,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Other Staff</p>
-                                         <p class="text-lg md:text-2xl font-bold text-gray-900" id="other-count">{{ $barangayProfiles->whereNotIn('role', ['Captain', 'Councilor'])->count() }}</p>
+                                         <p class="text-lg md:text-2xl font-bold text-gray-900" id="other-count">{{ $barangayProfiles->whereNotIn('role', ['captain', 'councilor'])->count() }}</p>
                 </div>
             </div>
         </div>
@@ -189,6 +197,12 @@
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-toggle-on mr-2"></i>
+                                    Status
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center justify-center">
                                     <i class="fas fa-cogs mr-2"></i>
                                     Actions
@@ -198,7 +212,13 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="userTableBody">
                         @foreach ($barangayProfiles as $user)
-                        <tr class="official-item hover:bg-gray-50 transition duration-150" data-role="{{ strtolower(str_replace(' ', '-', $user->role)) }}">
+                        @php
+                            $statusBadgeClass = $user->active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600';
+                            $statusIconClass = $user->active ? 'text-green-500' : 'text-gray-400';
+                            $toggleBtnClass = $user->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
+                            $toggleIcon = $user->active ? 'on' : 'off';
+                        @endphp
+                        <tr class="official-item hover:bg-gray-50 transition duration-150" data-role="{{ strtolower(str_replace(' ', '-', $user->role)) }}" data-status="{{ $user->active ? 'active' : 'inactive' }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     <div>
@@ -224,17 +244,29 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $user->address ?: 'No address provided' }}</div>
                             </td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
+                                    <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
+                                    {{ $user->active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     <a href="{{ route('admin.barangay-profiles.edit', $user->id) }}" 
-                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                        <i class="fas fa-edit mr-1"></i>
-                                        Edit
+                                       class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
+                                       title="Edit">
+                                        <i class="fas fa-edit"></i>
                                     </a>
+                                    <form method="POST" action="{{ route('admin.barangay-profiles.toggle', $user->id) }}" style="display:inline;">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="{{ $user->active ? 'Disable' : 'Enable' }}">
+                                            <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
+                                        </button>
+                                    </form>
                                     <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
-                                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
-                                        <i class="fas fa-trash-alt mr-1"></i>
-                                        Delete
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
+                                            title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
                             </td>
@@ -248,7 +280,13 @@
         <!-- Mobile Cards (hidden on desktop) -->
         <div class="md:hidden space-y-3" id="mobileUserCards">
             @foreach ($barangayProfiles as $user)
-            <div class="official-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition duration-200" data-role="{{ strtolower(str_replace(' ', '-', $user->role)) }}">
+            @php
+                $statusBadgeClass = $user->active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600';
+                $statusIconClass = $user->active ? 'text-green-500' : 'text-gray-400';
+                $toggleBtnClass = $user->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
+                $toggleIcon = $user->active ? 'on' : 'off';
+            @endphp
+            <div class="official-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition duration-200" data-role="{{ strtolower(str_replace(' ', '-', $user->role)) }}" data-status="{{ $user->active ? 'active' : 'inactive' }}">
                 <!-- Header with avatar and basic info -->
                 <div class="flex items-start space-x-4 mb-4">
                     <div class="flex-shrink-0">
@@ -260,15 +298,9 @@
                         <h3 class="text-base font-semibold text-gray-900 truncate">{{ $user->name }}</h3>
                         <p class="text-sm text-gray-500 truncate">{{ $user->email }}</p>
                         <div class="mt-2">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                                                                 @if($user->role === 'Captain') bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800
-                                @elseif($user->role === 'Councilor') bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800
-                                @elseif($user->role === 'Secretary') bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800
-                                @elseif($user->role === 'Treasurer') bg-gradient-to-r from-green-100 to-green-200 text-green-800
-                                @else bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800
-                                @endif">
-                                <i class="fas fa-briefcase mr-1.5"></i>
-                                {{ $user->role }}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
+                                <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
+                                {{ $user->active ? 'Active' : 'Inactive' }}
                             </span>
                         </div>
                     </div>
@@ -284,17 +316,31 @@
                 </div>
                 @endif
 
+                <!-- Status badge -->
+                <div class="mt-2">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
+                        <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
+                        {{ $user->active ? 'Active' : 'Inactive' }}
+                    </span>
+                </div>
+
                 <!-- Action buttons -->
                 <div class="flex space-x-2 pt-2">
                     <a href="{{ route('admin.barangay-profiles.edit', $user->id) }}" 
-                       class="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 shadow-sm">
-                        <i class="fas fa-edit mr-2"></i>
-                        Edit Profile
+                       class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 shadow-sm"
+                       title="Edit">
+                        <i class="fas fa-edit"></i>
                     </a>
+                    <form method="POST" action="{{ route('admin.barangay-profiles.toggle', $user->id) }}" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-gray-300 text-sm font-medium rounded-lg {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 shadow-sm" title="{{ $user->active ? 'Disable' : 'Enable' }}">
+                            <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
+                        </button>
+                    </form>
                     <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
-                            class="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 shadow-sm">
-                        <i class="fas fa-trash-alt mr-2"></i>
-                        Delete
+                            class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 shadow-sm"
+                            title="Delete">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
             </div>
@@ -358,7 +404,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const allItems = [...officialItems, ...officialCards];
             allItems.forEach(item => {
                 const role = item.dataset.role;
-                if (filter === 'all' || role === filter) {
+                const status = item.dataset.status;
+                if (filter === 'all' || role === filter || (filter === 'active' && status === 'active') || (filter === 'inactive' && status === 'inactive')) {
                     item.style.display = '';
                 } else {
                     item.style.display = 'none';

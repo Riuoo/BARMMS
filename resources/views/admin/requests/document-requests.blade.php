@@ -246,7 +246,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex flex-nowrap items-center gap-2">
                                     @if($request->status === 'pending')
-                                        <form action="{{ route('admin.document-requests.approve', $request->id) }}" method="POST" class="inline">
+                                        <form onsubmit="return approveAndDownload(event, '{{ $request->id }}')" class="inline">
                                             @csrf
                                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                                                 <i class="fas fa-check mr-1"></i>
@@ -255,11 +255,13 @@
                                         </form>
                                     @endif
                                     @if($request->status === 'approved')
-                                        <a href="{{ route('admin.document-requests.pdf', $request->id) }}" target="_blank"
-                                           class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                            <i class="fas fa-file-pdf mr-1"></i>
-                                            Generate PDF
-                                        </a>
+                                        <form onsubmit="return generatePdfAndComplete(event, '{{ $request->id }}')" class="inline">
+                                            @csrf
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                                <i class="fas fa-file-pdf mr-1"></i>
+                                                Generate PDF
+                                            </button>
+                                        </form>
                                         <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
                                             @csrf
                                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
@@ -343,7 +345,7 @@
                     </button>
                     
                     @if($request->status === 'pending')
-                        <form action="{{ route('admin.document-requests.approve', $request->id) }}" method="POST" class="inline">
+                        <form onsubmit="return approveAndDownload(event, '{{ $request->id }}')" class="inline">
                             @csrf
                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
                                 <i class="fas fa-check mr-1"></i>
@@ -353,11 +355,13 @@
                     @endif
                     
                     @if($request->status === 'approved')
-                        <a href="{{ route('admin.document-requests.pdf', $request->id) }}" target="_blank"
-                           class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition duration-200">
-                            <i class="fas fa-file-pdf mr-1"></i>
-                            Generate PDF
-                        </a>
+                        <form onsubmit="return generatePdfAndComplete(event, '{{ $request->id }}')" class="inline">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                <i class="fas fa-file-pdf mr-1"></i>
+                                Generate PDF
+                            </button>
+                        </form>
                         <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
                             @csrf
                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
@@ -526,5 +530,103 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Document functions are defined in the partial file (admin.modals.document-modals)
+
+function generatePdfAndComplete(event, requestId) {
+    event.preventDefault();
+    const form = event.target;
+    const csrfToken = form.querySelector('input[name="_token"]').value;
+    fetch(`/admin/document-requests/${requestId}/pdf`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/pdf'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.blob();
+    })
+    .then(blob => {
+        // Set flag for notification after reload
+        localStorage.setItem('showGeneratePdfNotify', '1');
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `document_request_${requestId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setTimeout(() => location.reload(), 1000);
+    })
+    .catch(error => {
+        alert('Error generating and downloading PDF.');
+        console.error(error);
+    });
+    return false;
+}
+
+function approveAndDownload(event, requestId) {
+    event.preventDefault();
+    const form = event.target;
+    const csrfToken = form.querySelector('input[name="_token"]').value;
+    fetch(`/admin/document-requests/${requestId}/approve`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/pdf'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.blob();
+    })
+    .then(blob => {
+        // Set flag for notification after reload
+        localStorage.setItem('showApproveNotify', '1');
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `document_request_${requestId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setTimeout(() => location.reload(), 1000);
+    })
+    .catch(error => {
+        alert('Error approving and downloading PDF.');
+        console.error(error);
+    });
+    return false;
+}
+
+// Show notification after reload if flag is set
+window.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('showApproveNotify') === '1') {
+        localStorage.removeItem('showApproveNotify');
+        if (typeof notify === 'function') {
+            notify('success', 'Document approved and PDF downloaded.');
+        } else {
+            alert('Document approved and PDF downloaded.');
+        }
+    }
+    if (localStorage.getItem('showGeneratePdfNotify') === '1') {
+        localStorage.removeItem('showGeneratePdfNotify');
+        if (typeof notify === 'function') {
+            notify('success', 'PDF generated and downloaded.');
+        } else {
+            alert('PDF generated and downloaded.');
+        }
+    }
+    if (localStorage.getItem('showDocumentCreateNotify') === '1') {
+        localStorage.removeItem('showDocumentCreateNotify');
+        if (typeof notify === 'function') {
+            notify('success', 'Document request created and PDF downloaded.');
+        } else {
+            alert('Document request created and PDF downloaded.');
+        }
+    }
+});
 </script>
 @endsection

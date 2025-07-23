@@ -16,6 +16,7 @@ class BarangayProfile extends Authenticatable
         'password',
         'role',
         'address',
+        'active',
     ];
 
     protected $hidden = [

@@ -15,7 +15,7 @@ class ResidentController
             abort(403, 'Unauthorized');
         }
         
-        $residents = Residents::all();
+        $residents = Residents::orderByDesc('active')->orderBy('name')->get();
         return view('admin.residents.residents', compact('residents'));
     }
 
@@ -127,5 +127,14 @@ class ResidentController
             return redirect()->route('admin.residents');
             
         }
+    }
+
+    public function toggleActive($id)
+    {
+        $resident = Residents::findOrFail($id);
+        $resident->active = !$resident->active;
+        $resident->save();
+        notify()->success('Resident status updated successfully.');
+        return redirect()->back();
     }
 }

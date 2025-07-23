@@ -25,6 +25,10 @@ class LoginController
         $user = BarangayProfile::where('email', $credentials['email'])->first();
         
         if ($user && Hash::check($credentials['password'], $user->password)) {
+            if (!$user->active) {
+                notify()->error('Your account is disabled. Please contact admin.');
+                return back()->onlyInput('email');
+            }
             // Don't use Auth::login() for barangay profiles, just use session
             $request->session()->regenerate();
             session(['user_id' => $user->id]);
@@ -37,6 +41,10 @@ class LoginController
         $user = Residents::where('email', $credentials['email'])->first();
         
         if ($user && Hash::check($credentials['password'], $user->password)) {
+            if (!$user->active) {
+                notify()->error('Your account is disabled. Please contact admin.');
+                return back()->onlyInput('email');
+            }
             // Don't use Auth::login() for residents, just use session
             $request->session()->regenerate();
             session(['user_id' => $user->id]);

@@ -12,7 +12,10 @@ class BlotterReportController
 {
     public function blotterReport()
     {
-        $blotterRequests = BlotterRequest::with('user')->get();
+        $blotterRequests = BlotterRequest::with('user')
+            ->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
+            ->orderByDesc('created_at')
+            ->get();
         return view('admin.requests.blotter-reports', compact('blotterRequests'));
     }
 

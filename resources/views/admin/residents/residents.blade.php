@@ -69,6 +69,10 @@
                         <i class="fas fa-user-check mr-1"></i>
                         Active
                     </button>
+                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="inactive">
+                        <i class="fas fa-user-slash mr-1"></i>
+                        Inactive
+                    </button>
                     <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="recent">
                         <i class="fas fa-clock mr-1"></i>
                         Recently Added
@@ -102,7 +106,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Active Residents</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="active-count">{{ $residents->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="active-count">{{ $residents->where('active', true)->count() }}</p>
                 </div>
             </div>
         </div>
@@ -182,6 +186,12 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
+                                    <i class="fas fa-toggle-on mr-2"></i>
+                                    Status
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
                                     <i class="fas fa-calendar mr-2"></i>
                                     Registered
                                 </div>
@@ -196,7 +206,13 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="residentTableBody">
                         @foreach ($residents as $resident)
-                        <tr class="resident-item hover:bg-gray-50 transition duration-150" data-status="active" data-created="{{ $resident->created_at->format('Y-m-d') }}">
+                        @php
+                            $statusBadgeClass = $resident->active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600';
+                            $statusIconClass = $resident->active ? 'text-green-500' : 'text-gray-400';
+                            $toggleBtnClass = $resident->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
+                            $toggleIcon = $resident->active ? 'on' : 'off';
+                        @endphp
+                        <tr class="resident-item hover:bg-gray-50 transition duration-150" data-status="{{ $resident->active ? 'active' : 'inactive' }}" data-created="{{ $resident->created_at->format('Y-m-d') }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     <div>
@@ -224,6 +240,12 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
+                                    <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
+                                    {{ $resident->active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->created_at->format('M d, Y') }}</div>
                                 <div class="text-sm text-gray-500">
                                     <i class="fas fa-calendar mr-1"></i>
@@ -233,14 +255,20 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
-                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                        <i class="fas fa-edit mr-1"></i>
-                                        Edit
+                                       class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
+                                       title="Edit">
+                                        <i class="fas fa-edit"></i>
                                     </a>
+                                    <form method="POST" action="{{ route('admin.residents.toggle', $resident->id) }}" style="display:inline;">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="{{ $resident->active ? 'Disable' : 'Enable' }}">
+                                            <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
+                                        </button>
+                                    </form>
                                     <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
-                                        <i class="fas fa-trash-alt mr-1"></i>
-                                        Delete
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
+                                            title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
                             </td>
@@ -254,7 +282,13 @@
         <!-- Mobile Cards (hidden on desktop) -->
         <div class="md:hidden space-y-3" id="mobileResidentCards">
             @foreach ($residents as $resident)
-            <div class="resident-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition duration-200" data-status="active" data-created="{{ $resident->created_at->format('Y-m-d') }}">
+            @php
+                $statusBadgeClass = $resident->active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600';
+                $statusIconClass = $resident->active ? 'text-green-500' : 'text-gray-400';
+                $toggleBtnClass = $resident->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
+                $toggleIcon = $resident->active ? 'on' : 'off';
+            @endphp
+            <div class="resident-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $resident->active ? 'active' : 'inactive' }}" data-created="{{ $resident->created_at->format('Y-m-d') }}">
                 <!-- Header with avatar and basic info -->
                 <div class="flex items-start space-x-4 mb-4">
                     <div class="flex-shrink-0">
@@ -266,9 +300,9 @@
                         <h3 class="text-base font-semibold text-gray-900 truncate">{{ $resident->name }}</h3>
                         <p class="text-sm text-gray-500 truncate">{{ $resident->email }}</p>
                         <div class="mt-2">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-green-200 text-green-800">
-                                <i class="fas fa-user-check mr-1.5"></i>
-                                Active Resident
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
+                                <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
+                                {{ $resident->active ? 'Active Resident' : 'Inactive Resident' }}
                             </span>
                             @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
                                 <button 
@@ -353,14 +387,20 @@
                 <!-- Action buttons -->
                 <div class="flex space-x-2 pt-2">
                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
-                       class="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 shadow-sm">
-                        <i class="fas fa-edit mr-2"></i>
-                        Edit Profile
+                       class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 shadow-sm"
+                       title="Edit">
+                        <i class="fas fa-edit"></i>
                     </a>
+                    <form method="POST" action="{{ route('admin.residents.toggle', $resident->id) }}" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-gray-300 text-sm font-medium rounded-lg {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 shadow-sm" title="{{ $resident->active ? 'Disable' : 'Enable' }}">
+                            <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
+                        </button>
+                    </form>
                     <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                            class="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 shadow-sm">
-                        <i class="fas fa-trash-alt mr-2"></i>
-                        Delete
+                            class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 shadow-sm"
+                            title="Delete">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
             </div>
@@ -459,6 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (filter === 'all' || 
                     (filter === 'active' && status === 'active') ||
+                    (filter === 'inactive' && status === 'inactive') ||
                     (filter === 'recent' && isRecent)) {
                     item.style.display = '';
                 } else {

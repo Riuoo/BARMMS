@@ -15,7 +15,7 @@ class BarangayProfileController
             abort(403, 'Unauthorized');
         }
         
-        $barangayProfiles = BarangayProfile::all();
+        $barangayProfiles = BarangayProfile::orderByDesc('active')->orderBy('name')->get();
         return view('admin.barangay-profiles.barangay-profiles', compact('barangayProfiles'));
     }
 
@@ -105,5 +105,14 @@ class BarangayProfileController
             return redirect()->route('admin.barangay-profiles');
             
         }
+    }
+
+    public function toggleActive($id)
+    {
+        $profile = BarangayProfile::findOrFail($id);
+        $profile->active = !$profile->active;
+        $profile->save();
+        notify()->success('Official status updated successfully.');
+        return redirect()->back();
     }
 }

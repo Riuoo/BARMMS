@@ -235,8 +235,10 @@
                                         {{ Str::limit($request->description, 50) }}
                                     </div>
                                     @if(strlen($request->description) > 50)
-                                        <button onclick="showFullDescription({{ json_encode($request->description) }}, {{ json_encode($request->user->name ?? 'N/A') }})" 
-                                                class="text-xs text-blue-600 hover:text-blue-800 underline mt-1">
+                                        <button 
+                                            class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 view-full-btn"
+                                            data-description="{{ $request->description }}"
+                                            data-user-name="{{ $request->user->name ?? 'N/A' }}">
                                             View Full
                                         </button>
                                     @endif
@@ -267,7 +269,7 @@
                                             <div class="flex items-center space-x-2">
                                                 <i class="fas fa-paperclip text-gray-400"></i>
                                                 <span class="text-xs">{{ $request->media_count }} attachments</span>
-                                                <button onclick="viewAllMedia({{ $request->id }})" class="text-xs text-blue-600 hover:text-blue-800 underline">
+                                                <button onclick="viewAllMedia('{{ $request->id }}')" class="text-xs text-blue-600 hover:text-blue-800 underline">
                                                     View All
                                                 </button>
                                             </div>
@@ -301,17 +303,30 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     @if($request->status === 'pending')
-                                        <button onclick="openApproveModal({{ $request->id }})" 
-                                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                            <i class="fas fa-check mr-1"></i>
-                                            Approve
-                                        </button>
+                                        <form onsubmit="return approveAndDownloadBlotter(event, '{{ $request->id }}')" class="inline">
+                                            @csrf
+                                            <input type="date" name="hearing_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                                <i class="fas fa-check mr-1"></i>
+                                                Approve
+                                            </button>
+                                        </form>
                                     @elseif($request->status === 'approved')
-                                        <button onclick="openNewSummonModal({{ $request->id }})" 
-                                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
-                                            <i class="fas fa-file-alt mr-1"></i>
-                                            New Summon
-                                        </button>
+                                        @if($request->attempts < 3)
+                                            <form onsubmit="return generateNewSummonPdf(event, '{{ $request->id }}')" class="inline">
+                                                @csrf
+                                                <input type="date" name="new_summon_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
+                                                    <i class="fas fa-file-alt mr-1"></i>
+                                                    New Summon
+                                                </button>
+                                            </form>
+                                        @else
+                                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" disabled>
+                                                <i class="fas fa-file-alt mr-1"></i>
+                                                New Summon (Limit Reached)
+                                            </button>
+                                        @endif
                                         <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
                                             @csrf
                                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
@@ -368,7 +383,7 @@
                             <span class="description-short">{{ Str::limit($request->description, 80) }}</span>
                             @if(strlen($request->description) > 80)
                                 <span class="description-full hidden">{{ $request->description }}</span>
-                                <button onclick="toggleDescription({{ $request->id }})" 
+                                <button onclick="toggleDescription('{{ $request->id }}')" 
                                         class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
                                     Read More
                                 </button>
@@ -385,7 +400,7 @@
                             <i class="fas fa-paperclip mr-1"></i>
                             {{ $request->media_count }} attachment{{ $request->media_count > 1 ? 's' : '' }}
                         </span>
-                        <button onclick="viewAllMedia({{ $request->id }})" 
+                        <button onclick="viewAllMedia('{{ $request->id }}')" 
                                 class="text-xs text-blue-600 hover:text-blue-800 underline">
                             View All
                         </button>
@@ -416,24 +431,37 @@
 
                 <!-- Actions Section -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                    <button onclick="viewBlotterDetails({{ $request->id }})" 
+                    <button onclick="viewBlotterDetails('{{ $request->id }}')" 
                             class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
                         <i class="fas fa-eye mr-1"></i>
                         View Details
                     </button>
                     
                     @if($request->status === 'pending')
-                        <button onclick="openApproveModal({{ $request->id }})" 
-                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
-                            <i class="fas fa-check mr-1"></i>
-                            Approve
-                        </button>
+                        <form onsubmit="return approveAndDownloadBlotter(event, '{{ $request->id }}')" class="inline">
+                            @csrf
+                            <input type="date" name="hearing_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
+                                <i class="fas fa-check mr-1"></i>
+                                Approve
+                            </button>
+                        </form>
                     @elseif($request->status === 'approved')
-                        <button onclick="openNewSummonModal({{ $request->id }})" 
-                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 transition duration-200">
-                            <i class="fas fa-file-alt mr-1"></i>
-                            New Summon
-                        </button>
+                        @if($request->attempts < 3)
+                            <form onsubmit="return generateNewSummonPdf(event, '{{ $request->id }}')" class="inline">
+                                @csrf
+                                <input type="date" name="new_summon_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 transition duration-200">
+                                    <i class="fas fa-file-alt mr-1"></i>
+                                    New Summon
+                                </button>
+                            </form>
+                        @else
+                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" disabled>
+                                <i class="fas fa-file-alt mr-1"></i>
+                                New Summon (Limit Reached)
+                            </button>
+                        @endif
                         <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
                             @csrf
                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
@@ -516,6 +544,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // updateCounts(); // No longer needed
     // Update counts on window resize
     // window.removeEventListener('resize', updateCounts); // No longer needed
+
+    // Add event listeners for view full buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('view-full-btn')) {
+            const description = e.target.getAttribute('data-description');
+            const userName = e.target.getAttribute('data-user-name');
+            showFullDescription(description, userName);
+        }
+    });
 });
 
 // Function to view all media files
@@ -686,6 +723,8 @@ function completeAndDownload(event, blotterId) {
         return response.blob();
     })
     .then(blob => {
+        // Set flag for notification after reload
+        localStorage.setItem('showBlotterCompleteNotify', '1');
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -702,5 +741,118 @@ function completeAndDownload(event, blotterId) {
     });
     return false;
 }
+
+function approveAndDownloadBlotter(event, blotterId) {
+    event.preventDefault();
+    const form = event.target;
+    const csrfToken = form.querySelector('input[name="_token"]').value;
+    // You may need to collect hearing_date from a modal or form input
+    const hearingDate = form.querySelector('input[name="hearing_date"]').value;
+    fetch(`/admin/blotter-reports/${blotterId}/approve`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/pdf',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ hearing_date: hearingDate })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.blob();
+    })
+    .then(blob => {
+        localStorage.setItem('showBlotterApproveNotify', '1');
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `summon_notice_${blotterId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setTimeout(() => location.reload(), 1000);
+    })
+    .catch(error => {
+        alert('Error approving and downloading PDF.');
+        console.error(error);
+    });
+    return false;
+}
+
+function generateNewSummonPdf(event, blotterId) {
+    event.preventDefault();
+    const form = event.target;
+    const csrfToken = form.querySelector('input[name="_token"]').value;
+    const newSummonDate = form.querySelector('input[name="new_summon_date"]').value;
+    fetch(`/admin/blotter-reports/${blotterId}/new-summons`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/pdf',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ new_summon_date: newSummonDate })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text); });
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        localStorage.setItem('showBlotterSummonNotify', '1');
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `new_summon_notice_${blotterId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setTimeout(() => location.reload(), 1000);
+    })
+    .catch(error => {
+        alert(error.message || 'Error generating new summon PDF.');
+        console.error(error);
+    });
+    return false;
+}
+
+// Show notification after reload if flag is set
+window.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('showBlotterCompleteNotify') === '1') {
+        localStorage.removeItem('showBlotterCompleteNotify');
+        if (typeof notify === 'function') {
+            notify('success', 'Blotter report completed and PDF downloaded.');
+        } else {
+            alert('Blotter report completed and PDF downloaded.');
+        }
+    }
+    if (localStorage.getItem('showBlotterApproveNotify') === '1') {
+        localStorage.removeItem('showBlotterApproveNotify');
+        if (typeof notify === 'function') {
+            notify('success', 'Blotter report approved and summon PDF downloaded.');
+        } else {
+            alert('Blotter report approved and summon PDF downloaded.');
+        }
+    }
+    if (localStorage.getItem('showBlotterSummonNotify') === '1') {
+        localStorage.removeItem('showBlotterSummonNotify');
+        if (typeof notify === 'function') {
+            notify('success', 'New summon notice generated and downloaded.');
+        } else {
+            alert('New summon notice generated and downloaded.');
+        }
+    }
+    if (localStorage.getItem('showBlotterCreateNotify') === '1') {
+        localStorage.removeItem('showBlotterCreateNotify');
+        if (typeof notify === 'function') {
+            notify('success', 'Blotter report created and PDF downloaded.');
+        } else {
+            alert('Blotter report created and PDF downloaded.');
+        }
+    }
+});
 </script>
 @endsection

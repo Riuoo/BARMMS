@@ -13,12 +13,6 @@
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Blotter Report</h1>
                 <p class="text-gray-600">Submit an incident report for barangay resolution</p>
             </div>
-            <div class="mt-4 sm:mt-0">
-                <a href="{{ route('admin.blotter-reports') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Back to Blotter Reports
-                </a>
-            </div>
         </div>
     </div>
 
@@ -58,7 +52,7 @@
 
     <!-- Form Card -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <form action="{{ route('admin.blotter-reports.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form id="createBlotterForm" action="{{ route('admin.blotter-reports.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
             <!-- Complainant Information -->
@@ -427,7 +421,48 @@
                 searchResults.classList.add('hidden');
             }
         });
-    });
+
+    // Blotter create form AJAX submit for download + redirect + notify
+    const createForm = document.getElementById('createBlotterForm');
+    if (createForm) {
+        createForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const csrfToken = form.querySelector('input[name="_token"]').value;
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/pdf',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: formData
+                });
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'blotter_report.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    // Set flag for notification
+                    localStorage.setItem('showBlotterCreateNotify', '1');
+                    // Redirect to reports page
+                    window.location.href = "{{ route('admin.blotter-reports') }}";
+                } else {
+                    alert('Error creating blotter report.');
+                }
+            } catch (err) {
+                alert('Error creating blotter report.');
+                console.error(err);
+            }
+        });
+    }
+});
 
     function debounce(func, delay) {
         let timeoutId;

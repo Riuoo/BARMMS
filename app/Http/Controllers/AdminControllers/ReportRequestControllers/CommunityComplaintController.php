@@ -10,7 +10,10 @@ class CommunityComplaintController
 {
     public function index()
     {
-        $complaints = CommunityComplaint::with('user')->orderBy('created_at', 'desc')->get();
+        $complaints = CommunityComplaint::with('user')
+            ->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")
+            ->orderByDesc('created_at')
+            ->get();
         
         // Get statistics
         $stats = [

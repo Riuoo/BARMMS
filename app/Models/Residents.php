@@ -22,6 +22,7 @@ class Residents extends Authenticatable
         'income_level',
         'employment_status',
         'health_status',
+        'active',
     ];
 
     protected $hidden = [

@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
-
+use App\Http\Middleware\CheckAdminRole;
+use App\Http\Middleware\CheckResidentRole;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -63,7 +64,7 @@ Route::get('/register/{token}', [RegistrationController::class, 'showRegistratio
 Route::post('/register', [RegistrationController::class, 'register'])->name('register');
 
 // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
-Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')->group(function () {
+Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
 
     // Admin Dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -75,6 +76,7 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/barangay-profiles/{id}/edit', [BarangayProfileController::class, 'edit'])->name('admin.barangay-profiles.edit');
     Route::put('/barangay-profiles/{id}', [BarangayProfileController::class, 'update'])->name('admin.barangay-profiles.update');
     Route::delete('/barangay-profiles/{id}', [BarangayProfileController::class, 'delete'])->name('admin.barangay-profiles.delete');
+    Route::post('/admin/barangay-profiles/{profile}/toggle', [BarangayProfileController::class, 'toggleActive'])->name('admin.barangay-profiles.toggle');
 
     // Residents routes
     Route::get('/residents', [ResidentController::class, 'residentProfile'])->name('admin.residents');
@@ -83,6 +85,7 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
     Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('admin.residents.edit');
     Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
     Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
+    Route::post('/admin/residents/{resident}/toggle', [ResidentController::class, 'toggleActive'])->name('admin.residents.toggle');
 
     
     // Profile routes for viewing and updating profile
@@ -227,7 +230,7 @@ Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->prefix('admin')
 
 
 
-Route::middleware([\App\Http\Middleware\CheckResidentRole::class])->prefix('resident')->group(function () {
+Route::middleware([CheckResidentRole::class])->prefix('resident')->group(function () {
     Route::get('/dashboard', [ResidentController2::class, 'dashboard'])->name('resident.dashboard');
     // Blotter Requests
     Route::get('/request_blotter_report', [ResidentController2::class, 'requestBlotter'])->name('resident.request_blotter_report');

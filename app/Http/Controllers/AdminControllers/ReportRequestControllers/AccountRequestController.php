@@ -19,7 +19,9 @@ class AccountRequestController
      */
     public function accountRequest()
     {
-        $accountRequests = AccountRequest::orderBy('created_at', 'desc')->get();
+        $accountRequests = AccountRequest::orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
+            ->orderByDesc('created_at')
+            ->get();
         return view('admin.requests.new-account-requests', compact('accountRequests'));
     }
 
