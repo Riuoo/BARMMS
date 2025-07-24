@@ -119,7 +119,7 @@
                         <input type="number" id="bmi" name="bmi" value="{{ old('bmi', $patientRecord->bmi) }}" step="0.01" min="0" readonly
                                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50"
                                placeholder="Will be calculated automatically">
-                        <p class="text-xs text-gray-500 mt-1">BMI will be calculated automatically</p>
+                        <p class="text-xs text-gray-500 mt-1">BMI will be calculated after saving.</p>
                         @error('bmi')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -263,26 +263,9 @@
 </div>
 
 <script>
-// Auto-calculate BMI when height or weight changes
-document.getElementById('height_cm').addEventListener('input', calculateBMI);
-document.getElementById('weight_kg').addEventListener('input', calculateBMI);
-
-function calculateBMI() {
-    const height = parseFloat(document.getElementById('height_cm').value);
-    const weight = parseFloat(document.getElementById('weight_kg').value);
-    
-    if (height > 0 && weight > 0) {
-        const heightInMeters = height / 100;
-        const bmi = weight / (heightInMeters * heightInMeters);
-        document.getElementById('bmi').value = bmi.toFixed(2);
-    } else {
-        document.getElementById('bmi').value = '';
-    }
-}
-
-// Calculate BMI on page load if values exist
-document.addEventListener('DOMContentLoaded', function() {
-    calculateBMI();
-});
+// Remove document.getElementById('height_cm').addEventListener('input', calculateBMI);
+// Remove document.getElementById('weight_kg').addEventListener('input', calculateBMI);
+// Remove the calculateBMI() function.
+// Add a note near the BMI field: 'BMI will be calculated after saving.'
 </script>
 @endsection 

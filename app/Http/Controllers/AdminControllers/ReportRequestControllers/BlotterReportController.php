@@ -10,13 +10,31 @@ use Illuminate\Http\Request;
 
 class BlotterReportController
 {
-    public function blotterReport()
+    public function blotterReport(Request $request)
     {
-        $blotterRequests = BlotterRequest::with('user')
-            ->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
+        // Statistics from full dataset
+        $totalReports = BlotterRequest::count();
+        $pendingCount = BlotterRequest::where('status', 'pending')->count();
+        $approvedCount = BlotterRequest::where('status', 'approved')->count();
+        $completedCount = BlotterRequest::where('status', 'completed')->count();
+
+        // For display (filtered)
+        $query = BlotterRequest::with('user');
+        if ($request->filled('search')) {
+            $search = trim($request->get('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('recipient_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('type', 'like', "%{$search}%");
+            });
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+        $blotterRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
             ->orderByDesc('created_at')
             ->get();
-        return view('admin.requests.blotter-reports', compact('blotterRequests'));
+        return view('admin.requests.blotter-reports', compact('blotterRequests', 'totalReports', 'pendingCount', 'approvedCount', 'completedCount'));
     }
 
     public function getDetails($id)
@@ -63,6 +81,11 @@ class BlotterReportController
 
         try {
             $blotter = BlotterRequest::findOrFail($id);
+            $user = $blotter->user;
+            if (!$user || !$user->active) {
+                notify()->error('This user account is inactive and cannot make transactions.');
+                return redirect()->back();
+            }
 
             if ($blotter->status === 'approved') {
                 notify()->error('This blotter report has already been approved.');
@@ -100,6 +123,11 @@ class BlotterReportController
     {
         try {
             $blotter = BlotterRequest::findOrFail($id);
+            $user = $blotter->user;
+            if (!$user || !$user->active) {
+                notify()->error('This user account is inactive and cannot make transactions.');
+                return back();
+            }
             
             if ($blotter->status !== 'approved') {
                 notify()->error('Only approved reports can be marked as complete');
@@ -156,7 +184,7 @@ class BlotterReportController
 
     public function create()
     {
-        $residents = Residents::all();
+        $residents = Residents::where('active', true)->get();
         return view('admin.requests.create_blotter_report', compact('residents'));
     }
 
@@ -170,6 +198,11 @@ class BlotterReportController
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240',
             'summon_date' => 'required|date|after:today'
         ]);
+        $user = \App\Models\Residents::find($validated['resident_id']);
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back()->withInput();
+        }
         try {
             $blotter = new BlotterRequest();
             $blotter->user_id = $validated['resident_id'];
@@ -221,6 +254,11 @@ class BlotterReportController
     public function generateNewSummons(Request $request, $id)
     {
         $blotter = BlotterRequest::findOrFail($id);
+        $user = $blotter->user;
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back();
+        }
         if ($blotter->attempts >= 3) {
             notify()->error('Maximum attempts reached for generating new summons.');
             return back();

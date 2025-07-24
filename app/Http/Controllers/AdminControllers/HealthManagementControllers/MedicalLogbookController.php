@@ -19,7 +19,7 @@ class MedicalLogbookController
 
     public function create()
     {
-        $residents = Residents::all();
+        $residents = Residents::where('active', true)->get();
         return view('admin.medical-logbooks.create', compact('residents'));
     }
 
@@ -49,7 +49,11 @@ class MedicalLogbookController
             'follow_up_date' => 'nullable|date|after:consultation_date',
             'status' => 'required|string|in:Completed,Pending,Referred,Cancelled',
         ]);
-
+        $user = \App\Models\Residents::find($validated['resident_id']);
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back()->withInput();
+        }
         try {
             MedicalLogbook::create($validated);
             notify()->success('Medical consultation record created successfully.');
@@ -76,6 +80,11 @@ class MedicalLogbookController
     public function update(Request $request, $id)
     {
         $medicalLogbook = MedicalLogbook::findOrFail($id);
+        $user = $medicalLogbook->resident;
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back()->withInput();
+        }
         
         $validated = $request->validate([
             'resident_id' => 'required|exists:residents,id',

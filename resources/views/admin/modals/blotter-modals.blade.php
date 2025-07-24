@@ -268,20 +268,33 @@ function approveAndDownload(event) {
         },
         body: formData
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.blob();
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `blotter_approve_${blotterId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        setTimeout(() => location.reload(), 1000);
+    .then(async response => {
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/pdf')) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `blotter_approve_${blotterId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            // Try to extract error message from response
+            let errorMsg = 'Error approving and downloading PDF.';
+            try {
+                const text = await response.text();
+                if (text.includes('This user account is inactive')) {
+                    errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('<ul class="list-disc')) {
+                    const match = text.match(/<li>(.*?)<\/li>/);
+                    if (match) errorMsg = match[1];
+                }
+            } catch (e) {}
+            alert(errorMsg);
+        }
     })
     .catch(error => {
         alert('Error approving and downloading PDF.');
@@ -305,20 +318,33 @@ function summonAndDownload(event) {
         },
         body: formData
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.blob();
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `blotter_summon_${blotterId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        setTimeout(() => location.reload(), 1000);
+    .then(async response => {
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/pdf')) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `blotter_summon_${blotterId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            // Try to extract error message from response
+            let errorMsg = 'Error generating summon and downloading PDF.';
+            try {
+                const text = await response.text();
+                if (text.includes('This user account is inactive')) {
+                    errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('<ul class="list-disc')) {
+                    const match = text.match(/<li>(.*?)<\/li>/);
+                    if (match) errorMsg = match[1];
+                }
+            } catch (e) {}
+            alert(errorMsg);
+        }
     })
     .catch(error => {
         alert('Error generating summon and downloading PDF.');

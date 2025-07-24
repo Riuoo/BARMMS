@@ -8,15 +8,43 @@ use Illuminate\Support\Facades\Hash;
 
 class ResidentController
 {
-    public function residentProfile()
+    public function residentProfile(Request $request)
     {
         if (session('user_role') !== 'barangay') {
             // Abort the request with a 403 Unauthorized error
             abort(403, 'Unauthorized');
         }
-        
-        $residents = Residents::orderByDesc('active')->orderBy('name')->get();
-        return view('admin.residents.residents', compact('residents'));
+        // Statistics from full dataset
+        $totalResidents = Residents::count();
+        $activeResidents = Residents::where('active', true)->count();
+        $recentResidents = Residents::where('created_at', '>=', now()->startOfMonth())->count();
+        $withAddress = Residents::whereNotNull('address')->count();
+
+        // For display (filtered)
+        $query = Residents::query();
+        // Search by name, email, or address
+        if ($request->filled('search')) {
+            $search = trim($request->get('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%");
+            });
+        }
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->get('status') === 'active') {
+                $query->where('active', true);
+            } elseif ($request->get('status') === 'inactive') {
+                $query->where('active', false);
+            }
+        }
+        // Filter by recently added (last 30 days)
+        if ($request->filled('recent') && $request->get('recent') === 'recent') {
+            $query->where('created_at', '>=', now()->subDays(30));
+        }
+        $residents = $query->orderByDesc('active')->orderBy('name')->get();
+        return view('admin.residents.residents', compact('residents', 'totalResidents', 'activeResidents', 'recentResidents', 'withAddress'));
     }
 
     public function create()

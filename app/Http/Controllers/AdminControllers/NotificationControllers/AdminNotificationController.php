@@ -17,9 +17,8 @@ class AdminNotificationController
      *
      * @return \Illuminate\View\View
      */
-    public function showNotifications()
+    public function showNotifications(Request $request)
     {
-        // This method remains largely the same as it fetches all notifications for the dedicated page
         $blotterReports = BlotterRequest::orderBy('created_at', 'desc')->get();
         $documentRequests = DocumentRequest::orderBy('created_at', 'desc')->get();
         $accountRequests = AccountRequest::orderBy('created_at', 'desc')->get();
@@ -34,30 +33,46 @@ class AdminNotificationController
                 'message' => 'New blotter report pending review.',
                 'created_at' => $report->created_at,
                 'is_read' => $report->is_read,
-                'link' => route('admin.blotter-reports'), // Link to the specific report type page
+                'link' => route('admin.blotter-reports'),
             ]);
         }
 
-        foreach ($documentRequests as $request) {
+        foreach ($documentRequests as $requestDoc) {
             $notifications->push((object)[
-                'id' => $request->id,
+                'id' => $requestDoc->id,
                 'type' => 'document_request',
                 'message' => 'New document request pending approval.',
-                'created_at' => $request->created_at,
-                'is_read' => $request->is_read,
-                'link' => route('admin.document-requests'), // Link to the specific request type page
+                'created_at' => $requestDoc->created_at,
+                'is_read' => $requestDoc->is_read,
+                'link' => route('admin.document-requests'),
             ]);
         }
 
-        foreach ($accountRequests as $request) {
+        foreach ($accountRequests as $requestAcc) {
             $notifications->push((object)[
-                'id' => $request->id,
+                'id' => $requestAcc->id,
                 'type' => 'account_request',
                 'message' => 'New account request awaiting action.',
-                'created_at' => $request->created_at,
-                'is_read' => $request->is_read,
-                'link' => route('admin.new-account-requests'), // Link to the specific request type page
+                'created_at' => $requestAcc->created_at,
+                'is_read' => $requestAcc->is_read,
+                'link' => route('admin.requests.new-account-requests'),
             ]);
+        }
+
+        // Filter by search
+        if ($request->filled('search')) {
+            $search = strtolower($request->get('search'));
+            $notifications = $notifications->filter(function($n) use ($search) {
+                return strpos(strtolower($n->message), $search) !== false;
+            });
+        }
+        // Filter by read/unread
+        if ($request->filled('read_status')) {
+            if ($request->read_status === 'unread') {
+                $notifications = $notifications->where('is_read', false);
+            } elseif ($request->read_status === 'read') {
+                $notifications = $notifications->where('is_read', true);
+            }
         }
 
         // Sort notifications by date (latest first)

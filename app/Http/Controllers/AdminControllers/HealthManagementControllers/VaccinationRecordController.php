@@ -18,7 +18,7 @@ class VaccinationRecordController
 
     public function create()
     {
-        $residents = Residents::all();
+        $residents = Residents::where('active', true)->get();
         return view('admin.vaccination-records.create', compact('residents'));
     }
 
@@ -37,7 +37,11 @@ class VaccinationRecordController
             'side_effects' => 'nullable|string|max:1000',
             'notes' => 'nullable|string|max:2000',
         ]);
-
+        $user = \App\Models\Residents::find($validated['resident_id']);
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back()->withInput();
+        }
         try {
             VaccinationRecord::create($validated);
             notify()->success('Vaccination record created successfully.');

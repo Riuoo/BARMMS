@@ -42,33 +42,32 @@
     @endif
 
     <!-- Filters and Search -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col gap-4">
-            <!-- Search Bar -->
-            <div class="relative">
-                <input type="text" id="searchInput" placeholder="Search by email..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
+    <form method="GET" action="{{ route('admin.requests.new-account-requests') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" id="searchInput" placeholder="Search by email..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
                 </div>
             </div>
-            
-            <!-- Filter Buttons -->
-            <div class="flex flex-wrap gap-2">
-                <button class="filter-btn active px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800" data-filter="all">
-                    All Requests
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="pending">
-                    Pending
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="approved">
-                    Approved
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="completed">
-                    Completed
-                </button>
+            <!-- Status Filter -->
+            <div class="sm:w-48">
+                <select name="status" id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <option value="">All Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                </select>
+            </div>
+            <div class="flex items-center">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
+                <a href="{{ route('admin.requests.new-account-requests') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
@@ -81,7 +80,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Total Requests</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="total-count">{{ $accountRequests->count() }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="total-count">{{ $totalRequests }}</p>
                 </div>
             </div>
         </div>
@@ -94,7 +93,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="pending-count">{{ $accountRequests->where('status', 'pending')->count() }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="pending-count">{{ $pendingCount }}</p>
                 </div>
             </div>
         </div>
@@ -107,20 +106,20 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Approved</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="approved-count">{{ $accountRequests->where('status', 'approved')->count() }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="approved-count">{{ $approvedCount }}</p>
                 </div>
             </div>
         </div>
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check-circle text-emerald-600 text-sm"></i>
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="completed-count">{{ $accountRequests->where('status', 'completed')->count() }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="completed-count">{{ $completedCount }}</p>
                 </div>
             </div>
         </div>
@@ -305,74 +304,4 @@
     <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const accountItems = document.querySelectorAll('.account-item');
-    const accountCards = document.querySelectorAll('.account-card');
-    
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            
-            // Update active button
-            filterBtns.forEach(b => {
-                b.classList.remove('active', 'bg-green-100', 'text-green-800');
-                b.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            this.classList.add('active', 'bg-green-100', 'text-green-800');
-            this.classList.remove('bg-gray-100', 'text-gray-600');
-            
-            // Filter accounts
-            const allItems = [...accountItems, ...accountCards];
-            allItems.forEach(item => {
-                const status = item.dataset.status;
-                if (filter === 'all' || status === filter) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            
-            // Update counts
-            function updateCounts() {
-                // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-                // This function is now empty or can be removed if not used elsewhere.
-            }
-            // Initial count update
-            // updateCounts(); // No longer needed
-            // Update counts on window resize
-            // window.removeEventListener('resize', updateCounts); // No longer needed
-        });
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        const allItems = [...accountItems, ...accountCards];
-        allItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-    
-    // Update counts
-    function updateCounts() {
-        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-        // This function is now empty or can be removed if not used elsewhere.
-    }
-    
-    // Initial count update
-    // updateCounts(); // No longer needed
-    // Update counts on window resize
-    // window.removeEventListener('resize', updateCounts); // No longer needed
-});
-</script>
 @endsection

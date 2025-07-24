@@ -609,23 +609,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        const allItems = [...requestItems, ...requestCards];
-        allItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-        updateCounts();
-    });
-    
     // Update counts
     function updateCounts() {
         let totalVisible = 0, blotter = 0, document = 0, pending = 0, completed = 0;

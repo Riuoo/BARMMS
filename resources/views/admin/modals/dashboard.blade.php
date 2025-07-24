@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <div class="mt-4">
-                    <a href="{{ route('admin.new-account-requests') }}" class="text-orange-100 hover:text-white text-sm font-medium flex items-center">
+                    <a href="{{ route('admin.requests.new-account-requests') }}" class="text-orange-100 hover:text-white text-sm font-medium flex items-center">
                         Manage requests <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>

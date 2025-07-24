@@ -48,39 +48,38 @@
     @endif
 
     <!-- Enhanced Filters, Search, and Bulk Actions -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col gap-4">
-            <!-- Search Bar (Mobile First) -->
-            <div class="relative">
-                <input type="text" id="searchInput" placeholder="Search residents by name, email, or address..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
+    <form method="GET" action="{{ route('admin.residents') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" id="searchInput" placeholder="Search residents by name, email, or address..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" value="{{ request('search') }}">
                 </div>
             </div>
-            
-            <!-- Filter Buttons (Scrollable on Mobile) -->
-            <div class="overflow-x-auto">
-                <div class="flex gap-2 min-w-max pb-2">
-                    <button class="filter-btn active px-4 py-2 text-sm font-medium rounded-full bg-green-100 text-green-800 whitespace-nowrap" data-filter="all">
-                        <i class="fas fa-users mr-1"></i>
-                        All Residents
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="active">
-                        <i class="fas fa-user-check mr-1"></i>
-                        Active
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="inactive">
-                        <i class="fas fa-user-slash mr-1"></i>
-                        Inactive
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="recent">
-                        <i class="fas fa-clock mr-1"></i>
-                        Recently Added
-                    </button>
-                </div>
+            <!-- Status Filter -->
+            <div class="sm:w-48">
+                <select name="status" id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <option value="">All Status</option>
+                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+            </div>
+            <!-- Recent Filter -->
+            <div class="sm:w-48">
+                <select name="recent" id="recentFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <option value="">All Residents</option>
+                    <option value="recent" {{ request('recent') == 'recent' ? 'selected' : '' }}>Recently Added</option>
+                </select>
+            </div>
+            <div class="flex items-center">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
+                <a href="{{ route('admin.residents') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
@@ -93,7 +92,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Total Residents</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="total-count">{{ $residents->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="total-count">{{ $totalResidents }}</p>
                 </div>
             </div>
         </div>
@@ -106,7 +105,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Active Residents</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="active-count">{{ $residents->where('active', true)->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="active-count">{{ $activeResidents }}</p>
                 </div>
             </div>
         </div>
@@ -119,7 +118,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">This Month</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="month-count">{{ $residents->where('created_at', '>=', now()->startOfMonth())->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="month-count">{{ $recentResidents }}</p>
                 </div>
             </div>
         </div>
@@ -132,7 +131,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">With Address</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="address-count">{{ $residents->whereNotNull('address')->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="address-count">{{ $withAddress }}</p>
                 </div>
             </div>
         </div>
@@ -469,234 +468,4 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const residentItems = document.querySelectorAll('.resident-item');
-    const residentCards = document.querySelectorAll('.resident-card');
-    
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            
-            // Update active button
-            filterBtns.forEach(b => {
-                b.classList.remove('active', 'bg-green-100', 'text-green-800');
-                b.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            this.classList.add('active', 'bg-green-100', 'text-green-800');
-            this.classList.remove('bg-gray-100', 'text-gray-600');
-            
-            // Filter residents
-            const allItems = [...residentItems, ...residentCards];
-            allItems.forEach(item => {
-                const status = item.dataset.status;
-                const created = item.dataset.created;
-                const now = new Date();
-                const createdDate = new Date(created);
-                const isRecent = (now - createdDate) < (30 * 24 * 60 * 60 * 1000); // 30 days
-                
-                if (filter === 'all' || 
-                    (filter === 'active' && status === 'active') ||
-                    (filter === 'inactive' && status === 'inactive') ||
-                    (filter === 'recent' && isRecent)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            
-            // Update counts
-            function updateCounts() {
-                // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-                // This function is now empty or can be removed if not used elsewhere.
-            }
-            // Initial count update
-            // updateCounts(); // No longer needed
-            // Update counts on window resize
-            // window.addEventListener('resize', updateCounts); // No longer needed
-        });
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        const allItems = [...residentItems, ...residentCards];
-        allItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-    
-    // Update counts
-    function updateCounts() {
-        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-        // This function is now empty or can be removed if not used elsewhere.
-    }
-    // Initial count update
-    // updateCounts(); // No longer needed
-    // Update counts on window resize
-    // window.addEventListener('resize', updateCounts); // No longer needed
-});
-
-// Demographics Modal Functions
-function showDemographicsModal(residentId, residentName) {
-    document.getElementById('modalResidentName').textContent = residentName;
-    
-    // Find the resident data from the current page
-    const residentData = findResidentData(residentId);
-    if (residentData) {
-        displayDemographics(residentData);
-    } else {
-        // If not found on page, you could make an AJAX call here
-        document.getElementById('demographicsContent').innerHTML = '<p class="text-gray-500">Demographic data not available.</p>';
-    }
-    
-    document.getElementById('demographicsModal').classList.remove('hidden');
-    document.getElementById('demographicsModal').classList.add('flex');
-}
-
-function closeDemographicsModal() {
-    document.getElementById('demographicsModal').classList.add('hidden');
-    document.getElementById('demographicsModal').classList.remove('flex');
-}
-
-function findResidentData(residentId) {
-    // This function would need to be implemented based on your data structure
-    // For now, we'll create a mock implementation
-    // You might want to store resident data in a JavaScript object or make an AJAX call
-    
-    // Example implementation - you'll need to adapt this to your actual data
-    const residents = @json($residents);
-    return residents.find(resident => resident.id === residentId);
-}
-
-function displayDemographics(resident) {
-    const content = document.getElementById('demographicsContent');
-    
-    let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
-    
-    // Personal Information
-    html += `
-        <div class="bg-gray-50 rounded-lg p-4">
-            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-user mr-2 text-blue-600"></i>
-                Personal Information
-            </h4>
-            <div class="space-y-3">
-                ${resident.age ? `
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Age:</span>
-                        <span class="text-sm text-gray-900">${resident.age} years old</span>
-                    </div>
-                ` : ''}
-                ${resident.family_size ? `
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Family Size:</span>
-                        <span class="text-sm text-gray-900">${resident.family_size} members</span>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `;
-    
-    // Education & Employment
-    html += `
-        <div class="bg-gray-50 rounded-lg p-4">
-            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-graduation-cap mr-2 text-green-600"></i>
-                Education & Employment
-            </h4>
-            <div class="space-y-3">
-                ${resident.education_level ? `
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Education Level:</span>
-                        <span class="text-sm text-gray-900">${resident.education_level}</span>
-                    </div>
-                ` : ''}
-                ${resident.employment_status ? `
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Employment Status:</span>
-                        <span class="text-sm text-gray-900">${resident.employment_status}</span>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `;
-    
-    // Financial Information
-    html += `
-        <div class="bg-gray-50 rounded-lg p-4">
-            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-money-bill mr-2 text-yellow-600"></i>
-                Financial Information
-            </h4>
-            <div class="space-y-3">
-                ${resident.income_level ? `
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Income Level:</span>
-                        <span class="text-sm text-gray-900">${resident.income_level}</span>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `;
-    
-    // Health Information
-    html += `
-        <div class="bg-gray-50 rounded-lg p-4">
-            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-heartbeat mr-2 text-red-600"></i>
-                Health Information
-            </h4>
-            <div class="space-y-3">
-                ${resident.health_status ? `
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Health Status:</span>
-                        <span class="text-sm text-gray-900">${resident.health_status}</span>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `;
-    
-    html += '</div>';
-    
-    // If no demographic data
-    if (!resident.age && !resident.family_size && !resident.education_level && 
-        !resident.income_level && !resident.employment_status && !resident.health_status) {
-        html = `
-            <div class="text-center py-8">
-                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-user-friends text-gray-400 text-xl"></i>
-                </div>
-                <h4 class="text-lg font-medium text-gray-900 mb-2">No Demographic Data</h4>
-                <p class="text-gray-500">This resident doesn't have any demographic information recorded yet.</p>
-            </div>
-        `;
-    }
-    
-    content.innerHTML = html;
-}
-
-// Delete functionality
-function deleteResident(id, name) {
-    document.getElementById('residentName').textContent = name;
-    document.getElementById('deleteForm').action = `/admin/residents/${id}`;
-    document.getElementById('deleteModal').classList.remove('hidden');
-    document.getElementById('deleteModal').classList.add('flex');
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-    document.getElementById('deleteModal').classList.remove('flex');
-}
-</script>
 @endsection

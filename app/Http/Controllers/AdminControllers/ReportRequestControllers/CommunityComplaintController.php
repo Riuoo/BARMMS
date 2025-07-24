@@ -8,24 +8,40 @@ use Illuminate\Support\Facades\Log;
 
 class CommunityComplaintController
 {
-    public function index()
+    public function index(Request $request)
     {
-        $complaints = CommunityComplaint::with('user')
-            ->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")
+        // Statistics from full dataset
+        $total = CommunityComplaint::count();
+        $pending = CommunityComplaint::where('status', 'pending')->count();
+        $under_review = CommunityComplaint::where('status', 'under_review')->count();
+        $in_progress = CommunityComplaint::where('status', 'in_progress')->count();
+        $resolved = CommunityComplaint::where('status', 'resolved')->count();
+        $closed = CommunityComplaint::where('status', 'closed')->count();
+
+        // For display (filtered)
+        $query = CommunityComplaint::with('user');
+        if ($request->filled('search')) {
+            $search = trim($request->get('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+        $complaints = $query->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")
             ->orderByDesc('created_at')
             ->get();
-        
-        // Get statistics
         $stats = [
-            'total' => $complaints->count(),
-            'pending' => $complaints->where('status', 'pending')->count(),
-            'under_review' => $complaints->where('status', 'under_review')->count(),
-            'in_progress' => $complaints->where('status', 'in_progress')->count(),
-            'resolved' => $complaints->where('status', 'resolved')->count(),
-            'closed' => $complaints->where('status', 'closed')->count(),
-            'unread' => $complaints->where('is_read', false)->count(),
+            'total' => $total,
+            'pending' => $pending,
+            'under_review' => $under_review,
+            'in_progress' => $in_progress,
+            'resolved' => $resolved,
+            'closed' => $closed,
         ];
-        
         return view('admin.requests.community-complaints', compact('complaints', 'stats'));
     }
 
@@ -76,9 +92,13 @@ class CommunityComplaintController
         $validated = $request->validate([
             'status' => 'required|in:pending,under_review,in_progress,resolved,closed',
         ]);
-
         try {
             $complaint = CommunityComplaint::findOrFail($id);
+            $user = $complaint->user;
+            if (!$user || !$user->active) {
+                notify()->error('This user account is inactive and cannot make transactions.');
+                return redirect()->back();
+            }
             
             $complaint->status = $validated['status'];
             

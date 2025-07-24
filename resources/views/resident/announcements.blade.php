@@ -64,27 +64,30 @@
     </div>
 
     <!-- Search and Filter -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('resident.announcements') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex flex-wrap gap-2">
-                <button class="filter-btn active px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800" data-filter="all">
-                    All Announcements
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="important">
-                    Important
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="recent">
-                    Recent
-                </button>
+                <select name="priority" id="priorityFilter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="">All Announcements</option>
+                    <option value="important" {{ request('priority') == 'important' ? 'selected' : '' }}>Important</option>
+                </select>
+                <select name="recent" id="recentFilter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="">All Dates</option>
+                    <option value="recent" {{ request('recent') == 'recent' ? 'selected' : '' }}>Recent</option>
+                </select>
             </div>
             <div class="relative">
-                <input type="text" id="searchInput" placeholder="Search announcements..." class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <input type="text" name="search" id="searchInput" placeholder="Search announcements..." class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
             </div>
+            <div class="flex items-center">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
+                <a href="{{ route('resident.announcements') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
+            </div>
         </div>
-    </div>
+    </form>
 
     <!-- Announcements List -->
     @if(empty($announcements))
@@ -145,7 +148,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
             @endforeach
         </div>
 
@@ -162,89 +164,4 @@
 
     <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden">No announcements match your search criteria.</p>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const announcementItems = document.querySelectorAll('.announcement-item');
-    
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            
-            // Update active button
-            filterBtns.forEach(b => {
-                b.classList.remove('active', 'bg-green-100', 'text-green-800');
-                b.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            this.classList.add('active', 'bg-green-100', 'text-green-800');
-            this.classList.remove('bg-gray-100', 'text-gray-600');
-            
-            // Filter announcements
-            announcementItems.forEach(item => {
-                const priority = item.dataset.priority;
-                const date = item.dataset.date;
-                const now = new Date();
-                const itemDate = new Date(date);
-                const daysDiff = Math.floor((now - itemDate) / (1000 * 60 * 60 * 24));
-                
-                let show = false;
-                if (filter === 'all') {
-                    show = true;
-                } else if (filter === 'important' && priority === 'high') {
-                    show = true;
-                } else if (filter === 'recent' && daysDiff <= 7) {
-                    show = true;
-                }
-                
-                item.style.display = show ? '' : 'none';
-            });
-            
-            updateCounts();
-        });
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        announcementItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-        updateCounts();
-    });
-    
-    // Update counts
-    function updateCounts() {
-        const visibleItems = Array.from(announcementItems).filter(item => item.style.display !== 'none');
-        const totalVisible = visibleItems.length;
-        const importantCount = visibleItems.filter(item => item.dataset.priority === 'high').length;
-        const recentCount = visibleItems.filter(item => {
-            const date = new Date(item.dataset.date);
-            const now = new Date();
-            const daysDiff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-            return daysDiff <= 7;
-        }).length;
-        
-        // Update statistics cards
-        const statCards = document.querySelectorAll('.bg-white.rounded-lg.shadow-sm.border.border-gray-200.p-4');
-        if (statCards.length >= 3) {
-            const countElements = statCards[1].querySelector('.text-2xl.font-bold.text-gray-900');
-            const importantElements = statCards[2].querySelector('.text-2xl.font-bold.text-gray-900');
-            if (countElements) countElements.textContent = totalVisible;
-            if (importantElements) importantElements.textContent = importantCount;
-        }
-    }
-    
-    // Initial count update
-    updateCounts();
-});
-</script>
 @endsection

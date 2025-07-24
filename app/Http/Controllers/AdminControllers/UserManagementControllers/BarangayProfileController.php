@@ -8,15 +8,43 @@ use Illuminate\Support\Facades\Hash;
 
 class BarangayProfileController
 {
-    public function barangayProfile()
+    public function barangayProfile(Request $request)
     {
         if (session('user_role') !== 'barangay') {
             // Abort the request with a 403 Unauthorized error
             abort(403, 'Unauthorized');
         }
-        
-        $barangayProfiles = BarangayProfile::orderByDesc('active')->orderBy('name')->get();
-        return view('admin.barangay-profiles.barangay-profiles', compact('barangayProfiles'));
+        // Statistics from full dataset
+        $totalOfficials = BarangayProfile::count();
+        $captainCount = BarangayProfile::where('role', 'captain')->count();
+        $councilorCount = BarangayProfile::where('role', 'councilor')->count();
+        $otherCount = BarangayProfile::whereNotIn('role', ['captain', 'councilor'])->count();
+
+        // For display (filtered)
+        $query = BarangayProfile::query();
+        // Search by name, email, or role
+        if ($request->filled('search')) {
+            $search = trim($request->get('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('role', 'like', "%{$search}%");
+            });
+        }
+        // Filter by role
+        if ($request->filled('role')) {
+            $query->where('role', $request->get('role'));
+        }
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->get('status') === 'active') {
+                $query->where('active', true);
+            } elseif ($request->get('status') === 'inactive') {
+                $query->where('active', false);
+            }
+        }
+        $barangayProfiles = $query->orderByDesc('active')->orderBy('name')->get();
+        return view('admin.barangay-profiles.barangay-profiles', compact('barangayProfiles', 'totalOfficials', 'captainCount', 'councilorCount', 'otherCount'));
     }
 
     public function create()

@@ -61,27 +61,27 @@
     @endif
 
     <!-- Filters and Search -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.notifications') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex flex-wrap gap-2">
-                <button class="filter-btn active px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800" data-filter="all">
-                    All
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="unread">
-                    Unread
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="read">
-                    Read
-                </button>
+                <select name="read_status" id="readStatusFilter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="">All</option>
+                    <option value="unread" {{ request('read_status') == 'unread' ? 'selected' : '' }}>Unread</option>
+                    <option value="read" {{ request('read_status') == 'read' ? 'selected' : '' }}>Read</option>
+                </select>
             </div>
             <div class="relative">
-                <input type="text" id="search-notifications" placeholder="Search notifications..." class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <input type="text" name="search" id="search-notifications" placeholder="Search notifications..." class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
             </div>
+            <div class="flex items-center">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
+                <a href="{{ route('admin.notifications') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
+            </div>
         </div>
-    </div>
+    </form>
 
     <!-- Notifications List -->
     @if($notifications->isEmpty())
@@ -213,133 +213,4 @@
     @endif
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const notificationItems = document.querySelectorAll('.notification-item');
-    
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            
-            // Update active button
-            filterBtns.forEach(b => {
-                b.classList.remove('active', 'bg-green-100', 'text-green-800');
-                b.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            this.classList.add('active', 'bg-green-100', 'text-green-800');
-            this.classList.remove('bg-gray-100', 'text-gray-600');
-            
-            // Filter notifications
-            notificationItems.forEach(item => {
-                const status = item.dataset.status;
-                if (filter === 'all' || status === filter) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            
-            updateCounts();
-        });
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('search-notifications');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        notificationItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-    
-    // Update counts
-    function updateCounts() {
-        const visibleItems = Array.from(notificationItems).filter(item => 
-            item.style.display !== 'none'
-        );
-        
-        const unreadCount = visibleItems.filter(item => 
-            item.dataset.status === 'unread'
-        ).length;
-        
-        const readCount = visibleItems.filter(item => 
-            item.dataset.status === 'read'
-        ).length;
-        
-        document.getElementById('unread-count').textContent = `${unreadCount} unread`;
-        document.getElementById('read-count').textContent = `${readCount} read`;
-    }
-    
-    // Initial count update
-    updateCounts();
-});
-
-// Mark as read functionality
-function markAsRead(type, id) {
-    fetch(`/admin/notifications/mark-as-read/${type}/${id}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Update the row styling
-        const row = document.querySelector(`[data-status="unread"]`);
-        if (row) {
-            row.dataset.status = 'read';
-            row.classList.remove('bg-blue-50');
-            row.classList.add('opacity-75');
-            
-            // Update status badge
-            const statusCell = row.querySelector('td:nth-child(3)');
-            if (statusCell) {
-                statusCell.innerHTML = `
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <i class="fas fa-check-circle mr-1"></i>
-                        Read
-                    </span>
-                `;
-            }
-            
-            // Remove "New" badge
-            const newBadge = row.querySelector('.bg-red-100');
-            if (newBadge) {
-                newBadge.remove();
-            }
-            
-            // Update action buttons
-            const actionCell = row.querySelector('td:nth-child(4)');
-            if (actionCell) {
-                actionCell.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <a href="${row.querySelector('a').href}" 
-                           class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                            <i class="fas fa-eye mr-1"></i>
-                            View
-                        </a>
-                    </div>
-                `;
-            }
-        }
-        
-        // Update counts
-        const event = new Event('DOMContentLoaded');
-        document.dispatchEvent(event);
-    })
-    .catch(error => {
-        console.error('Error marking notification as read:', error);
-    });
-}
-</script>
 @endsection

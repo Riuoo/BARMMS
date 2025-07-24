@@ -10,14 +10,33 @@ use App\Models\Residents;
 
 class DocumentRequestController
 {
-    public function documentRequest()
+    public function documentRequest(Request $request)
     {
-        // Eager load the user relationship
-        $documentRequests = DocumentRequest::with('user')
-            ->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
+        // Statistics from full dataset
+        $totalRequests = DocumentRequest::count();
+        $pendingCount = DocumentRequest::where('status', 'pending')->count();
+        $approvedCount = DocumentRequest::where('status', 'approved')->count();
+        $completedCount = DocumentRequest::where('status', 'completed')->count();
+
+        // For display (filtered)
+        $query = DocumentRequest::with('user');
+        if ($request->filled('search')) {
+            $search = trim($request->get('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('document_type', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+        $documentRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
             ->orderByDesc('created_at')
             ->get();
-        return view('admin.requests.document-requests', compact('documentRequests'));
+        return view('admin.requests.document-requests', compact('documentRequests', 'totalRequests', 'pendingCount', 'approvedCount', 'completedCount'));
     }
 
     public function getDetails($id)
@@ -55,6 +74,11 @@ class DocumentRequestController
     {
         try {
             $documentRequest = DocumentRequest::with('user')->findOrFail($id);
+            $user = $documentRequest->user;
+            if (!$user || !$user->active) {
+                notify()->error('This user account is inactive and cannot make transactions.');
+                return redirect()->back();
+            }
 
             if ($documentRequest->status !== 'pending') {
                 notify()->error('Document request already processed.');
@@ -117,6 +141,11 @@ class DocumentRequestController
     {
         try {
             $documentRequest = DocumentRequest::with('user')->findOrFail($id);
+            $user = $documentRequest->user;
+            if (!$user || !$user->active) {
+                notify()->error('This user account is inactive and cannot make transactions.');
+                return redirect()->back();
+            }
 
             // Get admin user data from session
             $adminUser = null;
@@ -175,6 +204,11 @@ class DocumentRequestController
     {
         try {
             $documentRequest = DocumentRequest::findOrFail($id);
+            $user = $documentRequest->user;
+            if (!$user || !$user->active) {
+                notify()->error('This user account is inactive and cannot make transactions.');
+                return back();
+            }
             if ($documentRequest->status !== 'approved') {
                 notify()->error('Only approved requests can be marked as completed.');
                 return back();
@@ -192,17 +226,22 @@ class DocumentRequestController
 
     public function create()
     {
-        $residents = Residents::all();
+        $residents = Residents::where('active', true)->get();
         return view('admin.requests.create_document_request', compact('residents'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:residents,id', // Ensure the user_id exists in the residents table
+            'user_id' => 'required|exists:residents,id',
             'document_type' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
+        $user = \App\Models\Residents::find($validated['user_id']);
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back()->withInput();
+        }
         try {
             $documentRequest = DocumentRequest::create([
                 'user_id' => $validated['user_id'],

@@ -48,51 +48,41 @@
     @endif
 
     <!-- Enhanced Filters, Search, and Bulk Actions -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col gap-4">
-            <!-- Search Bar (Mobile First) -->
-            <div class="relative">
-                <input type="text" id="searchInput" placeholder="Search officials by name, email, or role..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
+    <form method="GET" action="{{ route('admin.barangay-profiles') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" id="searchInput" placeholder="Search officials by name, email, or role..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" value="{{ request('search') }}">
                 </div>
             </div>
-            
-            <!-- Filter Buttons (Scrollable on Mobile) -->
-            <div class="overflow-x-auto">
-                <div class="flex gap-2 min-w-max pb-2">
-                    <button class="filter-btn active px-4 py-2 text-sm font-medium rounded-full bg-green-100 text-green-800 whitespace-nowrap" data-filter="all">
-                        <i class="fas fa-users mr-1"></i>
-                        All Officials
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="captain">
-                        <i class="fas fa-crown mr-1"></i>
-                        Captain
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="councilor">
-                        <i class="fas fa-user-tie mr-1"></i>
-                        Councilors
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="secretary">
-                        <i class="fas fa-file-alt mr-1"></i>
-                        Secretary
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="treasurer">
-                        <i class="fas fa-coins mr-1"></i>
-                        Treasurer
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="active">
-                        <i class="fas fa-user-check mr-1"></i>
-                        Active
-                    </button>
-                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap" data-filter="inactive">
-                        <i class="fas fa-user-slash mr-1"></i>
-                        Inactive
-                    </button>
-                </div>
+            <!-- Role Filter -->
+            <div class="sm:w-48">
+                <select name="role" id="roleFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <option value="">All Roles</option>
+                    <option value="captain" {{ request('role') == 'captain' ? 'selected' : '' }}>Captain</option>
+                    <option value="councilor" {{ request('role') == 'councilor' ? 'selected' : '' }}>Councilor</option>
+                    <option value="secretary" {{ request('role') == 'secretary' ? 'selected' : '' }}>Secretary</option>
+                    <option value="treasurer" {{ request('role') == 'treasurer' ? 'selected' : '' }}>Treasurer</option>
+                </select>
+            </div>
+            <!-- Status Filter -->
+            <div class="sm:w-48">
+                <select name="status" id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <option value="">All Status</option>
+                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+            </div>
+            <div class="flex items-center">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
+                <a href="{{ route('admin.barangay-profiles') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
@@ -105,7 +95,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Total Officials</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="total-count">{{ $barangayProfiles->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="total-count">{{ $totalOfficials }}</p>
                 </div>
             </div>
         </div>
@@ -118,7 +108,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Captains</p>
-                                         <p class="text-lg md:text-2xl font-bold text-gray-900" id="captain-count">{{ $barangayProfiles->where('role', 'captain')->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="captain-count">{{ $captainCount }}</p>
                 </div>
             </div>
         </div>
@@ -131,7 +121,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Councilors</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="councilor-count">{{ $barangayProfiles->where('role', 'councilor')->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="councilor-count">{{ $councilorCount }}</p>
                 </div>
             </div>
         </div>
@@ -144,7 +134,7 @@
                 </div>
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Other Staff</p>
-                                         <p class="text-lg md:text-2xl font-bold text-gray-900" id="other-count">{{ $barangayProfiles->whereNotIn('role', ['captain', 'councilor'])->count() }}</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="other-count">{{ $otherCount }}</p>
                 </div>
             </div>
         </div>
@@ -381,84 +371,17 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const officialItems = document.querySelectorAll('.official-item');
-    const officialCards = document.querySelectorAll('.official-card');
-    
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            
-            // Update active button
-            filterBtns.forEach(b => {
-                b.classList.remove('active', 'bg-green-100', 'text-green-800');
-                b.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            this.classList.add('active', 'bg-green-100', 'text-green-800');
-            this.classList.remove('bg-gray-100', 'text-gray-600');
-            
-            // Filter officials
-            const allItems = [...officialItems, ...officialCards];
-            allItems.forEach(item => {
-                const role = item.dataset.role;
-                const status = item.dataset.status;
-                if (filter === 'all' || role === filter || (filter === 'active' && status === 'active') || (filter === 'inactive' && status === 'inactive')) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            
-            // Update counts
-            function updateCounts() {
-                // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-                // This function is now empty or can be removed if not used elsewhere.
-            }
-            // Initial count update
-            // updateCounts(); // No longer needed
-            // Update counts on window resize
-            // window.addEventListener('resize', updateCounts); // No longer needed
-        });
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        const allItems = [...officialItems, ...officialCards];
-        allItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-    
-    // Update counts
-    function updateCounts() {
-        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-        // This function is now empty or can be removed if not used elsewhere.
-    }
-    // Initial count update
-    // updateCounts(); // No longer needed
-    // Update counts on window resize
-    // window.addEventListener('resize', updateCounts); // No longer needed
-});
+@endsection
 
-// Delete functionality
+@section('scripts')
+@parent
+<script>
 function deleteOfficial(id, name) {
     document.getElementById('officialName').textContent = name;
     document.getElementById('deleteForm').action = `/admin/barangay-profiles/${id}`;
     document.getElementById('deleteModal').classList.remove('hidden');
     document.getElementById('deleteModal').classList.add('flex');
 }
-
 function closeDeleteModal() {
     document.getElementById('deleteModal').classList.add('hidden');
     document.getElementById('deleteModal').classList.remove('flex');

@@ -16,9 +16,35 @@ class AccomplishProjectController
         $this->projectService = $projectService;
     }
 
-    public function accomplishProject()
+    public function accomplishProject(Request $request)
     {
-        $projects = AccomplishedProject::orderBy('completion_date', 'desc')->get();
+        $query = AccomplishedProject::query();
+
+        // Search by title, description, or category
+        if ($request->filled('search')) {
+            $search = trim($request->get('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->filled('category')) {
+            $query->where('category', $request->get('category'));
+        }
+
+        // Filter by featured
+        if ($request->filled('featured')) {
+            if ($request->get('featured') === 'featured') {
+                $query->where('is_featured', true);
+            } elseif ($request->get('featured') === 'non-featured') {
+                $query->where('is_featured', false);
+            }
+        }
+
+        $projects = $query->orderBy('completion_date', 'desc')->get();
         $stats = $this->projectService->getProjectStats();
         $featuredProjects = AccomplishedProject::where('is_featured', true)->get();
         

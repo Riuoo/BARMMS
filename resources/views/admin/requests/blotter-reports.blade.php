@@ -50,33 +50,32 @@
     @endif
 
     <!-- Filters and Search -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col gap-4">
-            <!-- Search Bar -->
-            <div class="relative">
-                <input type="text" id="blotterSearchInput" placeholder="Search reports..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
+    <form method="GET" action="{{ route('admin.blotter-reports') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" id="blotterSearchInput" placeholder="Search reports..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
                 </div>
             </div>
-            
-            <!-- Filter Buttons -->
-            <div class="flex flex-wrap gap-2">
-                <button class="filter-btn active px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800" data-filter="all">
-                    All Reports
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="pending">
-                    Pending
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="approved">
-                    Approved
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="completed">
-                    Completed
-                </button>
+            <!-- Status Filter -->
+            <div class="sm:w-48">
+                <select name="status" id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <option value="">All Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                </select>
+            </div>
+            <div class="flex items-center">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
+                <a href="{{ route('admin.blotter-reports') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
@@ -89,7 +88,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Total Reports</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="total-count">{{ $blotterRequests->count() }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="total-count">{{ $totalReports }}</p>
                 </div>
             </div>
         </div>
@@ -102,7 +101,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="pending-count">{{ $blotterRequests->where('status', 'pending')->count() }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="pending-count">{{ $pendingCount }}</p>
                 </div>
             </div>
         </div>
@@ -115,7 +114,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Approved</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="approved-count">{{ $blotterRequests->where('status', 'approved')->count() }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="approved-count">{{ $approvedCount }}</p>
                 </div>
             </div>
         </div>
@@ -128,7 +127,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="completed-count">{{ $blotterRequests->where('status', 'completed')->count() }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="completed-count">{{ $completedCount }}</p>
                 </div>
             </div>
         </div>
@@ -484,67 +483,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const blotterItems = document.querySelectorAll('.blotter-item');
-    const blotterCards = document.querySelectorAll('.blotter-card');
-    
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            
-            // Update active button
-            filterBtns.forEach(b => {
-                b.classList.remove('active', 'bg-green-100', 'text-green-800');
-                b.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            this.classList.add('active', 'bg-green-100', 'text-green-800');
-            this.classList.remove('bg-gray-100', 'text-gray-600');
-            
-            // Filter reports
-            const allItems = [...blotterItems, ...blotterCards];
-            allItems.forEach(item => {
-                const status = item.dataset.status;
-                if (filter === 'all' || status === filter) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            
-            // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-            // This function is now empty or can be removed if not used elsewhere.
-        });
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('blotterSearchInput');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        const allItems = [...blotterItems, ...blotterCards];
-        allItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-        // This function is now empty or can be removed if not used elsewhere.
-    });
-    
-    // Update counts
-    function updateCounts() {
-        // No longer update the statistics cards! The statistics cards always show the Blade-rendered totals.
-        // This function is now empty or can be removed if not used elsewhere.
-    }
-    // Initial count update
-    // updateCounts(); // No longer needed
-    // Update counts on window resize
-    // window.removeEventListener('resize', updateCounts); // No longer needed
-
     // Add event listeners for view full buttons
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('view-full-btn')) {
@@ -708,7 +646,6 @@ function formatFileSize(bytes) {
 
 function completeAndDownload(event, blotterId) {
     event.preventDefault();
-    // Find the CSRF token for this form
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
     fetch(`/admin/blotter-reports/${blotterId}/complete`, {
@@ -718,22 +655,33 @@ function completeAndDownload(event, blotterId) {
             'Accept': 'application/pdf'
         }
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.blob();
-    })
-    .then(blob => {
-        // Set flag for notification after reload
-        localStorage.setItem('showBlotterCompleteNotify', '1');
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `blotter_report_${blotterId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        setTimeout(() => location.reload(), 1000);
+    .then(async response => {
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/pdf')) {
+            const blob = await response.blob();
+            localStorage.setItem('showBlotterCompleteNotify', '1');
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `blotter_report_${blotterId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            let errorMsg = 'Error completing and downloading PDF.';
+            try {
+                const text = await response.text();
+                if (text.includes('This user account is inactive')) {
+                    errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('<ul class="list-disc')) {
+                    const match = text.match(/<li>(.*?)<\/li>/);
+                    if (match) errorMsg = match[1];
+                }
+            } catch (e) {}
+            alert(errorMsg);
+        }
     })
     .catch(error => {
         alert('Error completing and downloading PDF.');
@@ -746,7 +694,6 @@ function approveAndDownloadBlotter(event, blotterId) {
     event.preventDefault();
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
-    // You may need to collect hearing_date from a modal or form input
     const hearingDate = form.querySelector('input[name="hearing_date"]').value;
     fetch(`/admin/blotter-reports/${blotterId}/approve`, {
         method: 'POST',
@@ -757,21 +704,33 @@ function approveAndDownloadBlotter(event, blotterId) {
         },
         body: JSON.stringify({ hearing_date: hearingDate })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.blob();
-    })
-    .then(blob => {
-        localStorage.setItem('showBlotterApproveNotify', '1');
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `summon_notice_${blotterId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        setTimeout(() => location.reload(), 1000);
+    .then(async response => {
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/pdf')) {
+            const blob = await response.blob();
+            localStorage.setItem('showBlotterApproveNotify', '1');
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `summon_notice_${blotterId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            let errorMsg = 'Error approving and downloading PDF.';
+            try {
+                const text = await response.text();
+                if (text.includes('This user account is inactive')) {
+                    errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('<ul class="list-disc')) {
+                    const match = text.match(/<li>(.*?)<\/li>/);
+                    if (match) errorMsg = match[1];
+                }
+            } catch (e) {}
+            alert(errorMsg);
+        }
     })
     .catch(error => {
         alert('Error approving and downloading PDF.');
@@ -794,26 +753,36 @@ function generateNewSummonPdf(event, blotterId) {
         },
         body: JSON.stringify({ new_summon_date: newSummonDate })
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => { throw new Error(text); });
+    .then(async response => {
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/pdf')) {
+            const blob = await response.blob();
+            localStorage.setItem('showBlotterSummonNotify', '1');
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `new_summon_notice_${blotterId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            let errorMsg = 'Error generating new summon PDF.';
+            try {
+                const text = await response.text();
+                if (text.includes('This user account is inactive')) {
+                    errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('<ul class="list-disc')) {
+                    const match = text.match(/<li>(.*?)<\/li>/);
+                    if (match) errorMsg = match[1];
+                }
+            } catch (e) {}
+            alert(errorMsg);
         }
-        return response.blob();
-    })
-    .then(blob => {
-        localStorage.setItem('showBlotterSummonNotify', '1');
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `new_summon_notice_${blotterId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        setTimeout(() => location.reload(), 1000);
     })
     .catch(error => {
-        alert(error.message || 'Error generating new summon PDF.');
+        alert('Error generating new summon PDF.');
         console.error(error);
     });
     return false;

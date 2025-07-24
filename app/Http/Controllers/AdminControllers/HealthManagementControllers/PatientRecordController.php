@@ -51,7 +51,7 @@ class PatientRecordController
 
     public function create()
     {
-        $residents = Residents::orderBy('name')->get();
+        $residents = Residents::where('active', true)->orderBy('name')->get();
         return view('admin.patient-records.create', compact('residents'));
     }
 
@@ -75,7 +75,11 @@ class PatientRecordController
             'risk_level' => 'nullable|string|in:low,medium,high',
             'notes' => 'nullable|string|max:2000',
         ]);
-
+        $user = \App\Models\Residents::find($validated['resident_id']);
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back()->withInput();
+        }
         try {
             $patientRecord = PatientRecord::create([
                 'resident_id' => $validated['resident_id'],
@@ -125,6 +129,11 @@ class PatientRecordController
     public function update(Request $request, $id)
     {
         $patientRecord = PatientRecord::findOrFail($id);
+        $user = $patientRecord->resident;
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back()->withInput();
+        }
         
         $validated = $request->validate([
             'resident_id' => 'required|exists:residents,id',

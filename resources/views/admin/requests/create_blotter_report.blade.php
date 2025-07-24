@@ -245,11 +245,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.getElementById('complainantSearch');
-        const searchResults = document.getElementById('searchResults');
-        const residentIdInput = document.getElementById('resident_id');
-
-        // File upload functionality
         const fileInput = document.getElementById('media');
         const uploadArea = document.getElementById('uploadArea');
         const filePreview = document.getElementById('filePreview');
@@ -379,49 +374,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Resident search functionality
-        searchInput.addEventListener('input', debounce(async () => {
-            const term = searchInput.value.trim();
-            if (term.length < 2) {
-                searchResults.innerHTML = '';
-                searchResults.classList.add('hidden');
-                return;
-            }
-
-            const response = await fetch(`{{ route('admin.search.residents') }}?term=${term}`);
-            const results = await response.json();
-
-            if (results.length > 0) {
-                searchResults.innerHTML = results.map(resident => `
-                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
-                        <div class="font-medium text-gray-900">${resident.name}</div>
-                        <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
-                    </div>
-                `).join('');
-                searchResults.classList.remove('hidden');
-            } else {
-                searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
-                searchResults.classList.remove('hidden');
-            }
-        }, 250));
-
-        searchResults.addEventListener('click', (event) => {
-            const target = event.target.closest('[data-id]');
-            if (target && target.dataset.id) {
-                residentIdInput.value = target.dataset.id;
-                searchInput.value = target.dataset.name;
-                searchResults.innerHTML = '';
-                searchResults.classList.add('hidden');
-            }
-        });
-
-        document.addEventListener('click', (event) => {
-            if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-                searchResults.innerHTML = '';
-                searchResults.classList.add('hidden');
-            }
-        });
-
     // Blotter create form AJAX submit for download + redirect + notify
     const createForm = document.getElementById('createBlotterForm');
     if (createForm) {
@@ -439,7 +391,8 @@
                     },
                     body: formData
                 });
-                if (response.ok) {
+                const contentType = response.headers.get('content-type') || '';
+                if (response.ok && contentType.includes('application/pdf')) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -454,7 +407,18 @@
                     // Redirect to reports page
                     window.location.href = "{{ route('admin.blotter-reports') }}";
                 } else {
-                    alert('Error creating blotter report.');
+                    // Try to extract error message from response
+                    let errorMsg = 'Error creating blotter report.';
+                    try {
+                        const text = await response.text();
+                        if (text.includes('This user account is inactive')) {
+                            errorMsg = 'This user account is inactive and cannot make transactions.';
+                        } else if (text.includes('<ul class="list-disc')) {
+                            const match = text.match(/<li>(.*?)<\/li>/);
+                            if (match) errorMsg = match[1];
+                        }
+                    } catch (e) {}
+                    alert(errorMsg);
                 }
             } catch (err) {
                 alert('Error creating blotter report.');
@@ -462,7 +426,6 @@
             }
         });
     }
-});
 
     function debounce(func, delay) {
         let timeoutId;
@@ -471,5 +434,51 @@
             timeoutId = setTimeout(() => func.apply(this, args), delay);
         };
     }
+
+    // Resident AJAX search for complainant
+    const searchInput = document.getElementById('complainantSearch');
+    const searchResults = document.getElementById('searchResults');
+    const residentIdInput = document.getElementById('resident_id');
+
+    searchInput.addEventListener('input', debounce(async () => {
+        const term = searchInput.value.trim();
+        if (term.length < 2) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+            return;
+        }
+        const response = await fetch(`{{ route('admin.search.residents') }}?term=${term}`);
+        const results = await response.json();
+        if (results.length > 0) {
+            searchResults.innerHTML = results.map(resident => `
+                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                    <div class="font-medium text-gray-900">${resident.name}</div>
+                    <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                </div>
+            `).join('');
+            searchResults.classList.remove('hidden');
+        } else {
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+            searchResults.classList.remove('hidden');
+        }
+    }, 250));
+
+    searchResults.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-id]');
+        if (target && target.dataset.id) {
+            residentIdInput.value = target.dataset.id;
+            searchInput.value = target.dataset.name;
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+        }
+    });
+});
 </script>
 @endsection

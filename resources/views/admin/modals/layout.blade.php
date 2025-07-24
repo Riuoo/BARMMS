@@ -359,8 +359,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.new-account-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.new-account-requests*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.new-account-requests*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-user-clock fa-fw mr-3 {{ request()->routeIs('admin.new-account-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                <a href="{{ route('admin.requests.new-account-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.requests.new-account-requests*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.requests.new-account-requests*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-user-clock fa-fw mr-3 {{ request()->routeIs('admin.requests.new-account-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Account Requests</span>
                                 </a>
                             </li>
@@ -520,8 +520,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.new-account-requests') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.new-account-requests*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-user-clock fa-fw mr-3 {{ request()->routeIs('admin.new-account-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                <a href="{{ route('admin.requests.new-account-requests') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.requests.new-account-requests*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-user-clock fa-fw mr-3 {{ request()->routeIs('admin.requests.new-account-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Account Requests</span>
                                 </a>
                             </li>

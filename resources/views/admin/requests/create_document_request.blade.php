@@ -199,93 +199,48 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.getElementById('residentSearch');
-        const searchResults = document.getElementById('searchResults');
-        const userIdInput = document.getElementById('user_id');
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('residentSearch');
+    const searchResults = document.getElementById('searchResults');
+    const userIdInput = document.getElementById('user_id');
 
-        searchInput.addEventListener('input', debounce(async () => {
-            const term = searchInput.value.trim();
-            if (term.length < 2) {
-                searchResults.innerHTML = '';
-                searchResults.classList.add('hidden');
-                return;
-            }
+    searchInput.addEventListener('input', debounce(async () => {
+        const term = searchInput.value.trim();
+        if (term.length < 2) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+            return;
+        }
+        const response = await fetch(`{{ route('admin.search.residents') }}?term=${term}`);
+        const results = await response.json();
+        if (results.length > 0) {
+            searchResults.innerHTML = results.map(resident => `
+                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                    <div class="font-medium text-gray-900">${resident.name}</div>
+                    <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                </div>
+            `).join('');
+            searchResults.classList.remove('hidden');
+        } else {
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+            searchResults.classList.remove('hidden');
+        }
+    }, 250));
 
-            // Use the same search endpoint as blotter reports for residents
-            const response = await fetch(`{{ route('admin.search.residents') }}?term=${term}`);
-            const results = await response.json();
+    searchResults.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-id]');
+        if (target && target.dataset.id) {
+            userIdInput.value = target.dataset.id;
+            searchInput.value = target.dataset.name;
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+        }
+    });
 
-            if (results.length > 0) {
-                searchResults.innerHTML = results.map(resident => `
-                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
-                        <div class="font-medium text-gray-900">${resident.name}</div>
-                        <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
-                    </div>
-                `).join('');
-                searchResults.classList.remove('hidden');
-            } else {
-                searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
-                searchResults.classList.remove('hidden');
-            }
-        }, 250));
-
-        searchResults.addEventListener('click', (event) => {
-            const target = event.target.closest('[data-id]');
-            if (target && target.dataset.id) {
-                userIdInput.value = target.dataset.id;
-                searchInput.value = target.dataset.name;
-                searchResults.innerHTML = '';
-                searchResults.classList.add('hidden');
-            }
-        });
-
-        document.addEventListener('click', (event) => {
-            if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-                searchResults.innerHTML = '';
-                searchResults.classList.add('hidden');
-            }
-        });
-
-        // Document create form AJAX submit for download + redirect + notify
-        const createForm = document.getElementById('createDocumentRequestForm');
-        if (createForm) {
-            createForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const form = e.target;
-                const formData = new FormData(form);
-                const csrfToken = form.querySelector('input[name="_token"]').value;
-                try {
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/pdf',
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        body: formData
-                    });
-                    if (response.ok) {
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'document_request.pdf';
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                        window.URL.revokeObjectURL(url);
-                        // Set flag for notification
-                        localStorage.setItem('showDocumentCreateNotify', '1');
-                        // Redirect to document requests page
-                        window.location.href = "{{ route('admin.document-requests') }}";
-                    } else {
-                        alert('Error creating document request.');
-                    }
-                } catch (err) {
-                    alert('Error creating document request.');
-                    console.error(err);
-                }
-            });
+    document.addEventListener('click', (event) => {
+        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
         }
     });
 
@@ -296,5 +251,6 @@
             timeoutId = setTimeout(() => func.apply(this, args), delay);
         };
     }
+});
 </script>
 @endsection

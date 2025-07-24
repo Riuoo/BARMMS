@@ -42,36 +42,33 @@
     @endif
 
     <!-- Filters and Search -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col gap-4">
-            <!-- Search Bar -->
-            <div class="relative">
-                <input type="text" id="complaintSearchInput" placeholder="Search complaints..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
+    <form method="GET" action="{{ route('admin.community-complaints') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" id="complaintSearchInput" placeholder="Search complaints..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
                 </div>
             </div>
-            
-            <!-- Filter Buttons -->
-            <div class="flex flex-wrap gap-2">
-                <button class="filter-btn active px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800" data-filter="all">
-                    All Complaints
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="pending">
-                    Pending
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="under_review">
-                    Under Review
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="in_progress">
-                    In Progress
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="resolved">
-                    Resolved
-                </button>
+            <!-- Status Filter -->
+            <div class="sm:w-48">
+                <select name="status" id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <option value="">All Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="under_review" {{ request('status') == 'under_review' ? 'selected' : '' }}>Under Review</option>
+                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                    <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                </select>
+            </div>
+            <div class="flex items-center">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
+                <a href="{{ route('admin.community-complaints') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 lg:gap-4 mb-6">
@@ -383,197 +380,4 @@
 <!-- Modals -->
 @include('admin.modals.community-complaint-modals')
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const complaintItems = document.querySelectorAll('.complaint-item');
-    const complaintCards = document.querySelectorAll('.complaint-card');
-    
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            
-            // Update active button
-            filterBtns.forEach(b => {
-                b.classList.remove('active', 'bg-green-100', 'text-green-800');
-                b.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            this.classList.add('active', 'bg-green-100', 'text-green-800');
-            this.classList.remove('bg-gray-100', 'text-gray-600');
-            
-            // Filter complaints
-            const allItems = [...complaintItems, ...complaintCards];
-            allItems.forEach(item => {
-                const status = item.dataset.status;
-                let show = false;
-                if (filter === 'all') {
-                    show = true;
-                } else if (status === filter) {
-                    show = true;
-                }
-                item.style.display = show ? '' : 'none';
-            });
-        });
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('complaintSearchInput');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        const allItems = [...complaintItems, ...complaintCards];
-        allItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-});
-
-// Function to toggle description visibility
-function toggleDescription(requestId) {
-    const descriptionContainer = document.getElementById(`description-${requestId}`);
-    const shortDesc = descriptionContainer.querySelector('.description-short');
-    const fullDesc = descriptionContainer.querySelector('.description-full');
-    const toggleBtn = descriptionContainer.querySelector('.toggle-desc-btn');
-    
-    if (fullDesc.classList.contains('hidden')) {
-        // Show full description
-        shortDesc.classList.add('hidden');
-        fullDesc.classList.remove('hidden');
-        toggleBtn.textContent = 'Read Less';
-    } else {
-        // Show short description
-        shortDesc.classList.remove('hidden');
-        fullDesc.classList.add('hidden');
-        toggleBtn.textContent = 'Read More';
-    }
-}
-
-// Function to show full description in modal
-function showFullDescription(description, title) {
-    // Create modal HTML
-    const modalHTML = `
-        <div id="descriptionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-                <div class="mt-3">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">
-                            Full Description - ${title}
-                        </h3>
-                        <button onclick="closeDescriptionModal()" class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
-                    <div class="max-h-96 overflow-y-auto">
-                        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                            ${description}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Add modal to page
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
-
-// Function to close description modal
-function closeDescriptionModal() {
-    const modal = document.getElementById('descriptionModal');
-    if (modal) {
-        modal.remove();
-    }
-}
-
-// Function to view complaint details
-function viewComplaintDetails(id) {
-    // Show loading state
-    document.getElementById('complaintDetailsContent').innerHTML = `
-        <div class="flex items-center justify-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span class="ml-2 text-gray-600">Loading details...</span>
-        </div>
-    `;
-    
-    document.getElementById('complaintDetailsModal').classList.remove('hidden');
-    
-    // Fetch complaint details via AJAX
-    fetch(`/admin/community-complaints/${id}/details`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('complaintDetailsContent').innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Title</h4>
-                        <p class="text-gray-600">${data.title}</p>
-                    </div>
-                    <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Category</h4>
-                        <p class="text-gray-600">${data.category}</p>
-                    </div>
-                    <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Location</h4>
-                        <p class="text-gray-600">${data.location || 'Not specified'}</p>
-                    </div>
-                    <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Description</h4>
-                        <p class="text-gray-600">${data.description}</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Submitted By</h4>
-                            <p class="text-gray-600">${data.user_name}</p>
-                        </div>
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Status</h4>
-                            <p class="text-gray-600">${data.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Submitted</h4>
-                            <p class="text-gray-600">${data.created_at}</p>
-                        </div>
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Assigned</h4>
-                            <p class="text-gray-600">${data.assigned_at}</p>
-                        </div>
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Resolved</h4>
-                            <p class="text-gray-600">${data.resolved_at}</p>
-                        </div>
-                    </div>
-                    ${data.media_files && data.media_files.length > 0 ? `
-                        <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Attached Files (${data.media_files.length})</h4>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                ${data.media_files.map(file => `
-                                    <a href="${file.url}" target="_blank" class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50">
-                                        <i class="fas fa-file text-gray-400 mr-2"></i>
-                                        <span class="text-sm text-gray-600 truncate">${file.name}</span>
-                                    </a>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        })
-        .catch(error => {
-            console.error('Error fetching complaint details:', error);
-            document.getElementById('complaintDetailsContent').innerHTML = `
-                <div class="text-center py-8">
-                    <i class="fas fa-exclamation-triangle text-red-400 text-4xl mb-4"></i>
-                    <p class="text-gray-600">Error loading complaint details</p>
-                </div>
-            `;
-        });
-}
-</script>
 @endsection 

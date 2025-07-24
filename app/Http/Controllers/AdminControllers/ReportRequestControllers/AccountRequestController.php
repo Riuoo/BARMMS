@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Session;
 use App\Mail\AccountApproved;
+use Illuminate\Http\Request;
 
 class AccountRequestController
 {
@@ -17,12 +18,27 @@ class AccountRequestController
      *
      * @return \Illuminate\Http\Response
      */
-    public function accountRequest()
+    public function accountRequest(Request $request)
     {
-        $accountRequests = AccountRequest::orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
+        // Statistics from full dataset
+        $totalRequests = AccountRequest::count();
+        $pendingCount = AccountRequest::where('status', 'pending')->count();
+        $approvedCount = AccountRequest::where('status', 'approved')->count();
+        $completedCount = AccountRequest::where('status', 'completed')->count();
+
+        // For display (filtered)
+        $query = AccountRequest::query();
+        if ($request->filled('search')) {
+            $search = trim($request->get('search'));
+            $query->where('email', 'like', "%{$search}%");
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+        $accountRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
             ->orderByDesc('created_at')
             ->get();
-        return view('admin.requests.new-account-requests', compact('accountRequests'));
+        return view('admin.requests.new-account-requests', compact('accountRequests', 'totalRequests', 'pendingCount', 'approvedCount', 'completedCount'));
     }
 
     /**
@@ -121,7 +137,7 @@ class AccountRequestController
         }
 
         notify()->success("Account request approved by {$adminUserName} and email sent.");
-        return redirect()->route('admin.new-account-requests');
+        return redirect()->route('admin.requests.new-account-requests');
             
     }
 }

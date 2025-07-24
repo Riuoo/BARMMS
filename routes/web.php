@@ -86,6 +86,7 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
     Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
     Route::post('/admin/residents/{resident}/toggle', [ResidentController::class, 'toggleActive'])->name('admin.residents.toggle');
+    Route::get('/residents/search', [ResidentController::class, 'search'])->name('admin.residents.search');
 
     
     // Profile routes for viewing and updating profile
@@ -128,7 +129,7 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::post('/templates/{template}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
     
     // Account Requests listing and approval
-    Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.new-account-requests');
+    Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
     Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');
     
     // Accomplished Projects Routes
@@ -140,6 +141,7 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::put('/accomplished-projects/{id}', [AccomplishProjectController::class, 'update'])->name('admin.accomplished-projects.update');
     Route::delete('/accomplished-projects/{id}', [AccomplishProjectController::class, 'destroy'])->name('admin.accomplished-projects.destroy');
     Route::post('/accomplished-projects/{id}/toggle-featured', [AccomplishProjectController::class, 'toggleFeatured'])->name('admin.accomplished-projects.toggle-featured');
+    Route::get('/accomplished-projects/search', [AccomplishProjectController::class, 'search'])->name('admin.accomplished-projects.search');
 
     // Health Status Route
     Route::get('/health-status', [HealthStatusController::class, 'healthStatus'])->name('admin.health-status');
