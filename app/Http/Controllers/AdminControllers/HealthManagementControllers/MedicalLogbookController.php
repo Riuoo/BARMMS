@@ -3,18 +3,66 @@
 namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 
 use App\Models\MedicalLogbook;
-use App\Models\Residents;
 use Illuminate\Http\Request;
+use App\Models\Residents;
 
 class MedicalLogbookController
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = MedicalLogbook::with('resident');
+
+        // SEARCH - Patient name, email, complaint, or diagnosis
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->whereHas('resident', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            })->orWhere('chief_complaint', 'like', "%{$search}%")
+              ->orWhere('diagnosis', 'like', "%{$search}%");
+        }
+
+        // STATUS FILTER
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+
+        // Calculate Statistics
+        $stats = [
+            'total' => MedicalLogbook::count(),
+            'completed' => MedicalLogbook::where('status', 'Completed')->count(),
+            'pending' => MedicalLogbook::where('status', 'Pending')->count(),
+            'referred' => MedicalLogbook::where('status', 'Referred')->count(),
+            'last_month' => MedicalLogbook::where('consultation_date', '>=', now()->subDays(30))->count()
+        ];
+        $medicalLogbooks = $query->paginate(15);
+        return view('admin.medical-logbooks.index', compact('medicalLogbooks', 'stats'));
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $status = $request->input('status');
+
         $medicalLogbooks = MedicalLogbook::with('resident')
+            ->when($query, function($q) use ($query) {
+                $q->whereHas('resident', function($subQ) use ($query) {
+                    $subQ->where('name', 'like', "%{$query}%");
+                })
+                ->orWhere('chief_complaint', 'like', "%{$query}%")
+                ->orWhere('diagnosis', 'like', "%{$query}%");
+            })
+            ->when($status, function($q) use ($status) {
+                $q->where('status', $status);
+            })
             ->orderBy('consultation_date', 'desc')
-            ->orderBy('consultation_time', 'desc')
             ->paginate(15);
-        return view('admin.medical-logbooks.index', compact('medicalLogbooks'));
+
+        return view('admin.medical-logbooks.index', [
+            'medicalLogbooks' => $medicalLogbooks,
+            'search' => $query,
+            'status' => $status
+        ]);
     }
 
     public function create()
@@ -49,7 +97,7 @@ class MedicalLogbookController
             'follow_up_date' => 'nullable|date|after:consultation_date',
             'status' => 'required|string|in:Completed,Pending,Referred,Cancelled',
         ]);
-        $user = \App\Models\Residents::find($validated['resident_id']);
+        $user = Residents::find($validated['resident_id']);
         if (!$user || !$user->active) {
             notify()->error('This user account is inactive and cannot make transactions.');
             return back()->withInput();
@@ -133,23 +181,6 @@ class MedicalLogbookController
             notify()->error('Error deleting medical consultation record: ' . $e->getMessage());
             return back();
         }
-    }
-
-    public function search(Request $request)
-    {
-        $query = $request->get('query');
-        
-        $medicalLogbooks = MedicalLogbook::with('resident')
-            ->whereHas('resident', function($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%");
-            })
-            ->orWhere('chief_complaint', 'like', "%{$query}%")
-            ->orWhere('diagnosis', 'like', "%{$query}%")
-            ->orWhere('consultation_type', 'like', "%{$query}%")
-            ->orderBy('consultation_date', 'desc')
-            ->paginate(15);
-
-        return view('admin.medical-logbooks.index', compact('medicalLogbooks', 'query'));
     }
 
     public function generateReport(Request $request)

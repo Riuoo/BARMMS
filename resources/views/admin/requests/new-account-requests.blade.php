@@ -203,7 +203,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex items-center justify-center space-x-2">
                                         @if($request->status === 'pending')
                                             <form method="POST" action="{{ route('admin.account-requests.approve', $request->id) }}" class="inline">
                                                 @csrf

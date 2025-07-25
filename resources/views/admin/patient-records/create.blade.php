@@ -3,24 +3,64 @@
 @section('title', 'Add Patient Record')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Add Patient Record</h1>
-        <a href="{{ route('admin.patient-records.index') }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-            <i class="fas fa-arrow-left mr-2"></i>Back to List
-        </a>
+<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Add Patient Record</h1>
+                <p class="text-gray-600">Register a new patient and record their medical information for the barangay health system.</p>
+            </div>
+        </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6">
-        <form action="{{ route('admin.patient-records.store') }}" method="POST">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-800">{{ session('success') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+    @if ($errors->any())
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">There were some errors with your submission</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc pl-5 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <form action="{{ route('admin.patient-records.store') }}" method="POST" class="space-y-6">
             @csrf
-            
-            <!-- Resident Selection -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Patient Information</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Patient Information -->
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-user mr-3 text-blue-600 text-2xl"></i>
+                    <h2 class="text-xl font-bold text-gray-900">Patient Information</h2>
+                </div>
+                <div class="grid grid-cols-1 gap-6">
                     <div>
-                        <label for="resident_id" class="block text-sm font-medium text-gray-700 mb-2">Select Resident *</label>
+                        <label for="resident_id" class="block text-sm font-medium text-gray-700 mb-2">Select Resident <span class="text-red-500">*</span></label>
                         <select id="resident_id" name="resident_id" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Select a resident</option>
                             @foreach($residents as $resident)
@@ -33,22 +73,15 @@
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    <div>
-                        <label for="patient_number" class="block text-sm font-medium text-gray-700 mb-2">Patient Number *</label>
-                        <input type="text" id="patient_number" name="patient_number" value="{{ old('patient_number') }}" required 
-                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="Enter patient number">
-                        @error('patient_number')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
                 </div>
             </div>
 
             <!-- Blood Information -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Blood Information</h3>
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-tint mr-3 text-red-600 text-2xl"></i>
+                    <h2 class="text-xl font-bold text-gray-900">Blood Information</h2>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="blood_type" class="block text-sm font-medium text-gray-700 mb-2">Blood Type</label>
@@ -67,7 +100,6 @@
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="blood_pressure_status" class="block text-sm font-medium text-gray-700 mb-2">Blood Pressure Status</label>
                         <select id="blood_pressure_status" name="blood_pressure_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -85,8 +117,11 @@
             </div>
 
             <!-- Physical Measurements -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Physical Measurements</h3>
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-ruler-vertical mr-3 text-green-600 text-2xl"></i>
+                    <h2 class="text-xl font-bold text-gray-900">Physical Measurements</h2>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label for="height_cm" class="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
@@ -97,7 +132,6 @@
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="weight_kg" class="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
                         <input type="number" id="weight_kg" name="weight_kg" value="{{ old('weight_kg') }}" step="0.1" min="0"
@@ -107,7 +141,6 @@
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="bmi" class="block text-sm font-medium text-gray-700 mb-2">BMI</label>
                         <input type="number" id="bmi" name="bmi" value="{{ old('bmi') }}" step="0.01" min="0" readonly
@@ -122,8 +155,11 @@
             </div>
 
             <!-- Medical Information -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Medical Information</h3>
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-notes-medical mr-3 text-purple-600 text-2xl"></i>
+                    <h2 class="text-xl font-bold text-gray-900">Medical Information</h2>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="allergies" class="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
@@ -134,7 +170,6 @@
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="current_medications" class="block text-sm font-medium text-gray-700 mb-2">Current Medications</label>
                         <textarea id="current_medications" name="current_medications" rows="3" 
@@ -145,7 +180,6 @@
                         @enderror
                     </div>
                 </div>
-
                 <div class="mt-6">
                     <label for="medical_history" class="block text-sm font-medium text-gray-700 mb-2">Medical History</label>
                     <textarea id="medical_history" name="medical_history" rows="4" 
@@ -155,7 +189,6 @@
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-
                 <div class="mt-6">
                     <label for="family_medical_history" class="block text-sm font-medium text-gray-700 mb-2">Family Medical History</label>
                     <textarea id="family_medical_history" name="family_medical_history" rows="4" 
@@ -168,8 +201,11 @@
             </div>
 
             <!-- Risk Assessment -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Risk Assessment</h3>
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-exclamation-triangle mr-3 text-yellow-600 text-2xl"></i>
+                    <h2 class="text-xl font-bold text-gray-900">Risk Assessment</h2>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="risk_level" class="block text-sm font-medium text-gray-700 mb-2">Risk Level</label>
@@ -183,7 +219,6 @@
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="lifestyle_factors" class="block text-sm font-medium text-gray-700 mb-2">Lifestyle Factors</label>
                         <textarea id="lifestyle_factors" name="lifestyle_factors" rows="3" 
@@ -197,8 +232,11 @@
             </div>
 
             <!-- Emergency Contact -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h3>
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-phone-alt mr-3 text--600 text-2xl"></i>
+                    <h2 class="text-xl font-bold text-gray-900">Emergency Contact</h2>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">Contact Name</label>
@@ -209,7 +247,6 @@
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
                         <input type="text" id="emergency_contact_number" name="emergency_contact_number" value="{{ old('emergency_contact_number') }}"
@@ -219,7 +256,6 @@
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-700 mb-2">Relationship</label>
                         <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{ old('emergency_contact_relationship') }}"
@@ -233,27 +269,44 @@
             </div>
 
             <!-- Additional Notes -->
-            <div class="mb-6">
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                <textarea id="notes" name="notes" rows="4" 
-                          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Enter any additional notes">{{ old('notes') }}</textarea>
-                @error('notes')
-                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                @enderror
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-sticky-note mr-3 text-gray-600 text-2xl"></i>
+                    <h2 class="text-xl font-bold text-gray-900">Additional Notes</h2>
+                </div>
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                        <textarea id="notes" name="notes" rows="4" 
+                                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Enter any additional notes">{{ old('notes') }}</textarea>
+                        @error('notes')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
             </div>
 
             <!-- Form Actions -->
-            <div class="flex justify-end space-x-4">
-                <a href="{{ route('admin.patient-records.index') }}" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
-                    Cancel
-                </a>
-                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-                    <i class="fas fa-save mr-2"></i>Save Patient Record
-                </button>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    The record will be created and can be managed from the patient records list.
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{{ route('admin.patient-records.index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Patient Record
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 </div>
-
 @endsection 

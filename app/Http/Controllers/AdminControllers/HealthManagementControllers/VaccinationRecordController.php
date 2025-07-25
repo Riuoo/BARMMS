@@ -3,17 +3,93 @@
 namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 
 use App\Models\VaccinationRecord;
-use App\Models\Residents;
 use Illuminate\Http\Request;
+use App\Models\Residents;
 
 class VaccinationRecordController
 {
-    public function index()
+    public function index(Request $request)
+    {
+        $query = VaccinationRecord::with('resident');
+
+        // SEARCH - Patient name or vaccine details
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->whereHas('resident', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })->orWhere('vaccine_name', 'like', "%{$search}%")
+              ->orWhere('vaccine_type', 'like', "%{$search}%");
+        }
+
+        // DOSE STATUS FILTER
+        if ($request->filled('dose_status')) {
+            switch($request->get('dose_status')) {
+                case 'overdue':
+                    $query->whereNotNull('next_dose_date')
+                          ->where('next_dose_date', '<', now());
+                    break;
+                case 'due_soon':
+                    $query->whereNotNull('next_dose_date')
+                          ->whereBetween('next_dose_date', [now(), now()->addDays(30)]);
+                    break;
+                case 'up_to_date':
+                    $query->whereNull('next_dose_date');
+                    break;
+            }
+        }
+
+            $stats = [
+            'total' => VaccinationRecord::count(),
+            'due_soon' => VaccinationRecord::whereNotNull('next_dose_date')
+                        ->whereBetween('next_dose_date', [now(), now()->addDays(30)])
+                        ->count(),
+            'overdue' => VaccinationRecord::whereNotNull('next_dose_date')
+                        ->where('next_dose_date', '<', now())
+                        ->count(),
+            'completed' => VaccinationRecord::whereNull('next_dose_date')->count(),
+            'last_month' => VaccinationRecord::where('vaccination_date', '>=', now()->subDays(30))->count()
+        ];
+
+        $vaccinationRecords = $query->paginate(15);
+
+        return view('admin.vaccination-records.index', compact('vaccinationRecords', 'stats'));
+    
+    }
+
+    public function search(Request $request)
     {
         $vaccinationRecords = VaccinationRecord::with('resident')
+            ->when($request->filled('search'), function($q) use ($request) {
+                $search = $request->get('search');
+                $q->whereHas('resident', function($subQ) use ($search) {
+                    $subQ->where('name', 'like', "%{$search}%");
+                })
+                ->orWhere('vaccine_name', 'like', "%{$search}%")
+                ->orWhere('vaccine_type', 'like', "%{$search}%");
+            })
+            ->when($request->filled('dose_status'), function($q) use ($request) {
+                switch($request->get('dose_status')) {
+                    case 'overdue':
+                        $q->whereNotNull('next_dose_date')
+                          ->where('next_dose_date', '<', now());
+                        break;
+                    case 'due_soon':
+                        $q->whereNotNull('next_dose_date')
+                          ->whereBetween('next_dose_date', [now(), now()->addDays(30)]);
+                        break;
+                    case 'up_to_date':
+                        $q->whereNull('next_dose_date');
+                        break;
+                }
+            })
             ->orderBy('vaccination_date', 'desc')
             ->paginate(15);
-        return view('admin.vaccination-records.index', compact('vaccinationRecords'));
+
+        return view('admin.vaccination-records.index', [
+            'vaccinationRecords' => $vaccinationRecords,
+            'search' => $request->get('search'),
+            'dose_status' => $request->get('dose_status')
+        ]);
     }
 
     public function create()
@@ -105,22 +181,6 @@ class VaccinationRecordController
             notify()->error('Error deleting vaccination record: ' . $e->getMessage());
             return back();
         }
-    }
-
-    public function search(Request $request)
-    {
-        $query = $request->get('query');
-        
-        $vaccinationRecords = VaccinationRecord::with('resident')
-            ->whereHas('resident', function($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%");
-            })
-            ->orWhere('vaccine_name', 'like', "%{$query}%")
-            ->orWhere('vaccine_type', 'like', "%{$query}%")
-            ->orderBy('vaccination_date', 'desc')
-            ->paginate(15);
-
-        return view('admin.vaccination-records.index', compact('vaccinationRecords', 'query'));
     }
 
     public function dueVaccinations()

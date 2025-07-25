@@ -59,7 +59,7 @@ class PatientRecordController
     {
         $validated = $request->validate([
             'resident_id' => 'required|exists:residents,id|unique:patient_records,resident_id',
-            'patient_number' => 'required|string|max:50|unique:patient_records,patient_number',
+            // 'patient_number' => 'required|string|max:50|unique:patient_records,patient_number', // removed, will be auto-generated
             'blood_type' => 'nullable|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
             'allergies' => 'nullable|string|max:1000',
             'medical_history' => 'nullable|string|max:2000',
@@ -81,9 +81,26 @@ class PatientRecordController
             return back()->withInput();
         }
         try {
+            // Auto-generate patient_number: P-YYYY-XXXX
+            $year = date('Y');
+            $lastRecord = PatientRecord::whereYear('created_at', $year)
+                ->orderBy('id', 'desc')
+                ->first();
+            if ($lastRecord && preg_match('/P-' . $year . '-(\\d{4})/', $lastRecord->patient_number, $matches)) {
+                $nextNumber = intval($matches[1]) + 1;
+            } else {
+                $nextNumber = 1;
+            }
+            $patient_number = 'P-' . $year . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            // Ensure uniqueness
+            while (PatientRecord::where('patient_number', $patient_number)->exists()) {
+                $nextNumber++;
+                $patient_number = 'P-' . $year . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            }
+
             $patientRecord = PatientRecord::create([
                 'resident_id' => $validated['resident_id'],
-                'patient_number' => $validated['patient_number'],
+                'patient_number' => $patient_number,
                 'blood_type' => $validated['blood_type'],
                 'allergies' => $validated['allergies'],
                 'medical_history' => $validated['medical_history'],

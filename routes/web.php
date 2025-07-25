@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Http\Request;
 
 use App\Http\Middleware\CheckAdminRole;
 use App\Http\Middleware\CheckResidentRole;
@@ -188,8 +187,8 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::get('/medical-logbooks/{id}/edit', [MedicalLogbookController::class, 'edit'])->name('admin.medical-logbooks.edit');
     Route::put('/medical-logbooks/{id}', [MedicalLogbookController::class, 'update'])->name('admin.medical-logbooks.update');
     Route::delete('/medical-logbooks/{id}', [MedicalLogbookController::class, 'destroy'])->name('admin.medical-logbooks.destroy');
-    Route::get('/medical-logbooks/search', [MedicalLogbookController::class, 'search'])->name('admin.medical-logbooks.search');
     Route::get('/medical-logbooks/report', [MedicalLogbookController::class, 'generateReport'])->name('admin.medical-logbooks.report');
+    Route::get('/medical-logbooks/search', [MedicalLogbookController::class, 'search'])->name('admin.medical-logbooks.search');
 
     // Health Center Activities Routes
     Route::get('/health-center-activities', [HealthCenterActivityController::class, 'index'])->name('admin.health-center-activities.index');
