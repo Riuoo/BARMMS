@@ -56,12 +56,14 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" id="searchInput" placeholder="Search officials by name, email, or role..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" value="{{ request('search') }}">
+                    <input type="text" name="search" id="searchInput" placeholder="Search officials by name, email, or role..." 
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                        value="{{ request('search') }}">
                 </div>
             </div>
             <!-- Role Filter -->
-            <div class="sm:w-48">
-                <select name="role" id="roleFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+            <div class="w-full sm:w-48">
+                <select name="role" id="roleFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                     <option value="">All Roles</option>
                     <option value="captain" {{ request('role') == 'captain' ? 'selected' : '' }}>Captain</option>
                     <option value="councilor" {{ request('role') == 'councilor' ? 'selected' : '' }}>Councilor</option>
@@ -71,15 +73,19 @@
             </div>
             <!-- Status Filter -->
             <div class="sm:w-48">
-                <select name="status" id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                <select name="status" id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                     <option value="">All Status</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                 </select>
             </div>
-            <div class="flex items-center">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
-                <a href="{{ route('admin.barangay-profiles') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
+            <div class="flex space-x-2">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Filter
+                </button>
+                <a href="{{ route('admin.barangay-profiles') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Reset
+                </a>
             </div>
         </div>
     </form>
@@ -276,61 +282,66 @@
                 $toggleBtnClass = $user->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
                 $toggleIcon = $user->active ? 'on' : 'off';
             @endphp
-            <div class="official-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition duration-200" data-role="{{ strtolower(str_replace(' ', '-', $user->role)) }}" data-status="{{ $user->active ? 'active' : 'inactive' }}">
+            <div class="document-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-role="{{ strtolower(str_replace(' ', '-', $user->role)) }}" data-status="{{ $user->active ? 'active' : 'inactive' }}">
                 <!-- Header with avatar and basic info -->
-                <div class="flex items-start space-x-4 mb-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center shadow-sm">
-                            <i class="fas fa-user text-green-600 text-lg"></i>
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user text-green-600"></i>
                         </div>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-base font-semibold text-gray-900 truncate">{{ $user->name }}</h3>
-                        <p class="text-sm text-gray-500 truncate">{{ $user->email }}</p>
-                        <div class="mt-2">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
-                                <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
-                                {{ $user->active ? 'Active' : 'Inactive' }}
-                            </span>
+                        <div class="ml-3 flex-1 min-w-0">
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $user->name }}</h3>
+                            <p class="text-sm text-gray-500 truncate">{{ $user->email }}</p>
+                            <div class="flex items-center mt-1">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                    @if($user->role === 'Captain') bg-yellow-100 text-yellow-800
+                                    @elseif($user->role === 'Councilor') bg-purple-100 text-purple-800
+                                    @elseif($user->role === 'Secretary') bg-blue-100 text-blue-800
+                                    @elseif($user->role === 'Treasurer') bg-green-100 text-green-800
+                                    @else bg-gray-100 text-gray-800
+                                    @endif">
+                                    <i class="fas fa-briefcase mr-1"></i>
+                                    {{ $user->role }}
+                                </span>
+                                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
+                                    <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
+                                    {{ $user->active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Address section -->
                 @if($user->address)
-                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-map-marker-alt text-gray-400 mt-0.5 flex-shrink-0"></i>
-                        <p class="text-sm text-gray-700 leading-relaxed">{{ $user->address }}</p>
-                    </div>
+                <div class="mb-3">
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                        {{ $user->address }}
+                    </p>
                 </div>
                 @endif
 
-                <!-- Status badge -->
-                <div class="mt-2">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
-                        <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
-                        {{ $user->active ? 'Active' : 'Inactive' }}
-                    </span>
-                </div>
-
                 <!-- Action buttons -->
-                <div class="flex space-x-2 pt-2">
+                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
                     <a href="{{ route('admin.barangay-profiles.edit', $user->id) }}" 
-                       class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 shadow-sm"
+                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
                        title="Edit">
-                        <i class="fas fa-edit"></i>
+                        <i class="fas fa-edit mr-1"></i>
+                        Edit
                     </a>
                     <form method="POST" action="{{ route('admin.barangay-profiles.toggle', $user->id) }}" style="display:inline;">
                         @csrf
-                        <button type="submit" class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-gray-300 text-sm font-medium rounded-lg {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 shadow-sm" title="{{ $user->active ? 'Disable' : 'Enable' }}">
-                            <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="{{ $user->active ? 'Disable' : 'Enable' }}">
+                            <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
+                            {{ $user->active ? 'Disable' : 'Enable' }}
                         </button>
                     </form>
                     <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
-                            class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 shadow-sm"
+                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
                             title="Delete">
-                        <i class="fas fa-trash-alt"></i>
+                        <i class="fas fa-trash-alt mr-1"></i>
+                        Delete
                     </button>
                 </div>
             </div>
@@ -371,10 +382,6 @@
     </div>
 </div>
 
-@endsection
-
-@section('scripts')
-@parent
 <script>
 function deleteOfficial(id, name) {
     document.getElementById('officialName').textContent = name;
@@ -387,4 +394,5 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').classList.remove('flex');
 }
 </script>
+
 @endsection

@@ -5,13 +5,13 @@
 @section('content')
 <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
     <!-- Header Section -->
-    <div class="mb-8">
+    <div class="mb-6 md:mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Document Requests</h1>
                 <p class="text-gray-600">Manage and process document requests from residents</p>
             </div>
-            <div class="mt-4 sm:mt-0 space-x-2">
+            <div class="mt-4 sm:mt-0 flex space-x-2">
                 <a href="{{ route('admin.document-requests.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Create New Request
@@ -60,21 +60,27 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" id="searchInput" placeholder="Search requests..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+                    <input type="text" name="search" id="searchInput" placeholder="Search requests..."
+                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    value="{{ request('search') }}">
                 </div>
             </div>
             <!-- Status Filter -->
             <div class="sm:w-48">
-                <select name="status" id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                <select name="status" id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                     <option value="">All Status</option>
                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                     <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                 </select>
             </div>
-            <div class="flex items-center">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
-                <a href="{{ route('admin.document-requests') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
+            <div class="flex space-x-2">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Filter
+                </button>
+                <a href="{{ route('admin.document-requests') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Reset
+                </a>
             </div>
         </div>
     </form>
@@ -200,7 +206,6 @@
                         <tr class="document-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex flex-row items-center gap-2">
-                                    <!-- Optional avatar/icon here -->
                                     <span class="text-sm font-medium text-gray-900">{{ $request->user->name ?? 'N/A' }}</span>
                                 </div>
                             </td>

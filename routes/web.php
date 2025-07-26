@@ -86,7 +86,7 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
     Route::post('/admin/residents/{resident}/toggle', [ResidentController::class, 'toggleActive'])->name('admin.residents.toggle');
     Route::get('/residents/search', [ResidentController::class, 'search'])->name('admin.residents.search');
-
+    Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->name('admin.residents.demographics');
     
     // Profile routes for viewing and updating profile
     Route::get('/profile', [AdminProfileController::class, 'profile'])->name('admin.profile');

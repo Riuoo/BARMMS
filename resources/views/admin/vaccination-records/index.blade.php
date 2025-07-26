@@ -180,27 +180,45 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vaccine Details</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vaccination Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next Dose</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-user mr-2"></i>
+                                    Patient
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-syringe mr-2"></i>
+                                    Vaccine Details
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    Vaccination Date
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    Next Dose
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-cogs mr-2"></i>
+                                    Actions
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($vaccinationRecords as $record)
                         <tr class="hover:bg-gray-50 transition duration-150">
                             <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                                            <i class="fas fa-user text-green-600"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
+                                <div class="items-center gap-2">
                                         <div class="text-sm font-medium text-gray-900">{{ $record->resident->name }}</div>
                                         <div class="text-sm text-gray-500">{{ $record->resident->email }}</div>
-                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -265,50 +283,86 @@
         <!-- Mobile Cards -->
         <div class="md:hidden space-y-3">
             @foreach($vaccinationRecords as $record)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div class="flex items-start space-x-3">
-                    <div class="flex-shrink-0">
-                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+            <div class="document-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200">
+                <!-- Header Section -->
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-user text-green-600"></i>
                         </div>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-sm font-semibold text-gray-900">{{ $record->resident->name }}</h3>
-                        <p class="text-sm text-gray-500">{{ $record->vaccine_name }}</p>
-                        <div class="mt-2 space-y-1">
-                            <div class="flex items-center">
-                                <span class="text-xs text-gray-600">Date:</span>
-                                <span class="ml-1 text-xs font-medium">{{ $record->vaccination_date->format('M d, Y') }}</span>
-                            </div>
-                            <div class="flex items-center">
-                                <span class="text-xs text-gray-600">Dose:</span>
-                                <span class="ml-1 text-xs font-medium">{{ $record->dose_number }}</span>
-                            </div>
-                            @if($record->next_dose_date)
-                            <div class="flex items-center">
-                                <span class="text-xs text-gray-600">Next:</span>
-                                <span class="ml-1 text-xs font-medium">{{ $record->next_dose_date->format('M d, Y') }}</span>
-                            </div>
-                            @endif
-                        </div>
-                        <div class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center justify-center space-x-2">
-                                <a href="{{ route('admin.vaccination-records.show', $record->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" title="Edit">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{{ route('admin.vaccination-records.edit', $record->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form method="POST" action="{{ route('admin.vaccination-records.destroy', $record->id) }}" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+                        <div class="ml-3 flex-1 min-w-0">
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $record->resident->name }}</h3>
+                            <p class="text-sm text-gray-500 truncate">{{ $record->vaccine_name }}</p>
+                            <div class="flex items-center mt-1">
+                                @php
+                                    $doseStatusColors = [
+                                        'Overdue' => 'bg-red-100 text-red-800',
+                                        'Due Soon' => 'bg-yellow-100 text-yellow-800',
+                                        'Scheduled' => 'bg-green-100 text-green-800',
+                                        'Up To Date' => 'bg-green-100 text-green-800'
+                                    ];
+                                    $currentDoseStatus = '';
+                                    if ($record->next_dose_date) {
+                                        if ($record->next_dose_date->isPast()) {
+                                            $currentDoseStatus = 'Overdue';
+                                        } elseif ($record->next_dose_date->diffInDays(now()) <= 30) {
+                                            $currentDoseStatus = 'Due Soon';
+                                        } else {
+                                            $currentDoseStatus = 'Scheduled';
+                                        }
+                                    } else {
+                                        $currentDoseStatus = 'Up To Date'; // Assuming no next dose means up to date
+                                    }
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $doseStatusColors[$currentDoseStatus] ?? 'bg-gray-100 text-gray-800' }}">
+                                    <i class="fas fa-tag mr-1"></i>
+                                    {{ $currentDoseStatus }}
+                                </span>
+                                <span class="ml-2 text-xs text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    {{ $record->vaccination_date->format('M d, Y') }}
+                                </span>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="mb-3">
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-syringe mr-1 text-gray-400"></i>
+                        Type: <span class="font-medium">{{ $record->vaccine_type }}</span>
+                    </p>
+                    <p class="text-sm text-gray-600 mt-1">
+                        <i class="fas fa-hashtag mr-1 text-gray-400"></i>
+                        Dose: <span class="font-medium">{{ $record->dose_number }}</span>
+                    </p>
+                    @if($record->next_dose_date)
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-calendar-check mr-1 text-gray-400"></i>
+                            Next Dose: <span class="font-medium">{{ $record->next_dose_date->format('M d, Y') }}</span>
+                        </p>
+                    @endif
+                </div>
+
+                <!-- Actions Section -->
+                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                    <a href="{{ route('admin.vaccination-records.show', $record->id) }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200" title="View">
+                        <i class="fas fa-eye mr-1"></i>
+                        View
+                    </a>
+                    <a href="{{ route('admin.vaccination-records.edit', $record->id) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="Edit">
+                        <i class="fas fa-edit mr-1"></i>
+                        Edit
+                    </a>
+                    <form method="POST" action="{{ route('admin.vaccination-records.destroy', $record->id) }}" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
+                            <i class="fas fa-trash-alt mr-1"></i>
+                            Delete
+                        </button>
+                    </form>
                 </div>
             </div>
             @endforeach

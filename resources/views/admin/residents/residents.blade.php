@@ -56,12 +56,12 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" id="searchInput" placeholder="Search residents by name, email, or address..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" value="{{ request('search') }}">
+                    <input type="text" name="search" id="searchInput" placeholder="Search residents by name, email, or address..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
                 </div>
             </div>
             <!-- Status Filter -->
             <div class="sm:w-48">
-                <select name="status" id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                <select name="status" id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                     <option value="">All Status</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -69,14 +69,18 @@
             </div>
             <!-- Recent Filter -->
             <div class="sm:w-48">
-                <select name="recent" id="recentFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                <select name="recent" id="recentFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                     <option value="">All Residents</option>
                     <option value="recent" {{ request('recent') == 'recent' ? 'selected' : '' }}>Recently Added</option>
                 </select>
             </div>
-            <div class="flex items-center">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
-                <a href="{{ route('admin.residents') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
+            <div class="flex space-x-2">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Filter
+                </button>
+                <a href="{{ route('admin.residents') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Reset
+                </a>
             </div>
         </div>
     </form>
@@ -287,119 +291,71 @@
                 $toggleBtnClass = $resident->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
                 $toggleIcon = $resident->active ? 'on' : 'off';
             @endphp
-            <div class="resident-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $resident->active ? 'active' : 'inactive' }}" data-created="{{ $resident->created_at->format('Y-m-d') }}">
+            <div class="document-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $resident->active ? 'active' : 'inactive' }}" data-created="{{ $resident->created_at->format('Y-m-d') }}">
                 <!-- Header with avatar and basic info -->
-                <div class="flex items-start space-x-4 mb-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center shadow-sm">
-                            <i class="fas fa-home text-blue-600 text-lg"></i>
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-home text-blue-600"></i>
                         </div>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-base font-semibold text-gray-900 truncate">{{ $resident->name }}</h3>
-                        <p class="text-sm text-gray-500 truncate">{{ $resident->email }}</p>
-                        <div class="mt-2">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
-                                <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
-                                {{ $resident->active ? 'Active Resident' : 'Inactive Resident' }}
-                            </span>
-                            @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
-                                <button 
-                                    class="block md:hidden mt-2 text-blue-600 hover:text-blue-800 font-medium cursor-pointer text-xs underline"
-                                    onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')">
-                                    <i class="fas fa-eye mr-1"></i>
-                                    View Demographics
-                                </button>
-                            @endif
+                        <div class="ml-3 flex-1 min-w-0">
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $resident->name }}</h3>
+                            <p class="text-sm text-gray-500 truncate">{{ $resident->email }}</p>
+                            <div class="flex items-center mt-1">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
+                                    <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
+                                    {{ $resident->active ? 'Active' : 'Inactive' }}
+                                </span>
+                                <span class="ml-2 text-xs text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    {{ $resident->created_at->format('M d, Y') }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Address section -->
                 @if($resident->address)
-                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-map-marker-alt text-gray-400 mt-0.5 flex-shrink-0"></i>
-                        <p class="text-sm text-gray-700 leading-relaxed">{{ $resident->address }}</p>
-                    </div>
+                <div class="mb-3">
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                        {{ $resident->address }}
+                    </p>
                 </div>
                 @endif
 
                 <!-- Demographics section -->
                 @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
-                <div class="mb-4 p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition duration-200 hidden md:block" onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')">
-                    <h4 class="text-sm font-medium text-gray-900 mb-2 flex items-center">
-                        <i class="fas fa-user-friends mr-2 text-blue-600"></i>
-                        Demographics
-                        <i class="fas fa-external-link-alt ml-auto text-blue-500 text-xs"></i>
-                    </h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                        @if($resident->age)
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-birthday-cake mr-2 text-blue-500 w-4"></i>
-                                <span>Age: {{ $resident->age }}</span>
-                            </div>
-                        @endif
-                        @if($resident->family_size)
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-users mr-2 text-blue-500 w-4"></i>
-                                <span>Family: {{ $resident->family_size }}</span>
-                            </div>
-                        @endif
-                        @if($resident->education_level)
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-graduation-cap mr-2 text-blue-500 w-4"></i>
-                                <span>{{ $resident->education_level }}</span>
-                            </div>
-                        @endif
-                        @if($resident->income_level)
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-money-bill mr-2 text-blue-500 w-4"></i>
-                                <span>{{ $resident->income_level }}</span>
-                            </div>
-                        @endif
-                        @if($resident->employment_status)
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-briefcase mr-2 text-blue-500 w-4"></i>
-                                <span>{{ $resident->employment_status }}</span>
-                            </div>
-                        @endif
-                        @if($resident->health_status)
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-heartbeat mr-2 text-blue-500 w-4"></i>
-                                <span>{{ $resident->health_status }}</span>
-                            </div>
-                        @endif
-                    </div>
-                    <p class="text-xs text-blue-600 mt-2 font-medium">Click to view full details</p>
+                <div class="mb-3">
+                    <button onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
+                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition duration-200">
+                        <i class="fas fa-user-friends mr-1"></i>
+                        View Demographics
+                    </button>
                 </div>
                 @endif
 
-                <!-- Registration info -->
-                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center text-sm text-gray-600">
-                        <i class="fas fa-calendar mr-2 text-gray-500"></i>
-                        <span>Registered {{ $resident->created_at->diffForHumans() }}</span>
-                    </div>
-                </div>
-
                 <!-- Action buttons -->
-                <div class="flex space-x-2 pt-2">
+                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
-                       class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 shadow-sm"
+                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
                        title="Edit">
-                        <i class="fas fa-edit"></i>
+                        <i class="fas fa-edit mr-1"></i>
+                        Edit
                     </a>
                     <form method="POST" action="{{ route('admin.residents.toggle', $resident->id) }}" style="display:inline;">
                         @csrf
-                        <button type="submit" class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-gray-300 text-sm font-medium rounded-lg {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 shadow-sm" title="{{ $resident->active ? 'Disable' : 'Enable' }}">
-                            <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="{{ $resident->active ? 'Disable' : 'Enable' }}">
+                            <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
+                            {{ $resident->active ? 'Disable' : 'Enable' }}
                         </button>
                     </form>
                     <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                            class="flex-1 inline-flex items-center justify-center px-2 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 shadow-sm"
+                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
                             title="Delete">
-                        <i class="fas fa-trash-alt"></i>
+                        <i class="fas fa-trash-alt mr-1"></i>
+                        Delete
                     </button>
                 </div>
             </div>
@@ -410,30 +366,38 @@
     <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
 </div>
 
-<!-- Demographics Modal -->
-<div id="demographicsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-6">
+<!-- Demographics Modal - Nicer & Simpler Design Only -->
+<div id="demographicsModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50 p-4 sm:p-6">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
+        
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-5 border-b border-gray-200">
             <div class="flex items-center">
-                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                    <i class="fas fa-user-friends text-blue-600"></i>
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-user-friends text-blue-600 text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-xl font-semibold text-gray-900" id="modalResidentName"></h3>
-                    <p class="text-sm text-gray-500">Demographic Information</p>
+                    <h3 class="text-xl font-semibold text-gray-800" id="modalResidentName"></h3>
+                    <p class="text-sm text-gray-500 mt-1">Demographic Information</p>
                 </div>
             </div>
-            <button onclick="closeDemographicsModal()" class="text-gray-400 hover:text-gray-600 transition duration-200">
-                <i class="fas fa-times text-xl"></i>
+            <button onclick="closeDemographicsModal()" 
+                    class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 rounded-full p-1 transition duration-200">
+                <i class="fas fa-times text-lg"></i>
             </button>
         </div>
         
-        <div id="demographicsContent" class="space-y-6">
+        <!-- Modal Body - Demographics Content -->
+        <div id="demographicsContent" class="p-5 space-y-4 text-gray-700">
             <!-- Content will be loaded dynamically -->
+            <!-- Placeholder for content if not loaded yet -->
+            <p class="text-center text-gray-500">Loading demographic data...</p>
         </div>
         
-        <div class="flex justify-end mt-6 pt-4 border-t border-gray-200">
-            <button onclick="closeDemographicsModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200">
+        <!-- Modal Footer -->
+        <div class="flex justify-end p-5 border-t border-gray-200">
+            <button onclick="closeDemographicsModal()" 
+                    class="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition duration-200">
                 Close
             </button>
         </div>
@@ -468,4 +432,77 @@
     </div>
 </div>
 
+<script>
+    function showDemographicsModal(residentId, residentName) {
+        document.getElementById('modalResidentName').textContent = residentName;
+        const demographicsContent = document.getElementById('demographicsContent');
+        demographicsContent.innerHTML = '<p class="text-center text-gray-500">Loading demographics...</p>';
+
+        // Fetch demographics data via AJAX
+        fetch('/admin/residents/' + residentId + '/demographics')
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { 
+                        throw new Error('HTTP error! status: ' + response.status + ', message: ' + text); 
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                let contentHtml = '';
+                if (Object.keys(data).length === 0 || Object.values(data).every(value => value === null || value === '')) {
+                    contentHtml = '<p class="text-center text-gray-500">No demographic data available for this resident.</p>';
+                } else {
+                    contentHtml += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                    // Dynamically add fields if they exist and are not null/empty
+                    const fields = {
+                        'age': { label: 'Age', icon: 'fas fa-birthday-cake' },
+                        'family_size': { label: 'Family Size', icon: 'fas fa-users' },
+                        'education_level': { label: 'Education Level', icon: 'fas fa-graduation-cap' },
+                        'income_level': { label: 'Income Level', icon: 'fas fa-money-bill-wave' },
+                        'employment_status': { label: 'Employment Status', icon: 'fas fa-briefcase' },
+                        'health_status': { label: 'Health Status', icon: 'fas fa-heartbeat' }
+                    };
+
+                    let hasData = false;
+                    for (const key in fields) {
+                        if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+                            contentHtml += '<div class="flex items-center"><i class="' + fields[key].icon + ' text-blue-500 mr-2"></i><span><strong>' + fields[key].label + ':</strong> ' + data[key] + '</span></div>';
+                            hasData = true;
+                        }
+                    }
+                    if (!hasData) {
+                        contentHtml = '<p class="text-center text-gray-500">No demographic data available for this resident.</p>';
+                    }
+                    contentHtml += '</div>';
+                }
+                demographicsContent.innerHTML = contentHtml;
+            })
+            .catch(error => {
+                console.error('Error fetching demographics:', error);
+                demographicsContent.innerHTML = '<p class="text-center text-red-500">Failed to load demographics. Please try again. <br>Details: ' + (error.message || error) + '</p>';
+            });
+
+        const modal = document.getElementById('demographicsModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeDemographicsModal() {
+        const modal = document.getElementById('demographicsModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function deleteResident(id, name) {
+        document.getElementById('residentName').textContent = name;
+        document.getElementById('deleteForm').action = `/admin/residents/${id}`;
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+    }
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+    }
+</script>
 @endsection

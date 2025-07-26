@@ -47,13 +47,26 @@ class ResidentController
         return view('admin.residents.residents', compact('residents', 'totalResidents', 'activeResidents', 'recentResidents', 'withAddress'));
     }
 
+    public function getDemographics(Residents $resident) // Use the correct model name, e.g., Residents
+    {
+        // Return all available demographic fields from the residents table
+        return response()->json([
+            'age' => $resident->age,
+            'family_size' => $resident->family_size,
+            'education_level' => $resident->education_level,
+            'income_level' => $resident->income_level,
+            'employment_status' => $resident->employment_status,
+            'health_status' => $resident->health_status
+        ]);
+    }
+
     public function create()
     {
         return view('admin.residents.create_resident_profile');
     }
     
 
-        public function store(Request $request)
+    public function store(Request $request)
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',

@@ -175,27 +175,45 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Info</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consultation Details</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-user mr-2"></i>
+                                    Patient Info
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-stethoscope mr-2"></i>
+                                    Consultation Details
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    Date & Time
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Status
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-cogs mr-2"></i>
+                                    Actions
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($medicalLogbooks as $logbook)
                         <tr class="hover:bg-gray-50 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                            <i class="fas fa-user text-blue-600"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
+                                <div class="items-center gap-2">
                                         <div class="text-sm font-medium text-gray-900">{{ $logbook->resident->name }}</div>
                                         <div class="text-sm text-gray-500">{{ $logbook->resident->email }}</div>
-                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -261,50 +279,93 @@
         <!-- Mobile Cards -->
         <div class="md:hidden space-y-3">
             @foreach($medicalLogbooks as $logbook)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div class="flex items-start space-x-3">
-                    <div class="flex-shrink-0">
-                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+            <div class="document-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200">
+                <!-- Header Section -->
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-user text-blue-600"></i>
                         </div>
+                        <div class="ml-3 flex-1 min-w-0">
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $logbook->resident->name }}</h3>
+                            <p class="text-sm text-gray-500 truncate">{{ $logbook->consultation_type }}</p>
+                            <div class="flex items-center mt-1">
+                                @php
+                                    $statusColors = [
+                                        'Completed' => 'bg-green-100 text-green-800',
+                                        'Pending' => 'bg-yellow-100 text-yellow-800',
+                                        'Referred' => 'bg-blue-100 text-blue-800',
+                                        'Cancelled' => 'bg-red-100 text-red-800'
+                                    ];
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$logbook->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                    <i class="fas fa-tag mr-1"></i>
+                                    {{ $logbook->status }}
+                                </span>
+                                <span class="ml-2 text-xs text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    {{ $logbook->consultation_date->format('M d, Y') }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex-1">
-                        <h3 class="text-sm font-semibold text-gray-900">{{ $logbook->resident->name }}</h3>
-                        <p class="text-sm text-gray-500">{{ $logbook->consultation_type }}</p>
-                        <div class="mt-2 space-y-1">
-                            <div class="flex items-center">
-                                <span class="text-xs text-gray-600">Date:</span>
-                                <span class="ml-1 text-xs font-medium">{{ $logbook->consultation_date->format('M d, Y') }}</span>
-                            </div>
-                            <div class="flex items-center">
-                                <span class="text-xs text-gray-600">Time:</span>
-                                <span class="ml-1 text-xs font-medium">{{ $logbook->consultation_time->format('g:i A') }}</span>
-                            </div>
-                            @if($logbook->follow_up_date)
-                            <div class="flex items-center">
-                                <span class="text-xs text-gray-600">Follow-up:</span>
-                                <span class="ml-1 text-xs font-medium">{{ $logbook->follow_up_date->format('M d, Y') }}</span>
-                            </div>
+                </div>
+
+                <!-- Description Section -->
+                <div class="mb-3">
+                    <div class="description-container">
+                        <p class="text-sm text-gray-600 leading-relaxed description-text" id="medical-description-{{ $logbook->id }}">
+                            <i class="fas fa-align-left mr-1 text-gray-400"></i>
+                            <span class="description-short">{{ Str::limit($logbook->chief_complaint, 80) }}</span>
+                            @if(strlen($logbook->chief_complaint) > 80)
+                                <span class="description-full hidden">{{ $logbook->chief_complaint }}</span>
+                                <button onclick="toggleDescription('medical-{{ $logbook->id }}')" 
+                                        class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
+                                    Read More
+                                </button>
                             @endif
-                        </div>
-                        <div class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center justify-center space-x-2">
-                                <a href="{{ route('admin.medical-logbooks.show', $logbook->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" title="Edit">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{{ route('admin.medical-logbooks.edit', $logbook->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form method="POST" action="{{ route('admin.medical-logbooks.destroy', $logbook->id) }}" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                        </p>
+                        @if($logbook->diagnosis)
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-notes-medical mr-1"></i>
+                                Diagnosis: {{ Str::limit($logbook->diagnosis, 80) }}
+                            </p>
+                        @endif
+                        @if($logbook->follow_up_date)
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-calendar-check mr-1"></i>
+                                Follow-up: {{ $logbook->follow_up_date->format('M d, Y') }}
+                            </p>
+                        @endif
                     </div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="mb-3">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        <i class="fas fa-user-md mr-1"></i>
+                        {{ $logbook->attending_health_worker }}
+                    </span>
+                </div>
+
+                <!-- Actions Section -->
+                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                    <a href="{{ route('admin.medical-logbooks.show', $logbook->id) }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200" title="View">
+                        <i class="fas fa-eye mr-1"></i>
+                        View
+                    </a>
+                    <a href="{{ route('admin.medical-logbooks.edit', $logbook->id) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="Edit">
+                        <i class="fas fa-edit mr-1"></i>
+                        Edit
+                    </a>
+                    <form method="POST" action="{{ route('admin.medical-logbooks.destroy', $logbook->id) }}" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
+                            <i class="fas fa-trash-alt mr-1"></i>
+                            Delete
+                        </button>
+                    </form>
                 </div>
             </div>
             @endforeach
