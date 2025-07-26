@@ -96,7 +96,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-xs lg:text-sm font-medium text-gray-500">Total Requests</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="total-count">{{ $totalRequests }}</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $totalRequests }}</p>
                 </div>
             </div>
         </div>
