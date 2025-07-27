@@ -22,7 +22,6 @@ use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentTempl
 use App\Http\Controllers\AdminControllers\ProjectControllers\AccomplishProjectController;
 use App\Http\Controllers\AdminControllers\NotificationControllers\AdminNotificationController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthReportController;
-use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthStatusController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\PatientRecordController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\VaccinationRecordController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicalLogbookController;
@@ -74,8 +73,9 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::post('/barangay-profiles', [BarangayProfileController::class, 'store'])->name('admin.barangay-profiles.store');
     Route::get('/barangay-profiles/{id}/edit', [BarangayProfileController::class, 'edit'])->name('admin.barangay-profiles.edit');
     Route::put('/barangay-profiles/{id}', [BarangayProfileController::class, 'update'])->name('admin.barangay-profiles.update');
+    Route::put('/barangay-profiles/{id}/activate', [BarangayProfileController::class, 'activate'])->name('admin.barangay-profiles.activate');
+    Route::put('/barangay-profiles/{id}/deactivate', [BarangayProfileController::class, 'deactivate'])->name('admin.barangay-profiles.deactivate');
     Route::delete('/barangay-profiles/{id}', [BarangayProfileController::class, 'delete'])->name('admin.barangay-profiles.delete');
-    Route::post('/admin/barangay-profiles/{profile}/toggle', [BarangayProfileController::class, 'toggleActive'])->name('admin.barangay-profiles.toggle');
 
     // Residents routes
     Route::get('/residents', [ResidentController::class, 'residentProfile'])->name('admin.residents');
@@ -83,9 +83,9 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::post('/residents', [ResidentController::class, 'store'])->name('admin.residents.store');
     Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('admin.residents.edit');
     Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
+    Route::put('/residents/{id}/activate', [ResidentController::class, 'activate'])->name('admin.residents.activate');
+    Route::put('/residents/{id}/deactivate', [ResidentController::class, 'deactivate'])->name('admin.residents.deactivate');
     Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
-    Route::post('/admin/residents/{resident}/toggle', [ResidentController::class, 'toggleActive'])->name('admin.residents.toggle');
-    Route::get('/residents/search', [ResidentController::class, 'search'])->name('admin.residents.search');
     Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->name('admin.residents.demographics');
     
     // Profile routes for viewing and updating profile
@@ -94,15 +94,12 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     
     // Blotter Reports route
     Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
-    Route::get('/blotter-reports/{id}/details', [BlotterReportController::class, 'getDetails'])->name('admin.blotter-reports.details');
-    Route::post('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-reports.approve');
-    Route::post('/blotter-reports/{id}/complete', [BlotterReportController::class, 'markAsComplete'])->name('admin.blotter-reports.complete');
-    Route::get('/blotter-reports/{id}/summon', [BlotterReportController::class, 'generateSummonPDF'])->name('admin.blotter-reports.summon-pdf');
-    Route::post('/blotter-reports/{id}/new-summons', [BlotterReportController::class, 'generateNewSummons'])->name('admin.blotter-reports.new-summons');
-    Route::get('/blotter-reports/{id}/resolution', [BlotterReportController::class, 'generateResolutionPDF'])->name('admin.blotter-reports.resolution-pdf');
     Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');
     Route::post('/blotter-reports', [BlotterReportController::class, 'store'])->name('admin.blotter-reports.store');
-    Route::get('/search/residents', [BlotterReportController::class, 'searchResidents'])->name('admin.search.residents');
+    Route::get('/blotter-reports/{id}/details', [BlotterReportController::class, 'getDetails'])->name('admin.blotter-reports.details');
+    Route::post('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-reports.approve');
+    Route::post('/blotter-reports/{id}/new-summons', [BlotterReportController::class, 'generateNewSummons'])->name('admin.blotter-reports.new-summons');
+    Route::post('/blotter-reports/{id}/complete', [BlotterReportController::class, 'markAsComplete'])->name('admin.blotter-reports.complete');
     
     // Community Complaints route
     Route::get('/community-complaints', [CommunityComplaintController::class, 'index'])->name('admin.community-complaints');
@@ -111,13 +108,14 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     
     // Document Requests route
     Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
+    Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
+    Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
     Route::get('/document-requests/{id}/details', [DocumentRequestController::class, 'getDetails'])->name('admin.document-requests.details');
     Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-requests.approve');
     Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
     Route::post('/document-requests/{id}/complete', [DocumentRequestController::class, 'markAsComplete'])->name('admin.document-requests.complete');
-    Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
-    Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
 
+    //TODO
     // Document Templates Management
     Route::get('/templates', [DocumentTemplateController::class, 'index'])->name('admin.templates.index');
     Route::get('/templates/create', [DocumentTemplateController::class, 'create'])->name('admin.templates.create');
@@ -140,10 +138,6 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::put('/accomplished-projects/{id}', [AccomplishProjectController::class, 'update'])->name('admin.accomplished-projects.update');
     Route::delete('/accomplished-projects/{id}', [AccomplishProjectController::class, 'destroy'])->name('admin.accomplished-projects.destroy');
     Route::post('/accomplished-projects/{id}/toggle-featured', [AccomplishProjectController::class, 'toggleFeatured'])->name('admin.accomplished-projects.toggle-featured');
-    Route::get('/accomplished-projects/search', [AccomplishProjectController::class, 'search'])->name('admin.accomplished-projects.search');
-
-    // Health Status Route
-    Route::get('/health-status', [HealthStatusController::class, 'healthStatus'])->name('admin.health-status');
     
     // Health Status Requests from Residents
     Route::get('/health-status-requests', [HealthStatusRequestController::class, 'index'])->name('admin.health-status-requests');

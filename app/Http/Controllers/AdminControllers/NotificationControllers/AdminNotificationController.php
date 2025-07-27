@@ -78,7 +78,7 @@ class AdminNotificationController
         // Sort notifications by date (latest first)
         $notifications = $notifications->sortByDesc('created_at');
 
-        return view('admin.health.notifications', compact('notifications'));
+        return view('admin.notifications.notifications', compact('notifications'));
     }
 
     /**

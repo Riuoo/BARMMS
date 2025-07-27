@@ -62,23 +62,31 @@
 
     <!-- Filters and Search -->
     <form method="GET" action="{{ route('admin.notifications') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex flex-wrap gap-2">
-                <select name="read_status" id="readStatusFilter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" id="search-notifications" placeholder="Search notifications..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+                </div>
+            </div>
+
+            <div class="sm:w-48">
+                <select name="read_status" id="readStatusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                     <option value="">All</option>
                     <option value="unread" {{ request('read_status') == 'unread' ? 'selected' : '' }}>Unread</option>
                     <option value="read" {{ request('read_status') == 'read' ? 'selected' : '' }}>Read</option>
                 </select>
             </div>
-            <div class="relative">
-                <input type="text" name="search" id="search-notifications" placeholder="Search notifications..." class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
-                </div>
-            </div>
-            <div class="flex items-center">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300">Search</button>
-                <a href="{{ route('admin.notifications') }}" class="ml-2 text-green-600 hover:text-green-800 font-medium">Clear</a>
+            <div class="flex space-x-2">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Filter
+                </button>
+                <a href="{{ route('admin.notifications') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Reset
+                </a>
             </div>
         </div>
     </form>
@@ -212,5 +220,38 @@
         </div>
     @endif
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to update notification counts
+    function updateNotificationCounts() {
+        fetch('{{ route("admin.notifications.count") }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data && !data.error) {
+                    const totalUnread = data.total || 0;
+                    const totalNotifications = {{ $notifications->count() }};
+                    const totalRead = totalNotifications - totalUnread;
+                    
+                    // Update unread count
+                    document.getElementById('unread-count').textContent = `${totalUnread} unread`;
+                    
+                    // Update read count
+                    document.getElementById('read-count').textContent = `${totalRead} read`;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching notification counts:', error);
+            });
+    }
+
+    // Initial load
+    updateNotificationCounts();
+
+    // Update counts every 30 seconds
+    setInterval(updateNotificationCounts, 30000);
+});
+</script>
+
 
 @endsection

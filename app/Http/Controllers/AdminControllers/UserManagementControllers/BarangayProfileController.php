@@ -92,30 +92,57 @@ class BarangayProfileController
         try {
             $barangayProfile = BarangayProfile::findOrFail($id);
 
+            // Only validate password since other fields are readonly
             $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:barangay_profiles,email,' . $id,
-                'role' => 'required|string|max:255',
-                'address' => 'required|string|max:500',
                 'password' => 'nullable|string|min:6|confirmed',
             ]);
 
+            // Only update password if provided
             if (!empty($validatedData['password'])) {
                 $barangayProfile->password = Hash::make($validatedData['password']);
+                $barangayProfile->save();
+                notify()->success('Password updated successfully.');
+            } else {
+                notify()->info('No changes were made to the profile.');
             }
 
-            $barangayProfile->name = $validatedData['name'];
-            $barangayProfile->email = $validatedData['email'];
-            $barangayProfile->role = $validatedData['role'];
-            $barangayProfile->address = $validatedData['address'];
-            $barangayProfile->save();
-
-            notify()->success('Barangay profile updated successfully.');
             return redirect()->route('admin.barangay-profiles');
             
         } catch (\Exception $e) {
             notify()->error('Error updating Barangay profile: ' . $e->getMessage());
             return back()->withInput();
+            
+        }
+    }
+
+    public function deactivate($id)
+    {
+        try {
+            $barangayProfile = BarangayProfile::findOrFail($id);
+            $barangayProfile->active = false;
+            $barangayProfile->save();
+            notify()->success('Barangay profile deactivated successfully.');
+            return redirect()->route('admin.barangay-profiles');
+            
+        } catch (\Exception $e) {
+            notify()->error('Error deactivating Barangay profile: ' . $e->getMessage());
+            return redirect()->route('admin.barangay-profiles');
+            
+        }
+    }
+
+    public function activate($id)
+    {
+        try {
+            $barangayProfile = BarangayProfile::findOrFail($id);
+            $barangayProfile->active = true;
+            $barangayProfile->save();
+            notify()->success('Barangay profile activated successfully.');
+            return redirect()->route('admin.barangay-profiles');
+            
+        } catch (\Exception $e) {
+            notify()->error('Error activating Barangay profile: ' . $e->getMessage());
+            return redirect()->route('admin.barangay-profiles');
             
         }
     }
@@ -133,14 +160,5 @@ class BarangayProfileController
             return redirect()->route('admin.barangay-profiles');
             
         }
-    }
-
-    public function toggleActive($id)
-    {
-        $profile = BarangayProfile::findOrFail($id);
-        $profile->active = !$profile->active;
-        $profile->save();
-        notify()->success('Official status updated successfully.');
-        return redirect()->back();
     }
 }

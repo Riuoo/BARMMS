@@ -306,24 +306,16 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     @if($request->status === 'pending')
-                                        <form onsubmit="return approveAndDownloadBlotter(event, '{{ $request->id }}')" class="inline">
-                                            @csrf
-                                            <input type="date" name="hearing_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
-                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                                <i class="fas fa-check mr-1"></i>
-                                                Approve
-                                            </button>
-                                        </form>
+                                        <button type="button" onclick="openApproveModal('{{ $request->id }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                            <i class="fas fa-check mr-1"></i>
+                                            Approve
+                                        </button>
                                     @elseif($request->status === 'approved')
                                         @if($request->attempts < 3)
-                                            <form onsubmit="return generateNewSummonPdf(event, '{{ $request->id }}')" class="inline">
-                                                @csrf
-                                                <input type="date" name="new_summon_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
-                                                    <i class="fas fa-file-alt mr-1"></i>
-                                                    New Summon
-                                                </button>
-                                            </form>
+                                            <button type="button" onclick="openNewSummonModal('{{ $request->id }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
+                                                <i class="fas fa-file-alt mr-1"></i>
+                                                New Summon
+                                            </button>
                                         @else
                                             <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" disabled>
                                                 <i class="fas fa-file-alt mr-1"></i>

@@ -91,7 +91,7 @@
                         <i class="fas fa-calendar mr-1"></i>
                         New Summon Date
                     </label>
-                    <input type="date" name="new_summon_date" 
+                    <input type="datetime-local" name="new_summon_date" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                            min="{{ date('Y-m-d') }}"
                            required>

@@ -233,7 +233,7 @@
                                 <div class="text-sm text-gray-900">
                                     @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
                                         <button onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                                                class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">
+                                                class="text-green-600 hover:text-green-800 font-medium cursor-pointer">
                                             <i class="fas fa-eye mr-1"></i>
                                             View Demographics
                                         </button>
@@ -258,16 +258,15 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
-                                       class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
+                                       class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
                                        title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.residents.toggle', $resident->id) }}" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="{{ $resident->active ? 'Disable' : 'Enable' }}">
-                                            <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
-                                        </button>
-                                    </form>
+                                    <button onclick="{{ $resident->active ? 'deactivateResident' : 'activateResident' }}({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" 
+                                            title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
+                                        <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
+                                    </button>
                                     <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
                                             class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
                                             title="Delete">
@@ -329,7 +328,7 @@
                 @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
                 <div class="mb-3">
                     <button onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition duration-200">
+                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition duration-200">
                         <i class="fas fa-user-friends mr-1"></i>
                         View Demographics
                     </button>
@@ -344,13 +343,12 @@
                         <i class="fas fa-edit mr-1"></i>
                         Edit
                     </a>
-                    <form method="POST" action="{{ route('admin.residents.toggle', $resident->id) }}" style="display:inline;">
-                        @csrf
-                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="{{ $resident->active ? 'Disable' : 'Enable' }}">
-                            <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
-                            {{ $resident->active ? 'Disable' : 'Enable' }}
-                        </button>
-                    </form>
+                    <button onclick="{{ $resident->active ? 'deactivateResident' : 'activateResident' }}({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
+                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" 
+                            title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
+                        <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
+                        {{ $resident->active ? 'Disable' : 'Enable' }}
+                    </button>
                     <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
                             class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
                             title="Delete">
@@ -373,8 +371,8 @@
         <!-- Modal Header -->
         <div class="flex items-center justify-between p-5 border-b border-gray-200">
             <div class="flex items-center">
-                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <i class="fas fa-user-friends text-blue-600 text-xl"></i>
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-user-friends text-green-600 text-xl"></i>
                 </div>
                 <div>
                     <h3 class="text-xl font-semibold text-gray-800" id="modalResidentName"></h3>
@@ -401,6 +399,62 @@
                 Close
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Activate Confirmation Modal -->
+<div id="activateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-check-circle text-green-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Activate Resident</h3>
+                <p class="text-sm text-gray-500">This will enable the resident's profile.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to activate <span id="activateResidentName" class="font-semibold"></span>? This will make their profile active and visible in the system.</p>
+        <form id="activateForm" method="POST" class="inline">
+            @csrf
+            @method('PUT')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeActivateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition duration-200">
+                    Activate Resident
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Deactivate Confirmation Modal -->
+<div id="deactivateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Deactivate Resident</h3>
+                <p class="text-sm text-gray-500">This will disable the resident's profile.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to deactivate <span id="deactivateResidentName" class="font-semibold"></span>? This will make their profile inactive and hidden from the system.</p>
+        <form id="deactivateForm" method="POST" class="inline">
+            @csrf
+            @method('PUT')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeactivateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-md hover:bg-yellow-700 transition duration-200">
+                    Deactivate Resident
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -503,6 +557,29 @@
     function closeDeleteModal() {
         document.getElementById('deleteModal').classList.add('hidden');
         document.getElementById('deleteModal').classList.remove('flex');
+    }
+    function activateResident(id, name) {
+        document.getElementById('activateResidentName').textContent = name;
+        document.getElementById('activateForm').action = `/admin/residents/${id}/activate`;
+        document.getElementById('activateModal').classList.remove('hidden');
+        document.getElementById('activateModal').classList.add('flex');
+    }
+
+    function closeActivateModal() {
+        document.getElementById('activateModal').classList.add('hidden');
+        document.getElementById('activateModal').classList.remove('flex');
+    }
+
+    function deactivateResident(id, name) {
+        document.getElementById('deactivateResidentName').textContent = name;
+        document.getElementById('deactivateForm').action = `/admin/residents/${id}/deactivate`;
+        document.getElementById('deactivateModal').classList.remove('hidden');
+        document.getElementById('deactivateModal').classList.add('flex');
+    }
+
+    function closeDeactivateModal() {
+        document.getElementById('deactivateModal').classList.add('hidden');
+        document.getElementById('deactivateModal').classList.remove('flex');
     }
 </script>
 @endsection

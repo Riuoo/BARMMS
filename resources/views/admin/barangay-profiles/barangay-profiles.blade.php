@@ -249,16 +249,15 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     <a href="{{ route('admin.barangay-profiles.edit', $user->id) }}" 
-                                       class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
+                                       class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
                                        title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.barangay-profiles.toggle', $user->id) }}" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="{{ $user->active ? 'Disable' : 'Enable' }}">
-                                            <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
-                                        </button>
-                                    </form>
+                                    <button onclick="{{ $user->active ? 'deactivateOfficial' : 'activateOfficial' }}({{ $user->id }}, '{{ addslashes($user->name) }}')" 
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" 
+                                            title="{{ $user->active ? 'Deactivate' : 'Activate' }}">
+                                        <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
+                                    </button>
                                     <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
                                             class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
                                             title="Delete">
@@ -330,13 +329,12 @@
                         <i class="fas fa-edit mr-1"></i>
                         Edit
                     </a>
-                    <form method="POST" action="{{ route('admin.barangay-profiles.toggle', $user->id) }}" style="display:inline;">
-                        @csrf
-                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="{{ $user->active ? 'Disable' : 'Enable' }}">
-                            <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
-                            {{ $user->active ? 'Disable' : 'Enable' }}
-                        </button>
-                    </form>
+                    <button onclick="{{ $user->active ? 'deactivateOfficial' : 'activateOfficial' }}({{ $user->id }}, '{{ addslashes($user->name) }}')" 
+                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" 
+                            title="{{ $user->active ? 'Deactivate' : 'Activate' }}">
+                        <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
+                        {{ $user->active ? 'Disable' : 'Enable' }}
+                    </button>
                     <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
                             class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
                             title="Delete">
@@ -352,7 +350,61 @@
     <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
 </div>
 
+<!-- Activate Confirmation Modal -->
+<div id="activateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-check-circle text-green-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Activate Official</h3>
+                <p class="text-sm text-gray-500">This will enable the official's profile.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to activate <span id="activateOfficialName" class="font-semibold"></span>? This will make their profile active and visible in the system.</p>
+        <form id="activateForm" method="POST" class="inline">
+            @csrf
+            @method('PUT')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeActivateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition duration-200">
+                    Activate Official
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
+<!-- Deactivate Confirmation Modal -->
+<div id="deactivateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Deactivate Official</h3>
+                <p class="text-sm text-gray-500">This will disable the official's profile.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to deactivate <span id="deactivateOfficialName" class="font-semibold"></span>? This will make their profile inactive and hidden from the system.</p>
+        <form id="deactivateForm" method="POST" class="inline">
+            @csrf
+            @method('PUT')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeactivateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-md hover:bg-yellow-700 transition duration-200">
+                    Deactivate Official
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
@@ -389,9 +441,34 @@ function deleteOfficial(id, name) {
     document.getElementById('deleteModal').classList.remove('hidden');
     document.getElementById('deleteModal').classList.add('flex');
 }
+
 function closeDeleteModal() {
     document.getElementById('deleteModal').classList.add('hidden');
     document.getElementById('deleteModal').classList.remove('flex');
+}
+
+function activateOfficial(id, name) {
+    document.getElementById('activateOfficialName').textContent = name;
+    document.getElementById('activateForm').action = `/admin/barangay-profiles/${id}/activate`;
+    document.getElementById('activateModal').classList.remove('hidden');
+    document.getElementById('activateModal').classList.add('flex');
+}
+
+function closeActivateModal() {
+    document.getElementById('activateModal').classList.add('hidden');
+    document.getElementById('activateModal').classList.remove('flex');
+}
+
+function deactivateOfficial(id, name) {
+    document.getElementById('deactivateOfficialName').textContent = name;
+    document.getElementById('deactivateForm').action = `/admin/barangay-profiles/${id}/deactivate`;
+    document.getElementById('deactivateModal').classList.remove('hidden');
+    document.getElementById('deactivateModal').classList.add('flex');
+}
+
+function closeDeactivateModal() {
+    document.getElementById('deactivateModal').classList.add('hidden');
+    document.getElementById('deactivateModal').classList.remove('flex');
 }
 </script>
 

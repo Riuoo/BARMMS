@@ -116,10 +116,6 @@ class ResidentController
             $resident = Residents::findOrFail($id);
 
             $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:residents,email,' . $id,
-                'role' => 'required|string|max:255',
-                'address' => 'required|string|max:500',
                 'password' => 'nullable|string|min:6|confirmed',
                 'age' => 'nullable|integer|min:1|max:120',
                 'family_size' => 'nullable|integer|min:1|max:20',
@@ -133,10 +129,6 @@ class ResidentController
                 $resident->password = bcrypt($validatedData['password']);
             }
 
-            $resident->name = $validatedData['name'];
-            $resident->email = $validatedData['email'];
-            $resident->role = $validatedData['role'];
-            $resident->address = $validatedData['address'];
             $resident->age = $validatedData['age'] ?? null;
             $resident->family_size = $validatedData['family_size'] ?? null;
             $resident->education_level = $validatedData['education_level'] ?? null;
@@ -155,6 +147,38 @@ class ResidentController
         }
     }
 
+    public function deactivate($id)
+    {
+        try {
+            $resident = Residents::findOrFail($id);
+            $resident->active = false;
+            $resident->save();
+            notify()->success('Resident deactivated successfully.');
+            return redirect()->route('admin.residents');
+            
+        } catch (\Exception $e) {
+            notify()->error('Error deactivating Resident: ' . $e->getMessage());
+            return redirect()->route('admin.residents');
+            
+        }
+    }
+
+    public function activate($id)
+    {
+        try {
+            $resident = Residents::findOrFail($id);
+            $resident->active = true;
+            $resident->save();
+            notify()->success('Resident activated successfully.');
+            return redirect()->route('admin.residents');
+            
+        } catch (\Exception $e) {
+            notify()->error('Error activating Resident: ' . $e->getMessage());
+            return redirect()->route('admin.residents');
+            
+        }
+    }
+
     public function delete($id)
     {
         try {
@@ -168,14 +192,5 @@ class ResidentController
             return redirect()->route('admin.residents');
             
         }
-    }
-
-    public function toggleActive($id)
-    {
-        $resident = Residents::findOrFail($id);
-        $resident->active = !$resident->active;
-        $resident->save();
-        notify()->success('Resident status updated successfully.');
-        return redirect()->back();
     }
 }
