@@ -50,7 +50,7 @@ class VaccinationRecordController
             'last_month' => VaccinationRecord::where('vaccination_date', '>=', now()->subDays(30))->count()
         ];
 
-        $vaccinationRecords = $query->paginate(15);
+        $vaccinationRecords = $query->orderBy('created_at', 'desc')->paginate(10);
 
         return view('admin.vaccination-records.index', compact('vaccinationRecords', 'stats'));
     

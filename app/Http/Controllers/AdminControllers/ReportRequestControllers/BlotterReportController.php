@@ -25,15 +25,16 @@ class BlotterReportController
             $query->where(function ($q) use ($search) {
                 $q->where('recipient_name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%");
+                  ->orWhere('type', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%");
+                  });
             });
         }
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
-        $blotterRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
-            ->orderByDesc('created_at')
-            ->get();
+        $blotterRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")->orderByDesc('created_at')->paginate(10);
         return view('admin.requests.blotter-reports', compact('blotterRequests', 'totalReports', 'pendingCount', 'approvedCount', 'completedCount'));
     }
 
@@ -107,7 +108,7 @@ class BlotterReportController
             }
             
             // Generate PDF
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdfs.summons_pdf', [
+            $pdf = Pdf::loadView('admin.pdfs.summons_pdf', [
                 'blotter' => $blotter,
                 'adminUser' => $adminUser
             ]);
@@ -198,7 +199,7 @@ class BlotterReportController
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240',
             'summon_date' => 'required|date|after:today'
         ]);
-        $user = \App\Models\Residents::find($validated['resident_id']);
+        $user = Residents::find($validated['resident_id']);
         if (!$user || !$user->active) {
             notify()->error('This user account is inactive and cannot make transactions.');
             return back()->withInput();
@@ -281,25 +282,6 @@ class BlotterReportController
         ]);
         $filename = "new_summon_notice_{$blotter->id}.pdf";
         return $pdf->download($filename); // Download the new summons PDF
-    }
-
-    public function searchResidents(Request $request)
-    {
-        $term = $request->query('term');
-        $page = $request->query('page', 1);
-        
-        return Residents::query()
-            ->where('name', 'like', "%{$term}%")
-            ->orWhere('email', 'like', "%{$term}%")
-            ->paginate(10, ['id', 'name', 'email'], 'page', $page)
-            ->map(function($resident) {
-                return [
-                    'id' => $resident->id,
-                    'text' => $resident->name,
-                    'name' => $resident->name,
-                    'email' => $resident->email
-                ];
-            });
     }
 
 }

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Residents;
+use App\Models\BarangayProfile;
+use App\Models\DocumentTemplate;
 
 class DocumentRequestController
 {
@@ -33,9 +35,7 @@ class DocumentRequestController
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
-        $documentRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
-            ->orderByDesc('created_at')
-            ->get();
+        $documentRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")->orderByDesc('created_at')->paginate(10);
         return view('admin.requests.document-requests', compact('documentRequests', 'totalRequests', 'pendingCount', 'approvedCount', 'completedCount'));
     }
 
@@ -88,11 +88,11 @@ class DocumentRequestController
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
-                $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
+                $adminUser = BarangayProfile::find(session('user_id'));
             }
 
             // Fetch the template from the database (case-insensitive, trimmed)
-            $template = \App\Models\DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
+            $template = DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
 
             if (!$template) {
                 notify()->error('No template found for this document type.');
@@ -119,7 +119,7 @@ class DocumentRequestController
             $html = $template->generateHtml($values);
 
             // Generate the PDF
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+            $pdf = Pdf::loadHTML($html);
 
             // Mark as approved
             $documentRequest->status = 'approved';
@@ -130,7 +130,7 @@ class DocumentRequestController
             return $pdf->download($filename);
 
         } catch (\Exception $e) {
-            \Log::error('Error approving document request: ' . $e->getMessage());
+            Log::error('Error approving document request: ' . $e->getMessage());
             notify()->error('Failed to approve document request. ' . $e->getMessage());
             return redirect()->back();
         }
@@ -150,11 +150,11 @@ class DocumentRequestController
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
-                $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
+                $adminUser = BarangayProfile::find(session('user_id'));
             }
 
             // Fetch the template from the database (case-insensitive, trimmed)
-            $template = \App\Models\DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
+            $template = DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
 
             if (!$template) {
                 notify()->error('No template found for this document type.');
@@ -181,7 +181,7 @@ class DocumentRequestController
             $html = $template->generateHtml($values);
 
             // Generate the PDF
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+            $pdf = Pdf::loadHTML($html);
 
             // If status is 'approved', mark as 'completed'
             if ($documentRequest->status === 'approved') {
@@ -237,7 +237,7 @@ class DocumentRequestController
             'document_type' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
-        $user = \App\Models\Residents::find($validated['user_id']);
+        $user = Residents::find($validated['user_id']);
         if (!$user || !$user->active) {
             notify()->error('This user account is inactive and cannot make transactions.');
             return back()->withInput();
@@ -252,7 +252,7 @@ class DocumentRequestController
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
-                $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
+                $adminUser = BarangayProfile::find(session('user_id'));
             }
 
             // Log the document request for debugging
@@ -304,7 +304,7 @@ class DocumentRequestController
     {
         $documentType = trim($documentType);
         Log::info('Looking for template with document_type: [' . $documentType . ']');
-        $template = \App\Models\DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower($documentType)])->first();
+        $template = DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower($documentType)])->first();
         if ($template && $template->html) {
             return $template->html;
         }

@@ -43,7 +43,7 @@ class ResidentController
         if ($request->filled('recent') && $request->get('recent') === 'recent') {
             $query->where('created_at', '>=', now()->subDays(30));
         }
-        $residents = $query->orderByDesc('active')->orderBy('name')->get();
+        $residents = $query->orderByDesc('active')->orderBy('name')->paginate(10);
         return view('admin.residents.residents', compact('residents', 'totalResidents', 'activeResidents', 'recentResidents', 'withAddress'));
     }
 
@@ -192,5 +192,21 @@ class ResidentController
             return redirect()->route('admin.residents');
             
         }
+    }
+    
+    public function search(Request $request)
+    {
+        $term = $request->get('term');
+        
+        if (!$term || strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $residents = Residents::where('name', 'like', "%{$term}%")
+            ->orWhere('email', 'like', "%{$term}%")
+            ->limit(10)
+            ->get(['id', 'name', 'email']);
+
+        return response()->json($residents);
     }
 }

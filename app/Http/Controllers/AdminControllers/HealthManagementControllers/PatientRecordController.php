@@ -32,7 +32,7 @@ class PatientRecordController
             $query->where('blood_type', $request->get('blood_type'));
         }
         
-        $patientRecords = $query->orderBy('created_at', 'desc')->paginate(15);
+        $patientRecords = $query->orderBy('created_at', 'desc')->paginate(10);
         
         // Calculate statistics
         $totalRecords = PatientRecord::count();

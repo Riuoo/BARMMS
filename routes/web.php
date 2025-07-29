@@ -81,6 +81,7 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::get('/residents', [ResidentController::class, 'residentProfile'])->name('admin.residents');
     Route::get('/residents/create', [ResidentController::class, 'create'])->name('admin.residents.create');
     Route::post('/residents', [ResidentController::class, 'store'])->name('admin.residents.store');
+    Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
     Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('admin.residents.edit');
     Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
     Route::put('/residents/{id}/activate', [ResidentController::class, 'activate'])->name('admin.residents.activate');

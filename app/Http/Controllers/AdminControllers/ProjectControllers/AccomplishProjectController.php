@@ -44,7 +44,7 @@ class AccomplishProjectController
             }
         }
 
-        $projects = $query->orderBy('completion_date', 'desc')->get();
+        $projects = $query->orderBy('completion_date', 'desc')->paginate(9);
         $stats = $this->projectService->getProjectStats();
         $featuredProjects = AccomplishedProject::where('is_featured', true)->get();
         

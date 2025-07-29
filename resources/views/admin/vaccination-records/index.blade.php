@@ -3,9 +3,9 @@
 @section('title', 'Vaccination Records')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+<div class="max-w-7xl mx-auto pt-2">
     <!-- Header Section -->
-    <div class="mb-6 md:mb-8">
+    <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Vaccination Records</h1>
@@ -52,7 +52,7 @@
     @endif
 
     <!-- Vaccination Search & Filter Form -->
-    <form method="GET" action="{{ route('admin.vaccination-records.index') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.vaccination-records.index') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -91,68 +91,78 @@
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-3">
         <!-- Total Vaccinations -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                    <i class="fas fa-syringe"></i>
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-syringe text-blue-600 text-sm md:text-base"></i>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Total Vaccinations</p>
-                    <p class="text-2xl font-semibold">{{ $stats['total'] }}</p>
+                <div class="ml-3 md:ml-4">
+                    <p class="text-xs md:text-sm font-medium text-gray-500">Total Vaccinations</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900   ">{{ $stats['total'] }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Due Soon -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
-                    <i class="fas fa-clock"></i>
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-clock text-yellow-600 text-sm md:text-base"></i>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Due Soon</p>
-                    <p class="text-2xl font-semibold">{{ $stats['due_soon'] }}</p>
+                <div class="ml-3 md:ml-4">
+                    <p class="text-xs md:text-sm font-medium text-gray-500">Due Soon</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['due_soon'] }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Overdue -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
-                    <i class="fas fa-exclamation-circle"></i>
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-circle text-red-600 text-sm md:text-base"></i>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Overdue</p>
-                    <p class="text-2xl font-semibold">{{ $stats['overdue'] }}</p>
+                <div class="ml-3 md:ml-4">
+                    <p class="text-xs md:text-sm font-medium text-gray-500">Overdue</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['overdue'] }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Completed -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                    <i class="fas fa-check-circle"></i>
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-check-circle text-green-600 text-sm md:text-base"></i>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-2xl font-semibold">{{ $stats['completed'] }}</p>
+                <div class="ml-3 md:ml-4">
+                    <p class="text-xs md:text-sm font-medium text-gray-500">Completed</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['completed'] }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Last 30 Days -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
-                    <i class="fas fa-calendar-alt"></i>
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-purple-600 text-sm md:text-base"></i>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Last 30 Days</p>
-                    <p class="text-2xl font-semibold">{{ $stats['last_month'] }}</p>
+                <div class="ml-3 md:ml-4">
+                    <p class="text-xs md:text-sm font-medium text-gray-500">Last 30 Days</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['last_month'] }}</p>
                 </div>
             </div>
         </div>
@@ -366,6 +376,123 @@
                 </div>
             </div>
             @endforeach
+        </div>
+    @endif
+
+    <!-- Modern Pagination -->
+    @if($vaccinationRecords->hasPages())
+        <div class="mt-6">
+            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+                <div class="-mt-px flex w-0 flex-1">
+                    @if($vaccinationRecords->onFirstPage())
+                        <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </span>
+                    @else
+                        <a href="{{ $vaccinationRecords->appends(request()->except('page'))->previousPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="hidden md:-mt-px md:flex">
+                    @php
+                        $currentPage = $vaccinationRecords->currentPage();
+                        $lastPage = $vaccinationRecords->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
+                    
+                    @if($startPage > 1)
+                        <a href="{{ $vaccinationRecords->appends(request()->except('page'))->url(1) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            1
+                        </a>
+                        @if($startPage > 2)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                    @endif
+                    
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $vaccinationRecords->appends(request()->except('page'))->url($page) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endfor
+                    
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                        <a href="{{ $vaccinationRecords->appends(request()->except('page'))->url($lastPage) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            {{ $lastPage }}
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="-mt-px flex w-0 flex-1 justify-end">
+                    @if($vaccinationRecords->hasMorePages())
+                        <a href="{{ $vaccinationRecords->appends(request()->except('page'))->nextPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </a>
+                    @else
+                        <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </span>
+                    @endif
+                </div>
+            </nav>
+            
+            <!-- Mobile Pagination -->
+            <div class="mt-4 flex justify-between sm:hidden">
+                @if($vaccinationRecords->onFirstPage())
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Previous
+                    </span>
+                @else
+                    <a href="{{ $vaccinationRecords->appends(request()->except('page'))->previousPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Previous
+                    </a>
+                @endif
+                
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                    Page {{ $vaccinationRecords->currentPage() }} of {{ $vaccinationRecords->lastPage() }}
+                </span>
+                
+                @if($vaccinationRecords->hasMorePages())
+                    <a href="{{ $vaccinationRecords->appends(request()->except('page'))->nextPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Next
+                    </a>
+                @else
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Next
+                    </span>
+                @endif
+            </div>
+            
+            <!-- Results Info -->
+            <div class="mt-4 text-center text-sm text-gray-500">
+                Showing {{ $vaccinationRecords->firstItem() }} to {{ $vaccinationRecords->lastItem() }} of {{ $vaccinationRecords->total() }} results
+            </div>
         </div>
     @endif
 </div>

@@ -43,7 +43,7 @@ class BarangayProfileController
                 $query->where('active', false);
             }
         }
-        $barangayProfiles = $query->orderByDesc('active')->orderBy('name')->get();
+        $barangayProfiles = $query->orderByDesc('active')->orderBy('name')->paginate(10);
         return view('admin.barangay-profiles.barangay-profiles', compact('barangayProfiles', 'totalOfficials', 'captainCount', 'councilorCount', 'otherCount'));
     }
 

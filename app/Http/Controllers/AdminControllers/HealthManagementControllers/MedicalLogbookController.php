@@ -35,7 +35,7 @@ class MedicalLogbookController
             'referred' => MedicalLogbook::where('status', 'Referred')->count(),
             'last_month' => MedicalLogbook::where('consultation_date', '>=', now()->subDays(30))->count()
         ];
-        $medicalLogbooks = $query->paginate(15);
+        $medicalLogbooks = $query->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.medical-logbooks.index', compact('medicalLogbooks', 'stats'));
     }
 

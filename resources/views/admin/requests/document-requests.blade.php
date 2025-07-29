@@ -3,9 +3,9 @@
 @section('title', 'Document Requests')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+<div class="max-w-7xl mx-auto pt-2">
     <!-- Header Section -->
-    <div class="mb-6 md:mb-8">
+    <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Document Requests</h1>
@@ -52,7 +52,7 @@
     @endif
 
     <!-- Filters and Search -->
-    <form method="GET" action="{{ route('admin.document-requests') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.document-requests') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -86,7 +86,7 @@
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -380,6 +380,123 @@
         </div>
     @endif
 
+    <!-- Modern Pagination -->
+    @if($documentRequests->hasPages())
+        <div class="mt-6">
+            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+                <div class="-mt-px flex w-0 flex-1">
+                    @if($documentRequests->onFirstPage())
+                        <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </span>
+                    @else
+                        <a href="{{ $documentRequests->appends(request()->except('page'))->previousPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="hidden md:-mt-px md:flex">
+                    @php
+                        $currentPage = $documentRequests->currentPage();
+                        $lastPage = $documentRequests->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
+                    
+                    @if($startPage > 1)
+                        <a href="{{ $documentRequests->appends(request()->except('page'))->url(1) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            1
+                        </a>
+                        @if($startPage > 2)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                    @endif
+                    
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $documentRequests->appends(request()->except('page'))->url($page) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endfor
+                    
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                        <a href="{{ $documentRequests->appends(request()->except('page'))->url($lastPage) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            {{ $lastPage }}
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="-mt-px flex w-0 flex-1 justify-end">
+                    @if($documentRequests->hasMorePages())
+                        <a href="{{ $documentRequests->appends(request()->except('page'))->nextPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </a>
+                    @else
+                        <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </span>
+                    @endif
+                </div>
+            </nav>
+            
+            <!-- Mobile Pagination -->
+            <div class="mt-4 flex justify-between sm:hidden">
+                @if($documentRequests->onFirstPage())
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Previous
+                    </span>
+                @else
+                    <a href="{{ $documentRequests->appends(request()->except('page'))->previousPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Previous
+                    </a>
+                @endif
+                
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                    Page {{ $documentRequests->currentPage() }} of {{ $documentRequests->lastPage() }}
+                </span>
+                
+                @if($documentRequests->hasMorePages())
+                    <a href="{{ $documentRequests->appends(request()->except('page'))->nextPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Next
+                    </a>
+                @else
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Next
+                    </span>
+                @endif
+            </div>
+            
+            <!-- Results Info -->
+            <div class="mt-4 text-center text-sm text-gray-500">
+                Showing {{ $documentRequests->firstItem() }} to {{ $documentRequests->lastItem() }} of {{ $documentRequests->total() }} results
+            </div>
+        </div>
+    @endif
+    
     <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
 </div>
 

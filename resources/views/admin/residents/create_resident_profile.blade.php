@@ -115,9 +115,18 @@
                 </div>
             </div>
 
+            <!-- Form Actions -->
             <div class="flex justify-between mt-8">
-                <a href="{{ route('admin.residents') }}" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Cancel</a>
-                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition">Add Resident</button>
+                <a href="{{ route('admin.residents') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                    <i class="fas fa-save mr-2"></i>
+                    Add Resident
+                </button>
             </div>
         </form>
     </div>

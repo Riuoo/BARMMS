@@ -31,9 +31,7 @@ class CommunityComplaintController
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
-        $complaints = $query->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")
-            ->orderByDesc('created_at')
-            ->get();
+        $complaints = $query->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")->orderByDesc('created_at')->paginate(10);
         $stats = [
             'total' => $total,
             'pending' => $pending,

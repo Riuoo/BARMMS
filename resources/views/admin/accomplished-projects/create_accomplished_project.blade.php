@@ -186,16 +186,19 @@
             </div>
         </div>
 
-        <!-- Submit Buttons -->
-        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-            <a href="{{ route('admin.accomplished-projects') }}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-300">
-                Cancel
-            </a>
-            <button type="submit" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition duration-300 flex items-center">
-                <i class="fas fa-save mr-2"></i>
-                Create Project
-            </button>
-        </div>
+        <!-- Form Actions -->
+            <div class="flex justify-between mt-8">
+                <a href="{{ route('admin.accomplished-projects') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                    <i class="fas fa-save mr-2"></i>
+                    Create Project
+                </button>
+            </div>
     </form>
 </div>
 

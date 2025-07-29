@@ -35,9 +35,7 @@ class AccountRequestController
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
-        $accountRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
-            ->orderByDesc('created_at')
-            ->get();
+        $accountRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")->orderByDesc('created_at')->paginate(10);
         return view('admin.requests.new-account-requests', compact('accountRequests', 'totalRequests', 'pendingCount', 'approvedCount', 'completedCount'));
     }
 
