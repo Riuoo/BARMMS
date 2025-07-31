@@ -125,7 +125,7 @@
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
+                                <div class="flex items-center justify-center">
                                     <i class="fas fa-cogs mr-2"></i>
                                     Actions
                                 </div>
@@ -150,6 +150,10 @@
                                             <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                                                 <i class="fas fa-user-plus text-green-600 text-sm"></i>
                                             </div>
+                                        @elseif($notification->type === 'community_complaint')
+                                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-exclamation-triangle text-yellow-600 text-sm"></i>
+                                            </div>
                                         @endif
                                     </div>
                                     <div class="ml-4 flex-1">
@@ -170,6 +174,8 @@
                                                 Document Request
                                             @elseif($notification->type === 'account_request')
                                                 Account Request
+                                            @elseif($notification->type === 'community_complaint')
+                                                Community Complaint
                                             @endif
                                         </p>
                                     </div>
@@ -196,20 +202,14 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex justify-center">
                                 <div class="flex items-center space-x-2">
                                     <a href="{{ $notification->link }}" 
-                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
+                                       onclick="markAsReadAndNavigate('{{ $notification->type }}', {{ $notification->id }}, '{{ $notification->link }}')">
                                         <i class="fas fa-eye mr-1"></i>
                                         View
                                     </a>
-                                    @if(!$notification->is_read)
-                                        <button onclick="markAsRead('{{ $notification->type }}', {{ $notification->id }})" 
-                                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                                            <i class="fas fa-check mr-1"></i>
-                                            Mark Read
-                                        </button>
-                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -230,20 +230,23 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data && !data.error) {
                     const totalUnread = data.total || 0;
-                    const totalNotifications = {{ $notifications->count() }};
-                    const totalRead = totalNotifications - totalUnread;
+                    // This line assumes $notifications->count() is the total number of notifications displayed on the current page.
+                    // If you want the total read notifications across all pages, you'd need a separate AJAX call or pass it from the backend.
+                    const totalNotificationsOnPage = {{ $notifications->count() }}; 
+                    const totalReadOnPage = totalNotificationsOnPage - totalUnread; // This calculation is only accurate if all notifications on the page are either read or unread.
                     
                     // Update unread count
                     document.getElementById('unread-count').textContent = `${totalUnread} unread`;
                     
-                    // Update read count
-                    document.getElementById('read-count').textContent = `${totalRead} read`;
+                    // Update read count (this will only reflect read status of notifications currently displayed)
+                    document.getElementById('read-count').textContent = `${totalReadOnPage} read`;
                 }
             })
             .catch(error => {
                 console.error('Error fetching notification counts:', error);
             });
     }
+    
 
     // Initial load
     updateNotificationCounts();
@@ -251,6 +254,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update counts every 30 seconds
     setInterval(updateNotificationCounts, 30000);
 });
+
+// Function to mark notification as read and navigate to the link
+function markAsReadAndNavigate(type, id, link) {
+    // Prevent default link behavior
+    event.preventDefault();
+    
+    // Make AJAX call to mark notification as read
+    fetch(`/admin/notifications/mark-as-read/${type}/${id}`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            if (typeof toast !== 'undefined') {
+                toast.success(data.message);
+            }
+        }
+        // Navigate to the link after marking as read
+        window.location.href = link;
+    })
+    .catch(error => {
+        console.error('Error marking notification as read:', error);
+        // Still navigate to the link even if marking as read fails
+        window.location.href = link;
+    });
+}
 </script>
 
 

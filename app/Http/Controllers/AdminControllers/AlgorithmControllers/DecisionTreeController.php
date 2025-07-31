@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\AdminControllers\AlgorithmControllers;
 
-use App\Services\DecisionTreeService;
+use App\Services\ResidentClassificationPredictionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -10,7 +10,7 @@ class DecisionTreeController
 {
     private $decisionTreeService;
 
-    public function __construct(DecisionTreeService $decisionTreeService)
+    public function __construct(ResidentClassificationPredictionService $decisionTreeService)
     {
         $this->decisionTreeService = $decisionTreeService;
     }
@@ -163,7 +163,7 @@ class DecisionTreeController
         $maxDepth = $request->input('max_depth', 10);
         $minSamplesSplit = $request->input('min_samples_split', 2);
         
-        $this->decisionTreeService = new DecisionTreeService($maxDepth, $minSamplesSplit);
+        $this->decisionTreeService = new ResidentClassificationPredictionService($maxDepth, $minSamplesSplit);
         
         switch ($type) {
             case 'health-risk':
@@ -469,4 +469,4 @@ class DecisionTreeController
             ]
         ];
     }
-} 
+}

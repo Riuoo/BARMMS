@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\AdminControllers\AlgorithmControllers;
 
-use App\Services\ClusteringService;
+use App\Services\ResidentDemographicAnalysisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Residents;
@@ -11,7 +11,7 @@ class ClusteringController
 {
     private $clusteringService;
 
-    public function __construct(ClusteringService $clusteringService)
+    public function __construct(ResidentDemographicAnalysisService $clusteringService)
     {
         $this->clusteringService = $clusteringService;
     }
@@ -29,7 +29,7 @@ class ClusteringController
             $k = $this->clusteringService->findOptimalK($residents);
         }
         
-        $this->clusteringService = new ClusteringService($k);
+        $this->clusteringService = new ResidentDemographicAnalysisService($k);
         $result = $this->clusteringService->clusterResidents();
         
         if (isset($result['error'])) {
@@ -76,7 +76,7 @@ class ClusteringController
         $k = $request->input('k', 3);
         $maxIterations = $request->input('max_iterations', 100);
         
-        $this->clusteringService = new ClusteringService($k, $maxIterations);
+        $this->clusteringService = new ResidentDemographicAnalysisService($k, $maxIterations);
         $result = $this->clusteringService->clusterResidents();
         
         if (isset($result['error'])) {
@@ -125,7 +125,7 @@ class ClusteringController
         $k = $request->input('k', 3);
         $format = $request->input('format', 'json');
         
-        $this->clusteringService = new ClusteringService($k);
+        $this->clusteringService = new ResidentDemographicAnalysisService($k);
         $result = $this->clusteringService->clusterResidents();
         
         if (isset($result['error'])) {
@@ -207,7 +207,7 @@ class ClusteringController
     {
         $k = $request->input('k', 3);
         
-        $this->clusteringService = new ClusteringService($k);
+        $this->clusteringService = new ResidentDemographicAnalysisService($k);
         $result = $this->clusteringService->clusterResidents();
         
         if (isset($result['error'])) {
@@ -250,4 +250,4 @@ class ClusteringController
         }
         return $distribution;
     }
-} 
+}

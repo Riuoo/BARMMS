@@ -202,6 +202,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="{{ route('resident.request_community_complaint') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_complaint') }} transition duration-300 text-base">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_complaint') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Complaint</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('resident.request_document_request') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_document_request') }} transition duration-300 text-base">
                                     <i class="fas fa-file-signature fa-fw mr-3 {{ request()->routeIs('resident.request_document_request') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>New Document Request</span>

@@ -430,13 +430,13 @@
                             <li>
                                 <a href="{{ route('admin.clustering') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.clustering*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.clustering*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-chart-pie fa-fw mr-3 {{ request()->routeIs('admin.clustering*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Clustering Analysis</span>
+                                    <span>Resident Demographic Analysis</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.decision-tree') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.decision-tree*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.decision-tree*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-sitemap fa-fw mr-3 {{ request()->routeIs('admin.decision-tree*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Decision Trees</span>
+                                    <span>Resident Classification & Prediction</span>
                                 </a>
                             </li>
                         </ul>
@@ -591,13 +591,13 @@
                             <li>
                                 <a href="{{ route('admin.clustering') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.clustering*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-chart-pie fa-fw mr-3 {{ request()->routeIs('admin.clustering*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Clustering Analysis</span>
+                                    <span>Resident Demographic Analysis</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.decision-tree') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.decision-tree*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-sitemap fa-fw mr-3 {{ request()->routeIs('admin.decision-tree*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Decision Trees</span>
+                                    <span>Resident Classification & Prediction</span>
                                 </a>
                             </li>
                         </ul>
@@ -1154,6 +1154,9 @@
                         break;
                     case 'account_request':
                         url = '/admin/new-account-requests';
+                        break;
+                    case 'community_complaint':
+                        url = '/admin/community-complaints';
                         break;
                     default:
                         toast.error('Unknown notification type');

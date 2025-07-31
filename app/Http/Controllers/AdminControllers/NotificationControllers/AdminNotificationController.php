@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AdminControllers\NotificationControllers;
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\AccountRequest;
+use App\Models\CommunityComplaint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +23,7 @@ class AdminNotificationController
         $blotterReports = BlotterRequest::orderBy('created_at', 'desc')->get();
         $documentRequests = DocumentRequest::orderBy('created_at', 'desc')->get();
         $accountRequests = AccountRequest::orderBy('created_at', 'desc')->get();
+        $communityComplaints = CommunityComplaint::orderBy('created_at', 'desc')->get();
 
         // Combine notifications into a single collection
         $notifications = collect();
@@ -56,6 +58,17 @@ class AdminNotificationController
                 'created_at' => $requestAcc->created_at,
                 'is_read' => $requestAcc->is_read,
                 'link' => route('admin.requests.new-account-requests'),
+            ]);
+        }
+
+        foreach ($communityComplaints as $complaint) {
+            $notifications->push((object)[
+                'id' => $complaint->id,
+                'type' => 'community_complaint',
+                'message' => 'New community complaint pending review.',
+                'created_at' => $complaint->created_at,
+                'is_read' => $complaint->is_read,
+                'link' => route('admin.community-complaints'),
             ]);
         }
 
@@ -134,12 +147,29 @@ class AdminNotificationController
                         'type' => 'account_request',
                         'message' => 'Account request from ' . $request->email,
                         'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
-                        'link' => route('admin.new-account-requests'),
+                        'link' => route('admin.requests.new-account-requests'),
                         'priority' => 'high'
                     ];
                 } catch (\Exception $e) {
                     // Skip this notification if there's an error
                     Log::error('Error processing account request notification: ' . $e->getMessage());
+                }
+            });
+            
+            // Process Community Complaints
+            CommunityComplaint::where('is_read', false)->get()->each(function ($complaint) use (&$notificationsData) {
+                try {
+                    $notificationsData[] = [
+                        'id' => $complaint->id,
+                        'type' => 'community_complaint',
+                        'message' => 'Community complaint from ' . ($complaint->user->name ?? 'Unknown Resident'),
+                        'created_at' => Carbon::parse($complaint->created_at)->toDateTimeString(),
+                        'link' => route('admin.community-complaints'),
+                        'priority' => 'medium'
+                    ];
+                } catch (\Exception $e) {
+                    // Skip this notification if there's an error
+                    Log::error('Error processing community complaint notification: ' . $e->getMessage());
                 }
             });
             
@@ -162,6 +192,7 @@ class AdminNotificationController
                     'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
                     'document_requests' => DocumentRequest::where('is_read', false)->count(),
                     'account_requests' => AccountRequest::where('is_read', false)->count(),
+                    'community_complaints' => CommunityComplaint::where('is_read', false)->count(),
                 ]
             ]);
         } catch (\Exception $e) {
@@ -173,6 +204,7 @@ class AdminNotificationController
                     'blotter_reports' => 0,
                     'document_requests' => 0,
                     'account_requests' => 0,
+                    'community_complaints' => 0,
                 ],
                 'error' => 'Failed to load notifications'
             ], 500);
@@ -192,6 +224,7 @@ class AdminNotificationController
             BlotterRequest::where('is_read', false)->update(['is_read' => true]);
             DocumentRequest::where('is_read', false)->update(['is_read' => true]);
             AccountRequest::where('is_read', false)->update(['is_read' => true]);
+            CommunityComplaint::where('is_read', false)->update(['is_read' => true]);
             DB::commit();
             notify()->success('All notifications marked as read.');
             return redirect()->back();
@@ -227,6 +260,9 @@ class AdminNotificationController
                 case 'account_request':
                     $updated = AccountRequest::where('id', $id)->update(['is_read' => true]) > 0;
                     break;
+                case 'community_complaint':
+                    $updated = CommunityComplaint::where('id', $id)->update(['is_read' => true]) > 0;
+                    break;
                 default:
                     return response()->json(['message' => 'Invalid notification type.'], 400);
             }
@@ -255,6 +291,7 @@ class AdminNotificationController
             BlotterRequest::where('is_read', false)->update(['is_read' => true]);
             DocumentRequest::where('is_read', false)->update(['is_read' => true]);
             AccountRequest::where('is_read', false)->update(['is_read' => true]);
+            CommunityComplaint::where('is_read', false)->update(['is_read' => true]);
             DB::commit();
             
             return response()->json([

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ResidentControllers;
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\HealthStatus;
+use App\Models\CommunityComplaint;
 use Illuminate\Http\Request;
 use App\Models\Residents;
 use Illuminate\Support\Facades\Session;
@@ -137,7 +138,7 @@ class ResidentController2
             return redirect()->route('landing');
         }
         
-        $complaint = new \App\Models\CommunityComplaint();
+        $complaint = new CommunityComplaint();
         $complaint->user_id = $userId;
         $complaint->title = $request->title;
         $complaint->category = $request->category;
@@ -226,7 +227,7 @@ class ResidentController2
         $blotterRequests = BlotterRequest::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
         $documentRequests = DocumentRequest::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
         $healthStatusRequests = HealthStatus::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
-        $communityComplaints = \App\Models\CommunityComplaint::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+        $communityComplaints = CommunityComplaint::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
 
         return view('resident.my_requests', compact('blotterRequests', 'documentRequests', 'healthStatusRequests', 'communityComplaints'));
     }

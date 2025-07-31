@@ -262,7 +262,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
-                                        <button onclick="openUpdateStatusModal({{ $complaint->id }})"
+                                        <button onclick="openUpdateStatusModal({{ $complaint->id }}, '{{ $complaint->status }}')"
                                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                                             <i class="fas fa-edit mr-1"></i>
                                             Update
@@ -360,7 +360,7 @@
                         View Details
                     </button>
                     @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
-                        <button onclick="openUpdateStatusModal({{ $complaint->id }})"
+                        <button onclick="openUpdateStatusModal({{ $complaint->id }}, '{{ $complaint->status }}')"
                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
                             <i class="fas fa-edit mr-1"></i>
                             Update

@@ -7,7 +7,7 @@ use App\Models\HealthStatus;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
-class ClusteringService
+class ResidentDemographicAnalysisService
 {
     private $k;
 

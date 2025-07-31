@@ -38,6 +38,7 @@
                 @csrf
                 @method('POST')
                 <input type="hidden" id="updateComplaintId" name="complaint_id">
+                <input type="hidden" id="currentComplaintStatus" name="current_status">
                 
                 <div class="space-y-4">
                     <div>
@@ -73,16 +74,48 @@
 
 <script>
 // Global function to open update status modal
-function openUpdateStatusModal(id) {
-    console.log('Opening update modal for complaint ID:', id);
+function openUpdateStatusModal(id, currentStatus) { // Added currentStatus parameter
+    console.log('Opening update modal for complaint ID:', id, 'with current status:', currentStatus);
     
     // Set the complaint ID
     document.getElementById('updateComplaintId').value = id;
+    // Set the current status
+    document.getElementById('currentComplaintStatus').value = currentStatus;
     
     // Set the form action
     const form = document.getElementById('updateStatusForm');
     form.action = `/admin/community-complaints/${id}/update-status`;
     
+    // Get the status dropdown
+    const statusSelect = document.getElementById('status');
+    
+    // Define the status order
+    const statusOrder = ['pending', 'under_review', 'in_progress', 'resolved', 'closed'];
+    
+    // Clear existing options
+    statusSelect.innerHTML = '<option value="">Select status</option>';
+
+    // Add options based on current status
+    let foundCurrentStatus = false;
+    for (let i = 0; i < statusOrder.length; i++) {
+        const status = statusOrder[i];
+        const option = document.createElement('option');
+        option.value = status;
+        option.textContent = status.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+        if (status === currentStatus) {
+            foundCurrentStatus = true;
+            option.selected = true; // Select the current status
+            option.disabled = true; // Disable the current status
+        } else if (foundCurrentStatus) {
+            // Only allow statuses that come after the current status in the defined order
+            statusSelect.appendChild(option);
+        } else {
+            // Disable statuses that come before the current status
+            option.disabled = true;
+        }
+    }
+
     // Show the modal
     document.getElementById('updateStatusModal').classList.remove('hidden');
     
@@ -108,9 +141,10 @@ function openUpdateStatusModal(id) {
         })
         .then(response => {
             if (response.ok) {
-                return response.text();
-            }
-            throw new Error('Network response was not ok');
+                    window.location.reload();
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
         })
         .then(data => {
             // Close modal
@@ -175,35 +209,4 @@ document.addEventListener('keydown', function(event) {
 // Debug: Log when script loads
 console.log('Community complaint modals script loaded');
 console.log('openUpdateStatusModal function available:', typeof openUpdateStatusModal);
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Add AJAX form submit for update status
-    const updateStatusForm = document.getElementById('updateStatusForm');
-    if (updateStatusForm) {
-        updateStatusForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const action = form.action;
-            fetch(action, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': formData.get('_token'),
-                },
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    return response.text().then(text => { throw new Error(text); });
-                }
-            })
-            .catch(error => {
-                alert('Failed to update status. Please try again.');
-            });
-        });
-    }
-});
-</script> 
+</script>
