@@ -98,9 +98,7 @@
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/95 backdrop-blur-md border-t border-gray-200">
                 <a href="#home" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Home</a>
                 <a href="#bulletin" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Bulletin Board</a>
-                <!-- <a href="{{ route('public.accomplishments') }}" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Accomplishments</a> -->
                 <a href="#contact" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Contact</a>
-                <!-- <a href="{{ route('admin.contact') }}" class="block bg-green-600 text-white px-3 py-2 rounded-md text-base font-medium">Request Account</a> -->
             </div>
         </div>
     </nav>
@@ -163,7 +161,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('login.post') }}" method="POST" class="space-y-6" novalidate>
+                    <form action="{{ route('login.post') }}" method="POST" class="space-y-6" novalidate id="loginForm">
                         @csrf
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
@@ -179,16 +177,23 @@
                                     {{ $message }}
                                 </p>
                             @enderror
+                            <p id="emailError" class="text-red-600 text-sm mt-1 hidden flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Please enter a valid email address.
+                            </p>
                         </div>
 
-                        <div>
+                        <div class="relative">
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                                 <i class="fas fa-lock mr-2 text-green-600"></i>
                                 Password
                             </label>
                             <input type="password" id="password" name="password" 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 @error('password') border-red-500 @enderror" 
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 @error('password') border-red-500 @enderror" 
                                 placeholder="Enter your password" required />
+                            <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-4 mt-7 flex items-center text-gray-600 hover:text-green-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
                             @error('password')
                                 <p class="text-red-600 text-sm mt-1 flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i>
@@ -207,7 +212,7 @@
                             </a>
                         </div>
 
-                        <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-4 rounded-xl transition duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105">
+                        <button type="submit" id="signInButton" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-4 rounded-xl transition duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105">
                             <i class="fas fa-sign-in-alt mr-2"></i>
                             Sign In
                         </button>
@@ -460,6 +465,38 @@
                     });
                 }
             });
+        });
+
+        // Password visibility toggle
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('emailError');
+            
+            // Reset error message
+            emailError.classList.add('hidden');
+
+            // Check if the email is valid
+            if (!emailInput.validity.valid) {
+                // Prevent form submission
+                event.preventDefault();
+                // Show error message
+                emailError.classList.remove('hidden');
+            }
         });
     </script>
     @notifyJs

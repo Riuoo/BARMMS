@@ -3,29 +3,27 @@
 @section('title', 'My Requests')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+<div class="max-w-7xl mx-auto pt-2">
     <!-- Header Section -->
-    <div class="mb-8">
+    <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">My Requests</h1>
                 <p class="text-gray-600">Track and manage all your submitted requests</p>
             </div>
-            <div class="mt-4 sm:mt-0">
-                <div class="flex space-x-2">
-                    <a href="{{ route('resident.request_blotter_report') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
-                        <i class="fas fa-plus mr-2"></i>
-                        New Blotter Report
-                    </a>
-                    <a href="{{ route('resident.request_document_request') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                        <i class="fas fa-plus mr-2"></i>
-                        New Document Request
-                    </a>
-                    <a href="{{ route('resident.health-status') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200">
-                        <i class="fas fa-plus mr-2"></i>
-                        Report Health Concern
-                    </a>
-                </div>
+            <div class="mt-4 sm:mt-0 flex space-x-2">
+                <a href="{{ route('resident.request_blotter_report') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    New Blotter Report
+                </a>
+                <a href="{{ route('resident.request_document_request') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    New Document Request
+                </a>
+                <a href="{{ route('resident.health-status') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    Report Health Concern
+                </a>
             </div>
         </div>
     </div>
@@ -58,80 +56,80 @@
     @endif
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                         <i class="fas fa-file-alt text-red-600 text-sm"></i>
                     </div>
                 </div>
-                <div class="ml-4">
+                <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Blotter Reports</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->count() }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                         <i class="fas fa-file-signature text-blue-600 text-sm"></i>
                     </div>
                 </div>
-                <div class="ml-4">
+                <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Document Requests</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $documentRequests->count() }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
                         <i class="fas fa-clipboard-list text-indigo-600 text-sm"></i>
                     </div>
                 </div>
-                <div class="ml-4">
+                <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Community Complaints</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $communityComplaints->count() }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
                         <i class="fas fa-clock text-yellow-600 text-sm"></i>
                     </div>
                 </div>
-                <div class="ml-4">
+                <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Pending</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $healthStatusRequests->where('status', 'pending')->count() + $communityComplaints->where('status', 'pending')->count() }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                         <i class="fas fa-heartbeat text-purple-600 text-sm"></i>
                     </div>
                 </div>
-                <div class="ml-4">
+                <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Health Concerns</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $healthStatusRequests->count() }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                         <i class="fas fa-check-circle text-green-600 text-sm"></i>
                     </div>
                 </div>
-                <div class="ml-4">
+                <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Completed</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $healthStatusRequests->where('status', 'resolved')->count() + $communityComplaints->where('status', 'resolved')->count() }}</p>
                 </div>
@@ -140,39 +138,38 @@
     </div>
 
     <!-- Filters and Search -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex flex-wrap gap-2">
-                <button class="filter-btn active px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800" data-filter="all">
-                    All Requests
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="blotter">
-                    Blotter Reports
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="complaint">
-                    Community Complaints
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="document">
-                    Document Requests
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="health">
-                    Health Concerns
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="pending">
-                    Pending
-                </button>
-                <button class="filter-btn px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="completed">
-                    Completed
-                </button>
-            </div>
-            <div class="relative">
-                <input type="text" id="searchInput" placeholder="Search requests..." class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
+    <form method="GET" action="{{ route('resident.my-requests') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" id="searchInput" placeholder="Search requests..."
+                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    value="{{ request('search') }}">
                 </div>
             </div>
+            <!-- Status Filter -->
+            <div class="sm:w-48">
+                <select name="status" id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                </select>
+            </div>
+            <div class="flex space-x-2">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Filter
+                </button>
+                <a href="{{ route('resident.my-requests') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Reset
+                </a>
+            </div>
         </div>
-    </div>
+    </form>
 
     <!-- Requests List -->
     @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $healthStatusRequests->isEmpty() && $communityComplaints->isEmpty())
@@ -297,10 +294,10 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ Str::limit($request->purpose, 50) }}</div>
+                                <div class="text-sm text-gray-900">{{ Str::limit($request->description, 50) }}</div>
                                 <div class="text-sm text-gray-500">
                                     <i class="fas fa-align-left mr-1"></i>
-                                    Purpose
+                                    Description
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -510,7 +507,7 @@
                 <div class="mt-3 pt-3 border-t border-gray-100">
                     <p class="text-sm text-gray-600">
                         <i class="fas fa-align-left mr-1"></i>
-                        {{ Str::limit($request->purpose, 80) }}
+                        {{ Str::limit($request->description, 80) }}
                     </p>
                     <p class="text-xs text-gray-500 mt-1">
                         <i class="fas fa-calendar mr-1"></i>

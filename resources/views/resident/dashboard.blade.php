@@ -3,13 +3,13 @@
 @section('title', 'Resident Dashboard')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+<div class="max-w-7xl mx-auto pt-2">
     <!-- Header Section -->
-    <div class="mb-8">
+    <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome, {{ $resident->name }}!</h1>
-                <p class="text-gray-600">Manage your requests and stay updated with barangay services</p>
+            <div class="mb-4 sm:mb-0">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome, {{ $resident->name }}!</h1>
+                <p class="text-sm md:text-base text-gray-600">Manage your requests and stay updated with barangay services</p>
             </div>
             <div class="hidden md:flex items-center space-x-4">
                 <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
@@ -20,8 +20,8 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -34,7 +34,7 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -47,7 +47,7 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -60,7 +60,7 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -76,7 +76,7 @@
     </div>
 
     <!-- Quick Actions Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-4 mb-3">
         <!-- Request Blotter Card -->
         <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
             <div class="p-6">

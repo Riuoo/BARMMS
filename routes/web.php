@@ -29,7 +29,13 @@ use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthCent
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringController;
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\DecisionTreeController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthStatusRequestController;
-use App\Http\Controllers\ResidentControllers\ResidentController2;
+use App\Http\Controllers\ResidentControllers\ResidentDashboardController;
+use App\Http\Controllers\ResidentControllers\ResidentBlotterController;
+use App\Http\Controllers\ResidentControllers\ResidentCommunityComplaintController;
+use App\Http\Controllers\ResidentControllers\ResidentDocumentRequestController;
+use App\Http\Controllers\ResidentControllers\ResidentRequestListController;
+use App\Http\Controllers\ResidentControllers\ResidentHealthStatusController;
+use App\Http\Controllers\ResidentControllers\ResidentAnnouncementController;
 use App\Http\Controllers\ResidentControllers\ResidentProfileController;
 use App\Http\Controllers\PublicController;
 
@@ -227,26 +233,34 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
 
 
 Route::middleware([CheckResidentRole::class])->prefix('resident')->group(function () {
-    Route::get('/dashboard', [ResidentController2::class, 'dashboard'])->name('resident.dashboard');
+    // Resident Dashboard
+    Route::get('/dashboard', [ResidentDashboardController::class, 'dashboard'])->name('resident.dashboard');
+
     // Blotter Requests
-    Route::get('/request_blotter_report', [ResidentController2::class, 'requestBlotter'])->name('resident.request_blotter_report');
-    Route::post('/request_blotter_report', [ResidentController2::class, 'storeBlotter'])->name('resident.request_blotter_report');
+    Route::get('/request-blotter', [ResidentBlotterController::class, 'requestBlotter'])->name('resident.request_blotter_report');
+    Route::post('/request-blotter', [ResidentBlotterController::class, 'storeBlotter']);
+
     // Community Complaints
-    Route::get('/request_community_complaint', [ResidentController2::class, 'requestCommunityComplaint'])->name('resident.request_community_complaint');
-    Route::post('/request_community_complaint', [ResidentController2::class, 'storeCommunityComplaint'])->name('resident.request_community_complaint');
+    Route::get('/request-community-complaint', [ResidentCommunityComplaintController::class, 'requestCommunityComplaint'])->name('resident.request_community_complaint');
+    Route::post('/request-community-complaint', [ResidentCommunityComplaintController::class, 'storeCommunityComplaint']);
+
     // Document Requests
-    Route::get('/request_document_request', [ResidentController2::class, 'requestDocument'])->name('resident.request_document_request');
-    Route::post('/request_document_request', [ResidentController2::class, 'storeDocument'])->name('resident.request_document_request');
-    // My Requests (Tracking)
-    Route::get('/my-requests', [ResidentController2::class, 'myRequests'])->name('resident.my-requests');
-    // Resident Profile
+    Route::get('/request-document', [ResidentDocumentRequestController::class, 'requestDocument'])->name('resident.request_document_request');
+    Route::post('/request-document', [ResidentDocumentRequestController::class, 'storeDocument']);
+
+    // My Requests (Listing & Filtering)
+    Route::get('/my-requests', [ResidentRequestListController::class, 'myRequests'])->name('resident.my-requests');
+
+    // Health Status
+    Route::get('/health-status', [ResidentHealthStatusController::class, 'healthStatus'])->name('resident.health-status');
+    Route::post('/health-status', [ResidentHealthStatusController::class, 'storeHealthStatus']);
+
+    // Announcements
+    Route::get('/announcements', [ResidentAnnouncementController::class, 'announcements'])->name('resident.announcements');
+
+    // Profile
     Route::get('/profile', [ResidentProfileController::class, 'profile'])->name('resident.profile');
-    Route::put('/profile', [ResidentProfileController::class, 'updateProfile'])->name('resident.profile.update');
-    // Health Status (Recommendation)
-    Route::get('/health-status', [ResidentController2::class, 'healthStatus'])->name('resident.health-status');
-    Route::post('/health-status', [ResidentController2::class, 'storeHealthStatus'])->name('resident.health-status.store');
-    // Announcements (Recommendation)
-    Route::get('/announcements', [ResidentController2::class, 'announcements'])->name('resident.announcements');
+    Route::put('/profile/update', [ResidentProfileController::class, 'updateProfile'])->name('resident.profile.update');
 });
 
 // Logout route

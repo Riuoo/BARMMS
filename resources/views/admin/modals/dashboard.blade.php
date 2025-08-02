@@ -3,15 +3,15 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto pt-2">
     <!-- Enhanced Header Section -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome back, {{ $barangay_profile->name }}!</h1>
-                <p class="text-gray-600 text-lg">Here's what's happening in your barangay today</p>
+    <div class="mb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="mb-4 sm:mb-0">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ $barangay_profile->name }}!</h1>
+                <p class="text-sm md:text-base text-gray-600">Here's what's happening in your barangay today</p>
             </div>
-            <div class="hidden md:flex items-center space-x-4">
+            <div class="mt-4 sm:mt-0">
                 <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
                     <span class="text-green-800 text-sm font-medium">Last updated: {{ now()->format('M d, Y g:i A') }}</span>
                 </div>
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Quick Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-3">
         <!-- Total Residents Card -->
         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
             <div class="p-4">

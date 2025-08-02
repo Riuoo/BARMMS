@@ -68,7 +68,7 @@
                     </div>
                 </div>
 
-                <form action="{{ route('resident.health-status.store') }}" method="POST" class="space-y-6">
+                <form action="{{ route('resident.health-status') }}" method="POST" class="space-y-6">
                     @csrf
 
                     <!-- Concern Type -->
