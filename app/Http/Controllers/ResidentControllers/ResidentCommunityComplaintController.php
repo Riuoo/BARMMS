@@ -9,22 +9,11 @@ use Illuminate\Support\Facades\Log;
 
 class ResidentCommunityComplaintController
 {
-    /**
-     * Show the form for creating a new community complaint.
-     *
-     * @return \Illuminate\View\View
-     */
     public function requestCommunityComplaint()
     {
         return view('resident.request_community_complaint');
     }
 
-    /**
-     * Store a newly requested community complaint in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function storeCommunityComplaint(Request $request)
     {
         $request->validate([

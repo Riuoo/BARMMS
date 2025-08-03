@@ -11,9 +11,6 @@ use App\Models\BarangayProfile;
 
 class ResetPasswordController
 {
-    /**
-     * Display the password reset view.
-     */
     public function showResetForm(Request $request, $token = null)
     {
         // Validate token
@@ -32,9 +29,6 @@ class ResetPasswordController
         ]);
     }
 
-    /**
-     * Reset the user's password.
-     */
     public function reset(Request $request)
     {
         $request->validate([

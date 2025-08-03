@@ -113,7 +113,7 @@ class VaccinationRecordController
             'side_effects' => 'nullable|string|max:1000',
             'notes' => 'nullable|string|max:2000',
         ]);
-        $user = \App\Models\Residents::find($validated['resident_id']);
+        $user = Residents::find($validated['resident_id']);
         if (!$user || !$user->active) {
             notify()->error('This user account is inactive and cannot make transactions.');
             return back()->withInput();

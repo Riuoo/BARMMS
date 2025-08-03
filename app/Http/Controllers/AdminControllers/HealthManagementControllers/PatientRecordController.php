@@ -5,7 +5,6 @@ namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 use App\Models\PatientRecord;
 use App\Models\Residents;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class PatientRecordController
 {
@@ -75,7 +74,7 @@ class PatientRecordController
             'risk_level' => 'nullable|string|in:low,medium,high',
             'notes' => 'nullable|string|max:2000',
         ]);
-        $user = \App\Models\Residents::find($validated['resident_id']);
+        $user = Residents::find($validated['resident_id']);
         if (!$user || !$user->active) {
             notify()->error('This user account is inactive and cannot make transactions.');
             return back()->withInput();

@@ -9,22 +9,11 @@ use Illuminate\Support\Facades\Log;
 
 class ResidentHealthStatusController
 {
-    /**
-     * Show the health status reporting page.
-     *
-     * @return \Illuminate\View\View
-     */
     public function healthStatus()
     {
         return view('resident.health_status');
     }
 
-    /**
-     * Store the health status report.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function storeHealthStatus(Request $request)
     {
         $request->validate([

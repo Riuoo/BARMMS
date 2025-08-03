@@ -6,11 +6,6 @@ use Illuminate\Http\Request;
 
 class ResidentAnnouncementController
 {
-    /**
-     * Show the announcements page (Recommendation).
-     *
-     * @return \Illuminate\View\View
-     */
     public function announcements(Request $request)
     {
         // For now, provide an empty collection since there's no Announcement model

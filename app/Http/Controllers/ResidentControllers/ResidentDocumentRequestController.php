@@ -9,22 +9,11 @@ use Illuminate\Support\Facades\Log;
 
 class ResidentDocumentRequestController
 {
-    /**
-     * Show the form for creating a new document request.
-     *
-     * @return \Illuminate\View\View
-     */
     public function requestDocument()
     {
         return view('resident.request_document_request');
     }
 
-    /**
-     * Store a newly requested document in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function storeDocument(Request $request)
     {
         $request->validate([

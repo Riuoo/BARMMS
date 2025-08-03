@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\AdminControllers\ReportRequestControllers;
 
 use App\Models\BlotterRequest;
+use App\Models\BarangayProfile;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Residents;
@@ -104,7 +105,7 @@ class BlotterReportController
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
-                $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
+                $adminUser = BarangayProfile::find(session('user_id'));
             }
             
             // Generate PDF
@@ -143,7 +144,7 @@ class BlotterReportController
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
-                $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
+                $adminUser = BarangayProfile::find(session('user_id'));
             }
             
             // Generate final resolution PDF
@@ -235,7 +236,7 @@ class BlotterReportController
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
-                $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
+                $adminUser = BarangayProfile::find(session('user_id'));
             }
             
             // Generate the PDF immediately after saving
@@ -272,7 +273,7 @@ class BlotterReportController
         // Get admin user data from session
         $adminUser = null;
         if (session()->has('user_role') && session('user_role') === 'barangay') {
-            $adminUser = \App\Models\BarangayProfile::find(session('user_id'));
+            $adminUser = BarangayProfile::find(session('user_id'));
         }
         
         // Generate the new summons PDF

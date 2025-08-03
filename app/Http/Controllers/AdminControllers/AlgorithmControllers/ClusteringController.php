@@ -25,7 +25,7 @@ class ClusteringController
         $useOptimalK = request('use_optimal_k', false);
         
         if ($useOptimalK) {
-            $residents = \App\Models\Residents::all();
+            $residents = Residents::all();
             $k = $this->clusteringService->findOptimalK($residents);
         }
         
@@ -108,7 +108,7 @@ class ClusteringController
      */
     public function getOptimalK()
     {
-        $residents = \App\Models\Residents::all();
+        $residents = Residents::all();
         $optimalK = $this->clusteringService->findOptimalK($residents);
         
         return response()->json([

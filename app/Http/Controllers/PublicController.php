@@ -7,9 +7,6 @@ use Illuminate\Http\Request;
 
 class PublicController
 {
-    /**
-     * Display the public accomplishments page
-     */
     public function accomplishments()
     {
         $projects = AccomplishedProject::orderBy('completion_date', 'desc')->paginate(12);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AdminControllers\AlgorithmControllers;
 use App\Services\ResidentClassificationPredictionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use App\Models\Residents;
 
 class DecisionTreeController
 {
@@ -135,7 +136,7 @@ class DecisionTreeController
         }
         
         // Get residents for the table
-        $residents = \App\Models\Residents::all();
+        $residents = Residents::all();
         
         return view('admin.decision-tree.index', [
             'healthCondition' => $healthCondition,
@@ -204,7 +205,7 @@ class DecisionTreeController
             'type' => 'required|in:service-eligibility,health-risk,program-recommendation'
         ]);
 
-        $resident = \App\Models\Residents::find($request->resident_id);
+        $resident = Residents::find($request->resident_id);
         $type = $request->input('type');
         
         if (!$resident) {

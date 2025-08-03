@@ -11,11 +11,6 @@ use Illuminate\Support\Facades\Session;
 
 class ResidentRequestListController
 {
-    /**
-     * Display a listing of the resident's blotter, document requests, and community complaints.
-     *
-     * @return \Illuminate\View\View
-     */
     public function myRequests(Request $request)
     {
         $userId = Session::get('user_id');

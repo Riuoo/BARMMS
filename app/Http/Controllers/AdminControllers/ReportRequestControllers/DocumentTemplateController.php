@@ -8,35 +8,23 @@ use Illuminate\Support\Facades\Log;
 
 class DocumentTemplateController
 {
-    /**
-     * Display a listing of the templates
-     */
     public function index()
     {
         $templates = DocumentTemplate::all();
         return view('admin.templates.index', compact('templates'));
     }
 
-    /**
-     * Show the form for editing a template
-     */
     public function edit($id)
     {
         $template = DocumentTemplate::findOrFail($id);
         return view('admin.templates.edit', compact('template'));
     }
 
-    /**
-     * Show the form for creating a new template
-     */
     public function create()
     {
         return view('admin.templates.create');
     }
 
-    /**
-     * Store a newly created template
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -61,9 +49,6 @@ class DocumentTemplateController
 
     }
 
-    /**
-     * Update the specified template
-     */
     public function update(Request $request, $id)
     {
         $template = DocumentTemplate::findOrFail($id);
@@ -88,9 +73,6 @@ class DocumentTemplateController
         }
     }
 
-    /**
-     * Preview the template with sample data
-     */
     public function preview($id)
     {
         $template = DocumentTemplate::findOrFail($id);
@@ -115,9 +97,6 @@ class DocumentTemplateController
         return response($html)->header('Content-Type', 'text/html');
     }
 
-    /**
-     * Reset template to default
-     */
     public function reset($id)
     {
         $template = DocumentTemplate::findOrFail($id);
@@ -144,9 +123,6 @@ class DocumentTemplateController
         }
     }
 
-    /**
-     * Toggle template active status
-     */
     public function toggleStatus($id)
     {
         $template = DocumentTemplate::findOrFail($id);

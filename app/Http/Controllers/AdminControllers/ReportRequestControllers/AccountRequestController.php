@@ -13,11 +13,6 @@ use Illuminate\Http\Request;
 
 class AccountRequestController
 {
-    /**
-     * Display a listing of the account requests.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function accountRequest(Request $request)
     {
         // Statistics from full dataset
@@ -38,13 +33,7 @@ class AccountRequestController
         $accountRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")->orderByDesc('created_at')->paginate(10);
         return view('admin.requests.new-account-requests', compact('accountRequests', 'totalRequests', 'pendingCount', 'approvedCount', 'completedCount'));
     }
-
-    /**
-     * Approve the specified account request by ID.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function approveAccountRequest($id)
     {
         Log::info('approveAccountRequest method called with id: ' . $id);

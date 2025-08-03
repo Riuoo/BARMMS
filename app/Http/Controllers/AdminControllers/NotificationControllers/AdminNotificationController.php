@@ -13,11 +13,6 @@ use Carbon\Carbon;
 
 class AdminNotificationController
 {
-    /**
-     * Show the notifications page.
-     *
-     * @return \Illuminate\View\View
-     */
     public function showNotifications(Request $request)
     {
         $blotterReports = BlotterRequest::orderBy('created_at', 'desc')->get();
@@ -93,12 +88,6 @@ class AdminNotificationController
 
         return view('admin.notifications.notifications', compact('notifications'));
     }
-
-    /**
-     * Get individual unread notifications for the header dropdown.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
 
     public function getNotificationCounts()
     {
@@ -211,12 +200,6 @@ class AdminNotificationController
         }
     }
 
-    /**
-     * Mark all reports and requests as read.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function markAllAsRead(Request $request)
     {
         DB::beginTransaction();
@@ -237,14 +220,6 @@ class AdminNotificationController
         }
     }
 
-    /**
-     * Mark a specific notification as read.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param string $type The type of notification (e.g., 'blotter_report', 'document_request', 'account_request')
-     * @param int $id The ID of the notification
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function markAsRead(Request $request, $type, $id)
     {
         try {
@@ -277,13 +252,7 @@ class AdminNotificationController
             return response()->json(['message' => 'Failed to mark notification as read: ' . $e->getMessage()], 500);
         }
     }
-
-    /**
-     * Mark all notifications as read via AJAX.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
     public function markAllAsReadAjax(Request $request)
     {
         DB::beginTransaction();

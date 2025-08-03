@@ -5,16 +5,9 @@ namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 use App\Models\HealthStatus;
 use App\Models\Residents;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class HealthStatusRequestController
 {
-    /**
-     * Display a listing of health status requests.
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
         $healthRequests = HealthStatus::with('user')
@@ -37,12 +30,6 @@ class HealthStatusRequestController
         ));
     }
 
-    /**
-     * Display the specified health status request.
-     *
-     * @param  int  $id
-     * @return \Illuminate\View\View
-     */
     public function show($id)
     {
         $healthRequest = HealthStatus::with('user')->findOrFail($id);
@@ -50,13 +37,6 @@ class HealthStatusRequestController
         return view('admin.health.show-health-status-request', compact('healthRequest'));
     }
 
-    /**
-     * Update the status of a health status request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -78,12 +58,6 @@ class HealthStatusRequestController
         return redirect()->route('admin.health-status-requests.show', $id);
     }
 
-    /**
-     * Search health status requests.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\View\View
-     */
     public function search(Request $request)
     {
         $query = HealthStatus::with('user');
@@ -135,13 +109,7 @@ class HealthStatusRequestController
             'resolvedRequests'
         ));
     }
-
-    /**
-     * Export health status requests to CSV.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse
-     */
+    
     public function export(Request $request)
     {
         $query = HealthStatus::with('user');

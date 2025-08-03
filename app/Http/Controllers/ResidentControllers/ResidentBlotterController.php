@@ -9,22 +9,11 @@ use Illuminate\Support\Facades\Log;
 
 class ResidentBlotterController
 {
-    /**
-     * Show the form for creating a new blotter report.
-     *
-     * @return \Illuminate\View\View
-     */
     public function requestBlotter()
     {
         return view('resident.request_blotter_report');
     }
 
-    /**
-     * Store a newly requested blotter report in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function storeBlotter(Request $request)
     {
         $request->validate([

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -12,17 +12,11 @@ use App\Models\BarangayProfile;
 
 class ForgotPasswordController
 {
-    /**
-     * Display the password reset request view.
-     */
     public function showLinkRequestForm()
     {
         return view('fpass');
     }
 
-    /**
-     * Handle a password reset link request.
-     */
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate(['email' => 'required|email']);
@@ -45,7 +39,7 @@ class ForgotPasswordController
         ]);
 
         // Send email (example using Laravel's Mail facade)
-        \Illuminate\Support\Facades\Mail::to($request->email)->send(
+        Mail::to($request->email)->send(
             new \App\Mail\PasswordResetMail($token, $request->email)
         );
 

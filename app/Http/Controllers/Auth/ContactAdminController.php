@@ -14,12 +14,6 @@ class ContactAdminController
         return view('admin_contact');
     }
 
-    /**
-     * Store a new account request from the contact form.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function store(Request $request)
     {
         $request->validate([

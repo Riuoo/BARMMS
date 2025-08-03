@@ -11,11 +11,6 @@ use Illuminate\Support\Facades\Session;
 
 class ResidentDashboardController
 {
-    /**
-     * Show the resident dashboard.
-     *
-     * @return \Illuminate\View\View
-     */
     public function dashboard()
     {
         $userId = Session::get('user_id');
