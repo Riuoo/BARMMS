@@ -14,7 +14,7 @@ class ForgotPasswordController
 {
     public function showLinkRequestForm()
     {
-        return view('fpass');
+        return view('login.fpass');
     }
 
     public function sendResetLinkEmail(Request $request)

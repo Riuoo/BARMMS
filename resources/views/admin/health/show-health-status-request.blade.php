@@ -1,4 +1,4 @@
-@extends('admin.modals.layout')
+@extends('admin.main.layout')
 
 @section('title', 'Health Status Request Details')
 

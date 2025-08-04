@@ -11,7 +11,7 @@ class LoginController
 {
     public function showLoginForm()
     {
-        return view('landing');
+        return view('login.landing');
     }
 
     public function login(Request $request)

@@ -114,7 +114,7 @@ class HealthReportController
             'total_participants' => $activities->sum('actual_participants'),
         ];
 
-        return view('admin.health-reports.comprehensive', compact(
+        return view('admin.health.comprehensive', compact(
             'startDate',
             'endDate',
             'patientSummary',

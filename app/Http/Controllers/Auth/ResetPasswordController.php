@@ -23,7 +23,7 @@ class ResetPasswordController
             return redirect()->route('password.request');
         }
 
-        return view('reset-password', [
+        return view('login.reset-password', [
             'token' => $token,
             'email' => $resetRecord->email
         ]);

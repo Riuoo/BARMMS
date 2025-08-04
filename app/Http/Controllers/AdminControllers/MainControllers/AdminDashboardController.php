@@ -65,7 +65,7 @@ class AdminDashboardController
             ->groupBy('document_type')
             ->get();
 
-        return view('admin.modals.dashboard', compact(
+        return view('admin.main.dashboard', compact(
             'barangay_profile',
             'totalResidents',
             'totalAccountRequests',

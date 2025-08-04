@@ -41,7 +41,7 @@ use App\Http\Controllers\PublicController;
 
 // Landing page route
 Route::get('/', function () {
-    return view('landing');
+    return view('login.landing');
 })->name('landing');
 
 // Public accomplished projects page

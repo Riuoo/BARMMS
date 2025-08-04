@@ -1,6 +1,6 @@
 {{-- resources/views/admin/blotter-reports.blade.php --}}
 
-@extends('admin.modals.layout')
+@extends('admin.main.layout')
 
 @section('title', 'Blotter Reports')
 

@@ -20,7 +20,7 @@ class RegistrationController
             
         }
 
-        return view('signup.signup', compact('token', 'accountRequest'));
+        return view('login.signup', compact('token', 'accountRequest'));
     }
 
     public function register(Request $request)

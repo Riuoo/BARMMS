@@ -11,7 +11,7 @@ class ContactAdminController
 {
     public function contactAdmin()
     {
-        return view('admin_contact');
+        return view('login.admin_contact');
     }
 
     public function store(Request $request)
