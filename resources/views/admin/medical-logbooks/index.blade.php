@@ -236,8 +236,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $logbook->consultation_date->format('M d, Y') }}</div>
-                                <div class="text-sm text-gray-500">{{ $logbook->consultation_time->format('g:i A') }}</div>
+                                <div class="text-sm text-gray-900">{{ $logbook->consultation_datetime->format('M d, Y') }}</div>
                                 <div class="text-xs text-gray-400">{{ $logbook->attending_health_worker }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -314,7 +313,7 @@
                                 </span>
                                 <span class="ml-2 text-xs text-gray-500">
                                     <i class="fas fa-calendar mr-1"></i>
-                                    {{ $logbook->consultation_date->format('M d, Y') }}
+                                    {{ $logbook->consultation_datetime->format('M d, Y') }}
                                 </span>
                             </div>
                         </div>

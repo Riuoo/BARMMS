@@ -72,23 +72,14 @@ class HealthStatusRequestController
             $query->where('severity', $request->severity);
         }
 
-        // Filter by concern type
-        if ($request->filled('concern_type')) {
-            $query->where('concern_type', 'like', '%' . $request->concern_type . '%');
-        }
-
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        // Search by resident name
-        if ($request->filled('resident_name')) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->resident_name . '%');
+        // Combined search for resident name or concern type
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($q2) use ($search) {
+                    $q2->where('name', 'like', '%' . $search . '%');
+                })
+                ->orWhere('concern_type', 'like', '%' . $search . '%');
             });
         }
 

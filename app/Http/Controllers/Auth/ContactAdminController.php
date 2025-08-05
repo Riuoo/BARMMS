@@ -29,13 +29,17 @@ class ContactAdminController
         }
 
         // Check if the email already exists in the account_requests table
-        $existingRequest = AccountRequest::where('email', $request->email)->first();
+        // Only block if there's a pending request - allow if previous requests were rejected/completed
+        $existingPendingRequest = AccountRequest::where('email', $request->email)
+            ->where('status', 'pending')
+            ->first();
 
-        if ($existingRequest) {
+        if ($existingPendingRequest) {
             notify()->error('An account request for this email is already pending. Please wait for administrator approval or check your email for updates.');
             return back();
         }
 
+        // Allow new requests even if there are old rejected/completed ones
         try {
             AccountRequest::create([
                 'email' => $request->email,

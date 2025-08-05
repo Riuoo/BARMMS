@@ -11,8 +11,7 @@ class MedicalLogbook extends Model
 
     protected $fillable = [
         'resident_id',
-        'consultation_date',
-        'consultation_time',
+        'consultation_datetime',
         'consultation_type',
         'chief_complaint',
         'symptoms',
@@ -35,8 +34,7 @@ class MedicalLogbook extends Model
     ];
 
     protected $casts = [
-        'consultation_date' => 'date',
-        'consultation_time' => 'datetime',
+        'consultation_datetime' => 'datetime',
         'follow_up_date' => 'date',
         'temperature' => 'decimal:1',
         'weight_kg' => 'decimal:2',

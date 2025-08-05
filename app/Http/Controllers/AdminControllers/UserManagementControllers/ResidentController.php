@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\AdminControllers\UserManagementControllers;
 
 use App\Models\Residents;
+use App\Models\AccountRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -183,7 +184,14 @@ class ResidentController
     {
         try {
             $resident = Residents::findOrFail($id);
+            $residentEmail = $resident->email;
+            
+            // Delete the resident
             $resident->delete();
+            
+            // Also delete any account requests with the same email
+            AccountRequest::where('email', $residentEmail)->delete();
+            
             notify()->success('Resident deleted successfully.');
             return redirect()->route('admin.residents');
             

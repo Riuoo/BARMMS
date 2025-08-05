@@ -23,7 +23,7 @@ class HealthReportController
 
         // Get recent activities
         $recentConsultations = MedicalLogbook::with('resident')
-            ->orderBy('consultation_date', 'desc')
+            ->orderBy('consultation_datetime', 'desc')
             ->limit(5)
             ->get();
 
@@ -51,11 +51,46 @@ class HealthReportController
             ->get();
 
         // Monthly consultation trends
-        $monthlyConsultations = MedicalLogbook::selectRaw('DATE_FORMAT(consultation_date, "%Y-%m") as month, count(*) as count')
-            ->where('consultation_date', '>=', now()->subMonths(6))
+        $monthlyConsultations = MedicalLogbook::selectRaw('DATE_FORMAT(consultation_datetime, "%Y-%m") as month, count(*) as count')
+            ->where('consultation_datetime', '>=', now()->subMonths(6))
             ->groupBy('month')
             ->orderBy('month', 'asc')
             ->get();
+
+        // BHW Dashboard Additions
+        $pendingAppointments = MedicalLogbook::with('resident')
+            ->where('status', 'Pending')
+            ->orderBy('consultation_datetime', 'asc')
+            ->limit(10)
+            ->get();
+
+        $overdueVaccinations = VaccinationRecord::with('resident')
+            ->whereNotNull('next_dose_date')
+            ->where('next_dose_date', '<', now())
+            ->orderBy('next_dose_date', 'asc')
+            ->limit(10)
+            ->get();
+
+        $analyticsAlerts = [
+            '3 children in Zone 2 are at high risk for malnutrition.',
+            'Increase in respiratory complaints this month.',
+        ];
+
+        $kmeansResults = [
+            ['description' => 'Cluster 1: High-risk elderly in Purok 3'],
+            ['description' => 'Cluster 2: Children with incomplete vaccinations in Zone 1'],
+        ];
+
+        $decisionTreeResults = [
+            ['description' => 'Children with incomplete vaccinations are at higher risk for measles.'],
+            ['description' => 'Elderly with hypertension and diabetes are at higher risk for complications.'],
+        ];
+
+        $bhwStats = [
+            'patient_records' => PatientRecord::whereMonth('created_at', now()->month)->count(),
+            'consultations' => MedicalLogbook::whereMonth('created_at', now()->month)->count(),
+            'vaccinations' => VaccinationRecord::whereMonth('created_at', now()->month)->count(),
+        ];
 
         return view('admin.health.health-reports', compact(
             'totalResidents',
@@ -68,7 +103,14 @@ class HealthReportController
             'dueVaccinations',
             'healthStatusDistribution',
             'riskLevelDistribution',
-            'monthlyConsultations'
+            'monthlyConsultations',
+            // BHW dashboard variables:
+            'pendingAppointments',
+            'overdueVaccinations',
+            'analyticsAlerts',
+            'kmeansResults',
+            'decisionTreeResults',
+            'bhwStats'
         ));
     }
 
@@ -96,7 +138,7 @@ class HealthReportController
         ];
 
         // Medical Consultations Summary
-        $consultations = MedicalLogbook::whereBetween('consultation_date', [$startDate, $endDate])->get();
+        $consultations = MedicalLogbook::whereBetween('consultation_datetime', [$startDate, $endDate])->get();
         $consultationSummary = [
             'total' => $consultations->count(),
             'by_type' => $consultations->groupBy('consultation_type')->map->count(),

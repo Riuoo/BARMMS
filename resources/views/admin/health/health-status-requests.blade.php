@@ -3,15 +3,15 @@
 @section('title', 'Health Status Requests')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+<div class="max-w-7xl mx-auto pt-2">
     <!-- Header Section -->
-    <div class="mb-8">
+    <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
+            <div mb-4 sm:mb-0>
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Health Status Requests</h1>
-                <p class="text-gray-600">Review and manage health concerns submitted by residents</p>
+                <p class="text-sm md:text-base text-gray-600">Review and manage health concerns submitted by residents</p>
             </div>
-            <div class="mt-4 sm:mt-0 flex space-x-3">
+            <div class="mt-4 sm:mt-0 flex space-x-2">
                 <a href="{{ route('admin.health-status-requests.export') }}" 
                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-download mr-2"></i>
@@ -21,8 +21,60 @@
         </div>
     </div>
 
+    <!-- Enhanced Search & Filters -->
+    <form action="{{ route('admin.health-status-requests.search') }}" method="GET" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search by Resident Name or Concern Type -->
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" id="search" value="{{ request('search') }}"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                        placeholder="Search by resident name or concern type">
+                </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div>
+                <select name="status" id="status"
+                    class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="reviewed" {{ request('status') == 'reviewed' ? 'selected' : '' }}>Reviewed</option>
+                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                    <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                </select>
+            </div>
+
+            <!-- Severity Filter -->
+            <div>
+                <select name="severity" id="severity"
+                    class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Severity</option>
+                    <option value="Mild" {{ request('severity') == 'Mild' ? 'selected' : '' }}>Mild</option>
+                    <option value="Moderate" {{ request('severity') == 'Moderate' ? 'selected' : '' }}>Moderate</option>
+                    <option value="Severe" {{ request('severity') == 'Severe' ? 'selected' : '' }}>Severe</option>
+                    <option value="Emergency" {{ request('severity') == 'Emergency' ? 'selected' : '' }}>Emergency</option>
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex space-x-2">
+                <button type="submit"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Filter
+                </button>
+                <a href="{{ route('admin.health-status-requests.search') }}"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-3">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -90,64 +142,6 @@
         </div>
     </div>
 
-    <!-- Search and Filter Section -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <form action="{{ route('admin.health-status-requests.search') }}" method="GET" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">All Status</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="reviewed" {{ request('status') == 'reviewed' ? 'selected' : '' }}>Reviewed</option>
-                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="severity" class="block text-sm font-medium text-gray-700 mb-1">Severity</label>
-                    <select name="severity" id="severity" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">All Severity</option>
-                        <option value="Mild" {{ request('severity') == 'Mild' ? 'selected' : '' }}>Mild</option>
-                        <option value="Moderate" {{ request('severity') == 'Moderate' ? 'selected' : '' }}>Moderate</option>
-                        <option value="Severe" {{ request('severity') == 'Severe' ? 'selected' : '' }}>Severe</option>
-                        <option value="Emergency" {{ request('severity') == 'Emergency' ? 'selected' : '' }}>Emergency</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="resident_name" class="block text-sm font-medium text-gray-700 mb-1">Resident Name</label>
-                    <input type="text" name="resident_name" id="resident_name" value="{{ request('resident_name') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                           placeholder="Search by resident name">
-                </div>
-                <div>
-                    <label for="concern_type" class="block text-sm font-medium text-gray-700 mb-1">Concern Type</label>
-                    <input type="text" name="concern_type" id="concern_type" value="{{ request('concern_type') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                           placeholder="Search by concern type">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
-                    <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
-                    <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                        <i class="fas fa-search mr-2"></i>
-                        Search
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-
     <!-- Requests Table -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -169,18 +163,11 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($healthRequests as $request)
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50 transition duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10">
-                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <i class="fas fa-user text-blue-600"></i>
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $request->user->name ?? 'Unknown' }}</div>
-                                            <div class="text-sm text-gray-500">{{ $request->user->email ?? 'No email' }}</div>
-                                        </div>
+                                    <div class="items-center gap-2">
+                                        <div class="text-sm font-medium text-gray-900">{{ $request->user->name ?? 'Unknown' }}</div>
+                                        <div class="text-sm text-gray-500">{{ $request->user->email ?? 'No email' }}</div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">

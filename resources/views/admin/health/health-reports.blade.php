@@ -4,17 +4,124 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Health Reports Dashboard</h1>
-        <div class="flex space-x-2">
-            <a href="{{ route('admin.health-reports.comprehensive') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                <i class="fas fa-chart-bar mr-2"></i>Comprehensive Report
-            </a>
-            <a href="{{ route('admin.health-reports.export') }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                <i class="fas fa-download mr-2"></i>Export Report
-            </a>
+    <!-- BHW Notifications/Reminders Section (Improved UI/UX) -->
+    @if(isset($pendingAppointments) || isset($overdueVaccinations) || isset($analyticsAlerts))
+    <div class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Pending Appointments -->
+            @if(isset($pendingAppointments) && count($pendingAppointments))
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-calendar-check text-yellow-500 text-xl mr-2"></i>
+                    <span class="font-bold text-yellow-700">Pending Consultations</span>
+                </div>
+                <ul class="list-disc ml-6 text-yellow-800 text-sm">
+                    @foreach($pendingAppointments as $appointment)
+                        <li>
+                            <span class="font-semibold">{{ $appointment->resident->name }}</span>
+                            <span class="ml-1">({{ $appointment->consultation_datetime->format('M d, Y') }})</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            <!-- Overdue Vaccinations -->
+            @if(isset($overdueVaccinations) && count($overdueVaccinations))
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded shadow">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-syringe text-red-500 text-xl mr-2"></i>
+                    <span class="font-bold text-red-700">Overdue Vaccinations</span>
+                </div>
+                <ul class="list-disc ml-6 text-red-800 text-sm">
+                    @foreach($overdueVaccinations as $vaccination)
+                        <li>
+                            <span class="font-semibold">{{ $vaccination->resident->name }}</span>
+                            <span class="ml-1">({{ $vaccination->vaccine_name }})</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            <!-- Analytics Alerts -->
+            @if(isset($analyticsAlerts) && count($analyticsAlerts))
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-exclamation-triangle text-blue-500 text-xl mr-2"></i>
+                    <span class="font-bold text-blue-700">Analytics Alerts</span>
+                </div>
+                <ul class="list-disc ml-6 text-blue-800 text-sm">
+                    @foreach($analyticsAlerts as $alert)
+                        <li>{{ $alert }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
         </div>
     </div>
+    @endif
+
+    <!-- BHW Performance Summary Section (Improved UI/UX) -->
+    @if(isset($bhwStats))
+    <div class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-blue-100 rounded-lg p-4 flex items-center shadow">
+                <i class="fas fa-user-edit text-blue-500 text-2xl mr-3"></i>
+                <div>
+                    <div class="text-lg font-bold text-blue-700">{{ $bhwStats['patient_records'] ?? 0 }}</div>
+                    <div class="text-sm text-blue-800">Patient Records Updated</div>
+                </div>
+            </div>
+            <div class="bg-green-100 rounded-lg p-4 flex items-center shadow">
+                <i class="fas fa-stethoscope text-green-500 text-2xl mr-3"></i>
+                <div>
+                    <div class="text-lg font-bold text-green-700">{{ $bhwStats['consultations'] ?? 0 }}</div>
+                    <div class="text-sm text-green-800">Consultations Logged</div>
+                </div>
+            </div>
+            <div class="bg-yellow-100 rounded-lg p-4 flex items-center shadow">
+                <i class="fas fa-syringe text-yellow-500 text-2xl mr-3"></i>
+                <div>
+                    <div class="text-lg font-bold text-yellow-700">{{ $bhwStats['vaccinations'] ?? 0 }}</div>
+                    <div class="text-sm text-yellow-800">Vaccinations Recorded</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- BHW Health Analytics Viewer Section (Improved UI/UX) -->
+    @if((isset($kmeansResults) && count($kmeansResults)) || (isset($decisionTreeResults) && count($decisionTreeResults)))
+    <div class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @if(isset($kmeansResults) && count($kmeansResults))
+            <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded shadow">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-project-diagram text-indigo-500 text-xl mr-2"></i>
+                    <span class="font-bold text-indigo-700">K-Means Clusters</span>
+                </div>
+                <ul class="list-disc ml-6 text-indigo-800 text-sm">
+                    @foreach($kmeansResults as $cluster)
+                        <li>{{ $cluster['description'] }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            @if(isset($decisionTreeResults) && count($decisionTreeResults))
+            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-tree text-green-500 text-xl mr-2"></i>
+                    <span class="font-bold text-green-700">Decision Tree Insights</span>
+                </div>
+                <ul class="list-disc ml-6 text-green-800 text-sm">
+                    @foreach($decisionTreeResults as $insight)
+                        <li>{{ $insight['description'] }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
@@ -128,7 +235,7 @@
                 <div class="border-l-4 border-blue-500 pl-4">
                     <p class="text-sm font-medium text-gray-900">{{ $consultation->resident->name }}</p>
                     <p class="text-xs text-gray-500">{{ $consultation->chief_complaint }}</p>
-                    <p class="text-xs text-gray-400">{{ $consultation->consultation_date->format('M d, Y') }}</p>
+                    <p class="text-xs text-gray-400">{{ $consultation->consultation_datetime->format('M d, Y') }}</p>
                 </div>
                 @endforeach
             </div>

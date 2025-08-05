@@ -53,28 +53,28 @@
             @csrf
 
             <!-- Patient Information -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
+            <div class="border-b border-gray-200">
                 <div class="flex items-center mb-4">
                     <i class="fas fa-user mr-3 text-blue-600 text-2xl"></i>
                     <h2 class="text-xl font-bold text-gray-900">Patient Information</h2>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6">
                     <div>
-                        <label for="resident_id" class="block text-sm font-medium text-gray-700 mb-2">Select Patient <span class="text-red-500">*</span></label>
-                        <select name="resident_id" id="resident_id" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                            <option value="">Select a patient...</option>
-                            @foreach($residents as $resident)
-                                <option value="{{ $resident->id }}" {{ old('resident_id') == $resident->id ? 'selected' : '' }}>
-                                    {{ $resident->name }} ({{ $resident->email }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <label for="residentSearch" class="block text-sm font-medium text-gray-700 mb-2">Select Resident <span class="text-red-500">*</span></label>
+                        <input
+                            type="text"
+                            id="residentSearch"
+                            placeholder="Type to search for a resident..."
+                            autocomplete="off"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                            aria-label="Search for a resident"
+                        />
+                        <input type="hidden" id="resident_id" name="resident_id" required>
+                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                        <p class="mt-1 text-sm text-gray-500">Search and select the resident for this patient record</p>
                     </div>
                     <div>
-                        <label for="consultation_date" class="block text-sm font-medium text-gray-700 mb-2">Consultation Date <span class="text-red-500">*</span></label>
-                        <input type="date" name="consultation_date" id="consultation_date" 
-                               value="{{ old('consultation_date', date('Y-m-d')) }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" required>
+                        <!-- Consultation date and time merged into consultation_datetime field below -->
                     </div>
                 </div>
             </div>
@@ -87,8 +87,10 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="consultation_time" class="block text-sm font-medium text-gray-700 mb-2">Consultation Time <span class="text-red-500">*</span></label>
-                        <input type="time" name="consultation_time" id="consultation_time" value="{{ old('consultation_time') }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
+                        <label for="consultation_datetime" class="block text-sm font-medium text-gray-700 mb-2">Consultation Date & Time <span class="text-red-500">*</span></label>
+                        <input type="datetime-local" name="consultation_datetime" id="consultation_datetime" 
+                               value="{{ old('consultation_datetime') }}" 
+                               class="w-full border border-gray-300 rounded px-3 py-2" required>
                     </div>
                     <div>
                         <label for="consultation_type" class="block text-sm font-medium text-gray-700 mb-2">Consultation Type <span class="text-red-500">*</span></label>
@@ -281,4 +283,61 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    // Resident AJAX search for patient records
+    const searchInput = document.getElementById('residentSearch');
+    const searchResults = document.getElementById('searchResults');
+    const residentIdInput = document.getElementById('resident_id');
+
+    searchInput.addEventListener('input', debounce(async () => {
+        const term = searchInput.value.trim();
+        if (term.length < 2) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+            return;
+        }
+        const response = await fetch(`{{ route('admin.search.residents') }}?term=${term}`);
+        const results = await response.json();
+        if (results.length > 0) {
+            searchResults.innerHTML = results.map(resident => `
+                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                    <div class="font-medium text-gray-900">${resident.name}</div>
+                    <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                </div>
+            `).join('');
+            searchResults.classList.remove('hidden');
+        } else {
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+            searchResults.classList.remove('hidden');
+        }
+    }, 250));
+
+    searchResults.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-id]');
+        if (target && target.dataset.id) {
+            residentIdInput.value = target.dataset.id;
+            searchInput.value = target.dataset.name;
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+        }
+    });
+});
+</script>
 @endsection 

@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('medical_logbooks', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('resident_id');
-            $table->date('consultation_date');
-            $table->time('consultation_time');
-            $table->string('consultation_type'); // Check-up, Emergency, Follow-up, etc.
+            $table->dateTime('consultation_datetime')->useCurrent()->change();
+            $table->string('consultation_type');
             $table->text('chief_complaint');
             $table->text('symptoms');
             $table->text('diagnosis')->nullable();

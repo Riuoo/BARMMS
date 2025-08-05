@@ -33,7 +33,7 @@ class MedicalLogbookController
             'completed' => MedicalLogbook::where('status', 'Completed')->count(),
             'pending' => MedicalLogbook::where('status', 'Pending')->count(),
             'referred' => MedicalLogbook::where('status', 'Referred')->count(),
-            'last_month' => MedicalLogbook::where('consultation_date', '>=', now()->subDays(30))->count()
+            'last_month' => MedicalLogbook::where('consultation_datetime', '>=', now()->subDays(30))->count()
         ];
         $medicalLogbooks = $query->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.medical-logbooks.index', compact('medicalLogbooks', 'stats'));
@@ -55,7 +55,7 @@ class MedicalLogbookController
             ->when($status, function($q) use ($status) {
                 $q->where('status', $status);
             })
-            ->orderBy('consultation_date', 'desc')
+            ->orderBy('consultation_datetime', 'desc')
             ->paginate(15);
 
         return view('admin.medical-logbooks.index', [
@@ -75,8 +75,7 @@ class MedicalLogbookController
     {
         $validated = $request->validate([
             'resident_id' => 'required|exists:residents,id',
-            'consultation_date' => 'required|date|before_or_equal:today',
-            'consultation_time' => 'required|date_format:H:i',
+            'consultation_datetime' => 'required|date|before_or_equal:now',
             'consultation_type' => 'required|string|max:100',
             'chief_complaint' => 'required|string|max:1000',
             'symptoms' => 'required|string|max:1000',
@@ -94,7 +93,7 @@ class MedicalLogbookController
             'physical_examination' => 'required|string|max:2000',
             'notes' => 'nullable|string|max:2000',
             'attending_health_worker' => 'required|string|max:255',
-            'follow_up_date' => 'nullable|date|after:consultation_date',
+            'follow_up_date' => 'nullable|date|after:consultation_datetime',
             'status' => 'required|string|in:Completed,Pending,Referred,Cancelled',
         ]);
         $user = Residents::find($validated['resident_id']);
@@ -136,8 +135,7 @@ class MedicalLogbookController
         
         $validated = $request->validate([
             'resident_id' => 'required|exists:residents,id',
-            'consultation_date' => 'required|date|before_or_equal:today',
-            'consultation_time' => 'required|date_format:H:i',
+            'consultation_datetime' => 'required|date|before_or_equal:now',
             'consultation_type' => 'required|string|max:100',
             'chief_complaint' => 'required|string|max:1000',
             'symptoms' => 'required|string|max:1000',
@@ -155,7 +153,7 @@ class MedicalLogbookController
             'physical_examination' => 'required|string|max:2000',
             'notes' => 'nullable|string|max:2000',
             'attending_health_worker' => 'required|string|max:255',
-            'follow_up_date' => 'nullable|date|after:consultation_date',
+            'follow_up_date' => 'nullable|date|after:consultation_datetime',
             'status' => 'required|string|in:Completed,Pending,Referred,Cancelled',
         ]);
 
@@ -190,20 +188,20 @@ class MedicalLogbookController
         $consultationType = $request->get('consultation_type');
 
         $query = MedicalLogbook::with('resident')
-            ->whereBetween('consultation_date', [$startDate, $endDate]);
+            ->whereBetween('consultation_datetime', [$startDate, $endDate]);
 
         if ($consultationType) {
             $query->where('consultation_type', $consultationType);
         }
 
-        $medicalLogbooks = $query->orderBy('consultation_date', 'desc')->get();
+        $medicalLogbooks = $query->orderBy('consultation_datetime', 'desc')->get();
 
         $summary = [
             'total_consultations' => $medicalLogbooks->count(),
             'by_type' => $medicalLogbooks->groupBy('consultation_type')->map->count(),
             'by_status' => $medicalLogbooks->groupBy('status')->map->count(),
             'by_month' => $medicalLogbooks->groupBy(function($record) {
-                return $record->consultation_date->format('Y-m');
+                return $record->consultation_datetime->format('Y-m');
             })->map->count(),
         ];
 
