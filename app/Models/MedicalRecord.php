@@ -5,30 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MedicalLogbook extends Model
+class MedicalRecord extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'resident_id',
+        'attending_health_worker_id',
         'consultation_datetime',
         'consultation_type',
         'chief_complaint',
         'symptoms',
         'diagnosis',
-        'treatment_plan',
         'prescribed_medications',
-        'lab_tests_ordered',
-        'lab_results',
         'temperature',
         'blood_pressure_systolic',
         'blood_pressure_diastolic',
         'pulse_rate',
         'weight_kg',
         'height_cm',
-        'physical_examination',
         'notes',
-        'attending_health_worker',
         'follow_up_date',
         'status',
     ];
@@ -44,6 +40,11 @@ class MedicalLogbook extends Model
     public function resident()
     {
         return $this->belongsTo(Residents::class, 'resident_id');
+    }
+
+    public function attendingHealthWorker()
+    {
+        return $this->belongsTo(BarangayProfile::class, 'attending_health_worker_id');
     }
 
     public function getBloodPressureAttribute()

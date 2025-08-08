@@ -45,7 +45,7 @@ class Residents extends Authenticatable
 
     public function medicalLogbooks()
     {
-        return $this->hasMany(MedicalLogbook::class, 'resident_id');
+        return $this->hasMany(MedicalRecord::class, 'resident_id');
     }
 
     public function vaccinationRecords()

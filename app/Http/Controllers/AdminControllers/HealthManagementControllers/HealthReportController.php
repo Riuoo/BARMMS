@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 
-use App\Models\PatientRecord;
 use App\Models\VaccinationRecord;
-use App\Models\MedicalLogbook;
+use App\Models\MedicalRecord;
 use App\Models\HealthCenterActivity;
+use App\Models\MedicineRequest;
+use App\Models\MedicineTransaction;
 use App\Models\Residents;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -16,13 +17,12 @@ class HealthReportController
     {
         // Get summary statistics
         $totalResidents = Residents::count();
-        $totalPatientRecords = PatientRecord::count();
         $totalVaccinations = VaccinationRecord::count();
-        $totalConsultations = MedicalLogbook::count();
+        $totalConsultations = MedicalRecord::count();
         $totalActivities = HealthCenterActivity::count();
 
         // Get recent activities
-        $recentConsultations = MedicalLogbook::with('resident')
+        $recentConsultations = MedicalRecord::with('resident')
             ->orderBy('consultation_datetime', 'desc')
             ->limit(5)
             ->get();
@@ -45,20 +45,15 @@ class HealthReportController
             ->groupBy('health_status')
             ->get();
 
-        // Risk level distribution
-        $riskLevelDistribution = PatientRecord::selectRaw('risk_level, count(*) as count')
-            ->groupBy('risk_level')
-            ->get();
-
         // Monthly consultation trends
-        $monthlyConsultations = MedicalLogbook::selectRaw('DATE_FORMAT(consultation_datetime, "%Y-%m") as month, count(*) as count')
+        $monthlyConsultations = MedicalRecord::selectRaw('DATE_FORMAT(consultation_datetime, "%Y-%m") as month, count(*) as count')
             ->where('consultation_datetime', '>=', now()->subMonths(6))
             ->groupBy('month')
             ->orderBy('month', 'asc')
             ->get();
 
         // BHW Dashboard Additions
-        $pendingAppointments = MedicalLogbook::with('resident')
+        $pendingAppointments = MedicalRecord::with('resident')
             ->where('status', 'Pending')
             ->orderBy('consultation_datetime', 'asc')
             ->limit(10)
@@ -87,14 +82,37 @@ class HealthReportController
         ];
 
         $bhwStats = [
-            'patient_records' => PatientRecord::whereMonth('created_at', now()->month)->count(),
-            'consultations' => MedicalLogbook::whereMonth('created_at', now()->month)->count(),
+            'consultations' => MedicalRecord::whereMonth('created_at', now()->month)->count(),
             'vaccinations' => VaccinationRecord::whereMonth('created_at', now()->month)->count(),
         ];
 
+        // Medicine analytics (30-day window)
+        $medicineStats = [
+            'low_stock' => \App\Models\Medicine::whereColumn('current_stock', '<=', 'minimum_stock')->count(),
+            'expiring_soon' => \App\Models\Medicine::whereNotNull('expiry_date')->where('expiry_date', '<=', now()->addDays(30))->count(),
+        ];
+
+        $topRequestedMedicines = MedicineRequest::select('medicine_id')
+            ->selectRaw('COUNT(*) as requests')
+            ->whereBetween('request_date', [now()->subDays(30)->toDateString(), now()->toDateString()])
+            ->groupBy('medicine_id')
+            ->orderByDesc('requests')
+            ->with('medicine')
+            ->limit(5)
+            ->get();
+
+        $topDispensedMedicines = MedicineTransaction::select('medicine_id')
+            ->selectRaw('SUM(quantity) as total_qty')
+            ->where('transaction_type', 'OUT')
+            ->whereBetween('transaction_date', [now()->subDays(30), now()])
+            ->groupBy('medicine_id')
+            ->orderByDesc('total_qty')
+            ->with('medicine')
+            ->limit(5)
+            ->get();
+
         return view('admin.health.health-reports', compact(
             'totalResidents',
-            'totalPatientRecords',
             'totalVaccinations',
             'totalConsultations',
             'totalActivities',
@@ -102,15 +120,16 @@ class HealthReportController
             'upcomingActivities',
             'dueVaccinations',
             'healthStatusDistribution',
-            'riskLevelDistribution',
             'monthlyConsultations',
-            // BHW dashboard variables:
             'pendingAppointments',
             'overdueVaccinations',
             'analyticsAlerts',
             'kmeansResults',
             'decisionTreeResults',
-            'bhwStats'
+            'bhwStats',
+            'medicineStats',
+            'topRequestedMedicines',
+            'topDispensedMedicines'
         ));
     }
 
@@ -118,14 +137,6 @@ class HealthReportController
     {
         $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : now()->startOfMonth();
         $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : now()->endOfMonth();
-
-        // Patient Records Summary
-        $patientRecords = PatientRecord::whereBetween('created_at', [$startDate, $endDate])->get();
-        $patientSummary = [
-            'total' => $patientRecords->count(),
-            'by_risk_level' => $patientRecords->groupBy('risk_level')->map->count(),
-            'by_blood_type' => $patientRecords->whereNotNull('blood_type')->groupBy('blood_type')->map->count(),
-        ];
 
         // Vaccination Summary
         $vaccinations = VaccinationRecord::whereBetween('vaccination_date', [$startDate, $endDate])->get();
@@ -138,7 +149,7 @@ class HealthReportController
         ];
 
         // Medical Consultations Summary
-        $consultations = MedicalLogbook::whereBetween('consultation_datetime', [$startDate, $endDate])->get();
+        $consultations = MedicalRecord::whereBetween('consultation_datetime', [$startDate, $endDate])->get();
         $consultationSummary = [
             'total' => $consultations->count(),
             'by_type' => $consultations->groupBy('consultation_type')->map->count(),
@@ -159,7 +170,6 @@ class HealthReportController
         return view('admin.health.comprehensive', compact(
             'startDate',
             'endDate',
-            'patientSummary',
             'vaccinationSummary',
             'consultationSummary',
             'activitySummary'

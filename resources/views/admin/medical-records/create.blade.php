@@ -1,6 +1,6 @@
 @extends('admin.main.layout')
 
-@section('title', 'Create Medical Logbook Entry')
+@section('title', 'Create Medical Record Entry')
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
@@ -8,7 +8,7 @@
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Medical Logbook Entry</h1>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Medical Record Entry</h1>
                 <p class="text-gray-600">Log a new medical consultation, treatment, or health center activity for a resident.</p>
             </div>
         </div>
@@ -49,7 +49,7 @@
 
     <!-- Form Card -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <form action="{{ route('admin.medical-logbooks.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('admin.medical-records.store') }}" method="POST" class="space-y-6">
             @csrf
 
             <!-- Patient Information -->
@@ -68,6 +68,7 @@
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                             aria-label="Search for a resident"
+                            required
                         />
                         <input type="hidden" id="resident_id" name="resident_id" required>
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
@@ -106,14 +107,14 @@
                 </div>
                 <div class="mt-6 grid grid-cols-1 gap-6">
                     <div>
-                        <label for="symptoms" class="block text-sm font-medium text-gray-700 mb-2">Symptoms <span class="text-red-500">*</span></label>
-                        <textarea name="symptoms" id="symptoms" rows="3" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="List symptoms..." required>{{ old('symptoms') }}</textarea>
+                        <label for="symptoms" class="block text-sm font-medium text-gray-700 mb-2">Symptoms</label>
+                        <textarea name="symptoms" id="symptoms" rows="3" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="List symptoms...">{{ old('symptoms') }}</textarea>
                     </div>
                     <div>
-                        <label for="chief_complaint" class="block text-sm font-medium text-gray-700 mb-2">Chief Complaint <span class="text-red-500">*</span></label>
+                        <label for="chief_complaint" class="block text-sm font-medium text-gray-700 mb-2">Chief Complaint</label>
                         <textarea name="chief_complaint" id="chief_complaint" rows="3" 
                                   class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Primary reason for visit..." required>{{ old('chief_complaint') }}</textarea>
+                                  placeholder="Primary reason for visit...">{{ old('chief_complaint') }}</textarea>
                     </div>
                 </div>
             </div>
@@ -156,69 +157,29 @@
                 </div>
             </div>
 
-            <!-- Physical Examination -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-user-md mr-3 text-indigo-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Physical Examination</h2>
-                </div>
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="physical_examination" class="block text-sm font-medium text-gray-700 mb-2">Physical Examination</label>
-                        <textarea name="physical_examination" id="physical_examination" rows="4" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Detailed physical examination findings...">{{ old('physical_examination') }}</textarea>
-                    </div>
-                </div>
-            </div>
-
             <!-- Diagnosis & Treatment -->
             <div class="border-b border-gray-200 pb-6 mb-6">
                 <div class="flex items-center mb-4">
                     <i class="fas fa-stethoscope mr-3 text-purple-600 text-2xl"></i>
                     <h2 class="text-xl font-bold text-gray-900">Diagnosis & Treatment</h2>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="diagnosis" class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
-                        <textarea name="diagnosis" id="diagnosis" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Medical diagnosis...">{{ old('diagnosis') }}</textarea>
-                    </div>
-                    <div>
-                        <label for="treatment_plan" class="block text-sm font-medium text-gray-700 mb-2">Treatment Plan</label>
-                        <textarea name="treatment_plan" id="treatment_plan" rows="4" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Prescribed medications, procedures, follow-up instructions...">{{ old('treatment_plan') }}</textarea>
-                    </div>
+                <div>
+                    <label for="diagnosis" class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
+                    <textarea name="diagnosis" id="diagnosis" rows="3" 
+                              class="w-full border border-gray-300 rounded px-3 py-2" 
+                              placeholder="Medical diagnosis...">{{ old('diagnosis') }}</textarea>
                 </div>
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="prescribed_medications" class="block text-sm font-medium text-gray-700 mb-2">Prescribed Medications</label>
-                        <textarea name="prescribed_medications" id="prescribed_medications" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="List of prescribed medications with dosages...">{{ old('prescribed_medications') }}</textarea>
-                    </div>
-                    <div>
-                        <label for="lab_tests_ordered" class="block text-sm font-medium text-gray-700 mb-2">Lab Tests Ordered</label>
-                        <textarea name="lab_tests_ordered" id="lab_tests_ordered" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="List of lab tests ordered...">{{ old('lab_tests_ordered') }}</textarea>
-                    </div>
+                <div>
+                    <label for="prescribed_medications" class="block text-sm font-medium text-gray-700 mb-2">Prescribed Medications</label>
+                    <textarea name="prescribed_medications" id="prescribed_medications" rows="3" 
+                              class="w-full border border-gray-300 rounded px-3 py-2" 
+                              placeholder="List of prescribed medications with dosages...">{{ old('prescribed_medications') }}</textarea>
                 </div>
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="lab_results" class="block text-sm font-medium text-gray-700 mb-2">Lab Results</label>
-                        <textarea name="lab_results" id="lab_results" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Lab results...">{{ old('lab_results') }}</textarea>
-                    </div>
-                    <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                        <textarea name="notes" id="notes" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Any additional notes or observations...">{{ old('notes') }}</textarea>
-                    </div>
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                    <textarea name="notes" id="notes" rows="3" 
+                              class="w-full border border-gray-300 rounded px-3 py-2" 
+                              placeholder="Any additional notes or observations...">{{ old('notes') }}</textarea>
                 </div>
             </div>
 
@@ -243,32 +204,16 @@
                                placeholder="Follow-up instructions...">
                     </div>
                 </div>
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="attending_health_worker" class="block text-sm font-medium text-gray-700 mb-2">Attending Health Worker <span class="text-red-500">*</span></label>
-                        <input type="text" name="attending_health_worker" id="attending_health_worker" value="{{ old('attending_health_worker') }}" class="w-full border border-gray-300 rounded px-3 py-2" required placeholder="Name of attending health worker">
-                    </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
-                        <select name="status" id="status" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                            <option value="">Select status...</option>
-                            <option value="Completed" {{ old('status', 'Completed') == 'Completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="Pending" {{ old('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="Referred" {{ old('status') == 'Referred' ? 'selected' : '' }}>Referred</option>
-                            <option value="Cancelled" {{ old('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                        </select>
-                    </div>
-                </div>
             </div>
 
             <!-- Form Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
                 <div class="text-sm text-gray-500">
                     <i class="fas fa-info-circle mr-1"></i>
-                    The logbook entry will be created and can be managed from the medical logbooks list.
+                    The record entry will be created and can be managed from the medical records list.
                 </div>
                 <div class="flex space-x-3">
-                    <a href="{{ route('admin.medical-logbooks.index') }}" 
+                    <a href="{{ route('admin.medical-records.index') }}" 
                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                         <i class="fas fa-times mr-2"></i>
                         Cancel
@@ -276,7 +221,7 @@
                     <button type="submit" 
                             class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                         <i class="fas fa-save mr-2"></i>
-                        Create Medical Logbook Entry
+                        Done
                     </button>
                 </div>
             </div>

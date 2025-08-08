@@ -392,21 +392,15 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.patient-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.patient-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.patient-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-user-md fa-fw mr-3 {{ request()->routeIs('admin.patient-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Patient Records</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.vaccination-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.vaccination-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Vaccination Records</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.medical-logbooks.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medical-logbooks*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medical-logbooks*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-logbooks*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Medical Logbooks</span>
+                                <a href="{{ route('admin.medical-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medical-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medical-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Medical Records</span>
                                 </a>
                             </li>
                             <li>
@@ -416,9 +410,21 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.health-status-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.health-status-requests*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.health-status-requests*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-heartbeat fa-fw mr-3 {{ request()->routeIs('admin.health-status-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Health Status Requests</span>
+                                <a href="{{ route('admin.medicines.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medicines*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medicines*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-pills fa-fw mr-3 {{ request()->routeIs('admin.medicines*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Medicines Inventory</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.medicine-requests.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medicine-requests*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medicine-requests*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-clipboard-check fa-fw mr-3 {{ request()->routeIs('admin.medicine-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Medicine Requests</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.medicine-transactions.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medicine-transactions*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medicine-transactions*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-list fa-fw mr-3 {{ request()->routeIs('admin.medicine-transactions*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Medicine Transactions</span>
                                 </a>
                             </li>
                         </ul>
@@ -553,33 +559,21 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.patient-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.patient-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-user-md fa-fw mr-3 {{ request()->routeIs('admin.patient-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Patient Records</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.vaccination-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Vaccination Records</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.medical-logbooks.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.medical-logbooks*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-logbooks*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Medical Logbooks</span>
+                                <a href="{{ route('admin.medical-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.medical-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Medical Records</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.health-center-activities.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.health-center-activities*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-calendar-alt fa-fw mr-3 {{ request()->routeIs('admin.health-center-activities*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Health Activities</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.health-status-requests') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.health-status-requests*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-heartbeat fa-fw mr-3 {{ request()->routeIs('admin.health-status-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Health Status Requests</span>
                                 </a>
                             </li>
                         </ul>

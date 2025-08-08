@@ -10,7 +10,6 @@ use App\Models\DocumentRequest;
 use App\Models\Residents;
 use App\Models\VaccinationRecord;
 use App\Models\HealthCenterActivity;
-use App\Models\PatientRecord;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 
@@ -29,7 +28,6 @@ class AdminDashboardController
 
         // Fetch actual accomplished projects count
         $totalAccomplishedProjects = AccomplishedProject::count();
-        $totalHealthReports = PatientRecord::count();
         
         // Additional metrics for enhanced dashboard
         $totalVaccinationRecords = VaccinationRecord::count();
@@ -72,7 +70,6 @@ class AdminDashboardController
             'totalBlotterReports',
             'totalDocumentRequests',
             'totalAccomplishedProjects',
-            'totalHealthReports',
             'totalVaccinationRecords',
             'upcomingHealthActivities',
             'residentDemographics',

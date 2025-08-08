@@ -220,26 +220,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Health Reports Card -->
-        <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
-            <div class="p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-pink-100 text-xs font-medium">Health Reports</p>
-                        <p class="text-white text-2xl font-bold">{{ $totalHealthReports }}</p>
-                    </div>
-                    <div class="bg-pink-400 bg-opacity-30 rounded-full p-2">
-                        <i class="fas fa-heartbeat text-white text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <a href="{{ route('admin.health-reports') }}" class="text-pink-100 hover:text-white text-xs font-medium flex items-center">
-                        View <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Trends Section -->

@@ -22,19 +22,19 @@ use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentTempl
 use App\Http\Controllers\AdminControllers\ProjectControllers\AccomplishProjectController;
 use App\Http\Controllers\AdminControllers\NotificationControllers\AdminNotificationController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthReportController;
-use App\Http\Controllers\AdminControllers\HealthManagementControllers\PatientRecordController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\VaccinationRecordController;
-use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicalLogbookController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicalRecordController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthCenterActivityController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineRequestController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineTransactionController;
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringController;
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\DecisionTreeController;
-use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthStatusRequestController;
 use App\Http\Controllers\ResidentControllers\ResidentDashboardController;
 use App\Http\Controllers\ResidentControllers\ResidentBlotterController;
 use App\Http\Controllers\ResidentControllers\ResidentCommunityComplaintController;
 use App\Http\Controllers\ResidentControllers\ResidentDocumentRequestController;
 use App\Http\Controllers\ResidentControllers\ResidentRequestListController;
-use App\Http\Controllers\ResidentControllers\ResidentHealthStatusController;
 use App\Http\Controllers\ResidentControllers\ResidentAnnouncementController;
 use App\Http\Controllers\ResidentControllers\ResidentProfileController;
 use App\Http\Controllers\PublicController;
@@ -147,26 +147,12 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::post('/accomplished-projects/{id}/toggle-featured', [AccomplishProjectController::class, 'toggleFeatured'])->name('admin.accomplished-projects.toggle-featured');
     
     // Health Status Requests from Residents
-    Route::get('/health-status-requests', [HealthStatusRequestController::class, 'index'])->name('admin.health-status-requests');
-    Route::get('/health-status-requests/search', [HealthStatusRequestController::class, 'search'])->name('admin.health-status-requests.search');
-    Route::get('/health-status-requests/{id}', [HealthStatusRequestController::class, 'show'])->name('admin.health-status-requests.show');
-    Route::put('/health-status-requests/{id}/status', [HealthStatusRequestController::class, 'updateStatus'])->name('admin.health-status-requests.update-status');
-    Route::get('/health-status-requests/export', [HealthStatusRequestController::class, 'export'])->name('admin.health-status-requests.export');
+    // REMOVED: Health status request functionality removed as per requirements
 
     // Health Reports Route
     Route::get('/health-reports', [HealthReportController::class, 'healthReport'])->name('admin.health-reports');
     Route::get('/health-reports/comprehensive', [HealthReportController::class, 'generateComprehensiveReport'])->name('admin.health-reports.comprehensive');
     Route::get('/health-reports/export', [HealthReportController::class, 'exportReport'])->name('admin.health-reports.export');
-
-    // Patient Records Routes
-    Route::get('/patient-records', [PatientRecordController::class, 'index'])->name('admin.patient-records.index');
-    Route::get('/patient-records/create', [PatientRecordController::class, 'create'])->name('admin.patient-records.create');
-    Route::post('/patient-records', [PatientRecordController::class, 'store'])->name('admin.patient-records.store');
-    Route::get('/patient-records/{id}', [PatientRecordController::class, 'show'])->name('admin.patient-records.show');
-    Route::get('/patient-records/{id}/edit', [PatientRecordController::class, 'edit'])->name('admin.patient-records.edit');
-    Route::put('/patient-records/{id}', [PatientRecordController::class, 'update'])->name('admin.patient-records.update');
-    Route::delete('/patient-records/{id}', [PatientRecordController::class, 'destroy'])->name('admin.patient-records.destroy');
-    Route::get('/patient-records/search', [PatientRecordController::class, 'search'])->name('admin.patient-records.search');
 
     // Vaccination Records Routes
     Route::get('/vaccination-records', [VaccinationRecordController::class, 'index'])->name('admin.vaccination-records.index');
@@ -180,16 +166,34 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::get('/vaccination-records/due', [VaccinationRecordController::class, 'dueVaccinations'])->name('admin.vaccination-records.due');
     Route::get('/vaccination-records/report', [VaccinationRecordController::class, 'generateReport'])->name('admin.vaccination-records.report');
 
-    // Medical Logbooks Routes
-    Route::get('/medical-logbooks', [MedicalLogbookController::class, 'index'])->name('admin.medical-logbooks.index');
-    Route::get('/medical-logbooks/create', [MedicalLogbookController::class, 'create'])->name('admin.medical-logbooks.create');
-    Route::post('/medical-logbooks', [MedicalLogbookController::class, 'store'])->name('admin.medical-logbooks.store');
-    Route::get('/medical-logbooks/{id}', [MedicalLogbookController::class, 'show'])->name('admin.medical-logbooks.show');
-    Route::get('/medical-logbooks/{id}/edit', [MedicalLogbookController::class, 'edit'])->name('admin.medical-logbooks.edit');
-    Route::put('/medical-logbooks/{id}', [MedicalLogbookController::class, 'update'])->name('admin.medical-logbooks.update');
-    Route::delete('/medical-logbooks/{id}', [MedicalLogbookController::class, 'destroy'])->name('admin.medical-logbooks.destroy');
-    Route::get('/medical-logbooks/report', [MedicalLogbookController::class, 'generateReport'])->name('admin.medical-logbooks.report');
-    Route::get('/medical-logbooks/search', [MedicalLogbookController::class, 'search'])->name('admin.medical-logbooks.search');
+    // Medical Records Routes
+    Route::get('/medical-records', [MedicalRecordController::class, 'index'])->name('admin.medical-records.index');
+    Route::get('/medical-records/create', [MedicalRecordController::class, 'create'])->name('admin.medical-records.create');
+    Route::post('/medical-records', [MedicalRecordController::class, 'store'])->name('admin.medical-records.store');
+    Route::get('/medical-records/{id}', [MedicalRecordController::class, 'show'])->name('admin.medical-records.show');
+    Route::delete('/medical-records/{id}', [MedicalRecordController::class, 'destroy'])->name('admin.medical-records.destroy');
+    Route::get('/medical-records/report', [MedicalRecordController::class, 'generateReport'])->name('admin.medical-records.report');
+
+    // Medicines Inventory Routes
+    Route::get('/medicines', [MedicineController::class, 'index'])->name('admin.medicines.index');
+    Route::get('/medicines/create', [MedicineController::class, 'create'])->name('admin.medicines.create');
+    Route::post('/medicines', [MedicineController::class, 'store'])->name('admin.medicines.store');
+    Route::get('/medicines/{medicine}/edit', [MedicineController::class, 'edit'])->name('admin.medicines.edit');
+    Route::put('/medicines/{medicine}', [MedicineController::class, 'update'])->name('admin.medicines.update');
+    Route::post('/medicines/{medicine}/restock', [MedicineController::class, 'restock'])->name('admin.medicines.restock');
+    Route::delete('/medicines/{medicine}', [MedicineController::class, 'destroy'])->name('admin.medicines.destroy');
+    Route::get('/medicines/report', [MedicineController::class, 'report'])->name('admin.medicines.report');
+
+    // Medicine Requests Routes
+    Route::get('/medicine-requests', [MedicineRequestController::class, 'index'])->name('admin.medicine-requests.index');
+    Route::get('/medicine-requests/create', [MedicineRequestController::class, 'create'])->name('admin.medicine-requests.create');
+    Route::post('/medicine-requests', [MedicineRequestController::class, 'store'])->name('admin.medicine-requests.store');
+    Route::post('/medicine-requests/{medicineRequest}/approve', [MedicineRequestController::class, 'approve'])->name('admin.medicine-requests.approve');
+    Route::post('/medicine-requests/{medicineRequest}/reject', [MedicineRequestController::class, 'reject'])->name('admin.medicine-requests.reject');
+
+    // Medicine Transactions Routes
+    Route::get('/medicine-transactions', [MedicineTransactionController::class, 'index'])->name('admin.medicine-transactions.index');
+    Route::post('/medicine-transactions/{medicine}/adjust', [MedicineTransactionController::class, 'adjustStock'])->name('admin.medicine-transactions.adjust');
 
     // Health Center Activities Routes
     Route::get('/health-center-activities', [HealthCenterActivityController::class, 'index'])->name('admin.health-center-activities.index');
@@ -252,8 +256,7 @@ Route::middleware([CheckResidentRole::class])->prefix('resident')->group(functio
     Route::get('/my-requests', [ResidentRequestListController::class, 'myRequests'])->name('resident.my-requests');
 
     // Health Status
-    Route::get('/health-status', [ResidentHealthStatusController::class, 'healthStatus'])->name('resident.health-status');
-    Route::post('/health-status', [ResidentHealthStatusController::class, 'storeHealthStatus']);
+    // REMOVED: Health status functionality removed as per requirements
 
     // Announcements
     Route::get('/announcements', [ResidentAnnouncementController::class, 'announcements'])->name('resident.announcements');

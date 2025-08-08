@@ -1,6 +1,6 @@
 @extends('admin.main.layout')
 
-@section('title', 'Medical Logbooks')
+@section('title', 'Medical Records')
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
@@ -8,11 +8,11 @@
     <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Medical Logbooks</h1>
-                <p class="text-sm md:text-base text-gray-600">Manage medical consultations and logbook entries</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Medical Records</h1>
+                <p class="text-sm md:text-base text-gray-600">Manage medical consultations and record entries</p>
             </div>
             <div class="mt-4 sm:mt-0 flex space-x-2">
-                <a href="{{ route('admin.medical-logbooks.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                <a href="{{ route('admin.medical-records.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add Consultation
                 </a>
@@ -48,7 +48,7 @@
     @endif
 
     <!-- Enhanced Search & Filters -->
-    <form method="GET" action="{{ route('admin.medical-logbooks.index') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.medical-records.index') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -78,7 +78,7 @@
                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     Filter
                 </button>
-                <a href="{{ route('admin.medical-logbooks.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <a href="{{ route('admin.medical-records.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     Reset
                 </a>
             </div>
@@ -163,8 +163,8 @@
         </div>
     </div>
 
-    <!-- Medical Logbooks List -->
-    @if($medicalLogbooks->isEmpty())
+    <!-- Medical Records List -->
+    @if($medicalRecords->isEmpty())
         <div class="text-center py-12">
             <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <i class="fas fa-stethoscope text-gray-400 text-4xl"></i>
@@ -172,7 +172,7 @@
             <h3 class="text-lg font-medium text-gray-900 mb-2">No medical consultation records found</h3>
             <p class="text-gray-500">Get started by adding the first consultation record.</p>
             <div class="mt-6">
-                <a href="{{ route('admin.medical-logbooks.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
+                <a href="{{ route('admin.medical-records.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add First Consultation
                 </a>
@@ -218,26 +218,26 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($medicalLogbooks as $logbook)
+                        @foreach($medicalRecords as $record)
                         <tr class="hover:bg-gray-50 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="items-center gap-2">
-                                        <div class="text-sm font-medium text-gray-900">{{ $logbook->resident->name }}</div>
-                                        <div class="text-sm text-gray-500">{{ $logbook->resident->email }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $record->resident->name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $record->resident->email }}</div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">
-                                    <div class="font-medium">{{ $logbook->consultation_type }}</div>
-                                    <div class="text-gray-500">{{ Str::limit($logbook->chief_complaint, 50) }}</div>
-                                    @if($logbook->diagnosis)
-                                    <div class="text-xs text-gray-400 mt-1">Diagnosis: {{ Str::limit($logbook->diagnosis, 40) }}</div>
+                                <div class="text-sm text-gray-900"> 
+                                    <div class="font-medium">{{ $record->consultation_type }}</div>
+                                    <div class="text-gray-500">{{ Str::limit($record->chief_complaint, 50) }}</div>
+                                    @if($record->diagnosis)
+                                    <div class="text-xs text-gray-400 mt-1">Diagnosis: {{ Str::limit($record->diagnosis, 40) }}</div>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $logbook->consultation_datetime->format('M d, Y') }}</div>
-                                <div class="text-xs text-gray-400">{{ $logbook->attending_health_worker }}</div>
+                                <div class="text-sm text-gray-900">{{ $record->consultation_datetime->format('M d, Y') }}</div>
+                                <div class="text-xs text-gray-400">{{ optional($record->attendingHealthWorker)->name }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php
@@ -248,22 +248,19 @@
                                         'Cancelled' => 'bg-red-100 text-red-800'
                                     ];
                                 @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$logbook->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                    {{ $logbook->status }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$record->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                    {{ $record->status }}
                                 </span>
-                                @if($logbook->follow_up_date)
-                                <div class="text-xs text-gray-500 mt-1">Follow-up: {{ $logbook->follow_up_date->format('M d, Y') }}</div>
+                                @if($record->follow_up_date)
+                                <div class="text-xs text-gray-500 mt-1">Follow-up: {{ $record->follow_up_date->format('M d, Y') }}</div>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <a href="{{ route('admin.medical-logbooks.show', $logbook->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" title="Edit">
+                                    <a href="{{ route('admin.medical-records.show', $record->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.medical-logbooks.edit', $logbook->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form method="POST" action="{{ route('admin.medical-logbooks.destroy', $logbook->id) }}" style="display:inline;">
+                                    <form method="POST" action="{{ route('admin.medical-records.destroy', $record->id) }}" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
@@ -278,16 +275,16 @@
                     </tbody>
                 </table>
             </div>
-            @if($medicalLogbooks->hasPages())
+            @if($medicalRecords->hasPages())
             <div class="px-6 py-4 border-t border-gray-200">
-                {{ $medicalLogbooks->links() }}
+                {{ $medicalRecords->links() }}
             </div>
             @endif
         </div>
 
         <!-- Mobile Cards -->
         <div class="md:hidden space-y-3">
-            @foreach($medicalLogbooks as $logbook)
+            @foreach($medicalRecords as $record)
             <div class="document-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200">
                 <!-- Header Section -->
                 <div class="flex items-start justify-between mb-3">
@@ -296,8 +293,8 @@
                             <i class="fas fa-user text-blue-600"></i>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
-                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $logbook->resident->name }}</h3>
-                            <p class="text-sm text-gray-500 truncate">{{ $logbook->consultation_type }}</p>
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $record->resident->name }}</h3>
+                            <p class="text-sm text-gray-500 truncate">{{ $record->consultation_type }}</p>
                             <div class="flex items-center mt-1">
                                 @php
                                     $statusColors = [
@@ -307,13 +304,13 @@
                                         'Cancelled' => 'bg-red-100 text-red-800'
                                     ];
                                 @endphp
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$logbook->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$record->status] ?? 'bg-gray-100 text-gray-800' }}">
                                     <i class="fas fa-tag mr-1"></i>
-                                    {{ $logbook->status }}
+                                    {{ $record->status }}
                                 </span>
                                 <span class="ml-2 text-xs text-gray-500">
                                     <i class="fas fa-calendar mr-1"></i>
-                                    {{ $logbook->consultation_datetime->format('M d, Y') }}
+                                    {{ $record->consultation_datetime->format('M d, Y') }}
                                 </span>
                             </div>
                         </div>
@@ -323,27 +320,27 @@
                 <!-- Description Section -->
                 <div class="mb-3">
                     <div class="description-container">
-                        <p class="text-sm text-gray-600 leading-relaxed description-text" id="medical-description-{{ $logbook->id }}">
+                        <p class="text-sm text-gray-600 leading-relaxed description-text" id="medical-description-{{ $record->id }}">
                             <i class="fas fa-align-left mr-1 text-gray-400"></i>
-                            <span class="description-short">{{ Str::limit($logbook->chief_complaint, 80) }}</span>
-                            @if(strlen($logbook->chief_complaint) > 80)
-                                <span class="description-full hidden">{{ $logbook->chief_complaint }}</span>
-                                <button onclick="toggleDescription('medical-{{ $logbook->id }}')" 
+                            <span class="description-short">{{ Str::limit($record->chief_complaint, 80) }}</span>
+                            @if(strlen($record->chief_complaint) > 80)
+                                <span class="description-full hidden">{{ $record->chief_complaint }}</span>
+                                <button onclick="toggleDescription('medical-{{ $record->id }}')" 
                                         class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
                                     Read More
                                 </button>
                             @endif
                         </p>
-                        @if($logbook->diagnosis)
+                        @if($record->diagnosis)
                             <p class="text-xs text-gray-500 mt-1">
                                 <i class="fas fa-notes-medical mr-1"></i>
-                                Diagnosis: {{ Str::limit($logbook->diagnosis, 80) }}
+                                Diagnosis: {{ Str::limit($record->diagnosis, 80) }}
                             </p>
                         @endif
-                        @if($logbook->follow_up_date)
+                        @if($record->follow_up_date)
                             <p class="text-xs text-gray-500 mt-1">
                                 <i class="fas fa-calendar-check mr-1"></i>
-                                Follow-up: {{ $logbook->follow_up_date->format('M d, Y') }}
+                                Follow-up: {{ $record->follow_up_date->format('M d, Y') }}
                             </p>
                         @endif
                     </div>
@@ -353,21 +350,17 @@
                 <div class="mb-3">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                         <i class="fas fa-user-md mr-1"></i>
-                        {{ $logbook->attending_health_worker }}
+                        {{ $record->attending_health_worker }}
                     </span>
                 </div>
 
                 <!-- Actions Section -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                    <a href="{{ route('admin.medical-logbooks.show', $logbook->id) }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200" title="View">
+                    <a href="{{ route('admin.medical-records.show', $record->id) }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200" title="View">
                         <i class="fas fa-eye mr-1"></i>
                         View
                     </a>
-                    <a href="{{ route('admin.medical-logbooks.edit', $logbook->id) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="Edit">
-                        <i class="fas fa-edit mr-1"></i>
-                        Edit
-                    </a>
-                    <form method="POST" action="{{ route('admin.medical-logbooks.destroy', $logbook->id) }}" style="display:inline;">
+                    <form method="POST" action="{{ route('admin.medical-records.destroy', $record->id) }}" style="display:inline;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
@@ -382,17 +375,17 @@
     @endif
     
     <!-- Modern Pagination -->
-    @if($medicalLogbooks->hasPages())
+    @if($medicalRecords->hasPages())
         <div class="mt-6">
             <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
                 <div class="-mt-px flex w-0 flex-1">
-                    @if($medicalLogbooks->onFirstPage())
+                    @if($medicalRecords->onFirstPage())
                         <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
                             <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
                             Previous
                         </span>
                     @else
-                        <a href="{{ $medicalLogbooks->appends(request()->except('page'))->previousPageUrl() }}" 
+                        <a href="{{ $medicalRecords->appends(request()->except('page'))->previousPageUrl() }}" 
                            class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                             <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
                             Previous
@@ -402,14 +395,14 @@
                 
                 <div class="hidden md:-mt-px md:flex">
                     @php
-                        $currentPage = $medicalLogbooks->currentPage();
-                        $lastPage = $medicalLogbooks->lastPage();
+                        $currentPage = $medicalRecords->currentPage();
+                        $lastPage = $medicalRecords->lastPage();
                         $startPage = max(1, $currentPage - 2);
                         $endPage = min($lastPage, $currentPage + 2);
                     @endphp
                     
                     @if($startPage > 1)
-                        <a href="{{ $medicalLogbooks->appends(request()->except('page'))->url(1) }}" 
+                        <a href="{{ $medicalRecords->appends(request()->except('page'))->url(1) }}" 
                            class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                             1
                         </a>
@@ -426,7 +419,7 @@
                                 {{ $page }}
                             </span>
                         @else
-                            <a href="{{ $medicalLogbooks->appends(request()->except('page'))->url($page) }}" 
+                            <a href="{{ $medicalRecords->appends(request()->except('page'))->url($page) }}" 
                                class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                                 {{ $page }}
                             </a>
@@ -439,7 +432,7 @@
                                 ...
                             </span>
                         @endif
-                        <a href="{{ $medicalLogbooks->appends(request()->except('page'))->url($lastPage) }}" 
+                        <a href="{{ $medicalRecords->appends(request()->except('page'))->url($lastPage) }}" 
                            class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                             {{ $lastPage }}
                         </a>
@@ -447,8 +440,8 @@
                 </div>
                 
                 <div class="-mt-px flex w-0 flex-1 justify-end">
-                    @if($medicalLogbooks->hasMorePages())
-                        <a href="{{ $medicalLogbooks->appends(request()->except('page'))->nextPageUrl() }}" 
+                    @if($medicalRecords->hasMorePages())
+                        <a href="{{ $medicalRecords->appends(request()->except('page'))->nextPageUrl() }}" 
                            class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                             Next
                             <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
@@ -464,23 +457,23 @@
             
             <!-- Mobile Pagination -->
             <div class="mt-4 flex justify-between sm:hidden">
-                @if($medicalLogbooks->onFirstPage())
+                @if($medicalRecords->onFirstPage())
                     <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
                         Previous
                     </span>
                 @else
-                    <a href="{{ $medicalLogbooks->appends(request()->except('page'))->previousPageUrl() }}" 
+                    <a href="{{ $medicalRecords->appends(request()->except('page'))->previousPageUrl() }}" 
                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                         Previous
                     </a>
                 @endif
                 
                 <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
-                    Page {{ $medicalLogbooks->currentPage() }} of {{ $medicalLogbooks->lastPage() }}
+                    Page {{ $medicalRecords->currentPage() }} of {{ $medicalRecords->lastPage() }}
                 </span>
                 
-                @if($medicalLogbooks->hasMorePages())
-                    <a href="{{ $medicalLogbooks->appends(request()->except('page'))->nextPageUrl() }}" 
+                @if($medicalRecords->hasMorePages())
+                    <a href="{{ $medicalRecords->appends(request()->except('page'))->nextPageUrl() }}" 
                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                         Next
                     </a>
@@ -493,7 +486,7 @@
             
             <!-- Results Info -->
             <div class="mt-4 text-center text-sm text-gray-500">
-                Showing {{ $medicalLogbooks->firstItem() }} to {{ $medicalLogbooks->lastItem() }} of {{ $medicalLogbooks->total() }} results
+                Showing {{ $medicalRecords->firstItem() }} to {{ $medicalRecords->lastItem() }} of {{ $medicalRecords->total() }} results
             </div>
         </div>
     @endif
