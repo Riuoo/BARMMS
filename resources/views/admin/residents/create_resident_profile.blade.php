@@ -31,17 +31,17 @@
             @csrf
 
             <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
                 <input type="text" id="name" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
             </div>
 
             <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
                 <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
             </div>
 
             <div>
-                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
                 <input type="text" id="address" name="address" value="{{ old('address') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
             </div>
 
@@ -50,16 +50,16 @@
                 <h3 class="text-lg font-semibold mb-4 text-gray-700">Demographic Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                        <input type="number" id="age" name="age" value="{{ old('age') }}" min="1" max="120" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+                        <input type="number" id="age" name="age" value="{{ old('age') }}" min="1" max="120" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                     </div>
                     <div>
-                        <label for="family_size" class="block text-sm font-medium text-gray-700 mb-1">Family Size</label>
-                        <input type="number" id="family_size" name="family_size" value="{{ old('family_size') }}" min="1" max="20" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <label for="family_size" class="block text-sm font-medium text-gray-700 mb-1">Family Size <span class="text-red-500">*</span></label>
+                        <input type="number" id="family_size" name="family_size" value="{{ old('family_size') }}" min="1" max="20" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                     </div>
                     <div>
-                        <label for="education_level" class="block text-sm font-medium text-gray-700 mb-1">Education Level</label>
-                        <select id="education_level" name="education_level" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <label for="education_level" class="block text-sm font-medium text-gray-700 mb-1">Education Level <span class="text-red-500">*</span></label>
+                        <select id="education_level" name="education_level" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                             <option value="">Select Education Level</option>
                             <option value="No Education" {{ old('education_level') == 'No Education' ? 'selected' : '' }}>No Education</option>
                             <option value="Elementary" {{ old('education_level') == 'Elementary' ? 'selected' : '' }}>Elementary</option>
@@ -70,8 +70,8 @@
                         </select>
                     </div>
                     <div>
-                        <label for="income_level" class="block text-sm font-medium text-gray-700 mb-1">Income Level</label>
-                        <select id="income_level" name="income_level" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <label for="income_level" class="block text-sm font-medium text-gray-700 mb-1">Income Level <span class="text-red-500">*</span></label>
+                        <select id="income_level" name="income_level" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                             <option value="">Select Income Level</option>
                             <option value="Low" {{ old('income_level') == 'Low' ? 'selected' : '' }}>Low</option>
                             <option value="Lower Middle" {{ old('income_level') == 'Lower Middle' ? 'selected' : '' }}>Lower Middle</option>
@@ -81,8 +81,8 @@
                         </select>
                     </div>
                     <div>
-                        <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
-                        <select id="employment_status" name="employment_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-1">Employment Status <span class="text-red-500">*</span></label>
+                        <select id="employment_status" name="employment_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                             <option value="">Select Employment Status</option>
                             <option value="Unemployed" {{ old('employment_status') == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
                             <option value="Part-time" {{ old('employment_status') == 'Part-time' ? 'selected' : '' }}>Part-time</option>
@@ -91,8 +91,8 @@
                         </select>
                     </div>
                     <div>
-                        <label for="health_status" class="block text-sm font-medium text-gray-700 mb-1">Health Status</label>
-                        <select id="health_status" name="health_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <label for="health_status" class="block text-sm font-medium text-gray-700 mb-1">Health Status <span class="text-red-500">*</span></label>
+                        <select id="health_status" name="health_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                             <option value="">Select Health Status</option>
                             <option value="Critical" {{ old('health_status') == 'Critical' ? 'selected' : '' }}>Critical</option>
                             <option value="Poor" {{ old('health_status') == 'Poor' ? 'selected' : '' }}>Poor</option>
@@ -106,11 +106,11 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
                     <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                 </div>
                 <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password <span class="text-red-500">*</span>    </label>
                     <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                 </div>
             </div>

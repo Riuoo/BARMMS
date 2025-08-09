@@ -4,7 +4,6 @@ namespace App\Http\Controllers\ResidentControllers;
 
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
-use App\Models\HealthStatus;
 use App\Models\CommunityComplaint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -47,20 +46,6 @@ class ResidentRequestListController
         }
         $blotterRequests = $blotterQuery->orderByDesc('created_at')->get();
 
-        // --- Health Status Requests ---
-        $healthQuery = HealthStatus::where('user_id', $userId);
-        if ($request->filled('search')) {
-            $search = trim($request->get('search'));
-            $healthQuery->where(function ($q) use ($search) {
-                $q->where('concern_type', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-        if ($request->filled('status')) {
-            $healthQuery->where('status', $request->get('status'));
-        }
-        $healthStatusRequests = $healthQuery->orderByDesc('created_at')->get();
-
         // --- Community Complaints ---
         $complaintQuery = CommunityComplaint::where('user_id', $userId);
         if ($request->filled('search')) {
@@ -77,11 +62,26 @@ class ResidentRequestListController
         }
         $communityComplaints = $complaintQuery->orderByDesc('created_at')->get();
 
+        // Compute resident notifications (mirror admin style but for this user only)
+        $residentNotifications = collect();
+        foreach ($documentRequests as $req) {
+            if ($req->status === 'approved') {
+                $residentNotifications->push((object) [
+                    'id' => $req->id,
+                    'type' => 'document_request',
+                    'message' => 'Your ' . $req->document_type . ' is ready for pickup.',
+                    'created_at' => $req->updated_at,
+                    'is_read' => (bool) ($req->resident_is_read ?? true),
+                    'link' => route('resident.my-requests')
+                ]);
+            }
+        }
+
         return view('resident.my_requests', compact(
             'documentRequests',
             'blotterRequests',
-            'healthStatusRequests',
-            'communityComplaints'
+            'communityComplaints',
+            'residentNotifications'
         ));
     }
 } 

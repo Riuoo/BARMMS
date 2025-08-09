@@ -153,6 +153,10 @@
             </div>
         </div>
     @else
+        @php
+            $hasThreadActions = collect($blotterRequests->items())
+                ->contains(function ($r) { return in_array($r->status, ['pending','approved']); });
+        @endphp
         <!-- Desktop Table (hidden on mobile) -->
         <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
@@ -201,12 +205,14 @@
                                     Created
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-cogs mr-2"></i>
-                                    Actions
-                                </div>
-                            </th>
+                            @if($hasThreadActions)
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center justify-center">
+                                        <i class="fas fa-cogs mr-2"></i>
+                                        Actions
+                                    </div>
+                                </th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="blotterTableBody">
@@ -303,35 +309,37 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center justify-center space-x-2">
-                                    @if($request->status === 'pending')
-                                        <button type="button" onclick="openApproveModal('{{ $request->id }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                            <i class="fas fa-check mr-1"></i>
-                                            Approve
-                                        </button>
-                                    @elseif($request->status === 'approved')
-                                        @if($request->attempts < 3)
-                                            <button type="button" onclick="openNewSummonModal('{{ $request->id }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
-                                                <i class="fas fa-file-alt mr-1"></i>
-                                                New Summon
+                            @if($hasThreadActions)
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        @if($request->status === 'pending')
+                                            <button type="button" onclick="openApproveModal('{{ $request->id }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                                <i class="fas fa-check mr-1"></i>
+                                                Approve
                                             </button>
-                                        @else
-                                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" disabled>
-                                                <i class="fas fa-file-alt mr-1"></i>
-                                                New Summon (Limit Reached)
-                                            </button>
+                                        @elseif($request->status === 'approved')
+                                            @if($request->attempts < 3)
+                                                <button type="button" onclick="openNewSummonModal('{{ $request->id }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
+                                                    <i class="fas fa-file-alt mr-1"></i>
+                                                    New Summon
+                                                </button>
+                                            @else
+                                                <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" disabled>
+                                                    <i class="fas fa-file-alt mr-1"></i>
+                                                    New Summon (Limit Reached)
+                                                </button>
+                                            @endif
+                                            <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
+                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                    Complete
+                                                </button>
+                                            </form>
                                         @endif
-                                        <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
-                                            @csrf
-                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
-                                                <i class="fas fa-check-circle mr-1"></i>
-                                                Complete
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                            </td>
+                                    </div>
+                                </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

@@ -160,6 +160,11 @@
 
     <!-- Complaints List -->
     @if($complaints->count() > 0)
+        @php
+            $hasThreadActions = $complaints->contains(function ($c) {
+                return !in_array($c->status, ['resolved','closed']);
+            });
+        @endphp
         <!-- Desktop Table (hidden on mobile) -->
         <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
@@ -196,41 +201,26 @@
                                     Date
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-cogs mr-2"></i>
-                                    Actions
-                                </div>
-                            </th>
+                            @if($hasThreadActions)
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center justify-center">
+                                        <i class="fas fa-cogs mr-2"></i>
+                                        Actions
+                                    </div>
+                                </th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($complaints as $complaint)
                         <tr class="complaint-item hover:bg-gray-50 transition duration-150" data-status="{{ $complaint->status }}">
                             <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">{{ $complaint->title }}</div>
-                                        <div class="text-sm text-gray-500 max-w-xs">
-                                            <div class="truncate" title="{{ $complaint->description }}">
-                                                {{ Str::limit($complaint->description, 50) }}
-                                            </div>
-                                            @if(strlen($complaint->description) > 50)
-                                                <button onclick="showFullDescription('{{ addslashes($complaint->description) }}', '{{ $complaint->title }}')"
-                                                        class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 md:hidden">
-                                                    View Full
-                                                </button>
-                                            @endif
-                                        </div>
-                                        @if($complaint->location)
-                                            <div class="text-xs text-gray-400">
-                                                <i class="fas fa-map-marker-alt mr-1"></i>{{ $complaint->location }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
+                                <button type="button"
+                                        data-id="{{ $complaint->id }}"
+                                        class="js-complaint-view hidden md:inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    View Details
+                                </button>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -259,17 +249,19 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $complaint->created_at->format('M d, Y') }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center justify-center space-x-2">
-                                    @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
-                                        <button onclick="openUpdateStatusModal({{ $complaint->id }}, '{{ $complaint->status }}')"
-                                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                                            <i class="fas fa-edit mr-1"></i>
-                                            Update
-                                        </button>
-                                    @endif
-                                </div>
-                            </td>
+                            @if($hasThreadActions)
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
+                                            <button type="button" data-id="{{ $complaint->id }}" data-status="{{ $complaint->status }}"
+                                                    class="js-open-update inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                                <i class="fas fa-edit mr-1"></i>
+                                                Update
+                                            </button>
+                                        @endif
+                                    </div>
+                                </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -313,27 +305,6 @@
                     </div>
                 </div>
 
-                <!-- Description Section -->
-                <div class="mb-3">
-                    <div class="description-container">
-                        <p class="text-sm text-gray-600 leading-relaxed description-text" id="description-{{ $complaint->id }}">
-                            <i class="fas fa-align-left mr-1 text-gray-400"></i>
-                            <span class="description-short">{{ Str::limit($complaint->description, 80) }}</span>
-                            @if(strlen($complaint->description) > 80)
-                                <span class="description-full hidden">{{ $complaint->description }}</span>
-                                <button onclick="toggleDescription({{ $complaint->id }})"
-                                        class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
-                                    Read More
-                                </button>
-                                <button onclick="showFullDescription('{{ addslashes($complaint->description) }}', '{{ $complaint->title }}')"
-                                        class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 md:hidden">
-                                    View Full
-                                </button>
-                            @endif
-                        </p>
-                    </div>
-                </div>
-
                 <!-- Category Section -->
                 <div class="mb-3 flex flex-wrap gap-2">
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -342,26 +313,16 @@
                     </span>
                 </div>
 
-                <!-- Location Section -->
-                @if($complaint->location)
-                <div class="mb-3 p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>
-                        <span class="text-sm text-gray-600">{{ $complaint->location }}</span>
-                    </div>
-                </div>
-                @endif
-
                 <!-- Actions Section -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                    <button onclick="viewComplaintDetails({{ $complaint->id }})"
-                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200 md:hidden">
+                    <button type="button" data-id="{{ $complaint->id }}"
+                            class="js-complaint-view-mobile inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200 md:hidden">
                         <i class="fas fa-eye mr-1"></i>
-                        View Details
+                        View Full Details
                     </button>
                     @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
-                        <button onclick="openUpdateStatusModal({{ $complaint->id }}, '{{ $complaint->status }}')"
-                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
+                        <button type="button" data-id="{{ $complaint->id }}" data-status="{{ $complaint->status }}"
+                                class="js-open-update inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
                             <i class="fas fa-edit mr-1"></i>
                             Update
                         </button>
@@ -503,4 +464,4 @@
 <!-- Modals -->
 @include('admin.modals.community-complaint-modals')
 
-@endsection 
+@endsection

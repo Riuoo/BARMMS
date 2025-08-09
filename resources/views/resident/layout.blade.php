@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', 'Resident Page')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -13,9 +14,14 @@
         .notify {
             z-index: 1001 !important;
         }
+        /* Match admin notification dropdown scroll styling */
+        .notification-scroll::-webkit-scrollbar { width: 6px; }
+        .notification-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        .notification-scroll::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+        .notification-scroll::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
     </style>
 </head>
-<body x-data="{ sidebarOpen: false }" class="flex flex-col min-h-screen bg-gray-100 font-sans" data-notify-timeout="{{ config('notify.timeout', 5000) }}">
+<body x-data="{ sidebarOpen: false }" class="flex flex-col min-h-screen bg-gray-100 font-sans" data-notify-timeout="{{ config('notify.timeout', 5000) }}" data-notifications-url="{{ route('resident.notifications.count') }}">
     @include('notify::components.notify')
 
     <!-- Header -->
@@ -32,6 +38,106 @@
             </div>
         </div>
         <div class="flex items-center space-x-4">
+            <!-- Notifications -->
+            <div class="relative"
+                 x-data="{
+                    open: false,
+                    items: [],
+                    loading: false,
+                    load() {
+                        const url = document.body.dataset.notificationsUrl || '{{ route('resident.notifications.count') }}';
+                        this.loading = true;
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }, credentials: 'same-origin' })
+                            .then(r => r.ok ? r.json() : Promise.reject())
+                            .then(d => { this.items = Array.isArray(d.notifications) ? d.notifications : []; })
+                            .catch(() => { this.items = []; })
+                            .finally(() => { this.loading = false; });
+                    },
+                    init() {
+                        this.load();
+                        if (!window.__residentNotifInterval) {
+                            window.__residentNotifInterval = setInterval(() => this.load(), 30000);
+                            window.addEventListener('beforeunload', () => {
+                                if (window.__residentNotifInterval) {
+                                    clearInterval(window.__residentNotifInterval);
+                                    window.__residentNotifInterval = null;
+                                }
+                            });
+                        }
+                    }
+                 }"
+                 x-init="init()"
+                 @click.away="open = false">
+                <button @click="open = !open" class="relative focus:outline-none" aria-label="Notifications" title="Notifications">
+                    <i class="fas fa-bell text-gray-900"></i>
+                    <span x-show="items.length > 0" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1" x-text="items.length"></span>
+                </button>
+                <div x-show="open"
+                     x-transition
+                     class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+                     style="display: none;"
+                     role="dialog" aria-modal="true" aria-label="Notifications dropdown">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-green-600 to-green-700 px-4 py-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-white font-semibold text-sm">Notifications</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-white text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full" x-text="items.length"></span>
+                                <button @click="open = false" class="text-white hover:text-gray-200 transition duration-200" aria-label="Close">
+                                    <i class="fas fa-times text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- List -->
+                    <div class="max-h-96 overflow-y-auto notification-scroll">
+                        <div class="p-4" x-show="loading">
+                            <div class="flex items-center justify-center py-8">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                                <span class="ml-2 text-gray-500 text-sm">Loading notifications...</span>
+                            </div>
+                        </div>
+                        <div class="p-2 divide-y divide-gray-100" x-show="!loading">
+                            <template x-if="items.length === 0">
+                                <div class="flex items-center justify-center py-8">
+                                    <div class="text-center">
+                                        <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
+                                        <p class="text-gray-500 text-sm">No new notifications</p>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-for="n in items" :key="n.id">
+                                <div class="flex items-start p-3 hover:bg-gray-50 notification-item cursor-default select-none">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                                        <i class="fas fa-file-signature text-blue-600 text-sm"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs text-gray-900" x-text="n.message"></p>
+                                        <p class="text-[10px] text-gray-500" x-text="new Date(n.created_at).toLocaleString()"></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <!-- Footer -->
+                    <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <a href="{{ route('resident.notifications') }}" class="text-green-600 hover:text-green-700 text-sm font-medium transition duration-200">
+                                <i class="fas fa-external-link-alt mr-1"></i>
+                                View All Notifications
+                            </a>
+                            <form method="POST" action="{{ route('resident.notifications.mark-all') }}">
+                                @csrf
+                                <button type="submit" class="text-gray-600 hover:text-gray-800 text-sm transition duration-200">
+                                    <i class="fas fa-check-double mr-1"></i>
+                                    Mark All Read
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- User menu -->
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none" aria-haspopup="true" :aria-expanded="open.toString()">
@@ -109,12 +215,6 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('resident.request_community_complaint') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_complaint') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_complaint') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_complaint') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Community Complaint</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('resident.request_document_request') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_document_request') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_document_request') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-file-signature fa-fw mr-3 {{ request()->routeIs('resident.request_document_request') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Request a Document</span>
@@ -129,33 +229,14 @@
                         </ul>
                     </section>
 
-                    <!-- Health Monitoring (Recommendation) -->
-                    <section class="mb-6" aria-label="Health Monitoring">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Monitoring</h3>
+                    <!-- Community Complaint -->
+                    <section class="mb-6" aria-label="Complaint">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Complaint</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('resident.health-status') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.health-status') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.health-status') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-heartbeat fa-fw mr-3 {{ request()->routeIs('resident.health-status') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Report Health Concerns</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </section>
-
-                    <!-- Information & Profile -->
-                    <section class="mb-6" aria-label="Information & Profile">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Information & Profile</h3>
-                        <ul class="flex flex-col space-y-2">
-                            <li>
-                                <a href="{{ route('resident.announcements') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.announcements') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.announcements') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-bullhorn fa-fw mr-3 {{ request()->routeIs('resident.announcements') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Announcements</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('resident.profile') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.profile') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.profile') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-user-circle fa-fw mr-3 {{ request()->routeIs('resident.profile') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>My Profile</span>
+                                <a href="{{ route('resident.request_community_complaint') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_complaint') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_complaint') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_complaint') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Complaint</span>
                                 </a>
                             </li>
                         </ul>
@@ -203,12 +284,6 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('resident.request_community_complaint') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_complaint') }} transition duration-300 text-base">
-                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_complaint') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Community Complaint</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('resident.request_document_request') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_document_request') }} transition duration-300 text-base">
                                     <i class="fas fa-file-signature fa-fw mr-3 {{ request()->routeIs('resident.request_document_request') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>New Document Request</span>
@@ -223,33 +298,14 @@
                         </ul>
                     </section>
 
-                    <!-- Health Monitoring (Recommendation) -->
-                    <section class="mb-6" aria-label="Health Monitoring">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Monitoring</h3>
+                    <!-- Community Complaint -->
+                    <section class="mb-6" aria-label="Complaint">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Complaint</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('resident.health-status') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.health-status') }} transition duration-300 text-base">
-                                    <i class="fas fa-heartbeat fa-fw mr-3 {{ request()->routeIs('resident.health-status') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Report Health Concerns</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </section>
-
-                    <!-- Information & Profile -->
-                    <section class="mb-6" aria-label="Information & Profile">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Information & Profile</h3>
-                        <ul class="flex flex-col space-y-2">
-                            <li>
-                                <a href="{{ route('resident.announcements') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.announcements') }} transition duration-300 text-base">
-                                    <i class="fas fa-bullhorn fa-fw mr-3 {{ request()->routeIs('resident.announcements') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Announcements</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('resident.profile') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.profile') }} transition duration-300 text-base">
-                                    <i class="fas fa-user-circle fa-fw mr-3 {{ request()->routeIs('resident.profile') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>My Profile</span>
+                                <a href="{{ route('resident.request_community_complaint') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_complaint') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_complaint') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_complaint') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Complaint</span>
                                 </a>
                             </li>
                         </ul>

@@ -36,6 +36,7 @@ use App\Http\Controllers\ResidentControllers\ResidentCommunityComplaintControlle
 use App\Http\Controllers\ResidentControllers\ResidentDocumentRequestController;
 use App\Http\Controllers\ResidentControllers\ResidentRequestListController;
 use App\Http\Controllers\ResidentControllers\ResidentAnnouncementController;
+use App\Http\Controllers\ResidentControllers\ResidentNotificationController;
 use App\Http\Controllers\ResidentControllers\ResidentProfileController;
 use App\Http\Controllers\PublicController;
 
@@ -117,6 +118,7 @@ Route::middleware([CheckAdminRole::class])->prefix('admin')->group(function () {
     Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
     Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
     Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
+    Route::get('/document-requests/download/{id}', [DocumentRequestController::class, 'downloadRequest'])->name('document-requests.download');
     Route::get('/document-requests/{id}/details', [DocumentRequestController::class, 'getDetails'])->name('admin.document-requests.details');
     Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-requests.approve');
     Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
@@ -258,8 +260,11 @@ Route::middleware([CheckResidentRole::class])->prefix('resident')->group(functio
     // Health Status
     // REMOVED: Health status functionality removed as per requirements
 
-    // Announcements
-    Route::get('/announcements', [ResidentAnnouncementController::class, 'announcements'])->name('resident.announcements');
+    // Resident Notifications
+    Route::get('/notifications', [ResidentNotificationController::class, 'index'])->name('resident.notifications');
+    Route::get('/notifications/count', [ResidentNotificationController::class, 'count'])->name('resident.notifications.count');
+    Route::post('/notifications/mark-all', [ResidentNotificationController::class, 'markAllAsRead'])->name('resident.notifications.mark-all');
+    Route::post('/notifications/mark-as-read/{id}', [ResidentNotificationController::class, 'markAsRead'])->name('resident.notifications.mark-as-read');
 
     // Profile
     Route::get('/profile', [ResidentProfileController::class, 'profile'])->name('resident.profile');

@@ -142,6 +142,9 @@
                 <p class="text-gray-500">No new account applications are waiting for approval.</p>
             </div>
         @else
+            @php
+                $hasThreadActions = $accountRequests->contains(function ($r) { return in_array($r->status, ['pending','approved']); });
+            @endphp
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -165,12 +168,14 @@
                                         Requested
                                     </div>
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <div class="flex items-center justify-center">
-                                        <i class="fas fa-cogs mr-2"></i>
-                                        Actions
-                                    </div>
-                                </th>
+                                @if($hasThreadActions)
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <div class="flex items-center justify-center">
+                                            <i class="fas fa-cogs mr-2"></i>
+                                            Actions
+                                        </div>
+                                    </th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200" id="accountRequestsTableBody">
@@ -208,20 +213,22 @@
                                         {{ optional($request->created_at)->diffForHumans() ?? 'N/A' }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        @if($request->status === 'pending')
-                                            <form method="POST" action="{{ route('admin.account-requests.approve', $request->id) }}" class="inline">
-                                                @csrf
-                                                @method('PUT')
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                                                    <i class="fas fa-check mr-1"></i>
-                                                    Approve
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </td>
+                                @if($hasThreadActions)
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            @if($request->status === 'pending')
+                                                <form method="POST" action="{{ route('admin.account-requests.approve', $request->id) }}" class="inline">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                                        <i class="fas fa-check mr-1"></i>
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                @endif
                             </tr>
                             @endforeach
                         </tbody>

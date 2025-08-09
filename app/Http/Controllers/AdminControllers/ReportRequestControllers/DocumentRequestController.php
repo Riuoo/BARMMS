@@ -6,6 +6,8 @@ use App\Models\DocumentRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DocumentReadyForPickupMail;
 use App\Models\Residents;
 use App\Models\BarangayProfile;
 use App\Models\DocumentTemplate;
@@ -123,7 +125,18 @@ class DocumentRequestController
 
             // Mark as approved
             $documentRequest->status = 'approved';
+            // Flag for resident notification: set to unread so it appears as resident notification
+            $documentRequest->resident_is_read = false;
             $documentRequest->save();
+
+            // Send email to resident informing that the document is ready for pickup
+            if ($user && $user->email) {
+                try {
+                    Mail::to($user->email)->send(new DocumentReadyForPickupMail($user->name, $documentRequest->document_type));
+                } catch (\Exception $e) {
+                    Log::error('Failed sending DocumentReadyForPickupMail: ' . $e->getMessage());
+                }
+            }
 
             // Download the PDF
             $filename = $this->generateFilename($documentRequest);
@@ -230,6 +243,7 @@ class DocumentRequestController
         return view('admin.requests.create_document_request', compact('residents'));
     }
 
+    // Store + return request id
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -237,11 +251,14 @@ class DocumentRequestController
             'document_type' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
+
         $user = Residents::find($validated['user_id']);
         if (!$user || !$user->active) {
-            notify()->error('This user account is inactive and cannot make transactions.');
-            return back()->withInput();
+            return response()->json([
+                'error' => 'This user account is inactive and cannot make transactions.'
+            ], 422);
         }
+
         try {
             $documentRequest = DocumentRequest::create([
                 'user_id' => $validated['user_id'],
@@ -249,55 +266,138 @@ class DocumentRequestController
                 'description' => $validated['description'],
                 'status' => 'approved',
             ]);
-            // Get admin user data from session
-            $adminUser = null;
-            if (session()->has('user_role') && session('user_role') === 'barangay') {
-                $adminUser = BarangayProfile::find(session('user_id'));
-            }
 
-            // Log the document request for debugging
-            Log::info('Document request details (store): ' . json_encode([
-                'id' => $documentRequest->id,
-                'document_type' => $documentRequest->document_type,
-                'status' => $documentRequest->status
-            ]));
+            return response()->json([
+                'success' => true,
+                'id' => $documentRequest->id
+            ]);
 
-            // Determine the appropriate PDF template based on document type
-            $template = $this->getPdfTemplate($documentRequest->document_type, $documentRequest);
-            
-            // Validate template exists
-            if (empty($template)) {
-                throw new \Exception('PDF template not found for document type: ' . $documentRequest->document_type);
-            }
-            
-            // If the template is HTML (from database), load it directly
-            if (strpos($template, '<!DOCTYPE html>') === 0) {
-                $pdf = Pdf::loadHTML($template);
-            } else {
-                // Check if the view exists
-                if (!view()->exists($template)) {
-                    Log::error('View does not exist: ' . $template);
-                    throw new \Exception('PDF template view does not exist: ' . $template);
-                }
-                
-                // Load the view template
-                $pdf = Pdf::loadView($template, [
-                    'documentRequest' => $documentRequest,
-                    'adminUser' => $adminUser
-                ]);
-            }
-            
-            // Generate filename based on document type
-            $filename = $this->generateFilename($documentRequest);
-            
-            return $pdf->download($filename);
         } catch (\Exception $e) {
             Log::error('Error creating document request: ' . $e->getMessage());
-            notify()->error('Error creating document request: ' . $e->getMessage());
-            return back()->withInput();
-            
+            return response()->json([
+                'error' => 'Error creating document request: ' . $e->getMessage()
+            ], 500);
         }
     }
+
+    // Download route
+    public function downloadRequest($id)
+    {
+        $documentRequest = DocumentRequest::with('user')->findOrFail($id);
+
+        $adminUser = null;
+        if (session()->has('user_role') && session('user_role') === 'barangay') {
+            $adminUser = BarangayProfile::find(session('user_id'));
+        }
+
+        $template = DocumentTemplate::whereRaw(
+            'LOWER(document_type) = ?',
+            [strtolower(trim($documentRequest->document_type))]
+        )->firstOrFail();
+
+        $values = [
+            'resident_name' => $documentRequest->user?->name ?? '',
+            'resident_address' => $documentRequest->user?->address ?? '',
+            'civil_status' => $documentRequest->user?->civil_status ?? '',
+            'purpose' => $documentRequest->description,
+            'day' => date('jS'),
+            'month' => date('F'),
+            'year' => date('Y'),
+            'barangay_name' => $adminUser->barangay_name ?? '',
+            'municipality_name' => $adminUser->municipality_name ?? '',
+            'province_name' => $adminUser->province_name ?? '',
+            'official_name' => $adminUser->name ?? '',
+            'official_position' => $adminUser->position ?? '',
+        ];
+
+        $html = $template->generateHtml($values);
+        $pdf = Pdf::loadHTML($html);
+        $filename = $this->generateFilename($documentRequest);
+
+        return $pdf->download($filename);
+    }
+
+    // public function store(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'user_id' => 'required|exists:residents,id',
+    //         'document_type' => 'required|string|max:255',
+    //         'description' => 'required|string',
+    //     ]);
+
+    //     $user = Residents::find($validated['user_id']);
+    //     if (!$user || !$user->active) {
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'error' => 'This user account is inactive and cannot make transactions.'
+    //             ], 422);
+    //         }
+    //         notify()->error('This user account is inactive and cannot make transactions.');
+    //         return back()->withInput();
+    //     }
+
+    //     try {
+    //         $documentRequest = DocumentRequest::create([
+    //             'user_id' => $validated['user_id'],
+    //             'document_type' => $validated['document_type'],
+    //             'description' => $validated['description'],
+    //             'status' => 'approved',
+    //         ]);
+
+    //         $adminUser = null;
+    //         if (session()->has('user_role') && session('user_role') === 'barangay') {
+    //             $adminUser = BarangayProfile::find(session('user_id'));
+    //         }
+
+    //         $template = DocumentTemplate::whereRaw(
+    //             'LOWER(document_type) = ?',
+    //             [strtolower(trim($documentRequest->document_type))]
+    //         )->first();
+
+    //         if (!$template) {
+    //             if ($request->expectsJson()) {
+    //                 return response()->json([
+    //                     'error' => 'No template found for this document type.'
+    //                 ], 404);
+    //             }
+    //             notify()->error('No template found for this document type.');
+    //             return redirect()->back();
+    //         }
+
+    //         $values = [
+    //             'resident_name' => $documentRequest->user?->name ?? '',
+    //             'resident_address' => $documentRequest->user?->address ?? '',
+    //             'civil_status' => $documentRequest->user?->civil_status ?? '',
+    //             'purpose' => $documentRequest->description,
+    //             'day' => date('jS'),
+    //             'month' => date('F'),
+    //             'year' => date('Y'),
+    //             'barangay_name' => $adminUser->barangay_name ?? '',
+    //             'municipality_name' => $adminUser->municipality_name ?? '',
+    //             'province_name' => $adminUser->province_name ?? '',
+    //             'official_name' => $adminUser->name ?? '',
+    //             'official_position' => $adminUser->position ?? '',
+    //         ];
+
+    //         $html = $template->generateHtml($values);
+    //         $pdf = Pdf::loadHTML($html);
+    //         $filename = $this->generateFilename($documentRequest);
+
+    //         return $pdf->download($filename);
+
+    //     } catch (\Exception $e) {
+    //         Log::error('Error creating document request: ' . $e->getMessage());
+
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'error' => 'Error creating document request: ' . $e->getMessage()
+    //             ], 500);
+    //         }
+
+    //         notify()->error('Error creating document request: ' . $e->getMessage());
+    //         return back()->withInput();
+    //     }
+    // }
 
     // Add this method to select the PDF template based on document type
     protected function getPdfTemplate($documentType, $documentRequest)

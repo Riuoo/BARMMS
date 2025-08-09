@@ -176,12 +176,10 @@
         <div class="flex items-center space-x-4">
             <!-- Notifications -->
             <div class="relative" x-data="{ open: false }" @click="open = !open">
-                <button class="relative p-2 text-gray-900 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded-lg transition duration-200" title="Notifications">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" role="img" aria-label="Notifications Icon">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
+                <button class="relative focus:outline-none" title="Notifications">
+                    <i class="fas fa-bell text-gray-900"></i>
                     {{-- Notification count badge --}}
-                    <span id="notification-count-badge" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-medium animate-pulse" style="display: none;"></span>
+                    <span id="notification-count-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1" style="display: none;"></span>
                 </button>
 
                 <div x-show="open" 
@@ -1017,18 +1015,12 @@
                     const priorityClass = notification.priority === 'high' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
                     
                     html += `
-                        <div class="notification-item ${priorityClass} bg-white border-r border-b border-gray-200 p-4 hover:bg-gray-50 transition duration-200" data-id="${notification.id}" data-type="${notification.type}" onclick="notificationSystem.markAsViewed(${notification.id}, '${notification.type}')">
+                        <div class="flex items-center justify-center p-3 hover:bg-gray-50 notification-item cursor-default select-none ${priorityClass}" data-id="${notification.id}" data-type="${notification.type}" onclick="notificationSystem.markAsViewed(${notification.id}, '${notification.type}')">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-900 mb-1">${notification.message}</p>
-                                    <p class="text-xs text-gray-500">${timeAgo}</p>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <button onclick="event.stopPropagation(); notificationSystem.markAsRead('${notification.type}', ${notification.id})" class="text-gray-400 hover:text-green-600 transition duration-200" title="Mark as read">
-                                        <i class="fas fa-check text-xs"></i>
-                                    </button>
                                     <button onclick="event.stopPropagation(); notificationSystem.viewDetails('${notification.type}', ${notification.id})" class="text-gray-400 hover:text-blue-600 transition duration-200" title="View details">
-                                        <i class="fas fa-external-link-alt text-xs"></i>
+                                        <p class="text-s text-gray-900">${notification.message}</p>
+                                        <p class="text-[15px] text-gray-500">${timeAgo}</p>
                                     </button>
                                 </div>
                             </div>

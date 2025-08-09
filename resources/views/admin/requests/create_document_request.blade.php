@@ -71,6 +71,7 @@
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                             aria-label="Search for a resident"
+                            required
                         />
                         <input type="hidden" id="user_id" name="user_id" required>
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
@@ -128,32 +129,6 @@
                 </div>
             </div>
 
-            <!-- Processing Information -->
-            <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
-                    <i class="fas fa-clock mr-2 text-blue-600"></i>
-                    Processing Information
-                </h3>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-info-circle text-blue-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h4 class="text-sm font-medium text-blue-800">Processing Time</h4>
-                            <div class="mt-2 text-sm text-blue-700">
-                                <ul class="list-disc pl-5 space-y-1">
-                                    <li>Barangay Clearance: 1-2 business days</li>
-                                    <li>Certificate of Residency: 1-2 business days</li>
-                                    <li>Certificate of Indigency: 2-3 business days</li>
-                                    <li>Other documents: 3-5 business days</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Form Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
                 <div class="text-sm text-gray-500">
@@ -175,27 +150,6 @@
             </div>
         </form>
     </div>
-
-    <!-- Requirements Information -->
-    <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-yellow-800">Important Requirements</h3>
-                <div class="mt-2 text-sm text-yellow-700">
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li>Valid government-issued ID (passport, driver's license, etc.)</li>
-                        <li>Proof of residency (utility bills, lease agreement, etc.)</li>
-                        <li>Recent 2x2 ID picture (for some documents)</li>
-                        <li>Additional requirements may vary by document type</li>
-                        <li>Processing fees may apply depending on the document</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -203,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('residentSearch');
     const searchResults = document.getElementById('searchResults');
     const userIdInput = document.getElementById('user_id');
+    const form = document.getElementById('createDocumentRequestForm');
 
     searchInput.addEventListener('input', debounce(async () => {
         const term = searchInput.value.trim();
@@ -250,6 +205,136 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => func.apply(this, args), delay);
         };
+    }
+
+    // Create -> success -> download -> back with notify()
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Basic client validation
+            if (!userIdInput.value) {
+                if (typeof notify === 'function') {
+                    notify('error', 'Please select a resident.');
+                } else {
+                    alert('Please select a resident.');
+                }
+                return;
+            }
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
+            }
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') || ''
+                    },
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    // Attempt to parse validation or server error
+                    let message = 'Failed to create document request.';
+                    try {
+                        const data = await response.json();
+                        if (data?.error) message = data.error;
+                        if (data?.message) message = data.message;
+                        if (data?.errors) {
+                            const firstErrorKey = Object.keys(data.errors)[0];
+                            if (firstErrorKey && data.errors[firstErrorKey][0]) {
+                                message = data.errors[firstErrorKey][0];
+                            }
+                        }
+                    } catch (_) {}
+                    if (typeof notify === 'function') {
+                        notify('error', message);
+                    } else {
+                        alert(message);
+                    }
+                    return;
+                }
+
+                const data = await response.json();
+                const newId = data?.id;
+                if (!data?.success || !newId) {
+                    if (typeof notify === 'function') {
+                        notify('error', 'Unexpected response from server.');
+                    } else {
+                        alert('Unexpected response from server.');
+                    }
+                    return;
+                }
+
+                // Success notify
+                if (typeof notify === 'function') {
+                    notify('success', 'Document request created. Preparing download...');
+                }
+
+                // Download PDF
+                await (async function downloadPdf(id) {
+                    try {
+                        const downloadRes = await fetch(`/admin/document-requests/download/${id}`, {
+                            method: 'GET',
+                            headers: { 'Accept': 'application/pdf' },
+                            credentials: 'same-origin'
+                        });
+
+                        const contentType = downloadRes.headers.get('content-type') || '';
+                        if (downloadRes.ok && contentType.includes('application/pdf')) {
+                            const blob = await downloadRes.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `document_request_${id}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            window.URL.revokeObjectURL(url);
+                        } else {
+                            // Try to read error text
+                            let errorMsg = 'Error generating PDF.';
+                            try { errorMsg = await downloadRes.text(); } catch (_) {}
+                            if (typeof notify === 'function') {
+                                notify('error', errorMsg || 'Error generating PDF.');
+                            } else {
+                                alert('Error generating PDF.');
+                            }
+                        }
+                    } catch (err) {
+                        if (typeof notify === 'function') {
+                            notify('error', 'Network error while downloading PDF.');
+                        } else {
+                            alert('Network error while downloading PDF.');
+                        }
+                    }
+                })(newId);
+
+                // Mark to show notify on the list page and redirect back
+                try { localStorage.setItem('showDocumentCreateNotify', '1'); } catch (_) {}
+                window.location.href = `{{ route('admin.document-requests') }}`;
+
+            } catch (error) {
+                if (typeof notify === 'function') {
+                    notify('error', 'Unexpected error. Please try again.');
+                } else {
+                    alert('Unexpected error. Please try again.');
+                }
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+            }
+        });
     }
 });
 </script>

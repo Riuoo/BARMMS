@@ -46,7 +46,7 @@
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-calendar mr-1"></i>
-                        Hearing Date
+                        Hearing Date <span class="text-red-500">*</span>
                     </label>
                     <input type="datetime-local" name="hearing_date" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -89,7 +89,7 @@
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-calendar mr-1"></i>
-                        New Summon Date
+                        New Summon Date <span class="text-red-500">*</span>
                     </label>
                     <input type="datetime-local" name="new_summon_date" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"

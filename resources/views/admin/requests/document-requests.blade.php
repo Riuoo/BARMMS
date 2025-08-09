@@ -157,6 +157,10 @@
             </div>
         </div>
     @else
+        @php
+            $hasThreadActions = collect($documentRequests->items())
+                ->contains(function ($r) { return in_array($r->status, ['pending','approved']); });
+        @endphp
         <!-- Desktop Table (hidden on mobile) -->
         <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
@@ -193,12 +197,14 @@
                                     Requested
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-cogs mr-2"></i>
-                                    Actions
-                                </div>
-                            </th>
+                            @if($hasThreadActions)
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center justify-center">
+                                        <i class="fas fa-cogs mr-2"></i>
+                                        Actions
+                                    </div>
+                                </th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="documentTableBody">
@@ -247,35 +253,37 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900"><i class="fas fa-calendar mr-1"></i>{{ $request->created_at->format('M d, Y') }}</div>   
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex flex-nowrap items-center gap-2">
-                                    @if($request->status === 'pending')
-                                        <form onsubmit="return approveAndDownload(event, '{{ $request->id }}')" class="inline">
-                                            @csrf
-                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                                <i class="fas fa-check mr-1"></i>
-                                                Approve
-                                            </button>
-                                        </form>
-                                    @endif
-                                    @if($request->status === 'approved')
-                                        <form onsubmit="return generatePdfAndComplete(event, '{{ $request->id }}')" class="inline">
-                                            @csrf
-                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                                <i class="fas fa-file-pdf mr-1"></i>
-                                                Generate PDF
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                                                <i class="fas fa-check-circle mr-1"></i>
-                                                Complete
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                            </td>
+                            @if($hasThreadActions)
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        @if($request->status === 'pending')
+                                            <form onsubmit="return approveAndDownload(event, '{{ $request->id }}')" class="inline">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    Approve
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if($request->status === 'approved')
+                                            <form onsubmit="return generatePdfAndComplete(event, '{{ $request->id }}')" class="inline">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                                    <i class="fas fa-file-pdf mr-1"></i>
+                                                    Generate PDF
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                    Complete
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

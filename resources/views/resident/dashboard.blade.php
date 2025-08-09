@@ -56,7 +56,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $healthStatusReports->where('status', 'pending')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $healthStatusReports->where('status', 'resolved')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -189,61 +189,7 @@
             </div>
         </div>
 
-        <!-- Health Status Card -->
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
-            <div class="p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-purple-500 rounded-lg p-3">
-                        <i class="fas fa-heartbeat text-white text-2xl"></i>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Health Status</dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900">
-                                    Report Health
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-6 py-4">
-                <div class="text-sm">
-                    <a href="{{ route('resident.health-status') }}" class="font-medium text-purple-600 hover:text-purple-900 transition duration-200">
-                        Submit health concerns <span aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Announcements Card -->
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
-            <div class="p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-yellow-500 rounded-lg p-3">
-                        <i class="fas fa-bullhorn text-white text-2xl"></i>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Announcements</dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900">
-                                    Stay Updated
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-6 py-4">
-                <div class="text-sm">
-                    <a href="{{ route('resident.announcements') }}" class="font-medium text-yellow-600 hover:text-yellow-900 transition duration-200">
-                        View latest updates <span aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Profile Management Card -->
         <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">

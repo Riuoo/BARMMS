@@ -71,6 +71,7 @@
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                             aria-label="Search for a resident"
+                            required
                         />
                         <input type="hidden" id="resident_id" name="resident_id" required>
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
@@ -230,7 +231,7 @@
                 <h3 class="text-sm font-medium text-blue-800">Important Information</h3>
                 <div class="mt-2 text-sm text-blue-700">
                     <ul class="list-disc pl-5 space-y-1">
-                        <li>All reports are confidential and will be handled by barangay officials</li>
+                        <li>All reports are confidential and will be handled by Administrator</li>
                         <li>Please ensure all information provided is accurate and complete</li>
                         <li>The respondent will be summoned for a hearing on the specified date</li>
                         <li>Reports can be managed and updated from the blotter reports list</li>

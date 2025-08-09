@@ -19,7 +19,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Project Title -->
             <div class="md:col-span-2">
-                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Project Title *</label>
+                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Project Title <span class="text-red-500">*</span></label>
                 <input type="text" id="title" name="title" value="{{ old('title') }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('title') border-red-500 @enderror" 
                     placeholder="Enter project title" required />
@@ -63,7 +63,7 @@
 
             <!-- Category -->
             <div>
-                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
                 <select name="category" id="category" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('category') border-red-500 @enderror" required>
                     <option value="">Select Category</option>
                     <option value="Infrastructure" {{ old('category') == 'Infrastructure' ? 'selected' : '' }}>Infrastructure</option>
@@ -114,7 +114,7 @@
 
             <!-- Start Date -->
             <div>
-                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Start Date <span class="text-red-500">*</span></label>
                 <input type="date" id="start_date" name="start_date" value="{{ old('start_date') }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('start_date') border-red-500 @enderror" required />
                 @error('start_date')
@@ -124,7 +124,7 @@
 
             <!-- Completion Date -->
             <div>
-                <label for="completion_date" class="block text-sm font-medium text-gray-700 mb-2">Completion Date *</label>
+                <label for="completion_date" class="block text-sm font-medium text-gray-700 mb-2">Completion Date <span class="text-red-500">*</span></label>
                 <input type="date" id="completion_date" name="completion_date" value="{{ old('completion_date') }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('completion_date') border-red-500 @enderror" required />
                 @error('completion_date')
@@ -145,7 +145,7 @@
 
             <!-- Description -->
             <div class="md:col-span-2">
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Project Description *</label>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Project Description <span class="text-red-500">*</span></label>
                 <textarea id="description" name="description" rows="4" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('description') border-red-500 @enderror" 
                     placeholder="Describe the project in detail..." required>{{ old('description') }}</textarea>

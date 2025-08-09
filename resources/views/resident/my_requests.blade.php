@@ -20,10 +20,6 @@
                     <i class="fas fa-plus mr-2"></i>
                     New Document Request
                 </a>
-                <a href="{{ route('resident.health-status') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Report Health Concern
-                </a>
             </div>
         </div>
     </div>
@@ -42,6 +38,8 @@
         </div>
     @endif
 
+    <!-- Notifications hidden on My Requests as per requirement -->
+
     @if(session('error'))
         <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <div class="flex">
@@ -56,7 +54,7 @@
     @endif
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4 mb-3">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -105,20 +103,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $healthStatusRequests->where('status', 'pending')->count() + $communityComplaints->where('status', 'pending')->count() }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-heartbeat text-purple-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-gray-500">Health Concerns</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $healthStatusRequests->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $communityComplaints->where('status', 'pending')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -131,7 +116,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $healthStatusRequests->where('status', 'resolved')->count() + $communityComplaints->where('status', 'resolved')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $communityComplaints->where('status', 'resolved')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -172,7 +157,7 @@
     </form>
 
     <!-- Requests List -->
-    @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $healthStatusRequests->isEmpty() && $communityComplaints->isEmpty())
+    @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $communityComplaints->isEmpty())
         <div class="text-center py-12">
             <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
@@ -328,61 +313,6 @@
                         </tr>
                         @endforeach
 
-                        @foreach($healthStatusRequests as $request)
-                        <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="health" data-status="{{ $request->status }}">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-heartbeat text-purple-600"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ $request->concern_type }}</div>
-                                        <div class="text-sm text-gray-500">Health Concern</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ Str::limit($request->description, 50) }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                                    Severity: {{ $request->severity }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                @if($request->status === 'pending')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        Pending
-                                    </span>
-                                @elseif($request->status === 'reviewed')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        <i class="fas fa-eye mr-1"></i>
-                                        Reviewed
-                                    </span>
-                                @elseif($request->status === 'in_progress')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        <i class="fas fa-spinner mr-1"></i>
-                                        In Progress
-                                    </span>
-                                @elseif($request->status === 'resolved' || $request->status === 'completed')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        {{ ucfirst($request->status) }}
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    {{ $request->created_at->diffForHumans() }}
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-
                         @foreach($communityComplaints as $request)
                         <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="complaint" data-status="{{ $request->status }}">
                             <td class="px-6 py-4">
@@ -506,45 +436,6 @@
                 </div>
                 <div class="mt-3 pt-3 border-t border-gray-100">
                     <p class="text-sm text-gray-600">
-                        <i class="fas fa-align-left mr-1"></i>
-                        {{ Str::limit($request->description, 80) }}
-                    </p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <i class="fas fa-calendar mr-1"></i>
-                        {{ $request->created_at->diffForHumans() }}
-                    </p>
-                </div>
-            </div>
-            @endforeach
-
-            @foreach($healthStatusRequests as $request)
-            <div class="request-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-type="health" data-status="{{ $request->status }}">
-                <div class="flex items-start justify-between">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-heartbeat text-purple-600"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-gray-900">{{ $request->concern_type }}</h3>
-                            <p class="text-sm text-gray-500">Health Concern</p>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
-                                @if($request->status === 'pending') bg-yellow-100 text-yellow-800
-                                @elseif($request->status === 'reviewed') bg-blue-100 text-blue-800
-                                @elseif($request->status === 'in_progress') bg-blue-100 text-blue-800
-                                @elseif($request->status === 'resolved' || $request->status === 'completed') bg-green-100 text-green-800
-                                @endif">
-                                <i class="fas fa-tag mr-1"></i>
-                                {{ ucfirst(str_replace('_', ' ', $request->status)) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <p class="text-sm text-gray-600">
-                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                        Severity: {{ $request->severity }}
-                    </p>
-                    <p class="text-sm text-gray-600 mt-1">
                         <i class="fas fa-align-left mr-1"></i>
                         {{ Str::limit($request->description, 80) }}
                     </p>

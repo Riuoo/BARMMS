@@ -15,6 +15,7 @@ class DocumentRequest extends Model
         'description',
         'status',
         'is_read',
+        'resident_is_read',
     ];
 
     public function user()
