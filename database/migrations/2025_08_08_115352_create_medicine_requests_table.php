@@ -19,12 +19,11 @@ return new class extends Migration
             $table->date('request_date')->useCurrent();
             $table->integer('quantity_requested')->default(0);
             $table->integer('quantity_approved')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
-            $table->string('approved_by')->nullable();
+            $table->foreignId('approved_by')->nullable()->constrained('barangay_profiles')->onDelete('set null');
             $table->text('notes')->nullable();
             $table->timestamps();
             
-            $table->index(['medicine_id', 'status']);
+            $table->index(['medicine_id']);
             $table->index('request_date');
             $table->index('resident_id');
         });

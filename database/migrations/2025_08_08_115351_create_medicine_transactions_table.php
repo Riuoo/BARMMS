@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('transaction_type', ['IN', 'OUT', 'ADJUSTMENT', 'EXPIRED'])->default('OUT');
             $table->integer('quantity')->default(0);
             $table->dateTime('transaction_date')->useCurrent();
-            $table->string('prescribed_by')->nullable();
+            $table->foreignId('prescribed_by')->nullable()->constrained('barangay_profiles')->onDelete('set null');
             $table->text('notes')->nullable();
             $table->timestamps();
             

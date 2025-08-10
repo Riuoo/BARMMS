@@ -15,7 +15,7 @@
             <label class="block text-sm text-gray-600 mb-1">Resident</label>
             <select name="resident_id" class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
                 @foreach($residents as $resident)
-                    <option value="{{ $resident->id }}">{{ $resident->name }}</option>
+                    <option value="{{ $resident->id }}" {{ $selectedResidentId == $resident->id ? 'selected' : '' }}>{{ $resident->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -24,6 +24,18 @@
             <select name="medicine_id" class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
                 @foreach($medicines as $med)
                     <option value="{{ $med->id }}">{{ $med->name }} ({{ $med->current_stock }})</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm text-gray-600 mb-1">Medical Record (Optional)</label>
+            <select name="medical_record_id" class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
+                <option value="">Select medical record (if applicable)</option>
+                @foreach($medicalRecords as $record)
+                    <option value="{{ $record->id }}" {{ $selectedMedicalRecordId == $record->id ? 'selected' : '' }}>
+                        {{ $record->resident->name ?? 'Unknown' }} - {{ $record->consultation_datetime->format('M d, Y') }} 
+                        ({{ $record->diagnosis ?? 'No diagnosis' }})
+                    </option>
                 @endforeach
             </select>
         </div>

@@ -62,17 +62,6 @@
                 </div>
             </div>
 
-            <!-- Status Filter -->
-            <div>
-                <select name="status" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                    <option value="">All Statuses</option>
-                    <option value="Completed" {{ request('status') == 'Completed' ? 'selected' : '' }}>Completed</option>
-                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="Referred" {{ request('status') == 'Referred' ? 'selected' : '' }}>Referred</option>
-                    <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                </select>
-            </div>
-
             <!-- Buttons -->
             <div class="flex space-x-2">
                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
@@ -86,7 +75,7 @@
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-3">
+    <div class="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-4 mb-3">
         <!-- Total Consultations -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
@@ -102,61 +91,16 @@
             </div>
         </div>
 
-        <!-- Completed -->
+        <!-- Last Month -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
-                    <i class="fas fa-check-circle text-green-600 text-sm md:text-base"></i>
+                    <i class="fas fa-calendar-alt text-green-600 text-sm md:text-base"></i>
                     </div>
                 </div>
                 <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['completed'] }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-full flex items-center justify-center">
-                    <i class="fas fa-clock text-yellow-600 text-sm md:text-base"></i>
-                    </div>
-                </div>
-                <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['pending'] }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Referred -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
-                    <i class="fas fa-share-alt text-purple-600 text-sm md:text-base"></i>
-                    </div>
-                </div>
-                <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">Referred</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['referred'] }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Last 30 Days -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
-                    <i class="fas fa-calendar-alt text-red-600 text-sm md:text-base"></i>
-                    </div>
-                </div>
-                <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">Last 30 Days</p>
+                    <p class="text-xs md:text-sm font-medium text-gray-500">Last Month</p>
                     <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['last_month'] }}</p>
                 </div>
             </div>
@@ -205,8 +149,8 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    Status
+                                    <i class="fas fa-calendar-check mr-2"></i>
+                                    Follow Up
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -240,19 +184,10 @@
                                 <div class="text-xs text-gray-400">{{ optional($record->attendingHealthWorker)->name }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @php
-                                    $statusColors = [
-                                        'Completed' => 'bg-green-100 text-green-800',
-                                        'Pending' => 'bg-yellow-100 text-yellow-800',
-                                        'Referred' => 'bg-blue-100 text-blue-800',
-                                        'Cancelled' => 'bg-red-100 text-red-800'
-                                    ];
-                                @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$record->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                    {{ $record->status }}
-                                </span>
                                 @if($record->follow_up_date)
-                                <div class="text-xs text-gray-500 mt-1">Follow-up: {{ $record->follow_up_date->format('M d, Y') }}</div>
+                                <div class="text-xs text-gray-500">Follow-up: {{ $record->follow_up_date->format('M d, Y') }}</div>
+                                @else
+                                <div class="text-xs text-gray-500">No follow-up date</div>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -296,19 +231,7 @@
                             <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $record->resident->name }}</h3>
                             <p class="text-sm text-gray-500 truncate">{{ $record->consultation_type }}</p>
                             <div class="flex items-center mt-1">
-                                @php
-                                    $statusColors = [
-                                        'Completed' => 'bg-green-100 text-green-800',
-                                        'Pending' => 'bg-yellow-100 text-yellow-800',
-                                        'Referred' => 'bg-blue-100 text-blue-800',
-                                        'Cancelled' => 'bg-red-100 text-red-800'
-                                    ];
-                                @endphp
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$record->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                    <i class="fas fa-tag mr-1"></i>
-                                    {{ $record->status }}
-                                </span>
-                                <span class="ml-2 text-xs text-gray-500">
+                                <span class="text-xs text-gray-500">
                                     <i class="fas fa-calendar mr-1"></i>
                                     {{ $record->consultation_datetime->format('M d, Y') }}
                                 </span>

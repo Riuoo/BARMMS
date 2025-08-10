@@ -12,7 +12,7 @@ class MedicineTransaction extends Model
     protected $fillable = [
         'medicine_id',
         'resident_id',
-        'medical_logbook_id',
+        'medical_record_id',
         'transaction_type',
         'quantity',
         'transaction_date',
@@ -34,9 +34,14 @@ class MedicineTransaction extends Model
         return $this->belongsTo(Residents::class);
     }
 
-    public function medicalLogbook()
+    public function medicalRecord()
     {
         return $this->belongsTo(MedicalRecord::class);
+    }
+
+    public function prescribedByUser()
+    {
+        return $this->belongsTo(BarangayProfile::class, 'prescribed_by');
     }
 
     public function scopeType($query, $type)

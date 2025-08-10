@@ -50,7 +50,8 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-user mr-2 text-gray-400"></i>Resident</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-pills mr-2 text-gray-400"></i>Medicine</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sort-numeric-up mr-2 text-gray-400"></i>Quantity</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-info-circle mr-2 text-gray-400"></i>Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-user-md mr-2 text-gray-400"></i>Approved By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sticky-note mr-2 text-gray-400"></i>Notes</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -60,8 +61,13 @@
                         <td class="px-6 py-4">{{ $req->resident->name ?? 'Unknown' }}</td>
                         <td class="px-6 py-4">{{ $req->medicine->name ?? 'Unknown' }}</td>
                         <td class="px-6 py-4">{{ $req->quantity_requested }}</td>
+                        <td class="px-6 py-4">{{ $req->approvedByUser->name ?? 'Unknown User' }}</td>
                         <td class="px-6 py-4">
-                            <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-800">Approved</span>
+                            @if($req->notes)
+                                {{ Str::limit($req->notes, 30) }}
+                            @else
+                                <span class="text-gray-400">No notes</span>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -84,11 +90,14 @@
                     <h3 class="text-sm font-semibold text-gray-900">{{ $req->medicine->name ?? 'Unknown' }}</h3>
                     <p class="text-xs text-gray-500">{{ $req->resident->name ?? 'Unknown' }}</p>
                 </div>
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>
             </div>
             <div class="text-sm text-gray-600 mb-2">
                 <p><i class="fas fa-calendar-day mr-1 text-gray-400"></i> {{ $req->request_date->format('M d, Y') }}</p>
-                    <p><i class="fas fa-sort-numeric-up mr-1 text-gray-400"></i> {{ $req->quantity_requested }}</p>
+                <p><i class="fas fa-sort-numeric-up mr-1 text-gray-400"></i> {{ $req->quantity_requested }}</p>
+                <p><i class="fas fa-user-md mr-1 text-gray-400"></i> {{ $req->approvedByUser->name ?? 'Unknown User' }}</p>
+                @if($req->notes)
+                    <p><i class="fas fa-sticky-note mr-1 text-gray-400"></i> {{ Str::limit($req->notes, 50) }}</p>
+                @endif
             </div>
                 <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
                     <span class="text-gray-400 text-sm">—</span>

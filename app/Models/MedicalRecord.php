@@ -26,7 +26,6 @@ class MedicalRecord extends Model
         'height_cm',
         'notes',
         'follow_up_date',
-        'status',
     ];
 
     protected $casts = [
@@ -45,6 +44,11 @@ class MedicalRecord extends Model
     public function attendingHealthWorker()
     {
         return $this->belongsTo(BarangayProfile::class, 'attending_health_worker_id');
+    }
+
+    public function medicineRequests()
+    {
+        return $this->hasMany(MedicineRequest::class);
     }
 
     public function getBloodPressureAttribute()

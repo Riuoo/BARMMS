@@ -23,17 +23,9 @@ class MedicalRecordController
               ->orWhere('diagnosis', 'like', "%{$search}%");
         }
 
-        // STATUS FILTER
-        if ($request->filled('status')) {
-            $query->where('status', $request->get('status'));
-        }
-
         // Calculate Statistics
         $stats = [
             'total' => MedicalRecord::count(),
-            'completed' => MedicalRecord::where('status', 'Completed')->count(),
-            'pending' => MedicalRecord::where('status', 'Pending')->count(),
-            'referred' => MedicalRecord::where('status', 'Referred')->count(),
             'last_month' => MedicalRecord::where('consultation_datetime', '>=', now()->subDays(30))->count()
         ];
         $medicalRecords = $query->orderBy('created_at', 'desc')->paginate(10);
@@ -65,7 +57,6 @@ class MedicalRecordController
             'height_cm' => 'nullable|numeric|min:50|max:300',
             'notes' => 'nullable|string|max:2000',
             'follow_up_date' => 'nullable|date|after:consultation_datetime',
-            'status' => 'string|in:Completed,Pending,Referred,Cancelled',
         ]);
         $user = Residents::find($validated['resident_id']);
         if (!$user || !$user->active) {
@@ -80,7 +71,6 @@ class MedicalRecordController
                 return back()->withInput();
             }
             $validated['attending_health_worker_id'] = $workerId;
-            $validated['status'] = 'Completed';
             
             MedicalRecord::create($validated);
             notify()->success('Medical consultation record created successfully.');
@@ -93,7 +83,12 @@ class MedicalRecordController
 
     public function show($id)
     {
-        $medicalRecord = MedicalRecord::with(['resident', 'attendingHealthWorker'])->findOrFail($id);
+        $medicalRecord = MedicalRecord::with([
+            'resident', 
+            'attendingHealthWorker', 
+            'medicineRequests.medicine',
+            'medicineRequests.approvedByUser'
+        ])->findOrFail($id);
         return view('admin.medical-records.show', compact('medicalRecord'));
     }
 
@@ -129,7 +124,6 @@ class MedicalRecordController
         $summary = [
             'total_consultations' => $medicalRecords->count(),
             'by_type' => $medicalRecords->groupBy('consultation_type')->map->count(),
-            'by_status' => $medicalRecords->groupBy('status')->map->count(),
             'by_month' => $medicalRecords->groupBy(function($record) {
                 return $record->consultation_datetime->format('Y-m');
             })->map->count(),

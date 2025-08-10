@@ -191,6 +191,74 @@
     </div>
     @endif
 
+    <!-- Medicine Requests -->
+    @if($medicalRecord->medicineRequests->count() > 0)
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                <i class="fas fa-pills text-green-500 mr-2"></i>Medicine Requests
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medicine</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($medicalRecord->medicineRequests as $request)
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ $request->medicine->name }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $request->quantity_approved }}/{{ $request->quantity_requested }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $request->request_date->format('M d, Y') }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $request->approvedByUser->name ?? 'Unknown User' }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">
+                                @if($request->notes)
+                                    {{ Str::limit($request->notes, 50) }}
+                                @else
+                                    <span class="text-gray-400">No notes</span>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($request->quantity_approved > 0)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check mr-1"></i>Dispensed
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @else
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                <i class="fas fa-pills text-gray-400 mr-2"></i>Medicine Requests
+            </h3>
+        </div>
+        <p class="text-gray-500 text-center py-4">No medicine requests associated with this medical record.</p>
+    </div>
+    @endif
+
     <!-- Additional Notes -->
     @if($medicalRecord->notes)
     <div class="bg-white rounded-lg shadow p-6 mb-6">

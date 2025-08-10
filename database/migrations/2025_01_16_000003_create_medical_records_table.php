@@ -29,7 +29,6 @@ return new class extends Migration
             $table->decimal('height_cm', 5, 2)->nullable();
             $table->text('notes')->nullable();
             $table->date('follow_up_date')->nullable();
-            $table->enum('status', ['Completed', 'Pending', 'Referred', 'Cancelled'])->default('Completed');
             $table->timestamps();
 
             $table->foreign('resident_id')->references('id')->on('residents')->onDelete('cascade');
