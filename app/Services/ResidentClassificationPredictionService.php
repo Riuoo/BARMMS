@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Residents;
-use App\Models\HealthStatus;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -29,10 +28,6 @@ class ResidentClassificationPredictionService
             ];
         }
 
-        // Get health status data for training
-        $healthStatuses = HealthStatus::select('user_id', 'concern_type', 'severity', 'status', 'description')->get();
-        $healthDataByUser = $healthStatuses->groupBy('user_id');
-
         $rules = $this->generateHealthConditionRules();
         $predictions = [];
         $accuracy = 0;
@@ -46,8 +41,8 @@ class ResidentClassificationPredictionService
         // Training phase
         $trainingPredictions = [];
         foreach ($trainingResidents as $resident) {
-            $predicted = $this->predictHealthCondition($resident, $healthDataByUser);
-            $actual = $this->determineActualHealthCondition($resident, $healthDataByUser);
+            $predicted = $this->predictHealthCondition($resident);
+            $actual = $this->determineActualHealthCondition($resident);
             $trainingPredictions[] = [
                 'resident' => $resident,
                 'predicted' => $predicted,
@@ -59,8 +54,8 @@ class ResidentClassificationPredictionService
         // Testing phase for validation
         $testingPredictions = [];
         foreach ($testingResidents as $resident) {
-            $predicted = $this->predictHealthCondition($resident, $healthDataByUser);
-            $actual = $this->determineActualHealthCondition($resident, $healthDataByUser);
+            $predicted = $this->predictHealthCondition($resident);
+            $actual = $this->determineActualHealthCondition($resident);
             $testingPredictions[] = [
                 'resident' => $resident,
                 'predicted' => $predicted,
@@ -110,18 +105,14 @@ class ResidentClassificationPredictionService
             ];
         }
 
-        // Get health status data
-        $healthStatuses = HealthStatus::select('user_id', 'concern_type', 'severity', 'status')->get();
-        $healthDataByUser = $healthStatuses->groupBy('user_id');
-
         $rules = $this->generateEnhancedServiceEligibilityRules();
         $predictions = [];
         $accuracy = 0;
         $correct = 0;
         
         foreach ($residents as $resident) {
-            $predicted = $this->predictEnhancedServiceEligibility($resident, $healthDataByUser);
-            $actual = $this->determineEnhancedServiceEligibility($resident, $healthDataByUser);
+            $predicted = $this->predictEnhancedServiceEligibility($resident);
+            $actual = $this->determineEnhancedServiceEligibility($resident);
             $predictions[] = [
                 'resident' => $resident,
                 'predicted' => $predicted,
@@ -171,10 +162,6 @@ class ResidentClassificationPredictionService
             ];
         }
 
-        // Get health status data
-        $healthStatuses = HealthStatus::select('user_id', 'concern_type', 'severity', 'status')->get();
-        $healthDataByUser = $healthStatuses->groupBy('user_id');
-
         $rules = $this->generateEnhancedHealthRiskRules();
         $predictions = [];
         $accuracy = 0;
@@ -182,8 +169,8 @@ class ResidentClassificationPredictionService
         $riskLevels = [];
         
         foreach ($residents as $resident) {
-            $predicted = $this->predictEnhancedHealthRisk($resident, $healthDataByUser);
-            $actual = $this->determineEnhancedHealthRisk($resident, $healthDataByUser);
+            $predicted = $this->predictEnhancedHealthRisk($resident);
+            $actual = $this->determineEnhancedHealthRisk($resident);
             $predictions[] = [
                 'resident' => $resident,
                 'predicted' => $predicted,
@@ -244,10 +231,6 @@ class ResidentClassificationPredictionService
             ];
         }
 
-        // Get health status data
-        $healthStatuses = HealthStatus::select('user_id', 'concern_type', 'severity', 'status')->get();
-        $healthDataByUser = $healthStatuses->groupBy('user_id');
-
         $rules = $this->generateEnhancedProgramRecommendationRules();
         $predictions = [];
         $accuracy = 0;
@@ -255,8 +238,8 @@ class ResidentClassificationPredictionService
         $programs = [];
         
         foreach ($residents as $resident) {
-            $predicted = $this->predictEnhancedRecommendedProgram($resident, $healthDataByUser);
-            $actual = $this->determineEnhancedRecommendedProgram($resident, $healthDataByUser);
+            $predicted = $this->predictEnhancedRecommendedProgram($resident);
+            $actual = $this->determineEnhancedRecommendedProgram($resident);
             $predictions[] = [
                 'resident' => $resident,
                 'predicted' => $predicted,
@@ -300,30 +283,24 @@ class ResidentClassificationPredictionService
     /**
      * Predict health condition based on multiple factors
      */
-    public function predictHealthCondition($resident, $healthDataByUser): string
+    public function predictHealthCondition($resident): string
     {
         $age = $resident->age ?? 30;
-        $income = $resident->income_level ?? 'Low';
-        $employment = $resident->employment_status ?? 'Unemployed';
         $health = $resident->health_status ?? 'Healthy';
-        $healthIncidence = $healthDataByUser->get($resident->id, collect());
         
         // Calculate health risk score
-        $riskScore = $this->calculateHealthRiskScore($resident, $healthIncidence);
+        $riskScore = $this->calculateHealthRiskScore($resident);
         
         // Determine health condition based on risk score and factors
-        if ($riskScore >= 8 || $health === 'Critical' || 
-            ($age > 60 && $healthIncidence->where('severity', 'Severe')->count() > 0)) {
+        if ($riskScore >= 8 || $health === 'Critical' || ($age > 60 && $health === 'Poor')) {
             return 'Critical Condition';
         }
         
-        if ($riskScore >= 6 || $health === 'Poor' || 
-            $healthIncidence->where('severity', 'Severe')->count() > 0) {
+        if ($riskScore >= 6 || $health === 'Poor') {
             return 'Chronic Condition';
         }
         
-        if ($riskScore >= 4 || $health === 'Fair' || 
-            $healthIncidence->count() > 1) {
+        if ($riskScore >= 4 || $health === 'Fair') {
             return 'Minor Health Issues';
         }
         
@@ -333,13 +310,12 @@ class ResidentClassificationPredictionService
     /**
      * Enhanced service eligibility prediction
      */
-    public function predictEnhancedServiceEligibility($resident, $healthDataByUser): string
+    public function predictEnhancedServiceEligibility($resident): string
     {
         $age = $resident->age ?? 30;
         $income = $resident->income_level ?? 'Low';
         $employment = $resident->employment_status ?? 'Unemployed';
         $health = $resident->health_status ?? 'Healthy';
-        $healthIncidence = $healthDataByUser->get($resident->id, collect());
         
         // Enhanced eligibility criteria including health factors
         if ($income === 'Low' || $income === 'Lower Middle') {
@@ -354,11 +330,6 @@ class ResidentClassificationPredictionService
             return 'Eligible';
         }
         
-        if ($healthIncidence->where('severity', 'Severe')->count() > 0 || 
-            $healthIncidence->where('severity', 'Emergency')->count() > 0) {
-            return 'Eligible';
-        }
-        
         if ($age > 60) {
             return 'Eligible';
         }
@@ -369,16 +340,10 @@ class ResidentClassificationPredictionService
     /**
      * Enhanced health risk prediction
      */
-    public function predictEnhancedHealthRisk($resident, $healthDataByUser): string
+    public function predictEnhancedHealthRisk($resident): string
     {
-        $age = $resident->age ?? 30;
-        $income = $resident->income_level ?? 'Low';
-        $employment = $resident->employment_status ?? 'Unemployed';
-        $health = $resident->health_status ?? 'Healthy';
-        $healthIncidence = $healthDataByUser->get($resident->id, collect());
-        
         // Calculate comprehensive risk score
-        $riskScore = $this->calculateComprehensiveRiskScore($resident, $healthIncidence);
+        $riskScore = $this->calculateComprehensiveRiskScore($resident);
         
         if ($riskScore >= 8) return 'High';
         if ($riskScore >= 5) return 'Medium';
@@ -388,20 +353,19 @@ class ResidentClassificationPredictionService
     /**
      * Predict enhanced recommended program
      */
-    public function predictEnhancedRecommendedProgram($resident, $healthDataByUser): string
+    public function predictEnhancedRecommendedProgram($resident): string
     {
         $age = $resident->age ?? 30;
         $income = $resident->income_level ?? 'Low';
         $employment = $resident->employment_status ?? 'Unemployed';
         $health = $resident->health_status ?? 'Healthy';
-        $healthIncidence = $healthDataByUser->get($resident->id, collect());
         
         // Health-focused program recommendations
-        if ($health === 'Critical' || $healthIncidence->where('severity', 'Emergency')->count() > 0) {
+        if ($health === 'Critical') {
             return 'Emergency Health Services';
         }
         
-        if ($health === 'Poor' || $healthIncidence->where('severity', 'Severe')->count() > 0) {
+        if ($health === 'Poor') {
             return 'Chronic Disease Management';
         }
         
@@ -413,7 +377,7 @@ class ResidentClassificationPredictionService
             return 'Job Training & Health Support';
         }
         
-        if ($health === 'Fair' || $healthIncidence->count() > 1) {
+        if ($health === 'Fair') {
             return 'Preventive Health Care';
         }
         
@@ -423,15 +387,15 @@ class ResidentClassificationPredictionService
     /**
      * Determine enhanced recommended program
      */
-    private function determineEnhancedRecommendedProgram($resident, $healthDataByUser): string
+    private function determineEnhancedRecommendedProgram($resident): string
     {
-        return $this->predictEnhancedRecommendedProgram($resident, $healthDataByUser);
+        return $this->predictEnhancedRecommendedProgram($resident);
     }
 
     /**
      * Calculate comprehensive health risk score
      */
-    private function calculateComprehensiveRiskScore($resident, $healthIncidence): int
+    private function calculateComprehensiveRiskScore($resident): int
     {
         $score = 0;
         
@@ -458,15 +422,6 @@ class ResidentClassificationPredictionService
         // Employment factor
         $employment = $resident->employment_status ?? 'Unemployed';
         if ($employment === 'Unemployed') $score += 2;
-        
-        // Health incidence factor
-        $incidenceCount = $healthIncidence->count();
-        $score += min($incidenceCount * 2, 4);
-        
-        // Severity factor
-        $highSeverityCount = $healthIncidence->where('severity', 'Severe')->count() + 
-                           $healthIncidence->where('severity', 'Emergency')->count();
-        $score += $highSeverityCount * 3;
         
         return $score;
     }
@@ -511,8 +466,7 @@ class ResidentClassificationPredictionService
             'income_level' => 0,
             'employment_status' => 0,
             'health_status' => 0,
-            'age' => 0,
-            'health_incidence' => 0
+            'age' => 0
         ];
         
         foreach ($predictions as $prediction) {
@@ -539,8 +493,7 @@ class ResidentClassificationPredictionService
             'age_over_60' => 0,
             'critical_health' => 0,
             'low_income' => 0,
-            'unemployed' => 0,
-            'high_incidence' => 0
+            'unemployed' => 0
         ];
         
         foreach ($predictions as $prediction) {
@@ -566,9 +519,7 @@ class ResidentClassificationPredictionService
         $factors = [
             'health_status' => 0,
             'age_over_60' => 0,
-            'low_income_unemployed' => 0,
-            'health_incidence' => 0,
-            'emergency_incidents' => 0
+            'low_income_unemployed' => 0
         ];
         
         foreach ($predictions as $prediction) {
@@ -606,7 +557,7 @@ class ResidentClassificationPredictionService
                 'confidence' => 0.90
             ],
             [
-                'condition' => 'Health Status = Poor OR Multiple Severe Incidents',
+                'condition' => 'Health Status = Poor',
                 'prediction' => 'Chronic Condition',
                 'confidence' => 0.85
             ],
@@ -616,7 +567,7 @@ class ResidentClassificationPredictionService
                 'confidence' => 0.80
             ],
             [
-                'condition' => 'Health Status = Fair OR Multiple Incidents',
+                'condition' => 'Health Status = Fair',
                 'prediction' => 'Minor Health Issues',
                 'confidence' => 0.75
             ],
@@ -636,20 +587,19 @@ class ResidentClassificationPredictionService
     /**
      * Determine actual health condition for validation
      */
-    private function determineActualHealthCondition($resident, $healthDataByUser): string
+    private function determineActualHealthCondition($resident): string
     {
         $health = $resident->health_status ?? 'Healthy';
-        $healthIncidence = $healthDataByUser->get($resident->id, collect());
         
-        if ($health === 'Critical' || $healthIncidence->where('severity', 'Emergency')->count() > 0) {
+        if ($health === 'Critical') {
             return 'Critical Condition';
         }
         
-        if ($health === 'Poor' || $healthIncidence->where('severity', 'Severe')->count() > 0) {
+        if ($health === 'Poor') {
             return 'Chronic Condition';
         }
         
-        if ($health === 'Fair' || $healthIncidence->count() > 1) {
+        if ($health === 'Fair') {
             return 'Minor Health Issues';
         }
         
@@ -662,11 +612,9 @@ class ResidentClassificationPredictionService
     private function calculateHealthFeatureImportance(): array
     {
         return [
-            'health_status' => 0.35,
-            'age' => 0.25,
-            'health_incidence_count' => 0.20,
-            'severity_level' => 0.15,
-            'income_level' => 0.05
+            'health_status' => 0.45,
+            'age' => 0.35,
+            'income_level' => 0.20
         ];
     }
 
@@ -692,11 +640,6 @@ class ResidentClassificationPredictionService
                 'confidence' => 0.85
             ],
             [
-                'condition' => 'Severe OR Emergency Health Incidents',
-                'prediction' => 'Eligible',
-                'confidence' => 0.80
-            ],
-            [
                 'condition' => 'Age > 60',
                 'prediction' => 'Eligible',
                 'confidence' => 0.75
@@ -712,36 +655,9 @@ class ResidentClassificationPredictionService
     /**
      * Determine enhanced service eligibility
      */
-    private function determineEnhancedServiceEligibility($resident, $healthDataByUser): string
+    private function determineEnhancedServiceEligibility($resident): string
     {
-        $age = $resident->age ?? 30;
-        $income = $resident->income_level ?? 'Low';
-        $employment = $resident->employment_status ?? 'Unemployed';
-        $health = $resident->health_status ?? 'Healthy';
-        $healthIncidence = $healthDataByUser->get($resident->id, collect());
-        
-        if ($income === 'Low' || $income === 'Lower Middle') {
-            return 'Eligible';
-        }
-        
-        if ($employment === 'Unemployed' && $age > 18) {
-            return 'Eligible';
-        }
-        
-        if ($health === 'Critical' || $health === 'Poor') {
-            return 'Eligible';
-        }
-        
-        if ($healthIncidence->where('severity', 'Severe')->count() > 0 || 
-            $healthIncidence->where('severity', 'Emergency')->count() > 0) {
-            return 'Eligible';
-        }
-        
-        if ($age > 60) {
-            return 'Eligible';
-        }
-        
-        return 'Ineligible';
+        return $this->predictEnhancedServiceEligibility($resident);
     }
 
     /**
@@ -750,11 +666,10 @@ class ResidentClassificationPredictionService
     private function calculateEnhancedFeatureImportance(): array
     {
         return [
-            'income_level' => 0.30,
-            'employment_status' => 0.25,
+            'income_level' => 0.35,
+            'employment_status' => 0.30,
             'health_status' => 0.20,
-            'health_incidence' => 0.15,
-            'age' => 0.10
+            'age' => 0.15
         ];
     }
 
@@ -775,7 +690,7 @@ class ResidentClassificationPredictionService
                 'confidence' => 0.90
             ],
             [
-                'condition' => 'Multiple Severe Health Incidents',
+                'condition' => 'Health Status = Poor',
                 'prediction' => 'High',
                 'confidence' => 0.85
             ],
@@ -785,7 +700,7 @@ class ResidentClassificationPredictionService
                 'confidence' => 0.80
             ],
             [
-                'condition' => 'Health Status = Poor OR Fair',
+                'condition' => 'Health Status = Fair',
                 'prediction' => 'Medium',
                 'confidence' => 0.75
             ],
@@ -800,10 +715,9 @@ class ResidentClassificationPredictionService
     /**
      * Determine enhanced health risk
      */
-    private function determineEnhancedHealthRisk($resident, $healthDataByUser): string
+    private function determineEnhancedHealthRisk($resident): string
     {
-        $healthIncidence = $healthDataByUser->get($resident->id, collect());
-        $riskScore = $this->calculateComprehensiveRiskScore($resident, $healthIncidence);
+        $riskScore = $this->calculateComprehensiveRiskScore($resident);
         
         if ($riskScore >= 8) return 'High';
         if ($riskScore >= 5) return 'Medium';
@@ -813,7 +727,7 @@ class ResidentClassificationPredictionService
     /**
      * Calculate health risk score for health condition prediction
      */
-    private function calculateHealthRiskScore($resident, $healthIncidence): int
+    private function calculateHealthRiskScore($resident): int
     {
         $score = 0;
         
@@ -839,15 +753,6 @@ class ResidentClassificationPredictionService
         // Employment factor
         $employment = $resident->employment_status ?? 'Unemployed';
         if ($employment === 'Unemployed') $score += 2;
-        
-        // Health incidence factor
-        $incidenceCount = $healthIncidence->count();
-        $score += min($incidenceCount * 2, 4);
-        
-        // Severity factor
-        $highSeverityCount = $healthIncidence->where('severity', 'Severe')->count() + 
-                           $healthIncidence->where('severity', 'Emergency')->count();
-        $score += $highSeverityCount * 2;
         
         return $score;
     }
@@ -1062,12 +967,12 @@ class ResidentClassificationPredictionService
     {
         return [
             [
-                'condition' => 'Health Status = Critical OR Emergency Incidents',
+                'condition' => 'Health Status = Critical',
                 'prediction' => 'Emergency Health Services',
                 'confidence' => 0.95
             ],
             [
-                'condition' => 'Health Status = Poor OR Severe Incidents',
+                'condition' => 'Health Status = Poor',
                 'prediction' => 'Chronic Disease Management',
                 'confidence' => 0.90
             ],
@@ -1082,7 +987,7 @@ class ResidentClassificationPredictionService
                 'confidence' => 0.80
             ],
             [
-                'condition' => 'Health Status = Fair OR Multiple Incidents',
+                'condition' => 'Health Status = Fair',
                 'prediction' => 'Preventive Health Care',
                 'confidence' => 0.75
             ],
@@ -1162,4 +1067,4 @@ class ResidentClassificationPredictionService
         
         return $levels[$health] ?? 0.5;
     }
-} 
+}

@@ -20,8 +20,7 @@ class CheckResidentRole
         // Check if the user is logged in and has an allowed role
         if (!Session::has('user_id') || !in_array($userRole, $allowedRoles)) {
             // If not authorized, redirect to the landing page with an error message
-            notify()->error('You do not have permission to access this page.');
-            return redirect()->route('landing');
+            abort(403, 'Unauthorized');
         }
 
         // If authorized, allow the request to proceed

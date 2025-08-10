@@ -42,7 +42,20 @@
 
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role <span class="text-red-500">*</span></label>
-                <input type="text" id="role" name="role" value="{{ old('role') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                <select id="role" name="role" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    <option value="">Select a role</option>
+                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="captain" {{ old('role') == 'captain' ? 'selected' : '' }}>Barangay Captain</option>
+                    <option value="councilor" {{ old('role') == 'councilor' ? 'selected' : '' }}>Barangay Councilor</option>
+                    <option value="secretary" {{ old('role') == 'secretary' ? 'selected' : '' }}>Barangay Secretary</option>
+                    <option value="treasurer" {{ old('role') == 'treasurer' ? 'selected' : '' }}>Barangay Treasurer</option>
+                    <option value="nurse" {{ old('role') == 'nurse' ? 'selected' : '' }}>Barangay Nurse</option>
+                    <option value="bhw" {{ old('role') == 'bhw' ? 'selected' : '' }}>Barangay Health Worker</option>
+                    <option value="sk_chairman" {{ old('role') == 'sk_chairman' ? 'selected' : '' }}>SK Chairman</option>
+                    <option value="sk_councilor" {{ old('role') == 'sk_councilor' ? 'selected' : '' }}>SK Councilor</option>
+                    <option value="sk_treasurer" {{ old('role') == 'sk_treasurer' ? 'selected' : '' }}>SK Treasurer</option>
+                    <option value="sk_secretary" {{ old('role') == 'sk_secretary' ? 'selected' : '' }}>SK Secretary</option>
+                </select>
             </div>
 
             <div>

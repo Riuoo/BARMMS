@@ -9,22 +9,35 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckAdminRole
 {
-    public function handle(Request $request, Closure $next): Response
+    /**
+     * Handle an incoming request.
+     *
+     * Usage in routes:
+     * Route::middleware(['check.admin.role:secretary,captain'])->get(...);
+     */
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // Get the user's role from the session
         $userRole = Session::get('user_role');
 
-        // Define the roles that are allowed to access admin sections
-        $allowedRoles = ['barangay_staff', 'barangay'];
-
-        // Check if the user is logged in and has an allowed role
-        if (!Session::has('user_id') || !in_array($userRole, $allowedRoles)) {
-            // If not authorized, redirect to the landing page with an error message
-            notify()->error('You do not have permission to access this page.');
-            return redirect()->route('landing');
+        if (!Session::has('user_id')) {
+            abort(403, 'Unauthorized');
         }
 
-        // If authorized, allow the request to proceed
+        if ($userRole === 'admin') {
+            // Admin can access everything
+            return $next($request);
+        }
+
+        // Use passed roles if any; otherwise, use defaults
+        if (empty($roles)) {
+            $roles = ['secretary', 'captain', 'nurse', 'treasurer', 'councilor'];
+        }
+
+        if (!in_array($userRole, $roles)) {
+            abort(403, 'Unauthorized');
+        }
+
         return $next($request);
     }
+
 }

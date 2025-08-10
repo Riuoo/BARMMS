@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -19,6 +20,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Define a gate for dashboard access
+        Gate::define('access-dashboard', function ($user) {
+            return in_array(session('user_role'), ['admin', 'secretary', 'captain']);
+        });        
     }
 }

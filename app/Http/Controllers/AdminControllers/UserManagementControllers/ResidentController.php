@@ -11,10 +11,6 @@ class ResidentController
 {
     public function residentProfile(Request $request)
     {
-        if (session('user_role') !== 'barangay') {
-            // Abort the request with a 403 Unauthorized error
-            abort(403, 'Unauthorized');
-        }
         // Statistics from full dataset
         $totalResidents = Residents::count();
         $activeResidents = Residents::where('active', true)->count();

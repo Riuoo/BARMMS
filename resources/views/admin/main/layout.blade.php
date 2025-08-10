@@ -242,7 +242,7 @@
                     <span class="font-semibold hidden sm:inline">
                         @php
                             $currentAdminUser = null;
-                            if (session('user_role') === 'barangay' && session('user_id')) {
+                            if (session('user_role') === 'barangay' || session('user_id')) {
                                 $currentAdminUser = \App\Models\BarangayProfile::find(session('user_id'));
                             }
                         @endphp
@@ -301,6 +301,7 @@
                         }
                     @endphp
 
+                    @if(!in_array(session('user_role'), ['nurse']))
                     <!-- Main section -->
                     <section class="mb-6" aria-label="Main navigation">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
@@ -313,9 +314,10 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
-                    <!-- User Management -->
-                    @if(session('user_role') === 'barangay')
+                    @if(!in_array(session('user_role'), ['nurse']))
+                    <!-- User Management --> 
                     <section class="mb-6" aria-label="User management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
                         <ul class="flex flex-col space-y-2">
@@ -335,6 +337,7 @@
                     </section>
                     @endif
 
+                    @if(!in_array(session('user_role'), ['nurse']))
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
@@ -365,7 +368,9 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!in_array(session('user_role'), ['nurse']))
                     <!-- Projects -->
                     <section class="mb-6" aria-label="Projects">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Projects</h3>
@@ -378,10 +383,12 @@
                             </li>
                         </ul>
                     </section>
-
-                    <!-- Health Management -->
+                    @endif
+                    
+                    @if(session('user_role') === 'nurse')
+                    <!-- Main Health Section -->
                     <section class="mb-6" aria-label="Health Management">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.health-reports') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.health-reports*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.health-reports*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
@@ -389,6 +396,15 @@
                                     <span>Health Dashboard</span>
                                 </a>
                             </li>
+                        </ul>
+                    </section>
+                    @endif
+
+                    @if(session('user_role') === 'nurse')
+                    <!-- Health Management -->
+                    <section class="mb-6" aria-label="Health Management">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
+                        <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.vaccination-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.vaccination-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
@@ -427,7 +443,9 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!in_array(session('user_role'), ['nurse']))
                     <!-- Analytics -->
                     <section class="mb-6" aria-label="Analytics">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Analytics</h3>
@@ -446,7 +464,8 @@
                             </li>
                         </ul>
                     </section>
-
+                    @endif
+                    
                 </nav>
                 <div class="flex-shrink-0 h-12"></div>
             </aside>
@@ -481,7 +500,6 @@
                     </section>
 
                     <!-- User Management -->
-                    @if(session('user_role') === 'barangay')
                     <section class="mb-6" aria-label="User management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
                         <ul class="flex flex-col space-y-2">
@@ -500,7 +518,6 @@
                             </li>
                         </ul>
                     </section>
-                    @endif
 
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">

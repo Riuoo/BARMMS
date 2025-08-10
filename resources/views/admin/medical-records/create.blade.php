@@ -104,6 +104,14 @@
                             <option value="Other" {{ old('consultation_type') == 'Other' ? 'selected' : '' }}>Other</option>
                         </select>
                     </div>
+                    <div id="consultation_type_other_container" class="hidden">
+                        <label for="consultation_type_other" class="block text-sm font-medium text-gray-700 mb-2">Specify Consultation Type <span class="text-red-500">*</span></label>
+                        <input type="text" name="consultation_type_other" id="consultation_type_other" 
+                               value="{{ old('consultation_type_other') }}" 
+                               class="w-full border border-gray-300 rounded px-3 py-2" 
+                               placeholder="e.g., Dental, Mental Health, Prenatal, etc.">
+                        <p class="mt-1 text-sm text-gray-500">Please specify the type of consultation</p>
+                    </div>
                 </div>
                 <div class="mt-6 grid grid-cols-1 gap-6">
                     <div>
@@ -237,6 +245,28 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => func.apply(this, args), delay);
         };
+    }
+
+    // Consultation type conditional field
+    const consultationTypeSelect = document.getElementById('consultation_type');
+    const otherContainer = document.getElementById('consultation_type_other_container');
+    const otherInput = document.getElementById('consultation_type_other');
+
+    consultationTypeSelect.addEventListener('change', function() {
+        if (this.value === 'Other') {
+            otherContainer.classList.remove('hidden');
+            otherInput.required = true;
+        } else {
+            otherContainer.classList.add('hidden');
+            otherInput.required = false;
+            otherInput.value = '';
+        }
+    });
+
+    // Initialize on page load if "Other" is pre-selected (e.g., after validation errors)
+    if (consultationTypeSelect.value === 'Other') {
+        otherContainer.classList.remove('hidden');
+        otherInput.required = true;
     }
 
     // Resident AJAX search for patient records

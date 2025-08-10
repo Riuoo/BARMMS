@@ -31,9 +31,16 @@ class LoginController
             }
             // Don't use Auth::login() for barangay profiles, just use session
             $request->session()->regenerate();
-            session(['user_id' => $user->id]);
-            session(['user_role' => 'barangay']);
+            session([
+                'user_id' => $user->id,
+                'user_role' => $user->role
+            ]);
             
+                // Redirect based on role
+            if ($user->role === 'nurse') {
+                return redirect()->intended(route('admin.health-reports'));
+            }
+
             return redirect()->intended(route('admin.dashboard'));
         }
 

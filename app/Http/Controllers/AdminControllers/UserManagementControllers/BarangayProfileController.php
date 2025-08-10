@@ -10,10 +10,6 @@ class BarangayProfileController
 {
     public function barangayProfile(Request $request)
     {
-        if (session('user_role') !== 'barangay') {
-            // Abort the request with a 403 Unauthorized error
-            abort(403, 'Unauthorized');
-        }
         // Statistics from full dataset
         $totalOfficials = BarangayProfile::count();
         $captainCount = BarangayProfile::where('role', 'captain')->count();

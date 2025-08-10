@@ -45,6 +45,7 @@ class MedicalRecordController
             'resident_id' => 'required|exists:residents,id',
             'consultation_datetime' => 'required|date|before_or_equal:now',
             'consultation_type' => 'required|string|max:100',
+            'consultation_type_other' => 'nullable|string|max:100',
             'chief_complaint' => 'nullable|string|max:1000',
             'symptoms' => 'nullable|string|max:1000',
             'diagnosis' => 'nullable|string|max:1000',
@@ -58,6 +59,19 @@ class MedicalRecordController
             'notes' => 'nullable|string|max:2000',
             'follow_up_date' => 'nullable|date|after:consultation_datetime',
         ]);
+
+        // Handle "Other" consultation type
+        if ($validated['consultation_type'] === 'Other') {
+            if (empty($request->input('consultation_type_other'))) {
+                notify()->error('Please specify the consultation type when selecting "Other".');
+                return back()->withInput();
+            }
+            $validated['consultation_type'] = $request->input('consultation_type_other');
+        }
+
+        // Remove the consultation_type_other field as it's not needed in the database
+        unset($validated['consultation_type_other']);
+
         $user = Residents::find($validated['resident_id']);
         if (!$user || !$user->active) {
             notify()->error('This user account is inactive and cannot make transactions.');

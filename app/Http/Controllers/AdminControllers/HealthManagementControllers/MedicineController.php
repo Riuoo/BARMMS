@@ -77,6 +77,7 @@ class MedicineController
             'name' => 'required|string|max:255',
             'generic_name' => 'nullable|string|max:255',
             'category' => 'required|string|max:50',
+            'category_other' => 'nullable|string|max:50',
             'description' => 'nullable|string',
             'dosage_form' => 'required|string|max:100',
             'manufacturer' => 'required|string|max:255',
@@ -85,6 +86,18 @@ class MedicineController
             'expiry_date' => 'required|date',
             'is_active' => 'nullable|boolean',
         ]);
+
+        // Handle "Other" category
+        if ($validated['category'] === 'Other') {
+            if (empty($request->input('category_other'))) {
+                notify()->error('Please specify the category when selecting "Other".');
+                return back()->withInput();
+            }
+            $validated['category'] = $request->input('category_other');
+        }
+
+        // Remove the category_other field as it's not needed in the database
+        unset($validated['category_other']);
 
         $medicine = Medicine::create($validated);
 
@@ -114,6 +127,7 @@ class MedicineController
             'name' => 'required|string|max:255',
             'generic_name' => 'nullable|string|max:255',
             'category' => 'required|string|max:50',
+            'category_other' => 'nullable|string|max:50',
             'description' => 'nullable|string',
             'dosage_form' => 'required|string|max:100',
             'manufacturer' => 'required|string|max:255',
@@ -122,6 +136,18 @@ class MedicineController
             'expiry_date' => 'required|date',
             'is_active' => 'nullable|boolean',
         ]);
+
+        // Handle "Other" category
+        if ($validated['category'] === 'Other') {
+            if (empty($request->input('category_other'))) {
+                notify()->error('Please specify the category when selecting "Other".');
+                return back()->withInput();
+            }
+            $validated['category'] = $request->input('category_other');
+        }
+
+        // Remove the category_other field as it's not needed in the database
+        unset($validated['category_other']);
 
         $medicine->update($validated);
 

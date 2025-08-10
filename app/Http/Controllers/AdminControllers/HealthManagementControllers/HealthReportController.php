@@ -52,13 +52,6 @@ class HealthReportController
             ->orderBy('month', 'asc')
             ->get();
 
-        // BHW Dashboard Additions
-        $pendingAppointments = MedicalRecord::with('resident')
-            ->where('status', 'Pending')
-            ->orderBy('consultation_datetime', 'asc')
-            ->limit(10)
-            ->get();
-
         $overdueVaccinations = VaccinationRecord::with('resident')
             ->whereNotNull('next_dose_date')
             ->where('next_dose_date', '<', now())
@@ -121,7 +114,6 @@ class HealthReportController
             'dueVaccinations',
             'healthStatusDistribution',
             'monthlyConsultations',
-            'pendingAppointments',
             'overdueVaccinations',
             'analyticsAlerts',
             'kmeansResults',
