@@ -12,9 +12,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('resident_id');
             $table->string('vaccine_name');
-            $table->enum('vaccine_type', [
-                'COVID-19', 'Influenza', 'Pneumonia', 'Tetanus', 'Hepatitis B', 'MMR', 'Varicella', 'HPV', 'Other'
-            ]);
+            $table->enum('vaccine_type', ['COVID-19', 'Influenza', 'Pneumonia', 'Tetanus', 'Hepatitis B', 'MMR', 'Varicella', 'HPV', 'Other']);
             $table->date('vaccination_date');
             $table->string('batch_number')->nullable();
             $table->string('manufacturer')->nullable();

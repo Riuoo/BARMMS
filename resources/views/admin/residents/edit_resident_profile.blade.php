@@ -130,7 +130,8 @@
                                value="{{ old('age', $resident->age) }}" 
                                min="1" 
                                max="120" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                               required>
                         <p class="mt-1 text-sm text-gray-500">Resident's age in years</p>
                     </div>
 
@@ -142,7 +143,8 @@
                                value="{{ old('family_size', $resident->family_size) }}" 
                                min="1" 
                                max="20" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                               required>
                         <p class="mt-1 text-sm text-gray-500">Number of family members</p>
                     </div>
 
@@ -150,7 +152,8 @@
                         <label for="education_level" class="block text-sm font-medium text-gray-700 mb-2">Education Level</label>
                         <select id="education_level" 
                                 name="education_level" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                                required>
                             <option value="">Select Education Level</option>
                             <option value="No Education" {{ old('education_level', $resident->education_level) == 'No Education' ? 'selected' : '' }}>No Education</option>
                             <option value="Elementary" {{ old('education_level', $resident->education_level) == 'Elementary' ? 'selected' : '' }}>Elementary</option>
@@ -166,7 +169,8 @@
                         <label for="income_level" class="block text-sm font-medium text-gray-700 mb-2">Income Level</label>
                         <select id="income_level" 
                                 name="income_level" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                                required>
                             <option value="">Select Income Level</option>
                             <option value="Low" {{ old('income_level', $resident->income_level) == 'Low' ? 'selected' : '' }}>Low</option>
                             <option value="Lower Middle" {{ old('income_level', $resident->income_level) == 'Lower Middle' ? 'selected' : '' }}>Lower Middle</option>
@@ -181,7 +185,8 @@
                         <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-2">Employment Status</label>
                         <select id="employment_status" 
                                 name="employment_status" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                                required>
                             <option value="">Select Employment Status</option>
                             <option value="Unemployed" {{ old('employment_status', $resident->employment_status) == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
                             <option value="Part-time" {{ old('employment_status', $resident->employment_status) == 'Part-time' ? 'selected' : '' }}>Part-time</option>
@@ -195,7 +200,8 @@
                         <label for="health_status" class="block text-sm font-medium text-gray-700 mb-2">Health Status</label>
                         <select id="health_status" 
                                 name="health_status" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                                required>
                             <option value="">Select Health Status</option>
                             <option value="Critical" {{ old('health_status', $resident->health_status) == 'Critical' ? 'selected' : '' }}>Critical</option>
                             <option value="Poor" {{ old('health_status', $resident->health_status) == 'Poor' ? 'selected' : '' }}>Poor</option>

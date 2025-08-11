@@ -53,11 +53,11 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Test User',
-            'email' => 'rodericktajos01@gmail.com',
+            'name' => 'Nurse User',
+            'email' => 'nurse@example.com',
             'password' => bcrypt('password123'),
-            'role' => 'admin',
-            'address' => '202 Councilor St.',
+            'role' => 'nurse',
+            'address' => '205 Nurse St.',
         ]);
     }
 }

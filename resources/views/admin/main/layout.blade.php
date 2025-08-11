@@ -385,7 +385,7 @@
                     </section>
                     @endif
                     
-                    @if(session('user_role') === 'nurse')
+                    @if(session('user_role') === 'nurse' || session('user_role') === 'admin')
                     <!-- Main Health Section -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
@@ -400,7 +400,7 @@
                     </section>
                     @endif
 
-                    @if(session('user_role') === 'nurse')
+                    @if(session('user_role') === 'nurse' || session('user_role') === 'admin')
                     <!-- Health Management -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>

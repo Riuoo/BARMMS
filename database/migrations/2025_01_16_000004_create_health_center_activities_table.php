@@ -14,19 +14,7 @@ return new class extends Migration
         Schema::create('health_center_activities', function (Blueprint $table) {
             $table->id();
             $table->string('activity_name');
-            $table->enum('activity_type', [
-                'Vaccination Drive',
-                'Health Education',
-                'Medical Mission',
-                'Screening Program',
-                'Nutrition Program',
-                'Maternal Care',
-                'Child Care',
-                'Elderly Care',
-                'Dental Care',
-                'Mental Health',
-                'Other'
-            ]);
+            $table->enum('activity_type', ['Vaccination Drive', 'Health Education', 'Medical Mission', 'Screening Program', 'Nutrition Program', 'Maternal Care', 'Child Care', 'Elderly Care', 'Dental Care', 'Mental Health', 'Other']);
             $table->date('activity_date');
             $table->time('start_time');
             $table->time('end_time');

@@ -70,12 +70,12 @@ class ResidentController
             'email' => 'required|email|unique:residents,email',
             'address' => 'required|string|max:500',
             'password' => 'required|string|min:6|confirmed',
-            'age' => 'nullable|integer|min:1|max:120',
-            'family_size' => 'nullable|integer|min:1|max:20',
-            'education_level' => 'nullable|string|in:No Education,Elementary,High School,Vocational,College,Post Graduate',
-            'income_level' => 'nullable|string|in:Low,Lower Middle,Middle,Upper Middle,High',
-            'employment_status' => 'nullable|string|in:Unemployed,Part-time,Self-employed,Full-time',
-            'health_status' => 'nullable|string|in:Critical,Poor,Fair,Good,Excellent',
+            'age' => 'required|integer|min:1|max:120',
+            'family_size' => 'required|integer|min:1|max:20',
+            'education_level' => 'required|string|in:No Education,Elementary,High School,Vocational,College,Post Graduate',
+            'income_level' => 'required|string|in:Low,Lower Middle,Middle,Upper Middle,High',
+            'employment_status' => 'required|string|in:Unemployed,Part-time,Self-employed,Full-time',
+            'health_status' => 'required|string|in:Critical,Poor,Fair,Good,Excellent',
         ]);
         try {
             Residents::create([
@@ -84,12 +84,12 @@ class ResidentController
                 'role' => 'resident',
                 'address' => $validatedData['address'],
                 'password' => Hash::make($validatedData['password']),
-                'age' => $validatedData['age'] ?? null,
-                'family_size' => $validatedData['family_size'] ?? null,
-                'education_level' => $validatedData['education_level'] ?? null,
-                'income_level' => $validatedData['income_level'] ?? null,
-                'employment_status' => $validatedData['employment_status'] ?? null,
-                'health_status' => $validatedData['health_status'] ?? null,
+                'age' => $validatedData['age'],
+                'family_size' => $validatedData['family_size'],
+                'education_level' => $validatedData['education_level'],
+                'income_level' => $validatedData['income_level'],
+                'employment_status' => $validatedData['employment_status'],
+                'health_status' => $validatedData['health_status'],
             ]);
             notify()->success('New resident added successfully.');
             return redirect()->route('admin.residents');
@@ -114,24 +114,24 @@ class ResidentController
 
             $validatedData = $request->validate([
                 'password' => 'nullable|string|min:6|confirmed',
-                'age' => 'nullable|integer|min:1|max:120',
-                'family_size' => 'nullable|integer|min:1|max:20',
-                'education_level' => 'nullable|string|in:No Education,Elementary,High School,Vocational,College,Post Graduate',
-                'income_level' => 'nullable|string|in:Low,Lower Middle,Middle,Upper Middle,High',
-                'employment_status' => 'nullable|string|in:Unemployed,Part-time,Self-employed,Full-time',
-                'health_status' => 'nullable|string|in:Critical,Poor,Fair,Good,Excellent',
+                'age' => 'required|integer|min:1|max:120',
+                'family_size' => 'required|integer|min:1|max:20',
+                'education_level' => 'required|string|in:No Education,Elementary,High School,Vocational,College,Post Graduate',
+                'income_level' => 'required|string|in:Low,Lower Middle,Middle,Upper Middle,High',
+                'employment_status' => 'required|string|in:Unemployed,Part-time,Self-employed,Full-time',
+                'health_status' => 'required|string|in:Critical,Poor,Fair,Good,Excellent',
             ]);
 
             if (!empty($validatedData['password'])) {
                 $resident->password = bcrypt($validatedData['password']);
             }
 
-            $resident->age = $validatedData['age'] ?? null;
-            $resident->family_size = $validatedData['family_size'] ?? null;
-            $resident->education_level = $validatedData['education_level'] ?? null;
-            $resident->income_level = $validatedData['income_level'] ?? null;
-            $resident->employment_status = $validatedData['employment_status'] ?? null;
-            $resident->health_status = $validatedData['health_status'] ?? null;
+            $resident->age = $validatedData['age'];
+            $resident->family_size = $validatedData['family_size'];
+            $resident->education_level = $validatedData['education_level'];
+            $resident->income_level = $validatedData['income_level'];
+            $resident->employment_status = $validatedData['employment_status'];
+            $resident->health_status = $validatedData['health_status'];
             $resident->save();
 
             notify()->success('Resident updated successfully.');

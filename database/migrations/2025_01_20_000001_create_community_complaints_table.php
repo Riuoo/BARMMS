@@ -12,11 +12,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable()->index();
             $table->string('title');
-            $table->enum('category', [
-                'Water Supply', 'Electricity', 'Roads & Infrastructure', 'Garbage Collection', 'Street Lighting',
-                'Drainage & Sewage', 'Noise Pollution', 'Air Pollution', 'Public Safety', 'Health & Sanitation',
-                'Transportation', 'Other'
-            ]);
+            $table->enum('category', ['Water Supply', 'Electricity', 'Roads & Infrastructure', 'Garbage Collection', 'Street Lighting', 'Drainage & Sewage', 'Noise Pollution', 'Air Pollution', 'Public Safety', 'Health & Sanitation', 'Transportation', 'Other']);
             $table->text('description');
             $table->string('location')->nullable();
             $table->enum('status', ['pending', 'under_review', 'in_progress', 'resolved', 'closed'])->default('pending');

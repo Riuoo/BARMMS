@@ -54,7 +54,7 @@ class BarangayProfileController
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:barangay_profiles,email',
             'role' => 'required|string|max:255',
-            'address' => 'nullable|string|max:500',
+            'address' => 'required|string|max:500',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
