@@ -30,7 +30,7 @@ class ResidentCommunityComplaintController
             return redirect()->route('landing');
         }
         $complaint = new CommunityComplaint();
-        $complaint->user_id = $userId;
+        $complaint->resident_id = $userId;
         $complaint->title = $request->title;
         $complaint->category = $request->category;
         $complaint->description = $request->description;

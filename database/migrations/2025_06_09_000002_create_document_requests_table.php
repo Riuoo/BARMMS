@@ -10,7 +10,9 @@ class CreateDocumentRequestsTable extends Migration
     {
         Schema::create('document_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->index();
+            $table->unsignedBigInteger('resident_id')->index();
+            // Add template reference column at creation time; FK constraint is added in a later migration
+            $table->foreignId('document_template_id')->nullable();
             $table->string('document_type');
             $table->text('description')->nullable();
             $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
@@ -18,7 +20,7 @@ class CreateDocumentRequestsTable extends Migration
             $table->boolean('resident_is_read')->default(true);
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('residents')->onDelete('cascade');
+            $table->foreign('resident_id')->references('id')->on('residents')->onDelete('cascade');
         });
     }
 

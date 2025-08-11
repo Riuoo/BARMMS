@@ -13,14 +13,14 @@ class CreateAccountRequestsTable extends Migration
     {
         Schema::create('account_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->unsignedBigInteger('barangay_profile_id')->nullable()->index();
             $table->string('email')->unique();
             $table->string('status')->default('pending');
             $table->boolean('is_read')->default(false);
             $table->string('token')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('barangay_profiles')->onDelete('cascade');
+            $table->foreign('barangay_profile_id')->references('id')->on('barangay_profiles')->onDelete('cascade');
         });
     }
 

@@ -10,7 +10,7 @@ class CreateBlotterRequestsTable extends Migration
     {
         Schema::create('blotter_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->unsignedBigInteger('resident_id')->nullable()->index();
             $table->string('recipient_name')->nullable();
             $table->string('type');
             $table->text('description');
@@ -23,7 +23,7 @@ class CreateBlotterRequestsTable extends Migration
             $table->integer('attempts')->default(0);
             $table->dateTime('completed_at')->nullable();
 
-            $table->foreign('user_id')->references('id')->on('residents')->onDelete('cascade');
+            $table->foreign('resident_id')->references('id')->on('residents')->onDelete('cascade');
         });
     }
 

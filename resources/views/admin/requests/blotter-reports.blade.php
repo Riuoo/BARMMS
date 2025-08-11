@@ -217,13 +217,13 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="blotterTableBody">
                         @foreach($blotterRequests as $request)
-                        <tr class="blotter-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}">
+                        <tr class="blotter-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}" data-summon="{{ optional($request->summon_date)->format('Y-m-d\TH:i') }}" data-approved="{{ optional($request->approved_at)->format('Y-m-d\TH:i') }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0">
                                     </div>
                                     <div>
-                                        <div class="text-sm font-medium text-gray-900">{{ $request->user->name ?? 'N/A' }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $request->resident->name ?? 'N/A' }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -247,7 +247,7 @@
                                         <button 
                                             class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 view-full-btn"
                                             data-description="{{ $request->description }}"
-                                            data-user-name="{{ $request->user->name ?? 'N/A' }}">
+                                            data-user-name="{{ $request->resident->name ?? 'N/A' }}">
                                             View Full
                                         </button>
                                     @endif
@@ -358,7 +358,7 @@
                             <i class="fas fa-file-alt text-red-600"></i>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
-                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->user->name ?? 'N/A' }}</h3>
+                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->resident->name ?? 'N/A' }}</h3>
                             <p class="text-sm text-gray-500 truncate">vs {{ $request->recipient_name }}</p>
                             <div class="flex items-center mt-1">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium

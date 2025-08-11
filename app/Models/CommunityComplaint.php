@@ -10,7 +10,7 @@ class CommunityComplaint extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'resident_id',
         'title',
         'category',
         'description',
@@ -29,9 +29,9 @@ class CommunityComplaint extends Model
         'resolved_at' => 'datetime',
     ];
 
-    public function user()
+    public function resident()
     {
-        return $this->belongsTo(Residents::class);
+        return $this->belongsTo(Residents::class, 'resident_id');
     }
 
     /**

@@ -23,13 +23,13 @@ class DocumentRequestController
         $completedCount = DocumentRequest::where('status', 'completed')->count();
 
         // For display (filtered)
-        $query = DocumentRequest::with('user');
+        $query = DocumentRequest::with('resident');
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('document_type', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($uq) use ($search) {
+                  ->orWhereHas('resident', function($uq) use ($search) {
                       $uq->where('name', 'like', "%{$search}%");
                   });
             });
@@ -44,10 +44,10 @@ class DocumentRequestController
     public function getDetails($id)
     {
         try {
-            $documentRequest = DocumentRequest::with('user')->findOrFail($id);
+            $documentRequest = DocumentRequest::with('resident')->findOrFail($id);
             
             return response()->json([
-                'user_name' => $documentRequest->user->name ?? 'N/A',
+                'user_name' => $documentRequest->resident->name ?? 'N/A',
                 'document_type' => $documentRequest->document_type,
                 'purpose' => $documentRequest->description,
                 'status' => $documentRequest->status,
@@ -63,7 +63,7 @@ class DocumentRequestController
     protected function processTemplatePlaceholders($html, $documentRequest, $adminUser)
     {
         $replacements = [
-            '{{user_name}}' => $documentRequest->user ? $documentRequest->user->name : '',
+            '{{user_name}}' => $documentRequest->resident ? $documentRequest->resident->name : '',
             '{{document_type}}' => $documentRequest->document_type,
             '{{purpose}}' => $documentRequest->description,
             '{{admin_name}}' => $adminUser ? $adminUser->name : '',
@@ -75,9 +75,13 @@ class DocumentRequestController
     public function approve($id)
     {
         try {
-            $documentRequest = DocumentRequest::with('user')->findOrFail($id);
-            $user = $documentRequest->user;
-            if (!$user || !$user->active) {
+            $documentRequest = DocumentRequest::with('resident')->findOrFail($id);
+            $user = $documentRequest->resident;
+            if (!$user) {
+                notify()->error('This resident record no longer exists.');
+                return redirect()->back();
+            }
+            if ($user->active === false) {
                 notify()->error('This user account is inactive and cannot make transactions.');
                 return redirect()->back();
             }
@@ -93,8 +97,9 @@ class DocumentRequestController
                 $adminUser = BarangayProfile::find(session('user_id'));
             }
 
-            // Fetch the template from the database (case-insensitive, trimmed)
-            $template = DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
+            // Prefer FK to template, fallback to case-insensitive document_type match
+            $template = $documentRequest->documentTemplate
+                ?? DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
 
             if (!$template) {
                 notify()->error('No template found for this document type.');
@@ -103,9 +108,9 @@ class DocumentRequestController
 
             // Prepare values for placeholders
             $values = [
-                'resident_name' => $documentRequest->user ? $documentRequest->user->name : '',
-                'resident_address' => $documentRequest->user ? $documentRequest->user->address : '',
-                'civil_status' => $documentRequest->user ? $documentRequest->user->civil_status : '',
+                'resident_name' => $documentRequest->resident ? $documentRequest->resident->name : '',
+                'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
+                'civil_status' => $documentRequest->resident ? $documentRequest->resident->civil_status : '',
                 'purpose' => $documentRequest->description,
                 'day' => date('jS'),
                 'month' => date('F'),
@@ -153,9 +158,13 @@ class DocumentRequestController
     public function generatePdf(Request $request, $id)
     {
         try {
-            $documentRequest = DocumentRequest::with('user')->findOrFail($id);
-            $user = $documentRequest->user;
-            if (!$user || !$user->active) {
+            $documentRequest = DocumentRequest::with('resident')->findOrFail($id);
+            $user = $documentRequest->resident;
+            if (!$user) {
+                notify()->error('This resident record no longer exists.');
+                return redirect()->back();
+            }
+            if ($user->active === false) {
                 notify()->error('This user account is inactive and cannot make transactions.');
                 return redirect()->back();
             }
@@ -166,8 +175,9 @@ class DocumentRequestController
                 $adminUser = BarangayProfile::find(session('user_id'));
             }
 
-            // Fetch the template from the database (case-insensitive, trimmed)
-            $template = DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
+            // Prefer FK to template, fallback to case-insensitive document_type match
+            $template = $documentRequest->documentTemplate
+                ?? DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($documentRequest->document_type))])->first();
 
             if (!$template) {
                 notify()->error('No template found for this document type.');
@@ -176,9 +186,9 @@ class DocumentRequestController
 
             // Prepare values for placeholders
             $values = [
-                'resident_name' => $documentRequest->user ? $documentRequest->user->name : '',
-                'resident_address' => $documentRequest->user ? $documentRequest->user->address : '',
-                'civil_status' => $documentRequest->user ? $documentRequest->user->civil_status : '',
+                'resident_name' => $documentRequest->resident ? $documentRequest->resident->name : '',
+                'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
+                'civil_status' => $documentRequest->resident ? $documentRequest->resident->civil_status : '',
                 'purpose' => $documentRequest->description,
                 'day' => date('jS'),
                 'month' => date('F'),
@@ -217,8 +227,12 @@ class DocumentRequestController
     {
         try {
             $documentRequest = DocumentRequest::findOrFail($id);
-            $user = $documentRequest->user;
-            if (!$user || !$user->active) {
+            $user = $documentRequest->resident;
+            if (!$user) {
+                notify()->error('This resident record no longer exists.');
+                return back();
+            }
+            if ($user->active === false) {
                 notify()->error('This user account is inactive and cannot make transactions.');
                 return back();
             }
@@ -240,29 +254,44 @@ class DocumentRequestController
     public function create()
     {
         $residents = Residents::where('active', true)->get();
-        return view('admin.requests.create_document_request', compact('residents'));
+        $templates = DocumentTemplate::where('is_active', true)->orderBy('document_type')->get();
+        return view('admin.requests.create_document_request', compact('residents', 'templates'));
     }
 
     // Store + return request id
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:residents,id',
+            'resident_id' => 'required|exists:residents,id',
             'document_type' => 'required|string|max:255',
             'description' => 'required|string',
+            'document_template_id' => 'nullable|exists:document_templates,id',
         ]);
 
-        $user = Residents::find($validated['user_id']);
-        if (!$user || !$user->active) {
+        $user = Residents::find($validated['resident_id']);
+        if (!$user) {
+            return response()->json([
+                'error' => 'Selected resident does not exist.'
+            ], 422);
+        }
+        if ($user->active === false) {
             return response()->json([
                 'error' => 'This user account is inactive and cannot make transactions.'
             ], 422);
         }
 
         try {
+            $template = null;
+            if (!empty($validated['document_template_id'])) {
+                $template = DocumentTemplate::find($validated['document_template_id']);
+            } else {
+                $template = DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($validated['document_type']))])->first();
+            }
+
             $documentRequest = DocumentRequest::create([
-                'user_id' => $validated['user_id'],
-                'document_type' => $validated['document_type'],
+                'resident_id' => $validated['resident_id'],
+                'document_type' => $template?->document_type ?? $validated['document_type'],
+                'document_template_id' => $template?->id,
                 'description' => $validated['description'],
                 'status' => 'approved',
             ]);
@@ -283,22 +312,23 @@ class DocumentRequestController
     // Download route
     public function downloadRequest($id)
     {
-        $documentRequest = DocumentRequest::with('user')->findOrFail($id);
+        $documentRequest = DocumentRequest::with('resident')->findOrFail($id);
 
         $adminUser = null;
         if (session()->has('user_role') && session('user_role') === 'barangay') {
             $adminUser = BarangayProfile::find(session('user_id'));
         }
 
-        $template = DocumentTemplate::whereRaw(
-            'LOWER(document_type) = ?',
-            [strtolower(trim($documentRequest->document_type))]
-        )->firstOrFail();
+        $template = $documentRequest->documentTemplate
+            ?? DocumentTemplate::whereRaw(
+                'LOWER(document_type) = ?',
+                [strtolower(trim($documentRequest->document_type))]
+            )->firstOrFail();
 
         $values = [
-            'resident_name' => $documentRequest->user?->name ?? '',
-            'resident_address' => $documentRequest->user?->address ?? '',
-            'civil_status' => $documentRequest->user?->civil_status ?? '',
+            'resident_name' => $documentRequest->resident?->name ?? '',
+            'resident_address' => $documentRequest->resident?->address ?? '',
+            'civil_status' => $documentRequest->resident?->civil_status ?? '',
             'purpose' => $documentRequest->description,
             'day' => date('jS'),
             'month' => date('F'),
@@ -415,7 +445,7 @@ class DocumentRequestController
     protected function generateFilename($documentRequest)
     {
         $type = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($documentRequest->document_type));
-        $user = $documentRequest->user ? preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($documentRequest->user->name)) : 'unknown_user';
+        $user = $documentRequest->resident ? preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($documentRequest->resident->name)) : 'unknown_user';
         $id = $documentRequest->id;
         return $type . '_' . $user . '_' . $id . '.pdf';
     }

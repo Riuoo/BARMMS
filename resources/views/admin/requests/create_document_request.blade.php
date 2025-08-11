@@ -73,7 +73,7 @@
                             aria-label="Search for a resident"
                             required
                         />
-                        <input type="hidden" id="user_id" name="user_id" required>
+                        <input type="hidden" id="resident_id" name="resident_id" required>
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
                         <p class="mt-1 text-sm text-gray-500">Search and select the resident requesting the document</p>
                     </div>
@@ -88,22 +88,24 @@
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
                     <div>
-                        <label for="document_type" class="block text-sm font-medium text-gray-700 mb-2">
-                            Document Type <span class="text-red-500">*</span>
+                        <label for="document_template_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Template <span class="text-red-500">*</span>
                         </label>
                         <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
-                                id="document_type" 
-                                name="document_type" 
+                                id="document_template_id" 
+                                name="document_template_id" 
                                 required>
-                            <option value="">Select a document type</option>
-                            <option value="Barangay Clearance" {{ old('document_type') == 'Barangay Clearance' ? 'selected' : '' }}>Barangay Clearance</option>
-                            <option value="Certificate of Residency" {{ old('document_type') == 'Certificate of Residency' ? 'selected' : '' }}>Certificate of Residency</option>
-                            <option value="Certificate of Indigency" {{ old('document_type') == 'Certificate of Indigency' ? 'selected' : '' }}>Certificate of Indigency</option>
-                            <option value="Business Permit" {{ old('document_type') == 'Business Permit' ? 'selected' : '' }}>Business Permit</option>
-                            <option value="Other" {{ old('document_type') == 'Other' ? 'selected' : '' }}>Other</option>
+                            <option value="">Select a template</option>
+                            @foreach(($templates ?? []) as $t)
+                                <option value="{{ $t->id }}" {{ old('document_template_id') == $t->id ? 'selected' : '' }}>
+                                    {{ $t->document_type }}
+                                </option>
+                            @endforeach
                         </select>
-                        <p class="mt-1 text-sm text-gray-500">Choose the type of document being requested</p>
+                        <p class="mt-1 text-sm text-gray-500">Choose the template to be used for this request</p>
                     </div>
+
+                    <input type="hidden" id="document_type" name="document_type" value="">
                 </div>
             </div>
 
@@ -156,8 +158,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('residentSearch');
     const searchResults = document.getElementById('searchResults');
-    const userIdInput = document.getElementById('user_id');
+    const userIdInput = document.getElementById('resident_id');
     const form = document.getElementById('createDocumentRequestForm');
+    const templateSelect = document.getElementById('document_template_id');
+    const documentTypeHidden = document.getElementById('document_type');
 
     searchInput.addEventListener('input', debounce(async () => {
         const term = searchInput.value.trim();
@@ -221,6 +225,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return;
             }
+
+            // Fill hidden document_type from selected template's label (for compatibility)
+            try {
+                const selected = templateSelect?.options?.[templateSelect.selectedIndex];
+                if (selected && documentTypeHidden) {
+                    documentTypeHidden.value = selected.textContent?.trim() || '';
+                }
+            } catch (_) {}
 
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';

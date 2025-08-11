@@ -17,7 +17,7 @@ class ResidentNotificationController
             return redirect()->route('landing');
         }
 
-        $docs = DocumentRequest::where('user_id', $userId)
+        $docs = DocumentRequest::where('resident_id', $userId)
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -74,7 +74,7 @@ class ResidentNotificationController
                 return response()->json(['total' => 0, 'notifications' => []]);
             }
 
-            $unreadDocs = DocumentRequest::where('user_id', $userId)
+            $unreadDocs = DocumentRequest::where('resident_id', $userId)
                 ->where('status', 'approved')
                 ->where(function ($q) {
                     $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
@@ -107,7 +107,7 @@ class ResidentNotificationController
     {
         try {
             $userId = Session::get('user_id');
-            $doc = DocumentRequest::where('user_id', $userId)->where('id', $id)->first();
+            $doc = DocumentRequest::where('resident_id', $userId)->where('id', $id)->first();
             if (!$doc) {
                 return response()->json(['message' => 'Not found'], 404);
             }
@@ -124,7 +124,7 @@ class ResidentNotificationController
     {
         try {
             $userId = Session::get('user_id');
-            DocumentRequest::where('user_id', $userId)
+            DocumentRequest::where('resident_id', $userId)
                 ->where('status', 'approved')
                 ->update(['resident_is_read' => true]);
             return redirect()->back()->with('success', 'All notifications marked as read.');

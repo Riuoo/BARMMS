@@ -244,7 +244,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $complaint->user->name ?? 'N/A' }}</div>
+                                <div class="text-sm text-gray-900">{{ $complaint->resident->name ?? 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $complaint->created_at->format('M d, Y') }}</div>
@@ -281,7 +281,7 @@
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
                             <h3 class="text-sm font-medium text-gray-900 truncate">{{ $complaint->title }}</h3>
-                            <p class="text-sm text-gray-500 truncate">{{ $complaint->user->name ?? 'N/A' }}</p>
+                            <p class="text-sm text-gray-500 truncate">{{ $complaint->resident->name ?? 'N/A' }}</p>
                             <div class="flex items-center mt-1">
                                 @php
                                     $statusColors = [

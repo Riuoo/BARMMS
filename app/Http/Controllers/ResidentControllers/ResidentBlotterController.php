@@ -29,7 +29,7 @@ class ResidentBlotterController
             return redirect()->route('landing');
         }
         $blotter = new BlotterRequest();
-        $blotter->user_id = $userId;
+        $blotter->resident_id = $userId;
         $blotter->recipient_name = $request->recipient_name;
         $blotter->type = $request->type;
         $blotter->description = $request->description;

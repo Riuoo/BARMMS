@@ -38,6 +38,7 @@
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
                 <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                <p id="email-warning" class="mt-2 text-sm text-red-600 hidden"></p>
             </div>
 
             <div>
@@ -122,12 +123,57 @@
                     <i class="fas fa-times mr-2"></i>
                     Cancel
                 </a>
-                <button type="submit" 
-                        class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                <button type="submit" id="submit-btn"
+                        class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-save mr-2"></i>
                     Add Resident
                 </button>
             </div>
         </form>
+        <script>
+            (function() {
+                const emailInput = document.getElementById('email');
+                const warning = document.getElementById('email-warning');
+                const submitBtn = document.getElementById('submit-btn');
+                let lastQueried = '';
+                let debounceTimer;
+
+                function checkEmail(value) {
+                    if (!value || value === lastQueried) return;
+                    lastQueried = value;
+                    const url = '{{ route('admin.residents.check-email') }}' + '?email=' + encodeURIComponent(value);
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }})
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.blocked) {
+                                warning.textContent = 'Account creation blocked: this email has a ' + data.status + ' account request.';
+                                warning.classList.remove('hidden');
+                                submitBtn.disabled = true;
+                            } else {
+                                warning.textContent = '';
+                                warning.classList.add('hidden');
+                                submitBtn.disabled = false;
+                            }
+                        })
+                        .catch(() => {
+                            // On error, do not block, just hide warning
+                            warning.textContent = '';
+                            warning.classList.add('hidden');
+                            submitBtn.disabled = false;
+                        });
+                }
+
+                emailInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    const val = this.value.trim();
+                    debounceTimer = setTimeout(() => checkEmail(val), 300);
+                });
+
+                // Initial check if old('email') exists
+                if (emailInput.value) {
+                    checkEmail(emailInput.value.trim());
+                }
+            })();
+        </script>
     </div>
 @endsection

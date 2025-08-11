@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('community_complaints', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->unsignedBigInteger('resident_id')->nullable()->index();
             $table->string('title');
             $table->enum('category', ['Water Supply', 'Electricity', 'Roads & Infrastructure', 'Garbage Collection', 'Street Lighting', 'Drainage & Sewage', 'Noise Pollution', 'Air Pollution', 'Public Safety', 'Health & Sanitation', 'Transportation', 'Other']);
             $table->text('description');
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->dateTime('assigned_at')->nullable();
             $table->dateTime('resolved_at')->nullable();
             $table->timestamps();
-            $table->foreign('user_id')->references('id')->on('residents')->onDelete('cascade');
+            $table->foreign('resident_id')->references('id')->on('residents')->onDelete('cascade');
         });
     }
 

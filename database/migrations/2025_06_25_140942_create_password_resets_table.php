@@ -13,9 +13,28 @@ return new class extends Migration
     {
         Schema::create('password_resets', function (Blueprint $table) {
             $table->id();
+
+            // Relations
+            $table->unsignedBigInteger('resident_id')->nullable();
+            $table->unsignedBigInteger('barangay_profile_id')->nullable();
+
+            // Core fields
             $table->string('email')->index();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
+
+            // Constraints and indexes
+            $table->foreign('resident_id')
+                ->references('id')
+                ->on('residents')
+                ->onDelete('cascade');
+
+            $table->foreign('barangay_profile_id')
+                ->references('id')
+                ->on('barangay_profiles')
+                ->onDelete('cascade');
+
+            $table->index(['resident_id', 'barangay_profile_id']);
         });
     }
 

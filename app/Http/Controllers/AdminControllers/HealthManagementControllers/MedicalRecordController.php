@@ -73,7 +73,11 @@ class MedicalRecordController
         unset($validated['consultation_type_other']);
 
         $user = Residents::find($validated['resident_id']);
-        if (!$user || !$user->active) {
+        if (!$user) {
+            notify()->error('This resident record no longer exists.');
+            return back()->withInput();
+        }
+        if ($user->active === false) {
             notify()->error('This user account is inactive and cannot make transactions.');
             return back()->withInput();
         }

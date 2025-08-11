@@ -10,7 +10,7 @@ class AccountRequest extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'barangay_profile_id',
         'email',
         'status',
         'token',

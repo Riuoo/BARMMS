@@ -62,12 +62,45 @@ class ResidentController
         return view('admin.residents.create_resident_profile');
     }
     
+    public function checkEmailRequest(Request $request)
+    {
+        $email = trim((string) $request->get('email'));
+        if ($email === '') {
+            return response()->json(['blocked' => false]);
+        }
+
+        $existing = AccountRequest::where('email', $email)
+            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'blocked' => true,
+                'status' => $existing->status,
+            ]);
+        }
+
+        return response()->json(['blocked' => false]);
+    }
+
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:residents,email',
+            'email' => [
+                'required',
+                'email',
+                'unique:residents,email',
+                function ($attribute, $value, $fail) {
+                    $exists = AccountRequest::where('email', $value)
+                        ->whereIn('status', ['pending', 'approved', 'completed'])
+                        ->exists();
+                    if ($exists) {
+                        $fail('This email has an account request that is pending, approved, or completed. Creating a resident account is not allowed for this email.');
+                    }
+                },
+            ],
             'address' => 'required|string|max:500',
             'password' => 'required|string|min:6|confirmed',
             'age' => 'required|integer|min:1|max:120',
@@ -206,8 +239,11 @@ class ResidentController
             return response()->json([]);
         }
 
-        $residents = Residents::where('name', 'like', "%{$term}%")
-            ->orWhere('email', 'like', "%{$term}%")
+        $residents = Residents::where('active', true)
+            ->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                  ->orWhere('email', 'like', "%{$term}%");
+            })
             ->limit(10)
             ->get(['id', 'name', 'email']);
 

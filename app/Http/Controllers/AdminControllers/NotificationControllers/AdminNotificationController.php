@@ -100,7 +100,7 @@ class AdminNotificationController
                     $notificationsData[] = [
                         'id' => $report->id,
                         'type' => 'blotter_report',
-                        'message' => 'New blotter report from ' . ($report->user->name ?? 'Unknown Resident'),
+                        'message' => 'New blotter report from ' . ($report->resident->name ?? 'Unknown Resident'),
                         'created_at' => Carbon::parse($report->created_at)->toDateTimeString(),
                         'link' => route('admin.blotter-reports'),
                         'priority' => 'high'
@@ -117,7 +117,7 @@ class AdminNotificationController
                     $notificationsData[] = [
                         'id' => $request->id,
                         'type' => 'document_request',
-                        'message' => 'Document request from ' . ($request->user->name ?? 'Unknown Resident'),
+                        'message' => 'Document request from ' . ($request->resident->name ?? 'Unknown Resident'),
                         'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
                         'link' => route('admin.document-requests'),
                         'priority' => 'medium'
@@ -151,7 +151,7 @@ class AdminNotificationController
                     $notificationsData[] = [
                         'id' => $complaint->id,
                         'type' => 'community_complaint',
-                        'message' => 'Community complaint from ' . ($complaint->user->name ?? 'Unknown Resident'),
+                        'message' => 'Community complaint from ' . ($complaint->resident->name ?? 'Unknown Resident'),
                         'created_at' => Carbon::parse($complaint->created_at)->toDateTimeString(),
                         'link' => route('admin.community-complaints'),
                         'priority' => 'medium'

@@ -93,7 +93,6 @@
                     </label>
                     <input type="datetime-local" name="new_summon_date" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                           min="{{ date('Y-m-d') }}"
                            required>
                     <p class="text-xs text-gray-500 mt-1">Select a date for the new summon notice</p>
                 </div>
@@ -228,6 +227,26 @@ function closeApproveModal() {
 function openNewSummonModal(id) {
     // Set the form action and show modal
     document.getElementById('newSummonForm').action = `/admin/blotter-reports/${id}/new-summons`;
+    // Set min to the current summon date + 1 minute if available via DOM row dataset
+    try {
+        const input = document.querySelector('#newSummonForm input[name="new_summon_date"]');
+        const row = document.querySelector(`tr.blotter-item button[onclick="openNewSummonModal('${id}')"]`)?.closest('tr');
+        const prevSummon = row?.getAttribute('data-summon');
+        const approvedAt = row?.getAttribute('data-approved');
+        const base = prevSummon || approvedAt;
+        if (input && base) {
+            const dt = new Date(base);
+            // add 1 minute to ensure strictly after
+            dt.setMinutes(dt.getMinutes() + 1);
+            const iso = dt.toISOString().slice(0,16);
+            input.min = iso;
+        } else if (input) {
+            // fallback to now
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 1);
+            input.min = now.toISOString().slice(0,16);
+        }
+    } catch (_) {}
     document.getElementById('newSummonModal').classList.remove('hidden');
 }
 

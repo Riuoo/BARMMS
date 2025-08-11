@@ -35,6 +35,8 @@ class ForgotPasswordController
         DB::table('password_resets')->insert([
             'email' => $request->email,
             'token' => $token,
+            'resident_id' => $user instanceof Residents ? $user->id : null,
+            'barangay_profile_id' => $user instanceof BarangayProfile ? $user->id : null,
             'created_at' => Carbon::now()
         ]);
 

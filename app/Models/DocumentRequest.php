@@ -10,16 +10,22 @@ class DocumentRequest extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'resident_id',
         'document_type',
         'description',
         'status',
         'is_read',
         'resident_is_read',
+        'document_template_id',
     ];
 
-    public function user()
+    public function resident()
     {
-        return $this->belongsTo(Residents::class);
+        return $this->belongsTo(Residents::class, 'resident_id');
+    }
+
+    public function documentTemplate()
+    {
+        return $this->belongsTo(DocumentTemplate::class);
     }
 }

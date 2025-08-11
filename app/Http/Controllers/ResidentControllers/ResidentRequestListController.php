@@ -15,7 +15,7 @@ class ResidentRequestListController
         $userId = Session::get('user_id');
 
         // --- Document Requests ---
-        $documentQuery = DocumentRequest::where('user_id', $userId);
+        $documentQuery = DocumentRequest::where('resident_id', $userId);
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $documentQuery->where(function ($q) use ($search) {
@@ -32,7 +32,7 @@ class ResidentRequestListController
             ->get();
 
         // --- Blotter Requests ---
-        $blotterQuery = BlotterRequest::where('user_id', $userId);
+        $blotterQuery = BlotterRequest::where('resident_id', $userId);
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $blotterQuery->where(function ($q) use ($search) {
@@ -47,7 +47,7 @@ class ResidentRequestListController
         $blotterRequests = $blotterQuery->orderByDesc('created_at')->get();
 
         // --- Community Complaints ---
-        $complaintQuery = CommunityComplaint::where('user_id', $userId);
+        $complaintQuery = CommunityComplaint::where('resident_id', $userId);
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $complaintQuery->where(function ($q) use ($search) {

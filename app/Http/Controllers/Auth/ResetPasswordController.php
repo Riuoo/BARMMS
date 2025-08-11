@@ -48,13 +48,24 @@ class ResetPasswordController
             return back();
         }
 
-        // Update password in the correct table
-        $user = Residents::where('email', $request->email)->first();
-        $userType = 'resident';
+        // Update password in the correct table using foreign keys when available
+        $user = null;
+        $userType = null;
 
-        if (!$user) {
-            $user = BarangayProfile::where('email', $request->email)->first();
+        if (isset($resetRecord->resident_id) && $resetRecord->resident_id) {
+            $user = Residents::find($resetRecord->resident_id);
+            $userType = 'resident';
+        } elseif (isset($resetRecord->barangay_profile_id) && $resetRecord->barangay_profile_id) {
+            $user = BarangayProfile::find($resetRecord->barangay_profile_id);
             $userType = 'barangay_profile';
+        } else {
+            // Fallback for legacy records without FKs
+            $user = Residents::where('email', $request->email)->first();
+            $userType = $user ? 'resident' : null;
+            if (!$user) {
+                $user = BarangayProfile::where('email', $request->email)->first();
+                $userType = $user ? 'barangay_profile' : null;
+            }
         }
 
         if (!$user) {

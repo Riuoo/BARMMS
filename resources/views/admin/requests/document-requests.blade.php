@@ -212,7 +212,7 @@
                         <tr class="document-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex flex-row items-center gap-2">
-                                    <span class="text-sm font-medium text-gray-900">{{ $request->user->name ?? 'N/A' }}</span>
+                                     <span class="text-sm font-medium text-gray-900">{{ $request->resident->name ?? 'N/A' }}</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -225,7 +225,7 @@
                                     </div>
                                     @if(strlen($request->description) > 50)
                                         <button data-description="{{ $request->description }}" 
-                                                data-user-name="{{ $request->user->name ?? 'N/A' }}"
+                                                 data-user-name="{{ $request->resident->name ?? 'N/A' }}"
                                                 class="view-full-btn text-xs text-blue-600 hover:text-blue-800 underline mt-1">
                                             View Full
                                         </button>
@@ -302,7 +302,7 @@
                             <i class="fas fa-file-signature text-blue-600"></i>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
-                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->user->name ?? 'N/A' }}</h3>
+                             <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->resident->name ?? 'N/A' }}</h3>
                             <p class="text-sm text-gray-500 truncate">{{ $request->document_type }}</p>
                             <div class="flex items-center mt-1">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium

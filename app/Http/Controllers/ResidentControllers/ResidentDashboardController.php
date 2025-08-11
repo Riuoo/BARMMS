@@ -20,9 +20,9 @@ class ResidentDashboardController
         }
 
         // Fetch the resident's blotter, document requests, and community complaints for dashboard statistics
-        $blotterRequests = BlotterRequest::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
-        $documentRequests = DocumentRequest::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
-        $communityComplaints = CommunityComplaint::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+        $blotterRequests = BlotterRequest::where('resident_id', $userId)->orderBy('created_at', 'desc')->get();
+        $documentRequests = DocumentRequest::where('resident_id', $userId)->orderBy('created_at', 'desc')->get();
+        $communityComplaints = CommunityComplaint::where('resident_id', $userId)->orderBy('created_at', 'desc')->get();
 
         return view('resident.dashboard', compact('resident', 'blotterRequests', 'documentRequests', 'communityComplaints'));
     }

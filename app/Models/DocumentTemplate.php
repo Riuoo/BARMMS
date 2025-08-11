@@ -21,6 +21,11 @@ class DocumentTemplate extends Model
         'is_active' => 'boolean'
     ];
 
+    public function documentRequests()
+    {
+        return $this->hasMany(DocumentRequest::class);
+    }
+
     /**
      * Get the default template content for a document type
      */

@@ -20,14 +20,14 @@ class BlotterReportController
         $completedCount = BlotterRequest::where('status', 'completed')->count();
 
         // For display (filtered)
-        $query = BlotterRequest::with('user');
+        $query = BlotterRequest::with('resident');
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('recipient_name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
                   ->orWhere('type', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($uq) use ($search) {
+                  ->orWhereHas('resident', function($uq) use ($search) {
                       $uq->where('name', 'like', "%{$search}%");
                   });
             });
@@ -42,7 +42,7 @@ class BlotterReportController
     public function getDetails($id)
     {
         try {
-            $blotterRequest = BlotterRequest::with('user')->findOrFail($id);
+            $blotterRequest = BlotterRequest::with('resident')->findOrFail($id);
             
             // Prepare media files for response
             $mediaFiles = null;
@@ -59,7 +59,7 @@ class BlotterReportController
             }
             
             return response()->json([
-                'user_name' => $blotterRequest->user->name ?? 'N/A',
+                'user_name' => $blotterRequest->resident->name ?? 'N/A',
                 'recipient_name' => $blotterRequest->recipient_name,
                 'description' => $blotterRequest->description,
                 'status' => $blotterRequest->status,
@@ -83,8 +83,12 @@ class BlotterReportController
 
         try {
             $blotter = BlotterRequest::findOrFail($id);
-            $user = $blotter->user;
-            if (!$user || !$user->active) {
+            $user = $blotter->resident;
+            if (!$user) {
+                notify()->error('This resident record no longer exists.');
+                return redirect()->back();
+            }
+            if ($user->active === false) {
                 notify()->error('This user account is inactive and cannot make transactions.');
                 return redirect()->back();
             }
@@ -125,8 +129,12 @@ class BlotterReportController
     {
         try {
             $blotter = BlotterRequest::findOrFail($id);
-            $user = $blotter->user;
-            if (!$user || !$user->active) {
+            $user = $blotter->resident;
+            if (!$user) {
+                notify()->error('This resident record no longer exists.');
+                return back();
+            }
+            if ($user->active === false) {
                 notify()->error('This user account is inactive and cannot make transactions.');
                 return back();
             }
@@ -207,7 +215,7 @@ class BlotterReportController
         }
         try {
             $blotter = new BlotterRequest();
-            $blotter->user_id = $validated['resident_id'];
+            $blotter->resident_id = $validated['resident_id'];
             $blotter->recipient_name = $validated['recipient_name'];
             $blotter->type = $validated['type'];
             $blotter->description = $validated['description'];
@@ -256,8 +264,12 @@ class BlotterReportController
     public function generateNewSummons(Request $request, $id)
     {
         $blotter = BlotterRequest::findOrFail($id);
-        $user = $blotter->user;
-        if (!$user || !$user->active) {
+        $user = $blotter->resident;
+        if (!$user) {
+            notify()->error('This resident record no longer exists.');
+            return back();
+        }
+        if ($user->active === false) {
             notify()->error('This user account is inactive and cannot make transactions.');
             return back();
         }
@@ -266,9 +278,19 @@ class BlotterReportController
             return back();
             
         }
+        // Validate new date must be strictly after current summon_date (or approved_at if no summon yet)
+        $request->validate([
+            'new_summon_date' => ['required', 'date', function ($attr, $value, $fail) use ($blotter) {
+                $baseDate = $blotter->summon_date ?? $blotter->approved_at ?? now();
+                if ($baseDate && strtotime($value) <= strtotime($baseDate)) {
+                    $fail('The new summon date must be after the previous summon date.');
+                }
+            }],
+        ]);
+
         // Increment the attempts
         $blotter->attempts++;
-        $blotter->summon_date = $request->input('new_summon_date'); // Get new date from request
+        $blotter->summon_date = $request->input('new_summon_date');
         $blotter->save();
         // Get admin user data from session
         $adminUser = null;

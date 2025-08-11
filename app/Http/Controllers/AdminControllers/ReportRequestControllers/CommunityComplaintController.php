@@ -19,7 +19,7 @@ class CommunityComplaintController
         $closed = CommunityComplaint::where('status', 'closed')->count();
 
         // For display (filtered)
-        $query = CommunityComplaint::with('user');
+        $query = CommunityComplaint::with('resident');
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
@@ -46,7 +46,7 @@ class CommunityComplaintController
     public function getDetails($id)
     {
         try {
-            $complaint = CommunityComplaint::with('user')->findOrFail($id);
+            $complaint = CommunityComplaint::with('resident')->findOrFail($id);
             
             // Mark as read
             if (!$complaint->is_read) {
@@ -68,7 +68,7 @@ class CommunityComplaintController
             }
             
             return response()->json([
-                'user_name' => $complaint->user->name ?? 'N/A',
+                'user_name' => $complaint->resident->name ?? 'N/A',
                 'title' => $complaint->title,
                 'category' => $complaint->category,
                 'description' => $complaint->description,
@@ -92,8 +92,12 @@ class CommunityComplaintController
         ]);
         try {
             $complaint = CommunityComplaint::findOrFail($id);
-            $user = $complaint->user;
-            if (!$user || !$user->active) {
+            $user = $complaint->resident;
+            if (!$user) {
+                notify()->error('This resident record no longer exists.');
+                return redirect()->back();
+            }
+            if ($user->active === false) {
                 notify()->error('This user account is inactive and cannot make transactions.');
                 return redirect()->back();
             }

@@ -70,7 +70,7 @@ class AccountRequestController
             Log::debug('Admin User ID from session: ' . $adminUserId); // For debugging purposes
 
             if ($adminUserId) {
-                $accountRequest->user_id = $adminUserId; // Assign the admin's user_id
+                $accountRequest->barangay_profile_id = $adminUserId; // Assign the admin's id
             } else {
                 // Log a warning if the admin user ID is not found in the session
                 Log::warning('Admin User ID not found in session for account request approval: ' . $accountRequest->id);
@@ -78,7 +78,7 @@ class AccountRequestController
                 // For now, it will just leave user_id as null if not found, which might be desired if it's nullable
             }
 
-            // Update status to 'approved' and save the user_id
+            // Update status to 'approved' and save the approver id
             $accountRequest->status = 'approved'; // Explicitly set status
             $accountRequest->save(); // Save changes including user_id and status
 

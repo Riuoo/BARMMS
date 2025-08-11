@@ -19,8 +19,8 @@
 
     <div class="content">
         <p>To: <strong>{{ $blotter->recipient_name }}</strong></p>
-        <p>Address: {{ $blotter->user->address ?? 'Not specified' }}</p>
-        <p>Contact: {{ $blotter->user->contact_number ?? 'Not specified' }}</p>
+        <p>Address: {{ $blotter->resident->address ?? 'Not specified' }}</p>
+        <p>Contact: {{ $blotter->resident->contact_number ?? 'Not specified' }}</p>
         
         <p class="important">You are hereby summoned to appear before the Barangay Office on:</p>
         <p><strong>{{ \Carbon\Carbon::parse($blotter->summon_date)->format('l, F j, Y \a\t g:i A') }}</strong></p>

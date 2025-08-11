@@ -19,7 +19,7 @@
     </div>
 
     <div class="content">
-        <p>This is to certify that the case filed by <strong>{{ $blotter->user->name }}</strong>
+        <p>This is to certify that the case filed by <strong>{{ $blotter->resident->name }}</strong>
         regarding {{ strtolower($blotter->type) }} has been duly resolved on this date
         {{ now()->format('F j, Y') }}.</p>
         

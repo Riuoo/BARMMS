@@ -10,7 +10,7 @@ class BlotterRequest extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'resident_id',
         'recipient_name',
         'type',
         'description',
@@ -21,11 +21,14 @@ class BlotterRequest extends Model
 
     protected $casts = [
         'media' => 'array',
+        'approved_at' => 'datetime',
+        'summon_date' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
-    public function user()
+    public function resident()
     {
-        return $this->belongsTo(Residents::class);
+        return $this->belongsTo(Residents::class, 'resident_id');
     }
 
     /**
