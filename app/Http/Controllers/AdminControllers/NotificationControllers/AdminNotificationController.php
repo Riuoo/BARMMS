@@ -15,6 +15,15 @@ class AdminNotificationController
 {
     public function showNotifications(Request $request)
     {
+        $userRole = session('user_role');
+        $isNurse = $userRole === 'nurse';
+        
+        // If user is a nurse, redirect to health dashboard with a notice
+        if ($isNurse) {
+            notify()->info('Access limited: Nurses can only use health features.');
+            return redirect()->route('admin.health-reports');
+        }
+        
         // Build query for each notification type
         $blotterQuery = BlotterRequest::query();
         $documentQuery = DocumentRequest::query();
@@ -145,74 +154,79 @@ class AdminNotificationController
     {
         try {
             $notificationsData = [];
+            $userRole = session('user_role');
+            $isNurse = $userRole === 'nurse';
             
-            // Process Blotter Reports
-            BlotterRequest::where('is_read', false)->get()->each(function ($report) use (&$notificationsData) {
-                try {
-                    $notificationsData[] = [
-                        'id' => $report->id,
-                        'type' => 'blotter_report',
-                        'message' => 'New blotter report from ' . ($report->resident->name ?? 'Unknown Resident'),
-                        'created_at' => Carbon::parse($report->created_at)->toDateTimeString(),
-                        'link' => route('admin.blotter-reports'),
-                        'priority' => 'high'
-                    ];
-                } catch (\Exception $e) {
-                    // Skip this notification if there's an error
-                    Log::error('Error processing blotter report notification: ' . $e->getMessage());
-                }
-            });
-            
-            // Process Document Requests
-            DocumentRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
-                try {
-                    $notificationsData[] = [
-                        'id' => $request->id,
-                        'type' => 'document_request',
-                        'message' => 'Document request from ' . ($request->resident->name ?? 'Unknown Resident'),
-                        'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
-                        'link' => route('admin.document-requests'),
-                        'priority' => 'medium'
-                    ];
-                } catch (\Exception $e) {
-                    // Skip this notification if there's an error
-                    Log::error('Error processing document request notification: ' . $e->getMessage());
-                }
-            });
+            // Only show barangay-related notifications if user is NOT a nurse
+            if (!$isNurse) {
+                // Process Blotter Reports
+                BlotterRequest::where('is_read', false)->get()->each(function ($report) use (&$notificationsData) {
+                    try {
+                        $notificationsData[] = [
+                            'id' => $report->id,
+                            'type' => 'blotter_report',
+                            'message' => 'New blotter report from ' . ($report->resident->name ?? 'Unknown Resident'),
+                            'created_at' => Carbon::parse($report->created_at)->toDateTimeString(),
+                            'link' => route('admin.blotter-reports'),
+                            'priority' => 'high'
+                        ];
+                    } catch (\Exception $e) {
+                        // Skip this notification if there's an error
+                        Log::error('Error processing blotter report notification: ' . $e->getMessage());
+                    }
+                });
+                
+                // Process Document Requests
+                DocumentRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
+                    try {
+                        $notificationsData[] = [
+                            'id' => $request->id,
+                            'type' => 'document_request',
+                            'message' => 'Document request from ' . ($request->resident->name ?? 'Unknown Resident'),
+                            'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
+                            'link' => route('admin.document-requests'),
+                            'priority' => 'medium'
+                        ];
+                    } catch (\Exception $e) {
+                        // Skip this notification if there's an error
+                        Log::error('Error processing document request notification: ' . $e->getMessage());
+                    }
+                });
 
-            // Process Account Requests
-            AccountRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
-                try {
-                    $notificationsData[] = [
-                        'id' => $request->id,
-                        'type' => 'account_request',
-                        'message' => 'Account request from ' . $request->email,
-                        'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
-                        'link' => route('admin.requests.new-account-requests'),
-                        'priority' => 'high'
-                    ];
-                } catch (\Exception $e) {
-                    // Skip this notification if there's an error
-                    Log::error('Error processing account request notification: ' . $e->getMessage());
-                }
-            });
-            
-            // Process Community Complaints
-            CommunityComplaint::where('is_read', false)->get()->each(function ($complaint) use (&$notificationsData) {
-                try {
-                    $notificationsData[] = [
-                        'id' => $complaint->id,
-                        'type' => 'community_complaint',
-                        'message' => 'Community complaint from ' . ($complaint->resident->name ?? 'Unknown Resident'),
-                        'created_at' => Carbon::parse($complaint->created_at)->toDateTimeString(),
-                        'link' => route('admin.community-complaints'),
-                        'priority' => 'medium'
-                    ];
-                } catch (\Exception $e) {
-                    // Skip this notification if there's an error
-                    Log::error('Error processing community complaint notification: ' . $e->getMessage());
-                }
-            });
+                // Process Account Requests
+                AccountRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
+                    try {
+                        $notificationsData[] = [
+                            'id' => $request->id,
+                            'type' => 'account_request',
+                            'message' => 'Account request from ' . $request->email,
+                            'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
+                            'link' => route('admin.requests.new-account-requests'),
+                            'priority' => 'high'
+                        ];
+                    } catch (\Exception $e) {
+                        // Skip this notification if there's an error
+                        Log::error('Error processing account request notification: ' . $e->getMessage());
+                    }
+                });
+                
+                // Process Community Complaints
+                CommunityComplaint::where('is_read', false)->get()->each(function ($complaint) use (&$notificationsData) {
+                    try {
+                        $notificationsData[] = [
+                            'id' => $complaint->id,
+                            'type' => 'community_complaint',
+                            'message' => 'Community complaint from ' . ($complaint->resident->name ?? 'Unknown Resident'),
+                            'created_at' => Carbon::parse($complaint->created_at)->toDateTimeString(),
+                            'link' => route('admin.community-complaints'),
+                            'priority' => 'medium'
+                        ];
+                    } catch (\Exception $e) {
+                        // Skip this notification if there's an error
+                        Log::error('Error processing community complaint notification: ' . $e->getMessage());
+                    }
+                });
+            }
             
             // Convert to collection and sort by priority and date
             $allUnreadNotifications = collect($notificationsData);
@@ -226,25 +240,47 @@ class AdminNotificationController
             // Limit to 5 notifications for dropdown
             $limitedNotifications = $sortedNotifications->take(5);
 
-            // Compute totals across models
-            $unreadCounts = [
-                'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
-                'document_requests' => DocumentRequest::where('is_read', false)->count(),
-                'account_requests' => AccountRequest::where('is_read', false)->count(),
-                'community_complaints' => CommunityComplaint::where('is_read', false)->count(),
-            ];
-            $readCounts = [
-                'blotter_reports' => BlotterRequest::where('is_read', true)->count(),
-                'document_requests' => DocumentRequest::where('is_read', true)->count(),
-                'account_requests' => AccountRequest::where('is_read', true)->count(),
-                'community_complaints' => CommunityComplaint::where('is_read', true)->count(),
-            ];
-            $totalCounts = [
-                'blotter_reports' => BlotterRequest::count(),
-                'document_requests' => DocumentRequest::count(),
-                'account_requests' => AccountRequest::count(),
-                'community_complaints' => CommunityComplaint::count(),
-            ];
+            // Compute totals across models based on user role
+            if (!$isNurse) {
+                $unreadCounts = [
+                    'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
+                    'document_requests' => DocumentRequest::where('is_read', false)->count(),
+                    'account_requests' => AccountRequest::where('is_read', false)->count(),
+                    'community_complaints' => CommunityComplaint::where('is_read', false)->count(),
+                ];
+                $readCounts = [
+                    'blotter_reports' => BlotterRequest::where('is_read', true)->count(),
+                    'document_requests' => DocumentRequest::where('is_read', true)->count(),
+                    'account_requests' => AccountRequest::where('is_read', true)->count(),
+                    'community_complaints' => CommunityComplaint::where('is_read', true)->count(),
+                ];
+                $totalCounts = [
+                    'blotter_reports' => BlotterRequest::count(),
+                    'document_requests' => DocumentRequest::count(),
+                    'account_requests' => AccountRequest::count(),
+                    'community_complaints' => CommunityComplaint::count(),
+                ];
+            } else {
+                // For nurses, only show health-related counts (all zeros for barangay-related)
+                $unreadCounts = [
+                    'blotter_reports' => 0,
+                    'document_requests' => 0,
+                    'account_requests' => 0,
+                    'community_complaints' => 0,
+                ];
+                $readCounts = [
+                    'blotter_reports' => 0,
+                    'document_requests' => 0,
+                    'account_requests' => 0,
+                    'community_complaints' => 0,
+                ];
+                $totalCounts = [
+                    'blotter_reports' => 0,
+                    'document_requests' => 0,
+                    'account_requests' => 0,
+                    'community_complaints' => 0,
+                ];
+            }
 
             $unreadTotal = array_sum($unreadCounts);
             $readTotal = array_sum($readCounts);
@@ -298,6 +334,12 @@ class AdminNotificationController
 
     public function markAllAsRead(Request $request)
     {
+        // Block nurses from barangay notifications
+        if (session('user_role') === 'nurse') {
+            notify()->warning('Access denied. Nurses cannot modify barangay notifications.');
+            return redirect()->route('admin.health-reports');
+        }
+
         DB::beginTransaction();
         try {
             BlotterRequest::where('is_read', false)->update(['is_read' => true]);
@@ -318,6 +360,11 @@ class AdminNotificationController
 
     public function markAsRead(Request $request, $type, $id)
     {
+        // Block nurses from barangay notifications
+        if (session('user_role') === 'nurse') {
+            return response()->json(['message' => 'Access denied. Nurses cannot modify barangay notifications.'], 403);
+        }
+
         try {
             $updated = false;
             
@@ -351,6 +398,14 @@ class AdminNotificationController
     
     public function markAllAsReadAjax(Request $request)
     {
+        // Block nurses from barangay notifications
+        if (session('user_role') === 'nurse') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied. Nurses cannot modify barangay notifications.'
+            ], 403);
+        }
+
         DB::beginTransaction();
         try {
             BlotterRequest::where('is_read', false)->update(['is_read' => true]);
@@ -376,6 +431,14 @@ class AdminNotificationController
 
     public function markAsReadByType(Request $request, $type)
     {
+        // Block nurses from barangay notifications
+        if (session('user_role') === 'nurse') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied. Nurses cannot modify barangay notifications.'
+            ], 403);
+        }
+
         try {
             $updated = false;
             

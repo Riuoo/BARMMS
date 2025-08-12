@@ -64,6 +64,15 @@
                 </div>
             </div>
 
+            <!-- Featured Filter -->
+            <div class="sm:w-48">
+                <select name="featured" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Activities</option>
+                    <option value="featured" {{ request('featured') == 'featured' ? 'selected' : '' }}>Featured Only</option>
+                    <option value="non-featured" {{ request('featured') == 'non-featured' ? 'selected' : '' }}>Non-Featured</option>
+                </select>
+            </div>
+            
             <div class="flex space-x-2">
                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     Filter
@@ -74,6 +83,102 @@
             </div>
         </div>
     </form>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-blue-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Activities</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $activities->total() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Planned</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $activities->where('status', 'Planned')->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Completed</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $activities->where('status', 'Completed')->count() }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 {{ $featuredCounts['total'] >= 6 ? 'bg-red-100' : 'bg-purple-100' }} rounded-full flex items-center justify-center">
+                        <i class="fas fa-star {{ $featuredCounts['total'] >= 6 ? 'text-red-600' : 'text-purple-600' }} text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Featured</p>
+                    <p class="text-lg lg:text-2xl font-bold {{ $featuredCounts['total'] >= 6 ? 'text-red-600' : 'text-gray-900' }}">
+                        {{ $featuredCounts['total'] }}/6
+                    </p>
+                    <p class="text-xs text-gray-500">{{ $featuredCounts['projects'] }} projects + {{ $featuredCounts['activities'] }} activities</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Items Warning -->
+    @if($warningMessage)
+        <div class="mb-4 bg-{{ $warningMessage['color'] }}-50 border border-{{ $warningMessage['color'] }}-200 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-{{ $warningMessage['icon'] }} text-{{ $warningMessage['color'] }}-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-{{ $warningMessage['color'] }}-800">
+                        <strong>{{ $warningMessage['title'] }}:</strong> {{ $warningMessage['message'] }}
+                    </p>
+                    @if($warningMessage['type'] === 'error' && !empty($unfeatureSuggestions))
+                        <div class="mt-3 pt-3 border-t border-{{ $warningMessage['color'] }}-200">
+                            <p class="text-xs text-{{ $warningMessage['color'] }}-700 mb-2"><strong>Suggestions to unfeature:</strong></p>
+                            <div class="space-y-1">
+                                @if(isset($unfeatureSuggestions['projects']))
+                                    @foreach($unfeatureSuggestions['projects']->take(2) as $suggestion)
+                                        <div class="text-xs text-{{ $warningMessage['color'] }}-600">
+                                            • Project: {{ $suggestion['name'] }} ({{ $suggestion['date']->format('M Y') }})
+                                        </div>
+                                    @endforeach
+                                @endif
+                                @if(isset($unfeatureSuggestions['activities']))
+                                    @foreach($unfeatureSuggestions['activities']->take(2) as $suggestion)
+                                        <div class="text-xs text-{{ $warningMessage['color'] }}-600">
+                                            • Activity: {{ $suggestion['name'] }} ({{ $suggestion['date']->format('M Y') }})
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Activities Grid (Aligned with Accomplished Projects UI) -->
     @if($activities->isEmpty())
@@ -103,34 +208,77 @@
                 };
             @endphp
             <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
-                <!-- Header Badge -->
+                <!-- Activity Image -->
                 <div class="relative">
-                    <div class="w-full h-2 bg-gradient-to-r from-green-500 to-blue-500"></div>
-                    <div class="absolute top-3 right-3">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $statusBadge }}">
-                            <i class="fas fa-toggle-on mr-1"></i>{{ $activity->status }}
+                    @if($activity->image)
+                        <img src="{{ $activity->image_url }}" 
+                             alt="{{ $activity->activity_name }}" 
+                             class="w-full h-48 object-cover">
+                    @else
+                        <div class="w-full h-48 bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-gray-400 text-4xl"></i>
+                        </div>
+                    @endif
+                    
+                    <!-- Featured Badge -->
+                    @if($activity->is_featured)
+                        <div class="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold shadow-sm">
+                            <i class="fas fa-star mr-1"></i>Featured
+                        </div>
+                    @endif
+                    
+                    <!-- Status Badge -->
+                    <div class="absolute top-3 left-3">
+                        <span class="px-3 py-1.5 rounded-full text-xs font-semibold {{ $statusBadge }} shadow-sm">
+                            <i class="fas fa-toggle-on mr-1.5 text-xs"></i>{{ $activity->status }}
+                        </span>
+                    </div>
+                    
+                    <!-- Activity Type Badge -->
+                    <div class="absolute bottom-3 right-3">
+                        <span class="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+                            {{ $activity->activity_type }}
                         </span>
                     </div>
                 </div>
 
                 <!-- Card Content -->
                 <div class="p-5">
-                    <div class="flex items-start justify-between mb-2">
-                        <h3 class="text-lg font-semibold text-gray-900 leading-snug line-clamp-2">{{ $activity->activity_name }}</h3>
-                        <span class="ml-2 bg-green-600 text-white px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap">{{ $activity->activity_type }}</span>
-                    </div>
-                    <p class="text-gray-600 text-sm mb-3 line-clamp-3">{{ Str::limit($activity->description, 180) }}</p>
+                    <!-- Title -->
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">{{ $activity->activity_name }}</h3>
+                    
+                    <!-- Description -->
+                    <p class="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">{{ Str::limit($activity->description, 120) }}</p>
 
-                    <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
-                        <span><i class="fas fa-calendar-alt mr-1"></i>{{ $activity->activity_date->format('M d, Y') }}</span>
+                    <!-- Date and Time Row -->
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-calendar-alt mr-2 text-gray-400 w-4 text-center"></i>
+                            <span>{{ $activity->activity_date->format('M d, Y') }}</span>
+                        </div>
                         @if($activity->start_time && $activity->end_time)
-                        <span><i class="fas fa-clock mr-1"></i>{{ $activity->start_time->format('g:i A') }} - {{ $activity->end_time->format('g:i A') }}</span>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-clock mr-2 text-gray-400 w-4 text-center"></i>
+                            <span>
+                                {{ \Carbon\Carbon::createFromFormat('H:i:s', $activity->start_time)->format('g:i A') }}
+                                -
+                                {{ \Carbon\Carbon::createFromFormat('H:i:s', $activity->end_time)->format('g:i A') }}
+                            </span>
+                        </div>
                         @endif
                     </div>
-                    <div class="text-sm text-gray-600 mb-4">
-                        <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>{{ $activity->location }}
+                    
+                    <!-- Location and Organizer Row -->
+                    <div class="space-y-2 mb-5">
+                        <div class="flex items-start text-sm text-gray-600">
+                            <i class="fas fa-map-marker-alt mr-2 text-gray-400 w-4 text-center mt-0.5"></i>
+                            <span class="leading-relaxed">{{ $activity->location }}</span>
+                        </div>
                         @if($activity->organizer)
-                            <span class="ml-2"><i class="fas fa-user mr-1 text-gray-400"></i>{{ $activity->organizer }}</span>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-user mr-2 text-gray-400 w-4 text-center"></i>
+                            <span>{{ $activity->organizer }}</span>
+                        </div>
                         @endif
                     </div>
 
@@ -144,6 +292,7 @@
                            class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition duration-300">
                             <i class="fas fa-edit mr-1"></i>Edit
                         </a>
+
                         <form action="{{ route('admin.health-center-activities.destroy', $activity) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this activity?')" class="flex-1">
                             @csrf
                             @method('DELETE')
@@ -225,4 +374,19 @@
         @endif
     @endif
 </div>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
 @endsection 

@@ -5,15 +5,18 @@ namespace App\Http\Controllers\AdminControllers\ProjectControllers;
 use App\Models\AccomplishedProject;
 use App\Http\Requests\AccomplishedProjectRequest;
 use App\Services\AccomplishedProjectService;
+use App\Services\FeaturedItemsService;
 use Illuminate\Http\Request;
 
 class AccomplishProjectController
 {
     protected $projectService;
+    protected $featuredService;
 
-    public function __construct(AccomplishedProjectService $projectService)
+    public function __construct(AccomplishedProjectService $projectService, FeaturedItemsService $featuredService)
     {
         $this->projectService = $projectService;
+        $this->featuredService = $featuredService;
     }
 
     public function accomplishProject(Request $request)
@@ -47,8 +50,11 @@ class AccomplishProjectController
         $projects = $query->orderBy('completion_date', 'desc')->paginate(9);
         $stats = $this->projectService->getProjectStats();
         $featuredProjects = AccomplishedProject::where('is_featured', true)->get();
+        $featuredCounts = $this->featuredService->getFeaturedCounts();
+        $warningMessage = $this->featuredService->getWarningMessage();
+        $unfeatureSuggestions = $this->featuredService->getUnfeatureSuggestions();
         
-        return view('admin.accomplished-projects.accomplished-projects', compact('projects', 'stats', 'featuredProjects'));
+        return view('admin.accomplished-projects.accomplished-projects', compact('projects', 'stats', 'featuredProjects', 'featuredCounts', 'warningMessage', 'unfeatureSuggestions'));
     }
 
     public function create()
@@ -110,6 +116,14 @@ class AccomplishProjectController
     {
         try {
             $project = AccomplishedProject::findOrFail($id);
+            
+            // If trying to mark as featured, check the limit
+            if (!$project->is_featured && !$this->featuredService->canAddMoreFeatured()) {
+                $counts = $this->featuredService->getFeaturedCounts();
+                notify()->error("Cannot mark project as featured. You already have {$counts['total']}/6 featured items ({$counts['projects']} projects + {$counts['activities']} activities). Please unfeature some items first.", 'Featured Limit Reached');
+                return redirect()->route('admin.accomplished-projects');
+            }
+            
             $this->projectService->toggleFeatured($project);
             
             $status = $project->fresh()->is_featured ? 'featured' : 'unfeatured';

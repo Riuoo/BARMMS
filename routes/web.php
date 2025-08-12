@@ -72,8 +72,21 @@ Route::post('/register', [RegistrationController::class, 'register'])->name('reg
 
 Route::prefix('admin')->group(function () {
     // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
-    Route::middleware(['admin.role:admin,secretary,captain,treasurer,councilor'])->group(function () {
+    Route::middleware(['admin.role:admin,secretary,captain,treasurer,councilor,nurse'])->group(function () {
+        // Profile routes for viewing and updating profile
+        Route::get('/profile', [AdminProfileController::class, 'profile'])->name('admin.profile');
+        Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
 
+        // Route to mark all notifications as read
+        Route::post('/notifications/mark-all-as-read', [AdminNotificationController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-as-read');
+        Route::get('/notifications/count', [AdminNotificationController::class, 'getNotificationCounts'])->name('admin.notifications.count');
+        Route::get('/notifications', [AdminNotificationController::class, 'showNotifications'])->name('admin.notifications');
+        Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
+        Route::post('/notifications/mark-all-as-read-ajax', [AdminNotificationController::class, 'markAllAsReadAjax'])->name('admin.notifications.mark-all-as-read-ajax');
+        Route::post('/notifications/mark-as-read-by-type/{type}', [AdminNotificationController::class, 'markAsReadByType'])->name('admin.notifications.mark-as-read-by-type');
+    });
+
+    Route::middleware(['admin.role:admin,secretary,captain,treasurer,councilor'])->group(function () {
         // Admin Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -99,11 +112,26 @@ Route::prefix('admin')->group(function () {
         Route::put('/residents/{id}/deactivate', [ResidentController::class, 'deactivate'])->name('admin.residents.deactivate');
         Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
         Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->name('admin.residents.demographics');
-        
-        // Profile routes for viewing and updating profile
-        Route::get('/profile', [AdminProfileController::class, 'profile'])->name('admin.profile');
-        Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
-        
+
+        // Clustering Analysis Routes
+        Route::get('/clustering', [ClusteringController::class, 'index'])->name('admin.clustering');
+        Route::post('/clustering/perform', [ClusteringController::class, 'performClustering'])->name('admin.clustering.perform');
+        Route::get('/clustering/optimal-k', [ClusteringController::class, 'getOptimalK'])->name('admin.clustering.optimal-k');
+        Route::get('/clustering/export', [ClusteringController::class, 'export'])->name('admin.clustering.export');
+        Route::get('/clustering/stats', [ClusteringController::class, 'getClusterStats'])->name('admin.clustering.stats');
+
+        // Decision Tree Analysis Routes
+        Route::get('/decision-tree', [DecisionTreeController::class, 'index'])->name('admin.decision-tree');
+        Route::post('/decision-tree/perform', [DecisionTreeController::class, 'performAnalysis'])->name('admin.decision-tree.perform');
+        Route::post('/decision-tree/predict', [DecisionTreeController::class, 'predictForResident'])->name('admin.decision-tree.predict');
+        Route::get('/decision-tree/stats', [DecisionTreeController::class, 'getStatistics'])->name('admin.decision-tree.stats');
+        Route::get('/decision-tree/export', [DecisionTreeController::class, 'exportRules'])->name('admin.decision-tree.export');
+        Route::get('/decision-tree/features', [DecisionTreeController::class, 'getFeatureImportance'])->name('admin.decision-tree.features');
+        Route::get('/decision-tree/visualization', [DecisionTreeController::class, 'getTreeVisualization'])->name('admin.decision-tree.visualization');
+    });
+
+    Route::middleware(['admin.role:admin,secretary,captain,councilor'])->group(function () {
+
         // Blotter Reports route
         Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
         Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');
@@ -141,32 +169,6 @@ Route::prefix('admin')->group(function () {
         // Account Requests listing and approval
         Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
         Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');
-        
-        // Accomplished Projects Routes
-        Route::get('/accomplished-projects', [AccomplishProjectController::class, 'accomplishProject'])->name('admin.accomplished-projects');
-        Route::get('/accomplished-projects/create', [AccomplishProjectController::class, 'create'])->name('admin.accomplished-projects.create');
-        Route::get('/accomplished-projects/{id}', [AccomplishProjectController::class, 'show'])->name('admin.accomplished-projects.show');
-        Route::get('/accomplished-projects/{id}/edit', [AccomplishProjectController::class, 'edit'])->name('admin.accomplished-projects.edit');
-        Route::post('/accomplished-projects', [AccomplishProjectController::class, 'store'])->name('admin.accomplished-projects.store');
-        Route::put('/accomplished-projects/{id}', [AccomplishProjectController::class, 'update'])->name('admin.accomplished-projects.update');
-        Route::delete('/accomplished-projects/{id}', [AccomplishProjectController::class, 'destroy'])->name('admin.accomplished-projects.destroy');
-        Route::post('/accomplished-projects/{id}/toggle-featured', [AccomplishProjectController::class, 'toggleFeatured'])->name('admin.accomplished-projects.toggle-featured');
-
-        // Clustering Analysis Routes
-        Route::get('/clustering', [ClusteringController::class, 'index'])->name('admin.clustering');
-        Route::post('/clustering/perform', [ClusteringController::class, 'performClustering'])->name('admin.clustering.perform');
-        Route::get('/clustering/optimal-k', [ClusteringController::class, 'getOptimalK'])->name('admin.clustering.optimal-k');
-        Route::get('/clustering/export', [ClusteringController::class, 'export'])->name('admin.clustering.export');
-        Route::get('/clustering/stats', [ClusteringController::class, 'getClusterStats'])->name('admin.clustering.stats');
-
-        // Decision Tree Analysis Routes
-        Route::get('/decision-tree', [DecisionTreeController::class, 'index'])->name('admin.decision-tree');
-        Route::post('/decision-tree/perform', [DecisionTreeController::class, 'performAnalysis'])->name('admin.decision-tree.perform');
-        Route::post('/decision-tree/predict', [DecisionTreeController::class, 'predictForResident'])->name('admin.decision-tree.predict');
-        Route::get('/decision-tree/stats', [DecisionTreeController::class, 'getStatistics'])->name('admin.decision-tree.stats');
-        Route::get('/decision-tree/export', [DecisionTreeController::class, 'exportRules'])->name('admin.decision-tree.export');
-        Route::get('/decision-tree/features', [DecisionTreeController::class, 'getFeatureImportance'])->name('admin.decision-tree.features');
-        Route::get('/decision-tree/visualization', [DecisionTreeController::class, 'getTreeVisualization'])->name('admin.decision-tree.visualization');
     });
 
     // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
@@ -229,14 +231,20 @@ Route::prefix('admin')->group(function () {
         Route::get('/health-center-activities/upcoming', [HealthCenterActivityController::class, 'upcoming'])->name('admin.health-center-activities.upcoming');
         Route::get('/health-center-activities/completed', [HealthCenterActivityController::class, 'completed'])->name('admin.health-center-activities.completed');
         Route::get('/health-center-activities/report', [HealthCenterActivityController::class, 'generateReport'])->name('admin.health-center-activities.report');
+        Route::post('/health-center-activities/{id}/toggle-featured', [HealthCenterActivityController::class, 'toggleFeatured'])->name('admin.health-center-activities.toggle-featured');
+    });
 
-        // Route to mark all notifications as read
-        Route::post('/notifications/mark-all-as-read', [AdminNotificationController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-as-read');
-        Route::get('/notifications/count', [AdminNotificationController::class, 'getNotificationCounts'])->name('admin.notifications.count');
-        Route::get('/notifications', [AdminNotificationController::class, 'showNotifications'])->name('admin.notifications');
-        Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
-        Route::post('/notifications/mark-all-as-read-ajax', [AdminNotificationController::class, 'markAllAsReadAjax'])->name('admin.notifications.mark-all-as-read-ajax');
-        Route::post('/notifications/mark-as-read-by-type/{type}', [AdminNotificationController::class, 'markAsReadByType'])->name('admin.notifications.mark-as-read-by-type');
+    Route::middleware(['admin.role:admin,treasurer'])->group(function () {
+
+        // Accomplished Projects Routes
+        Route::get('/accomplished-projects', [AccomplishProjectController::class, 'accomplishProject'])->name('admin.accomplished-projects');
+        Route::get('/accomplished-projects/create', [AccomplishProjectController::class, 'create'])->name('admin.accomplished-projects.create');
+        Route::get('/accomplished-projects/{id}', [AccomplishProjectController::class, 'show'])->name('admin.accomplished-projects.show');
+        Route::get('/accomplished-projects/{id}/edit', [AccomplishProjectController::class, 'edit'])->name('admin.accomplished-projects.edit');
+        Route::post('/accomplished-projects', [AccomplishProjectController::class, 'store'])->name('admin.accomplished-projects.store');
+        Route::put('/accomplished-projects/{id}', [AccomplishProjectController::class, 'update'])->name('admin.accomplished-projects.update');
+        Route::delete('/accomplished-projects/{id}', [AccomplishProjectController::class, 'destroy'])->name('admin.accomplished-projects.destroy');
+        Route::post('/accomplished-projects/{id}/toggle-featured', [AccomplishProjectController::class, 'toggleFeatured'])->name('admin.accomplished-projects.toggle-featured');
     });
 });
 

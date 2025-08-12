@@ -84,6 +84,13 @@
 <body x-data="{ sidebarOpen: false }" class="flex flex-col min-h-screen bg-gray-100 font-sans" data-notifications-url="{{ route('admin.notifications.count') }}" data-notify-timeout="{{ config('notify.timeout', 5000) }}">
     @include('notify::components.notify')
 
+    @php
+        // Global role helpers for layout and scripts
+        $userRole = session('user_role');
+        $isNurse = $userRole === 'nurse';
+        $isAdmin = $userRole === 'admin';
+    @endphp
+
     <!-- Enhanced Toast Notification System -->
     <div id="toastContainer" class="fixed top-4 right-4 z-[9998] space-y-2"></div>
 
@@ -174,6 +181,7 @@
             </div>
         </div>
         <div class="flex items-center space-x-4">
+            @if(!$isNurse)
             <!-- Notifications -->
             <div class="relative" x-data="{ open: false }" @click="open = !open">
                 <button class="relative focus:outline-none" title="Notifications">
@@ -199,7 +207,7 @@
                     <!-- Header -->
                     <div class="bg-gradient-to-r from-green-600 to-green-700 px-4 py-3">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-white font-semibold text-sm">Notifications</h3>
+                            <h3 class="text-white font-semibold text-sm">{{ $isNurse ? 'Health Notifications' : 'Notifications' }}</h3>
                             <div class="flex items-center space-x-2">
                                 <span id="dropdown-notification-count" class="text-white text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">0</span>
                                 <button @click="open = false" class="text-white hover:text-gray-200 transition duration-200">
@@ -214,7 +222,13 @@
                         <div id="notification-list-dropdown" class="p-4">
                             <div class="flex items-center justify-center py-8">
                                 <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-                                <span class="ml-2 text-gray-500 text-sm">Loading notifications...</span>
+                                <span class="ml-2 text-gray-500 text-sm">
+                                    @if($isNurse)
+                                        Loading health notifications...
+                                    @else
+                                        Loading notifications...
+                                    @endif
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -222,10 +236,17 @@
                     <!-- Footer -->
                     <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
                         <div class="flex items-center justify-between">
+                            @if(!$isNurse)
                             <a href="{{ route('admin.notifications') }}" class="text-green-600 hover:text-green-700 text-sm font-medium transition duration-200">
                                 <i class="fas fa-external-link-alt mr-1"></i>
                                 View All Notifications
                             </a>
+                            @else
+                            <span class="text-gray-500 text-sm">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Health notifications only
+                            </span>
+                            @endif
                             <button onclick="markAllAsRead()" class="text-gray-600 hover:text-gray-800 text-sm transition duration-200">
                                 <i class="fas fa-check-double mr-1"></i>
                                 Mark All Read
@@ -234,6 +255,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- User menu -->
             <div class="relative" x-data="{ open: false }">
@@ -299,9 +321,16 @@
                         function isActiveRoute($pattern) {
                             return request()->routeIs($pattern) ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300';
                         }
+                        
+                        // Get current user role
+                        $userRole = session('user_role');
+                        $isNurse = $userRole === 'nurse';
+                        $isAdmin = $userRole === 'admin';
+                        $isTreasurer = $userRole === 'treasurer';
+                        $isSecretary = in_array($userRole, ['secretary', 'captain', 'councilor']);
                     @endphp
 
-                    @if(!in_array(session('user_role'), ['nurse']))
+                    @if(!$isNurse)
                     <!-- Main section -->
                     <section class="mb-6" aria-label="Main navigation">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
@@ -316,7 +345,7 @@
                     </section>
                     @endif
 
-                    @if(!in_array(session('user_role'), ['nurse']))
+                    @if(!$isNurse)
                     <!-- User Management --> 
                     <section class="mb-6" aria-label="User management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
@@ -337,7 +366,7 @@
                     </section>
                     @endif
 
-                    @if(!in_array(session('user_role'), ['nurse']))
+                    @if(!$isNurse)
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
@@ -370,7 +399,7 @@
                     </section>
                     @endif
 
-                    @if(!in_array(session('user_role'), ['nurse']))
+                    @if(!$isNurse)
                     <!-- Projects -->
                     <section class="mb-6" aria-label="Projects">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Projects</h3>
@@ -385,7 +414,7 @@
                     </section>
                     @endif
                     
-                    @if(session('user_role') === 'nurse' || session('user_role') === 'admin')
+                    @if($isNurse || $isAdmin)
                     <!-- Main Health Section -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
@@ -400,7 +429,7 @@
                     </section>
                     @endif
 
-                    @if(session('user_role') === 'nurse' || session('user_role') === 'admin')
+                    @if($isNurse || $isAdmin)
                     <!-- Health Management -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
@@ -415,12 +444,6 @@
                                 <a href="{{ route('admin.medical-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medical-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medical-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Medical Records</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.health-center-activities.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.health-center-activities*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.health-center-activities*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-calendar-alt fa-fw mr-3 {{ request()->routeIs('admin.health-center-activities*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Health Activities</span>
                                 </a>
                             </li>
                             <li>
@@ -445,7 +468,22 @@
                     </section>
                     @endif
 
-                    @if(!in_array(session('user_role'), ['nurse']))
+                    @if($isNurse || $isAdmin)
+                    <!-- Main Health Section -->
+                    <section class="mb-6" aria-label="Health Management">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Activities</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li>
+                                <a href="{{ route('admin.health-center-activities.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.health-center-activities*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-calendar-alt fa-fw mr-3 {{ request()->routeIs('admin.health-center-activities*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Health Activities</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    @endif
+
+                    @if(!$isNurse)
                     <!-- Analytics -->
                     <section class="mb-6" aria-label="Analytics">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Analytics</h3>
@@ -484,8 +522,9 @@
                 style="display:none"
             >
                 <nav class="flex flex-col overflow-y-auto max-h-[calc(100vh-4rem)] px-2">
-                    <!-- Duplicate all sections from desktop exactly -->
+                    <!-- Duplicate all sections from desktop with role-based access control -->
 
+                    @if(!$isNurse)
                     <!-- Main section -->
                     <section class="mb-6" aria-label="Main navigation">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
@@ -498,7 +537,9 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!$isNurse)
                     <!-- User Management -->
                     <section class="mb-6" aria-label="User management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
@@ -514,11 +555,12 @@
                                     <i class="fas fa-home fa-fw mr-3 {{ request()->routeIs('admin.residents*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Resident Information</span>
                                 </a>
-                            </a>
                             </li>
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!$isNurse)
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
@@ -549,7 +591,9 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!$isNurse)
                     <!-- Projects -->
                     <section class="mb-6" aria-label="Projects">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Projects</h3>
@@ -562,17 +606,28 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
-                    <!-- Health Management -->
+                    @if($isNurse || $isAdmin)
+                    <!-- Main Health Section -->
                     <section class="mb-6" aria-label="Health Management">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('admin.health-reports') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.health-reports*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                <a href="{{ route('admin.health-reports') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.health-reports*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.health-reports*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-chart-line fa-fw mr-3 {{ request()->routeIs('admin.health-reports*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Health Dashboard</span>
                                 </a>
                             </li>
+                        </ul>
+                    </section>
+                    @endif
+
+                    @if($isNurse || $isAdmin)
+                    <!-- Health Management -->
+                    <section class="mb-6" aria-label="Health Management">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
+                        <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.vaccination-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
@@ -586,6 +641,33 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="{{ route('admin.medicines.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.medicines*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-pills fa-fw mr-3 {{ request()->routeIs('admin.medicines*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Medicines Inventory</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.medicine-requests.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.medicine-requests*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-clipboard-check fa-fw mr-3 {{ request()->routeIs('admin.medicine-requests*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Medicine Requests</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.medicine-transactions.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.medicine-transactions*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-list fa-fw mr-3 {{ request()->routeIs('admin.medicine-transactions*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Medicine Transactions</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    @endif
+
+                    @if($isNurse || $isAdmin)
+                    <!-- Main Health Section -->
+                    <section class="mb-6" aria-label="Health Management">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Activities</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li>
                                 <a href="{{ route('admin.health-center-activities.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.health-center-activities*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-calendar-alt fa-fw mr-3 {{ request()->routeIs('admin.health-center-activities*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Health Activities</span>
@@ -593,7 +675,9 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!$isNurse)
                     <!-- Analytics -->
                     <section class="mb-6" aria-label="Analytics">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Analytics</h3>
@@ -612,6 +696,7 @@
                             </li>
                         </ul>
                     </section>
+                    @endif
                 </nav>
                 <div class="flex-shrink-0 h-12"></div>
             </aside>
@@ -1016,14 +1101,27 @@
                 if (!container) return;
 
                 if (notifications.length === 0) {
-                    container.innerHTML = `
-                        <div class="flex items-center justify-center py-8">
-                            <div class="text-center">
-                                <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
-                                <p class="text-gray-500 text-sm">No new notifications</p>
+                    const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                    if (isNurse) {
+                        container.innerHTML = `
+                            <div class="flex items-center justify-center py-8">
+                                <div class="text-center">
+                                    <i class="fas fa-heartbeat text-gray-400 text-2xl mb-2"></i>
+                                    <p class="text-gray-500 text-sm">Health notifications only</p>
+                                    <p class="text-gray-400 text-xs mt-1">No new health-related notifications</p>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div class="flex items-center justify-center py-8">
+                                <div class="text-center">
+                                    <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
+                                    <p class="text-gray-500 text-sm">No new notifications</p>
+                                </div>
+                            </div>
+                        `;
+                    }
                     return;
                 }
 
@@ -1059,6 +1157,14 @@
 
             // Mark notification as read
             markAsRead: function(type, id) {
+                // Check if user is a nurse
+                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                
+                if (isNurse) {
+                    toast.info('Nurses can only access health-related notifications');
+                    return;
+                }
+                
                 // Get notification message for confirmation
                 const notificationElement = document.querySelector(`[data-id="${id}"][data-type="${type}"]`);
                 const messageElement = notificationElement?.querySelector('p');
@@ -1098,6 +1204,14 @@
 
             // Mark all notifications as read
             markAllAsRead: function() {
+                // Check if user is a nurse
+                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                
+                if (isNurse) {
+                    toast.info('Nurses can only access health-related notifications');
+                    return;
+                }
+                
                 // Get current notification count
                 const currentCount = document.getElementById('dropdown-notification-count')?.textContent || '0';
                 
@@ -1149,6 +1263,14 @@
 
             // View notification details
             viewDetails: function(type, id) {
+                // Check if user is a nurse
+                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                
+                if (isNurse) {
+                    toast.info('Nurses can only access health-related notifications');
+                    return;
+                }
+                
                 let url = '';
                 switch (type) {
                     case 'blotter_report':
@@ -1228,6 +1350,13 @@
 
             // Check current page and mark relevant notifications as read
             checkCurrentPageAndMarkNotifications: function() {
+                // Check if user is a nurse
+                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                
+                if (isNurse) {
+                    return; // Nurses don't have access to barangay-related notifications
+                }
+                
                 const currentPath = window.location.pathname;
                 let notificationType = null;
                 
@@ -1250,6 +1379,13 @@
 
             // Mark all notifications of a specific type as read
             markNotificationsAsReadByType: function(type) {
+                // Check if user is a nurse
+                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                
+                if (isNurse) {
+                    return; // Nurses don't have access to barangay-related notifications
+                }
+                
                 fetch(`/admin/notifications/mark-as-read-by-type/${type}`, {
                     method: 'POST',
                     headers: {
@@ -1275,6 +1411,10 @@
 
         // Initialize notification system when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
+            // Skip initializing notifications for nurses
+            const isNurse = {{ $isNurse ? 'true' : 'false' }};
+            if (isNurse) return;
+
             try {
                 notificationSystem.init();
             } catch (error) {

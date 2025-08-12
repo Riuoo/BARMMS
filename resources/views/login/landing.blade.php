@@ -243,8 +243,7 @@
                     ->take(6)
                     ->get();
                 // Build local bulletin list combining featured projects with latest featured activities for landing
-                $completedActivities = \App\Models\HealthCenterActivity::where('status', 'Completed')
-                    ->where('is_featured', true)
+                $featuredActivities = \App\Models\HealthCenterActivity::where('is_featured', true)
                     ->orderBy('activity_date', 'desc')
                     ->take(6)
                     ->get();
@@ -261,15 +260,15 @@
                         'link' => route('public.accomplishments') . '#project-' . $p->id,
                     ]);
                 }
-                foreach ($completedActivities as $a) {
+                foreach ($featuredActivities as $a) {
                     $landingBulletin->push((object) [
                         'type' => 'activity',
                         'title' => $a->activity_name,
                         'description' => $a->description,
                         'date' => optional($a->activity_date),
-                        'image_url' => null,
+                        'image_url' => $a->image ? asset('storage/' . $a->image) : null,
                         'category' => $a->activity_type,
-                        'is_featured' => false,
+                        'is_featured' => true,
                         'link' => route('public.accomplishments.activity', $a->id),
                     ]);
                 }

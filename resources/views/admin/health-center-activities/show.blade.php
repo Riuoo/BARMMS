@@ -20,22 +20,39 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
+            <!-- Activity Image -->
+            @if($activity->image)
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <img src="{{ $activity->image_url }}" 
+                     alt="{{ $activity->activity_name }}" 
+                     class="w-full h-64 object-cover">
+            </div>
+            @endif
+
             <!-- Title and Status -->
             <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-gray-900">{{ $activity->activity_name }}</h2>
-                    @php
-                        $statusBadge = match($activity->status) {
-                            'Planned' => 'bg-blue-100 text-blue-800',
-                            'Ongoing' => 'bg-yellow-100 text-yellow-800',
-                            'Completed' => 'bg-green-100 text-green-800',
-                            'Cancelled' => 'bg-red-100 text-red-800',
-                            default => 'bg-gray-100 text-gray-800'
-                        };
-                    @endphp
-                    <span class="px-3 py-1 rounded-full text-sm font-medium {{ $statusBadge }}">
-                        {{ $activity->status }}
-                    </span>
+                    <div class="flex items-center space-x-3">
+                        @if($activity->is_featured)
+                            <div class="flex items-center text-yellow-600">
+                                <i class="fas fa-star mr-2"></i>
+                                <span class="font-medium">Featured Activity</span>
+                            </div>
+                        @endif
+                        @php
+                            $statusBadge = match($activity->status) {
+                                'Planned' => 'bg-blue-100 text-blue-800',
+                                'Ongoing' => 'bg-yellow-100 text-yellow-800',
+                                'Completed' => 'bg-green-100 text-green-800',
+                                'Cancelled' => 'bg-red-100 text-red-800',
+                                default => 'bg-gray-100 text-gray-800'
+                            };
+                        @endphp
+                        <span class="px-3 py-1 rounded-full text-sm font-medium {{ $statusBadge }}">
+                            {{ $activity->status }}
+                        </span>
+                    </div>
                 </div>
                 <p class="text-gray-700 leading-relaxed">{{ $activity->description }}</p>
             </div>
@@ -56,9 +73,9 @@
                         <h4 class="font-medium text-gray-900 mb-2">Time</h4>
                         <p class="text-gray-600">
                             @if($activity->start_time)
-                                {{ optional($activity->start_time)->format('g:i A') }}
+                                {{ \Carbon\Carbon::createFromFormat('H:i:s', $activity->start_time)->format('g:i A') }}
                                 @if($activity->end_time)
-                                    - {{ optional($activity->end_time)->format('g:i A') }}
+                                    - {{ \Carbon\Carbon::createFromFormat('H:i:s', $activity->end_time)->format('g:i A') }}
                                 @endif
                             @else
                                 N/A
@@ -137,6 +154,13 @@
                         <i class="fas fa-edit mr-2"></i>
                         Edit Activity
                     </a>
+                    <form action="{{ route('admin.health-center-activities.toggle-featured', $activity->id) }}" method="POST" class="w-full">
+                        @csrf
+                        <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center justify-center">
+                            <i class="fas fa-star mr-2"></i>
+                            {{ $activity->is_featured ? 'Unfeature' : 'Feature' }} Activity
+                        </button>
+                    </form>
                     <form action="{{ route('admin.health-center-activities.destroy', $activity->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this activity? This action cannot be undone.')">
                         @csrf
                         @method('DELETE')

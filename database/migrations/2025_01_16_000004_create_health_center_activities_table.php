@@ -16,20 +16,22 @@ return new class extends Migration
             $table->string('activity_name');
             $table->enum('activity_type', ['Vaccination Drive', 'Health Education', 'Medical Mission', 'Screening Program', 'Nutrition Program', 'Maternal Care', 'Child Care', 'Elderly Care', 'Dental Care', 'Mental Health', 'Other']);
             $table->date('activity_date');
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->string('location');
             $table->text('description');
-            $table->text('objectives');
+            $table->string('image')->nullable();
+            $table->text('objectives')->nullable();
             $table->integer('target_participants')->nullable();
             $table->integer('actual_participants')->nullable();
-            $table->string('organizer');
+            $table->string('organizer')->nullable();
             $table->text('materials_needed')->nullable();
             $table->decimal('budget', 10, 2)->nullable();
             $table->text('outcomes')->nullable();
             $table->text('challenges')->nullable();
             $table->text('recommendations')->nullable();
             $table->enum('status', ['Planned', 'Ongoing', 'Completed', 'Cancelled'])->default('Planned');
+            $table->boolean('is_featured')->default(false);
             $table->timestamps();
         });
     }

@@ -99,13 +99,16 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-star text-purple-600 text-sm"></i>
+                    <div class="w-8 h-8 {{ $featuredCounts['total'] >= 6 ? 'bg-red-100' : 'bg-purple-100' }} rounded-full flex items-center justify-center">
+                        <i class="fas fa-star {{ $featuredCounts['total'] >= 6 ? 'text-red-600' : 'text-purple-600' }} text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Featured Projects</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['featured_projects'] }}</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Featured</p>
+                    <p class="text-lg lg:text-2xl font-bold {{ $featuredCounts['total'] >= 6 ? 'text-red-600' : 'text-gray-900' }}">
+                        {{ $featuredCounts['total'] }}/6
+                    </p>
+                    <p class="text-xs text-gray-500">{{ $featuredCounts['projects'] }} projects + {{ $featuredCounts['activities'] }} activities</p>
                 </div>
             </div>
         </div>
@@ -123,6 +126,43 @@
             </div>
         </div>
     </div>
+
+    <!-- Featured Items Warning -->
+    @if($warningMessage)
+        <div class="mb-4 bg-{{ $warningMessage['color'] }}-50 border border-{{ $warningMessage['color'] }}-200 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-{{ $warningMessage['icon'] }} text-{{ $warningMessage['color'] }}-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-{{ $warningMessage['color'] }}-800">
+                        <strong>{{ $warningMessage['title'] }}:</strong> {{ $warningMessage['message'] }}
+                    </p>
+                    @if($warningMessage['type'] === 'error' && !empty($unfeatureSuggestions))
+                        <div class="mt-3 pt-3 border-t border-{{ $warningMessage['color'] }}-200">
+                            <p class="text-xs text-{{ $warningMessage['color'] }}-700 mb-2"><strong>Suggestions to unfeature:</strong></p>
+                            <div class="space-y-1">
+                                @if(isset($unfeatureSuggestions['projects']))
+                                    @foreach($unfeatureSuggestions['projects']->take(2) as $suggestion)
+                                        <div class="text-xs text-{{ $warningMessage['color'] }}-600">
+                                            • Project: {{ $suggestion['name'] }} ({{ $suggestion['date']->format('M Y') }})
+                                        </div>
+                                    @endforeach
+                                @endif
+                                @if(isset($unfeatureSuggestions['activities']))
+                                    @foreach($unfeatureSuggestions['activities']->take(2) as $suggestion)
+                                        <div class="text-xs text-{{ $warningMessage['color'] }}-600">
+                                            • Activity: {{ $suggestion['name'] }} ({{ $suggestion['date']->format('M Y') }})
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Projects Grid -->
     <div id="projectsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

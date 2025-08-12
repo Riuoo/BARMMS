@@ -36,6 +36,26 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        /* Pagination specific styles to prevent visual artifacts */
+        .pagination-nav {
+            position: relative;
+        }
+        
+        .pagination-nav * {
+            position: relative;
+        }
+        
+        .pagination-nav .inline-flex {
+            position: relative;
+        }
+        
+        /* Ensure no unwanted dots or artifacts */
+        .pagination-nav span,
+        .pagination-nav a {
+            position: relative;
+            background: transparent;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -167,15 +187,139 @@
             <!-- No results after filter -->
             <p id="noFilteredItems" class="hidden text-center text-gray-500 mt-5">No items to show for this filter.</p>
 
-            @if(isset($bulletin) && $bulletin->hasPages())
-            <div class="mt-12 flex justify-center">
-                {{ $bulletin->links() }}
-            </div>
-            @endif
-            
-            @if(isset($projects) && $projects->hasPages())
-            <div class="mt-12 flex justify-center">
-                {{ $projects->links() }}
+            <!-- Custom Pagination for Bulletin -->
+            @php
+                // Decide which dataset to use for pagination
+                $paginator = null;
+
+                if (isset($bulletin) && $bulletin->count()) {
+                    $paginator = $bulletin;
+                } elseif (isset($projects) && $projects->count()) {
+                    $paginator = $projects;
+                }
+            @endphp
+
+            @if($paginator && $paginator->hasPages())
+            <div class="mt-12">
+                <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0 pagination-nav">
+                    <div class="-mt-px flex w-0 flex-1">
+                        @if($paginator->onFirstPage())
+                            <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
+                                <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                                Previous
+                            </span>
+                        @else
+                            <a href="{{ $paginator->appends(request()->except('page'))->previousPageUrl() }}" 
+                            class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                                Previous
+                            </a>
+                        @endif
+                    </div>
+                    
+                    <div class="hidden md:-mt-px md:flex">
+                        @php
+                            $currentPage = $paginator->currentPage();
+                            $lastPage = $paginator->lastPage();
+                            $startPage = max(1, $currentPage - 2);
+                            $endPage = min($lastPage, $currentPage + 2);
+                        @endphp
+                        
+                        @if($startPage > 1)
+                            <a href="{{ $paginator->appends(request()->except('page'))->url(1) }}" 
+                            class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                1
+                            </a>
+                            @if($startPage > 2)
+                                <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                    ...
+                                </span>
+                            @endif
+                        @endif
+                        
+                        @for($page = $startPage; $page <= $endPage; $page++)
+                            @if($page == $currentPage)
+                                <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page" style="position: relative; z-index: 1;">
+                                    {{ $page }}
+                                </span>
+                            @else
+                                <a href="{{ $paginator->appends(request()->except('page'))->url($page) }}" 
+                                class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                    {{ $page }}
+                                </a>
+                            @endif
+                        @endfor
+                        
+                        @if($endPage < $lastPage)
+                            @if($endPage < $lastPage - 1)
+                                <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                    ...
+                                </span>
+                            @endif
+                            <a href="{{ $paginator->appends(request()->except('page'))->url($lastPage) }}" 
+                            class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                {{ $lastPage }}
+                            </a>
+                        @endif
+                    </div>
+                    
+                    <div class="-mt-px flex w-0 flex-1 justify-end">
+                        @if($paginator->hasMorePages())
+                            <a href="{{ $paginator->appends(request()->except('page'))->nextPageUrl() }}" 
+                            class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                Next
+                                <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                            </a>
+                        @else
+                            <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                                Next
+                                <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                            </span>
+                        @endif
+                    </div>
+                </nav>
+                
+                <!-- Mobile Pagination -->
+                <div class="mt-4 flex justify-between sm:hidden">
+                    @if($paginator->onFirstPage())
+                        <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                            Previous
+                        </span>
+                    @else
+                        <a href="{{ $paginator->appends(request()->except('page'))->previousPageUrl() }}" 
+                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Previous
+                        </a>
+                    @endif
+                    
+                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                        Page {{ $paginator->currentPage() }} of {{ $paginator->lastPage() }}
+                    </span>
+                    
+                    @if($paginator->hasMorePages())
+                        <a href="{{ $paginator->appends(request()->except('page'))->nextPageUrl() }}" 
+                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Next
+                        </a>
+                    @else
+                        <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                            Next
+                        </span>
+                    @endif
+                </div>
+                
+                <!-- Results Info -->
+                <div class="mt-4 text-center text-sm text-gray-500">
+                    @if($paginator->total() > 0)
+                        @if($paginator->firstItem() && $paginator->lastItem())
+                            Showing {{ $paginator->firstItem() }} to {{ $paginator->lastItem() }} of {{ $paginator->total() }} results
+                        @else
+                            Showing {{ $paginator->total() }} results
+                        @endif
+                    @else
+                        No results found
+                    @endif
+                </div>
             </div>
             @endif
         </div>

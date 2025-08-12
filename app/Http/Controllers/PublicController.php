@@ -41,7 +41,7 @@ class PublicController
                 'title' => $a->activity_name,
                 'description' => $a->description,
                 'date' => optional($a->activity_date),
-                'image_url' => null,
+                'image_url' => $a->image ? asset('storage/' . $a->image) : null,
                 'category' => $a->activity_type,
                 'is_featured' => false,
                 'link' => route('public.accomplishments.activity', $a->id),

@@ -39,7 +39,7 @@
 
     <!-- Form Card -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-        <form action="{{ route('admin.health-center-activities.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('admin.health-center-activities.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
             <!-- Activity Information -->
@@ -117,6 +117,21 @@
                 </div>
             </div>
 
+            <!-- Image Upload -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <i class="fas fa-image text-pink-600 mr-2"></i>
+                    Activity Image
+                </h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Upload Image</label>
+                        <input type="file" name="image" id="image" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100">
+                        <p class="mt-1 text-sm text-gray-500">Upload an image for the activity (JPG, PNG, GIF). Max size: 2MB.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Target & Expected Participants -->
             <div>
                 <h3 class="text-lg font-medium text-gray-900 mb-4">
@@ -184,6 +199,12 @@
                         <label for="organizer" class="block text-sm font-medium text-gray-700 mb-2">Organizer</label>
                         <input type="text" name="organizer" id="organizer" value="{{ old('organizer') }}" placeholder="Name of organizer" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
+                </div>
+                <div class="mt-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_featured" id="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                        <span class="ml-2 text-sm text-gray-700">Mark as featured activity</span>
+                    </label>
                 </div>
             </div>
 

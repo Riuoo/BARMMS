@@ -17,6 +17,7 @@ class HealthCenterActivity extends Model
         'end_time',
         'location',
         'description',
+        'image',
         'objectives',
         'target_participants',
         'actual_participants',
@@ -32,8 +33,9 @@ class HealthCenterActivity extends Model
 
     protected $casts = [
         'activity_date' => 'date',
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
+        // Store times as strings (HH:MM:SS); casting to datetime can break when date is absent
+        'start_time' => 'string',
+        'end_time' => 'string',
         'budget' => 'decimal:2',
         'is_featured' => 'boolean',
     ];
@@ -49,7 +51,21 @@ class HealthCenterActivity extends Model
     public function getDurationAttribute()
     {
         if ($this->start_time && $this->end_time) {
-            return $this->start_time->diffInHours($this->end_time);
+            try {
+                $start = \Carbon\Carbon::createFromFormat('H:i:s', $this->start_time);
+                $end = \Carbon\Carbon::createFromFormat('H:i:s', $this->end_time);
+                return $start->diffInMinutes($end);
+            } catch (\Throwable $e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public function getImageUrlAttribute()
+    {
+        if ($this->image) {
+            return asset('storage/' . $this->image);
         }
         return null;
     }

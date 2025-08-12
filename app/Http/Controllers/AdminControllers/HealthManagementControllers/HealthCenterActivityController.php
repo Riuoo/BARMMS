@@ -3,13 +3,22 @@
 namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 
 use App\Models\HealthCenterActivity;
+use App\Services\FeaturedItemsService;
 use Illuminate\Http\Request;
 
 class HealthCenterActivityController
 {
+    protected $featuredService;
+
+    public function __construct(FeaturedItemsService $featuredService)
+    {
+        $this->featuredService = $featuredService;
+    }
+
     public function index(Request $request)
     {
         $searchTerm = trim($request->get('search', ''));
+        $featuredFilter = $request->get('featured', '');
 
         $query = HealthCenterActivity::query();
 
@@ -23,14 +32,28 @@ class HealthCenterActivityController
             });
         }
 
+        // Filter by featured status
+        if ($featuredFilter === 'featured') {
+            $query->where('is_featured', true);
+        } elseif ($featuredFilter === 'non-featured') {
+            $query->where('is_featured', false);
+        }
+
         $activities = $query
             ->orderBy('activity_date', 'desc')
             ->paginate(15)
             ->withQueryString();
 
+        $featuredCounts = $this->featuredService->getFeaturedCounts();
+        $warningMessage = $this->featuredService->getWarningMessage();
+        $unfeatureSuggestions = $this->featuredService->getUnfeatureSuggestions();
+
         return view('admin.health-center-activities.index', [
             'activities' => $activities,
             'search' => $searchTerm,
+            'featuredCounts' => $featuredCounts,
+            'warningMessage' => $warningMessage,
+            'unfeatureSuggestions' => $unfeatureSuggestions,
         ]);
     }
 
@@ -43,21 +66,39 @@ class HealthCenterActivityController
     {
         $validated = $request->validate([
             'activity_name' => 'required|string|max:255',
-            'activity_type' => 'required|string|in:Vaccination Drive,Health Education,Medical Mission,Screening Program,Nutrition Program,Maternal Care,Child Care,Elderly Care,Dental Care,Mental Health,Other',
-            'activity_date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'activity_type' => 'required|string|in:Vaccination,Health Check-up,Health Education,Medical Consultation,Emergency Response,Preventive Care,Maternal Care,Child Care,Other',
+            'activity_date' => 'required|date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
             'location' => 'required|string|max:255',
             'description' => 'required|string|max:2000',
-            'objectives' => 'required|string|max:2000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'objectives' => 'nullable|string|max:2000',
             'target_participants' => 'nullable|integer|min:1',
-            'organizer' => 'required|string|max:255',
+            'organizer' => 'nullable|string|max:255',
             'materials_needed' => 'nullable|string|max:1000',
             'budget' => 'nullable|numeric|min:0',
             'status' => 'required|string|in:Planned,Ongoing,Completed,Cancelled',
+            'is_featured' => 'nullable|boolean',
         ]);
 
         try {
+            // Check featured limit before creating
+            if ($request->has('is_featured') && !$this->featuredService->canAddMoreFeatured()) {
+                $counts = $this->featuredService->getFeaturedCounts();
+                notify()->error("Cannot create featured activity. You already have {$counts['total']}/6 featured items ({$counts['projects']} projects + {$counts['activities']} activities). Please unfeature some items first.", 'Featured Limit Reached');
+                return back()->withInput();
+            }
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('health-activities', 'public');
+                $validated['image'] = $imagePath;
+            }
+
+            // Handle featured status
+            $validated['is_featured'] = $request->has('is_featured');
+
             HealthCenterActivity::create($validated);
             notify()->success('Health center activity created successfully.');
             return redirect()->route('admin.health-center-activities.index');
@@ -85,25 +126,47 @@ class HealthCenterActivityController
         
         $validated = $request->validate([
             'activity_name' => 'required|string|max:255',
-            'activity_type' => 'required|string|in:Vaccination Drive,Health Education,Medical Mission,Screening Program,Nutrition Program,Maternal Care,Child Care,Elderly Care,Dental Care,Mental Health,Other',
+            'activity_type' => 'required|string|in:Vaccination,Health Check-up,Health Education,Medical Consultation,Emergency Response,Preventive Care,Maternal Care,Child Care,Other',
             'activity_date' => 'required|date',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
             'location' => 'required|string|max:255',
             'description' => 'required|string|max:2000',
-            'objectives' => 'required|string|max:2000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'objectives' => 'nullable|string|max:2000',
             'target_participants' => 'nullable|integer|min:1',
             'actual_participants' => 'nullable|integer|min:0',
-            'organizer' => 'required|string|max:255',
+            'organizer' => 'nullable|string|max:255',
             'materials_needed' => 'nullable|string|max:1000',
             'budget' => 'nullable|numeric|min:0',
             'outcomes' => 'nullable|string|max:2000',
             'challenges' => 'nullable|string|max:2000',
             'recommendations' => 'nullable|string|max:2000',
             'status' => 'required|string|in:Planned,Ongoing,Completed,Cancelled',
+            'is_featured' => 'nullable|boolean',
         ]);
 
         try {
+            // Check featured limit before updating (only if trying to mark as featured)
+            if ($request->has('is_featured') && !$activity->is_featured && !$this->featuredService->canAddMoreFeatured()) {
+                $counts = $this->featuredService->getFeaturedCounts();
+                notify()->error("Cannot mark activity as featured. You already have {$counts['total']}/6 featured items ({$counts['projects']} projects + {$counts['activities']} activities). Please unfeature some items first.", 'Featured Limit Reached');
+                return back()->withInput();
+            }
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($activity->image) {
+                    \Storage::disk('public')->delete($activity->image);
+                }
+                $imagePath = $request->file('image')->store('health-activities', 'public');
+                $validated['image'] = $imagePath;
+            }
+
+            // Handle featured status
+            $validated['is_featured'] = $request->has('is_featured');
+
             $activity->update($validated);
             notify()->success('Health center activity updated successfully.');
             return redirect()->route('admin.health-center-activities.index');
@@ -117,6 +180,12 @@ class HealthCenterActivityController
     {
         try {
             $activity = HealthCenterActivity::findOrFail($id);
+            
+            // Delete associated image if exists
+            if ($activity->image) {
+                \Storage::disk('public')->delete($activity->image);
+            }
+            
             $activity->delete();
             
             notify()->success('Health center activity deleted successfully.');
@@ -134,6 +203,29 @@ class HealthCenterActivityController
             ->paginate(15)
             ->withQueryString();
         return view('admin.health-center-activities.upcoming', compact('upcomingActivities'));
+    }
+
+    public function toggleFeatured($id)
+    {
+        try {
+            $activity = HealthCenterActivity::findOrFail($id);
+            
+            // If trying to mark as featured, check the limit
+            if (!$activity->is_featured && !$this->featuredService->canAddMoreFeatured()) {
+                $counts = $this->featuredService->getFeaturedCounts();
+                notify()->error("Cannot mark activity as featured. You already have {$counts['total']}/6 featured items ({$counts['projects']} projects + {$counts['activities']} activities). Please unfeature some items first.", 'Featured Limit Reached');
+                return redirect()->route('admin.health-center-activities.index');
+            }
+            
+            $activity->update(['is_featured' => !$activity->is_featured]);
+            
+            $status = $activity->fresh()->is_featured ? 'featured' : 'unfeatured';
+            notify()->success("Activity {$status} successfully!", 'Success');
+        } catch (\Exception $e) {
+            notify()->error('Failed to update featured status. Please try again.', 'Error');
+        }
+
+        return redirect()->route('admin.health-center-activities.index');
     }
 
     public function completed()

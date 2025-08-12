@@ -23,7 +23,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.health-center-activities.update', $activity->id) }}" method="POST">
+            <form action="{{ route('admin.health-center-activities.update', $activity->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 
@@ -66,7 +66,7 @@
                     <div>
                         <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
                         <input type="time" name="start_time" id="start_time" 
-                               value="{{ old('start_time', $activity->start_time) }}" 
+                               value="{{ old('start_time', $activity->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $activity->start_time)->format('H:i') : '') }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2">
                     </div>
                 </div>
@@ -75,7 +75,7 @@
                     <div>
                         <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
                         <input type="time" name="end_time" id="end_time" 
-                               value="{{ old('end_time', $activity->end_time) }}" 
+                               value="{{ old('end_time', $activity->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $activity->end_time)->format('H:i') : '') }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2">
                     </div>
 
@@ -94,6 +94,19 @@
                     <textarea name="description" id="description" rows="4" 
                               class="w-full border border-gray-300 rounded px-3 py-2" 
                               placeholder="Detailed description of the activity..." required>{{ old('description', $activity->description) }}</textarea>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mb-6">
+                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Activity Image</label>
+                    @if($activity->image)
+                        <div class="mb-3">
+                            <p class="text-sm text-gray-600 mb-2">Current Image:</p>
+                            <img src="{{ $activity->image_url }}" alt="Current activity image" class="w-32 h-24 object-cover rounded border">
+                        </div>
+                    @endif
+                    <input type="file" name="image" id="image" accept="image/*" class="w-full border border-gray-300 rounded px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="mt-1 text-sm text-gray-500">Upload a new image (JPG, PNG, GIF). Max size: 2MB. Leave empty to keep current image.</p>
                 </div>
 
                 <!-- Objectives -->
@@ -147,20 +160,18 @@
                     </div>
                 </div>
 
-                <!-- Status and Notes -->
+                <!-- Status & Organizer -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
                         <select name="status" id="status" class="w-full border border-gray-300 rounded px-3 py-2" required>
                             <option value="">Select status...</option>
                             <option value="Planned" {{ old('status', $activity->status) == 'Planned' ? 'selected' : '' }}>Planned</option>
-                            <option value="In Progress" {{ old('status', $activity->status) == 'In Progress' ? 'selected' : '' }}>In Progress</option>
+                            <option value="Ongoing" {{ old('status', $activity->status) == 'Ongoing' ? 'selected' : '' }}>Ongoing</option>
                             <option value="Completed" {{ old('status', $activity->status) == 'Completed' ? 'selected' : '' }}>Completed</option>
                             <option value="Cancelled" {{ old('status', $activity->status) == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                            <option value="Postponed" {{ old('status', $activity->status) == 'Postponed' ? 'selected' : '' }}>Postponed</option>
                         </select>
                     </div>
-
                     <div>
                         <label for="organizer" class="block text-sm font-medium text-gray-700 mb-2">Organizer</label>
                         <input type="text" name="organizer" id="organizer" 
@@ -168,6 +179,12 @@
                                class="w-full border border-gray-300 rounded px-3 py-2" 
                                placeholder="Name of organizer">
                     </div>
+                </div>
+                <div class="mb-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_featured" id="is_featured" value="1" {{ old('is_featured', $activity->is_featured) ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                        <span class="ml-2 text-sm text-gray-700">Mark as featured activity</span>
+                    </label>
                 </div>
 
                 <!-- Additional Notes -->

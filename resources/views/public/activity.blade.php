@@ -13,6 +13,15 @@
             <i class="fas fa-arrow-left mr-2"></i> Back to Accomplishments
         </a>
         <div class="bg-white rounded-2xl shadow p-6">
+            <!-- Activity Image -->
+            @if($activity->image)
+            <div class="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <img src="{{ asset('storage/' . $activity->image) }}" 
+                     alt="{{ $activity->activity_name }}" 
+                     class="w-full h-64 object-cover">
+            </div>
+            @endif
+            
             <div class="flex items-center justify-between mb-4">
                 <h1 class="text-3xl font-bold text-gray-900">{{ $activity->activity_name }}</h1>
                 <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ $activity->activity_type }}</span>
