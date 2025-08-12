@@ -233,97 +233,101 @@
     <section id="bulletin" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-gray-900 mb-4">Community Accomplishments</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Discover the transformative projects and initiatives that have improved our community's quality of life</p>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Community Bulletin Board</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Projects and health activities recently accomplished in our community</p>
             </div>
             
+            @php
+                $featuredProjects = \App\Models\AccomplishedProject::where('is_featured', true)
+                    ->orderBy('completion_date', 'desc')
+                    ->take(6)
+                    ->get();
+                // Build local bulletin list combining featured projects with latest featured activities for landing
+                $completedActivities = \App\Models\HealthCenterActivity::where('status', 'Completed')
+                    ->where('is_featured', true)
+                    ->orderBy('activity_date', 'desc')
+                    ->take(6)
+                    ->get();
+                $landingBulletin = collect();
+                foreach ($featuredProjects as $p) {
+                    $landingBulletin->push((object) [
+                        'type' => 'project',
+                        'title' => $p->title,
+                        'description' => $p->description,
+                        'date' => optional($p->completion_date),
+                        'image_url' => $p->image_url,
+                        'category' => $p->category,
+                        'is_featured' => (bool) $p->is_featured,
+                        'link' => route('public.accomplishments') . '#project-' . $p->id,
+                    ]);
+                }
+                foreach ($completedActivities as $a) {
+                    $landingBulletin->push((object) [
+                        'type' => 'activity',
+                        'title' => $a->activity_name,
+                        'description' => $a->description,
+                        'date' => optional($a->activity_date),
+                        'image_url' => null,
+                        'category' => $a->activity_type,
+                        'is_featured' => false,
+                        'link' => route('public.accomplishments.activity', $a->id),
+                    ]);
+                }
+                $landingBulletin = $landingBulletin->sortByDesc(function($i){ return $i->date ?? now(); })->take(6)->values();
+            @endphp
+            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @php
-                    $featuredProjects = \App\Models\AccomplishedProject::where('is_featured', true)
-                        ->orderBy('completion_date', 'desc')
-                        ->take(6)
-                        ->get();
-                @endphp
-                
-                @forelse($featuredProjects as $project)
+                @forelse($landingBulletin as $item)
                 <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden border border-gray-100">
-                    @if($project->image_url)
+                    @if($item->image_url)
                         <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
-                            <img src="{{ $project->image_url }}" alt="{{ $project->title }} image" class="object-cover h-full w-full">
+                            <img src="{{ $item->image_url }}" alt="{{ $item->title }} image" class="object-cover h-full w-full">
                         </div>
                     @else
                         <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                            <i class="fas fa-project-diagram text-4xl text-gray-400"></i>
+                            <i class="fas {{ $item->type === 'activity' ? 'fa-heartbeat' : 'fa-project-diagram' }} text-4xl text-gray-400"></i>
                         </div>
                     @endif
-                    
-                    <!-- Project Content -->
+
                     <div class="p-6">
-                        <!-- Category Badge -->
                         <div class="flex items-center justify-between mb-3">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium {{ $project->category_color }}">
-                                {{ $project->category }}
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ $item->category ?? ($item->type === 'activity' ? 'Health' : 'Project') }}
                             </span>
-                            <span class="text-yellow-500">
-                                <i class="fas fa-star"></i>
+                            <span class="text-xs {{ $item->type === 'activity' ? 'text-green-600' : 'text-blue-600' }}">
+                                <i class="fas {{ $item->type === 'activity' ? 'fa-heartbeat' : 'fa-project-diagram' }} mr-1"></i>
+                                {{ ucfirst($item->type) }}
                             </span>
                         </div>
-                        
-                        <!-- Project Title -->
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $project->title }}</h3>
-                        
-                        <!-- Project Description -->
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ Str::limit($project->description, 120) }}</p>
-                        
-                        <!-- Project Details -->
-                        <div class="space-y-2 mb-4">
-                            @if($project->location)
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="fas fa-map-marker-alt mr-2 text-green-600"></i>
-                                <span>{{ $project->location }}</span>
-                            </div>
-                            @endif
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="fas fa-calendar mr-2 text-blue-600"></i>
-                                <span>{{ $project->completion_date->format('M Y') }}</span>
-                            </div>
-                            @if($project->budget)
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="fas fa-money-bill mr-2 text-green-600"></i>
-                                <span>{{ $project->formatted_budget }}</span>
-                            </div>
-                            @endif
+
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $item->title }}</h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ Str::limit($item->description, 120) }}</p>
+
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span><i class="fas fa-calendar-alt mr-1"></i>{{ optional($item->date)->format('M d, Y') }}</span>
+                            <a href="{{ $item->link }}" class="inline-flex items-center text-green-600 hover:text-green-700 font-medium">
+                                View <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
                         </div>
-                        
-                        <!-- Impact Preview -->
-                        @if($project->impact)
-                        <div class="pt-4 border-t border-gray-100">
-                            <p class="text-sm text-gray-600">
-                                <strong>Impact:</strong> {{ Str::limit($project->impact, 80) }}
-                            </p>
-                        </div>
-                        @endif
                     </div>
                 </div>
                 @empty
                 <div class="col-span-full text-center py-12">
                     <div class="text-gray-400 mb-4">
-                        <i class="fas fa-project-diagram text-6xl"></i>
+                        <i class="fas fa-bullhorn text-6xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Featured Projects Yet</h3>
-                    <p class="text-gray-600">Our community accomplishments will be displayed here soon.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Items Yet</h3>
+                    <p class="text-gray-600">Community updates will appear here soon.</p>
                 </div>
                 @endforelse
             </div>
             
-            @if($featuredProjects->count() > 0)
             <div class="text-center mt-12">
                 <a href="{{ route('public.accomplishments') }}" class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-300">
                     <i class="fas fa-eye mr-2"></i>
-                    View All Projects
+                    View All
                 </a>
             </div>
-            @endif
         </div>
     </section>
 

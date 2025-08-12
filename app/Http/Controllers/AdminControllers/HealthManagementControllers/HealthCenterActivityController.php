@@ -7,10 +7,31 @@ use Illuminate\Http\Request;
 
 class HealthCenterActivityController
 {
-    public function index()
+    public function index(Request $request)
     {
-        $activities = HealthCenterActivity::orderBy('activity_date', 'desc')->paginate(15);
-        return view('admin.health-center-activities.index', compact('activities'));
+        $searchTerm = trim($request->get('search', ''));
+
+        $query = HealthCenterActivity::query();
+
+        if ($searchTerm !== '') {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('activity_name', 'like', "%{$searchTerm}%")
+                    ->orWhere('activity_type', 'like', "%{$searchTerm}%")
+                    ->orWhere('organizer', 'like', "%{$searchTerm}%")
+                    ->orWhere('location', 'like', "%{$searchTerm}%")
+                    ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $activities = $query
+            ->orderBy('activity_date', 'desc')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.health-center-activities.index', [
+            'activities' => $activities,
+            'search' => $searchTerm,
+        ]);
     }
 
     public function create()
@@ -106,23 +127,12 @@ class HealthCenterActivityController
         }
     }
 
-    public function search(Request $request)
-    {
-        $query = $request->get('query');
-        
-        $activities = HealthCenterActivity::where('activity_name', 'like', "%{$query}%")
-            ->orWhere('activity_type', 'like', "%{$query}%")
-            ->orWhere('location', 'like', "%{$query}%")
-            ->orWhere('organizer', 'like', "%{$query}%")
-            ->orderBy('activity_date', 'desc')
-            ->paginate(15);
-
-        return view('admin.health-center-activities.index', compact('activities', 'query'));
-    }
-
     public function upcoming()
     {
-        $upcomingActivities = HealthCenterActivity::upcoming()->orderBy('activity_date', 'asc')->get();
+        $upcomingActivities = HealthCenterActivity::upcoming()
+            ->orderBy('activity_date', 'asc')
+            ->paginate(15)
+            ->withQueryString();
         return view('admin.health-center-activities.upcoming', compact('upcomingActivities'));
     }
 

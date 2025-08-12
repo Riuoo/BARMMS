@@ -15,10 +15,60 @@ class AdminNotificationController
 {
     public function showNotifications(Request $request)
     {
-        $blotterReports = BlotterRequest::orderBy('created_at', 'desc')->get();
-        $documentRequests = DocumentRequest::orderBy('created_at', 'desc')->get();
-        $accountRequests = AccountRequest::orderBy('created_at', 'desc')->get();
-        $communityComplaints = CommunityComplaint::orderBy('created_at', 'desc')->get();
+        // Build query for each notification type
+        $blotterQuery = BlotterRequest::query();
+        $documentQuery = DocumentRequest::query();
+        $accountQuery = AccountRequest::query();
+        $complaintQuery = CommunityComplaint::query();
+
+        // Apply search filter if provided
+        if ($request->filled('search')) {
+            $search = strtolower($request->get('search'));
+            
+            // Search in blotter reports
+            $blotterQuery->where(function($q) use ($search) {
+                $q->where('recipient_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('type', 'like', "%{$search}%");
+            });
+            
+            // Search in document requests
+            $documentQuery->where(function($q) use ($search) {
+                $q->where('document_type', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+            
+            // Search in account requests
+            $accountQuery->where('email', 'like', "%{$search}%");
+            
+            // Search in community complaints
+            $complaintQuery->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply read status filter if provided
+        if ($request->filled('read_status')) {
+            if ($request->read_status === 'unread') {
+                $blotterQuery->where('is_read', false);
+                $documentQuery->where('is_read', false);
+                $accountQuery->where('is_read', false);
+                $complaintQuery->where('is_read', false);
+            } elseif ($request->read_status === 'read') {
+                $blotterQuery->where('is_read', true);
+                $documentQuery->where('is_read', true);
+                $accountQuery->where('is_read', true);
+                $complaintQuery->where('is_read', true);
+            }
+        }
+
+        // Get all results (not paginated yet)
+        $blotterReports = $blotterQuery->orderBy('created_at', 'desc')->get();
+        $documentRequests = $documentQuery->orderBy('created_at', 'desc')->get();
+        $accountRequests = $accountQuery->orderBy('created_at', 'desc')->get();
+        $communityComplaints = $complaintQuery->orderBy('created_at', 'desc')->get();
 
         // Combine notifications into a single collection
         $notifications = collect();
@@ -67,24 +117,26 @@ class AdminNotificationController
             ]);
         }
 
-        // Filter by search
-        if ($request->filled('search')) {
-            $search = strtolower($request->get('search'));
-            $notifications = $notifications->filter(function($n) use ($search) {
-                return strpos(strtolower($n->message), $search) !== false;
-            });
-        }
-        // Filter by read/unread
-        if ($request->filled('read_status')) {
-            if ($request->read_status === 'unread') {
-                $notifications = $notifications->where('is_read', false);
-            } elseif ($request->read_status === 'read') {
-                $notifications = $notifications->where('is_read', true);
-            }
-        }
-
         // Sort notifications by date (latest first)
         $notifications = $notifications->sortByDesc('created_at');
+
+        // Create a custom paginator for the combined results
+        $perPage = 20; // Show 20 notifications per page
+        $currentPage = $request->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedNotifications = $notifications->slice($offset, $perPage);
+        
+        // Create a LengthAwarePaginator instance
+        $notifications = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedNotifications,
+            $notifications->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'page',
+            ]
+        );
 
         return view('admin.notifications.notifications', compact('notifications'));
     }
@@ -173,27 +225,71 @@ class AdminNotificationController
             
             // Limit to 5 notifications for dropdown
             $limitedNotifications = $sortedNotifications->take(5);
+
+            // Compute totals across models
+            $unreadCounts = [
+                'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
+                'document_requests' => DocumentRequest::where('is_read', false)->count(),
+                'account_requests' => AccountRequest::where('is_read', false)->count(),
+                'community_complaints' => CommunityComplaint::where('is_read', false)->count(),
+            ];
+            $readCounts = [
+                'blotter_reports' => BlotterRequest::where('is_read', true)->count(),
+                'document_requests' => DocumentRequest::where('is_read', true)->count(),
+                'account_requests' => AccountRequest::where('is_read', true)->count(),
+                'community_complaints' => CommunityComplaint::where('is_read', true)->count(),
+            ];
+            $totalCounts = [
+                'blotter_reports' => BlotterRequest::count(),
+                'document_requests' => DocumentRequest::count(),
+                'account_requests' => AccountRequest::count(),
+                'community_complaints' => CommunityComplaint::count(),
+            ];
+
+            $unreadTotal = array_sum($unreadCounts);
+            $readTotal = array_sum($readCounts);
+            $totalAll = array_sum($totalCounts);
             
             return response()->json([
-                'total' => $sortedNotifications->count(),
+                // Backwards compatibility (total previously meant unread)
+                'total' => $unreadTotal,
+                'total_unread' => $unreadTotal,
+                'total_read' => $readTotal,
+                'total_all' => $totalAll,
                 'notifications' => $limitedNotifications->toArray(),
                 'summary' => [
-                    'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
-                    'document_requests' => DocumentRequest::where('is_read', false)->count(),
-                    'account_requests' => AccountRequest::where('is_read', false)->count(),
-                    'community_complaints' => CommunityComplaint::where('is_read', false)->count(),
+                    'unread' => $unreadCounts,
+                    'read' => $readCounts,
+                    'total' => $totalCounts,
                 ]
             ]);
         } catch (\Exception $e) {
             Log::error('Error in getNotificationCounts: ' . $e->getMessage());
             return response()->json([
                 'total' => 0,
+                'total_unread' => 0,
+                'total_read' => 0,
+                'total_all' => 0,
                 'notifications' => [],
                 'summary' => [
-                    'blotter_reports' => 0,
-                    'document_requests' => 0,
-                    'account_requests' => 0,
-                    'community_complaints' => 0,
+                    'unread' => [
+                        'blotter_reports' => 0,
+                        'document_requests' => 0,
+                        'account_requests' => 0,
+                        'community_complaints' => 0,
+                    ],
+                    'read' => [
+                        'blotter_reports' => 0,
+                        'document_requests' => 0,
+                        'account_requests' => 0,
+                        'community_complaints' => 0,
+                    ],
+                    'total' => [
+                        'blotter_reports' => 0,
+                        'document_requests' => 0,
+                        'account_requests' => 0,
+                        'community_complaints' => 0,
+                    ],
                 ],
                 'error' => 'Failed to load notifications'
             ], 500);
@@ -274,6 +370,48 @@ class AdminNotificationController
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to mark all notifications as read: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function markAsReadByType(Request $request, $type)
+    {
+        try {
+            $updated = false;
+            
+            switch ($type) {
+                case 'blotter_report':
+                    $updated = BlotterRequest::where('is_read', false)->update(['is_read' => true]) > 0;
+                    break;
+                case 'document_request':
+                    $updated = DocumentRequest::where('is_read', false)->update(['is_read' => true]) > 0;
+                    break;
+                case 'account_request':
+                    $updated = AccountRequest::where('is_read', false)->update(['is_read' => true]) > 0;
+                    break;
+                case 'community_complaint':
+                    $updated = CommunityComplaint::where('is_read', false)->update(['is_read' => true]) > 0;
+                    break;
+                default:
+                    return response()->json(['message' => 'Invalid notification type.'], 400);
+            }
+            
+            if ($updated) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'All ' . str_replace('_', ' ', $type) . ' notifications marked as read.'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No unread ' . str_replace('_', ' ', $type) . ' notifications found.'
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error marking notifications as read by type: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark notifications as read: ' . $e->getMessage()
             ], 500);
         }
     }

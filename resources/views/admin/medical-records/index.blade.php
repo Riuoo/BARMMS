@@ -57,8 +57,8 @@
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
                     <input type="text" name="search" placeholder="Search records..." 
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" 
-                        value="{{ request('query') }}">
+                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" 
+                           value="{{ request('query') }}">
                 </div>
             </div>
 

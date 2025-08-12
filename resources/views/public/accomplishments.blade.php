@@ -6,6 +6,7 @@
     <title>Community Accomplishments - Lower Malinao System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="icon" href="{{ asset('lower malinao logo.ico') }}" type="image/x-icon">
     <style>
         .hero-bg {
             background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("/images/lower-malinao-brgy-bg-f.png");
@@ -92,91 +93,88 @@
         </div>
     </section>
 
-    <!-- Projects Grid -->
+    <!-- Community Bulletin Board (Projects + Health Activities) -->
     <section class="py-16 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">All Community Projects</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Browse through all our completed projects and see how we've transformed our community</p>
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Community Bulletin Board</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Browse completed projects and health activities across our community</p>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex justify-center mb-8 gap-3">
+                <button id="filter-projects" type="button" class="px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <i class="fas fa-project-diagram mr-2"></i>
+                    All Projects
+                </button>
+                <button id="filter-activities" type="button" class="px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <i class="fas fa-heartbeat mr-2"></i>
+                    All Health Activities
+                </button>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @forelse($projects as $project)
-                <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden border border-gray-100">
-                    @if($project->image_url)
+            @php $gridItems = isset($bulletin) ? $bulletin : collect(); @endphp
+
+            <div id="bulletinGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @forelse($gridItems as $item)
+                <div class="bulletin-item bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden border border-gray-100" data-type="{{ $item->type ?? 'project' }}">
+                    @if($item->image_url)
                         <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
-                            <img src="{{ $project->image_url }}" alt="{{ $project->title }} image" class="object-cover h-full w-full">
+                            <img src="{{ $item->image_url }}" alt="{{ $item->title }} image" class="object-cover h-full w-full">
                         </div>
                     @else
                         <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                            <i class="fas fa-project-diagram text-4xl text-gray-400"></i>
+                            <i class="fas {{ ($item->type ?? 'project') === 'activity' ? 'fa-heartbeat' : 'fa-project-diagram' }} text-4xl text-gray-400"></i>
                         </div>
                     @endif
-                    
-                    <!-- Project Content -->
+
+                    <!-- Card Content -->
                     <div class="p-6">
-                        <!-- Category Badge -->
                         <div class="flex items-center justify-between mb-3">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium {{ $project->category_color }}">
-                                {{ $project->category }}
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ $item->category ?? (($item->type ?? 'project') === 'activity' ? 'Health' : 'Project') }}
                             </span>
-                            @if($project->is_featured)
-                                <span class="text-yellow-500">
-                                    <i class="fas fa-star"></i>
-                                </span>
+                            <span class="text-xs {{ ($item->type ?? 'project') === 'activity' ? 'text-green-600' : 'text-blue-600' }}">
+                                <i class="fas {{ ($item->type ?? 'project') === 'activity' ? 'fa-heartbeat' : 'fa-project-diagram' }} mr-1"></i>
+                                {{ ucfirst($item->type ?? 'project') }}
+                            </span>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $item->title }}</h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ Str::limit($item->description, 120) }}</p>
+
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span><i class="fas fa-calendar-alt mr-1"></i>{{ optional($item->date)->format('M d, Y') }}</span>
+                            @if(!empty($item->link))
+                            <a href="{{ $item->link }}" class="inline-flex items-center text-green-600 hover:text-green-700 font-medium">
+                                View <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
                             @endif
                         </div>
-                        
-                        <!-- Project Title -->
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $project->title }}</h3>
-                        
-                        <!-- Project Description -->
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ Str::limit($project->description, 120) }}</p>
-                        
-                        <!-- Project Details -->
-                        <div class="space-y-2 mb-4">
-                            @if($project->location)
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="fas fa-map-marker-alt mr-2 text-green-600"></i>
-                                <span>{{ $project->location }}</span>
-                            </div>
-                            @endif
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="fas fa-calendar mr-2 text-blue-600"></i>
-                                <span>{{ $project->completion_date->format('M Y') }}</span>
-                            </div>
-                            @if($project->budget)
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="fas fa-money-bill mr-2 text-green-600"></i>
-                                <span>{{ $project->formatted_budget }}</span>
-                            </div>
-                            @endif
-                        </div>
-                        
-                        <!-- Impact Preview -->
-                        @if($project->impact)
-                        <div class="pt-4 border-t border-gray-100">
-                            <p class="text-sm text-gray-600">
-                                <strong>Impact:</strong> {{ Str::limit($project->impact, 80) }}
-                            </p>
-                        </div>
-                        @endif
                     </div>
                 </div>
                 @empty
                 <div class="col-span-full text-center py-12">
                     <div class="text-gray-400 mb-4">
-                        <i class="fas fa-project-diagram text-6xl"></i>
+                        <i class="fas fa-bullhorn text-6xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Projects Available</h3>
-                    <p class="text-gray-600">Our community projects will be displayed here soon.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Items Available</h3>
+                    <p class="text-gray-600">Community updates will be displayed here soon.</p>
                 </div>
                 @endforelse
             </div>
+
+            <!-- No results after filter -->
+            <p id="noFilteredItems" class="hidden text-center text-gray-500 mt-5">No items to show for this filter.</p>
+
+            @if(isset($bulletin) && $bulletin->hasPages())
+            <div class="mt-12 flex justify-center">
+                {{ $bulletin->links() }}
+            </div>
+            @endif
             
-            <!-- Pagination -->
-            @if($projects->hasPages())
-            <div class="mt-12">
+            @if(isset($projects) && $projects->hasPages())
+            <div class="mt-12 flex justify-center">
                 {{ $projects->links() }}
             </div>
             @endif
@@ -253,6 +251,33 @@
                 }
             });
         });
+
+        // Bulletin filter buttons
+        const btnProjects = document.getElementById('filter-projects');
+        const btnActivities = document.getElementById('filter-activities');
+        const grid = document.getElementById('bulletinGrid');
+        const items = () => Array.from(grid.querySelectorAll('.bulletin-item'));
+        const noFilteredEl = document.getElementById('noFilteredItems');
+
+        function setActive(button) {
+            [btnProjects, btnActivities].forEach(b => b.classList.remove('ring-2','ring-green-500','bg-green-50','text-green-700','border-green-300'));
+            button.classList.add('ring-2','ring-green-500','bg-green-50','text-green-700','border-green-300');
+        }
+
+        function applyFilter(type) {
+            let anyVisible = false;
+            items().forEach(el => {
+                const matches = type === 'all' ? true : (el.dataset.type === type);
+                el.classList.toggle('hidden', !matches);
+                if (matches) anyVisible = true;
+            });
+            noFilteredEl.classList.toggle('hidden', anyVisible);
+        }
+
+        if (btnProjects && btnActivities && grid) {
+            btnProjects.addEventListener('click', () => { setActive(btnProjects); applyFilter('project'); });
+            btnActivities.addEventListener('click', () => { setActive(btnActivities); applyFilter('activity'); });
+        }
     </script>
 </body>
 </html> 

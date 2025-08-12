@@ -47,6 +47,8 @@ Route::get('/', function () {
 
 // Public accomplished projects page
 Route::get('/accomplishments', [PublicController::class, 'accomplishments'])->name('public.accomplishments');
+Route::get('/accomplishments/project/{id}', [PublicController::class, 'showProject'])->name('public.accomplishments.project');
+Route::get('/accomplishments/activity/{id}', [PublicController::class, 'showActivity'])->name('public.accomplishments.activity');
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 
@@ -223,7 +225,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/health-center-activities/{id}/edit', [HealthCenterActivityController::class, 'edit'])->name('admin.health-center-activities.edit');
         Route::put('/health-center-activities/{id}', [HealthCenterActivityController::class, 'update'])->name('admin.health-center-activities.update');
         Route::delete('/health-center-activities/{id}', [HealthCenterActivityController::class, 'destroy'])->name('admin.health-center-activities.destroy');
-        Route::get('/health-center-activities/search', [HealthCenterActivityController::class, 'search'])->name('admin.health-center-activities.search');
+        // merged search into index; route no longer needed
         Route::get('/health-center-activities/upcoming', [HealthCenterActivityController::class, 'upcoming'])->name('admin.health-center-activities.upcoming');
         Route::get('/health-center-activities/completed', [HealthCenterActivityController::class, 'completed'])->name('admin.health-center-activities.completed');
         Route::get('/health-center-activities/report', [HealthCenterActivityController::class, 'generateReport'])->name('admin.health-center-activities.report');
@@ -234,6 +236,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/notifications', [AdminNotificationController::class, 'showNotifications'])->name('admin.notifications');
         Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
         Route::post('/notifications/mark-all-as-read-ajax', [AdminNotificationController::class, 'markAllAsReadAjax'])->name('admin.notifications.mark-all-as-read-ajax');
+        Route::post('/notifications/mark-as-read-by-type/{type}', [AdminNotificationController::class, 'markAsReadByType'])->name('admin.notifications.mark-as-read-by-type');
     });
 });
 

@@ -14,11 +14,11 @@
                 <div class="hidden sm:flex items-center space-x-4">
                     <div class="flex items-center space-x-2">
                         <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                        <span class="text-sm text-gray-600">{{ $notifications->where('is_read', false)->count() }} unread</span>
+                        <span class="text-sm text-gray-600">{{ $total_unread ?? 0 }} unread</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span class="text-sm text-gray-600">{{ $notifications->where('is_read', true)->count() }} read</span>
+                        <span class="text-sm text-gray-600">{{ $total_read ?? 0 }} read</span>
                     </div>
                 </div>
                 <form action="{{ route('resident.notifications.mark-all') }}" method="POST">
@@ -108,6 +108,123 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        </div>
+    @endif
+
+    <!-- Pagination -->
+    @if($notifications->hasPages())
+        <div class="mt-6">
+            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+                <div class="-mt-px flex w-0 flex-1">
+                    @if($notifications->onFirstPage())
+                        <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </span>
+                    @else
+                        <a href="{{ $notifications->appends(request()->except('page'))->previousPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="hidden md:-mt-px md:flex">
+                    @php
+                        $currentPage = $notifications->currentPage();
+                        $lastPage = $notifications->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
+                    
+                    @if($startPage > 1)
+                        <a href="{{ $notifications->appends(request()->except('page'))->url(1) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            1
+                        </a>
+                        @if($startPage > 2)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                    @endif
+                    
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $notifications->appends(request()->except('page'))->url($page) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endfor
+                    
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                        <a href="{{ $notifications->appends(request()->except('page'))->url($lastPage) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            {{ $lastPage }}
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="-mt-px flex w-0 flex-1 justify-end">
+                    @if($notifications->hasMorePages())
+                        <a href="{{ $notifications->appends(request()->except('page'))->nextPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </a>
+                    @else
+                        <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </span>
+                    @endif
+                </div>
+            </nav>
+            
+            <!-- Mobile Pagination -->
+            <div class="mt-4 flex justify-between sm:hidden">
+                @if($notifications->onFirstPage())
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Previous
+                    </span>
+                @else
+                    <a href="{{ $notifications->appends(request()->except('page'))->previousPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Previous
+                    </a>
+                @endif
+                
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                    Page {{ $notifications->currentPage() }} of {{ $notifications->lastPage() }}
+                </span>
+                
+                @if($notifications->hasMorePages())
+                    <a href="{{ $notifications->appends(request()->except('page'))->nextPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Next
+                    </a>
+                @else
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Next
+                    </span>
+                @endif
+            </div>
+            
+            <!-- Results Info -->
+            <div class="mt-4 text-center text-sm text-gray-500">
+                Showing {{ $notifications->firstItem() }} to {{ $notifications->lastItem() }} of {{ $notifications->total() }} results
             </div>
         </div>
     @endif

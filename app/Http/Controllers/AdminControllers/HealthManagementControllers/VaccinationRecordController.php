@@ -83,7 +83,7 @@ class VaccinationRecordController
                 }
             })
             ->orderBy('vaccination_date', 'desc')
-            ->paginate(15);
+            ->paginate(10);
 
         return view('admin.vaccination-records.index', [
             'vaccinationRecords' => $vaccinationRecords,
@@ -193,7 +193,8 @@ class VaccinationRecordController
             ->whereNotNull('next_dose_date')
             ->where('next_dose_date', '<=', now()->addDays(30))
             ->orderBy('next_dose_date', 'asc')
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.vaccination-records.due', compact('dueVaccinations'));
     }

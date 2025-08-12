@@ -14,42 +14,26 @@ class ResidentRequestListController
     {
         $userId = Session::get('user_id');
 
-        // --- Document Requests ---
+        // Get all requests without pagination first
         $documentQuery = DocumentRequest::where('resident_id', $userId);
+        $blotterQuery = BlotterRequest::where('resident_id', $userId);
+        $complaintQuery = CommunityComplaint::where('resident_id', $userId);
+
+        // Apply search filter if provided
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
+            
             $documentQuery->where(function ($q) use ($search) {
                 $q->where('document_type', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
-        }
-        if ($request->filled('status')) {
-            $documentQuery->where('status', $request->get('status'));
-        }
-        $documentRequests = $documentQuery
-            ->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
-            ->orderByDesc('created_at')
-            ->get();
-
-        // --- Blotter Requests ---
-        $blotterQuery = BlotterRequest::where('resident_id', $userId);
-        if ($request->filled('search')) {
-            $search = trim($request->get('search'));
+            
             $blotterQuery->where(function ($q) use ($search) {
                 $q->where('recipient_name', 'like', "%{$search}%")
                   ->orWhere('type', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
-        }
-        if ($request->filled('status')) {
-            $blotterQuery->where('status', $request->get('status'));
-        }
-        $blotterRequests = $blotterQuery->orderByDesc('created_at')->get();
-
-        // --- Community Complaints ---
-        $complaintQuery = CommunityComplaint::where('resident_id', $userId);
-        if ($request->filled('search')) {
-            $search = trim($request->get('search'));
+            
             $complaintQuery->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('category', 'like', "%{$search}%")
@@ -57,21 +41,110 @@ class ResidentRequestListController
                   ->orWhere('location', 'like', "%{$search}%");
             });
         }
+
+        // Apply status filter if provided
         if ($request->filled('status')) {
-            $complaintQuery->where('status', $request->get('status'));
+            $status = $request->get('status');
+            $documentQuery->where('status', $status);
+            $blotterQuery->where('status', $status);
+            $complaintQuery->where('status', $status);
         }
-        $communityComplaints = $complaintQuery->orderByDesc('created_at')->get();
+
+        // Get all results
+        $allDocumentRequests = $documentQuery
+            ->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")
+            ->orderByDesc('created_at')
+            ->get();
+
+        $allBlotterRequests = $blotterQuery->orderByDesc('created_at')->get();
+        $allCommunityComplaints = $complaintQuery->orderByDesc('created_at')->get();
+
+        // Combine all requests into a single collection
+        $allRequests = collect();
+
+        // Add document requests
+        foreach ($allDocumentRequests as $docRequest) {
+            $allRequests->push((object) [
+                'id' => $docRequest->id,
+                'type' => 'document',
+                'request' => $docRequest,
+                'created_at' => $docRequest->created_at,
+                'status' => $docRequest->status,
+            ]);
+        }
+
+        // Add blotter requests
+        foreach ($allBlotterRequests as $blotterRequest) {
+            $allRequests->push((object) [
+                'id' => $blotterRequest->id,
+                'type' => 'blotter',
+                'request' => $blotterRequest,
+                'created_at' => $blotterRequest->created_at,
+                'status' => $blotterRequest->status,
+            ]);
+        }
+
+        // Add community complaints
+        foreach ($allCommunityComplaints as $complaint) {
+            $allRequests->push((object) [
+                'id' => $complaint->id,
+                'type' => 'complaint',
+                'request' => $complaint,
+                'created_at' => $complaint->created_at,
+                'status' => $complaint->status,
+            ]);
+        }
+
+        // Sort by creation date (latest first)
+        $allRequests = $allRequests->sortByDesc('created_at');
+
+        // Create unified pagination
+        $perPage = 15; // Show 15 requests per page
+        $currentPage = (int) ($request->get('page', 1));
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedSlice = $allRequests->slice($offset, $perPage)->values();
+
+        // Create a LengthAwarePaginator instance
+        $paginatedRequests = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedSlice,
+            $allRequests->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
+        );
+
+        // Separate the paginated requests back into their types for the view
+        $documentRequests = collect();
+        $blotterRequests = collect();
+        $communityComplaints = collect();
+
+        foreach ($paginatedRequests as $item) {
+            switch ($item->type) {
+                case 'document':
+                    $documentRequests->push($item->request);
+                    break;
+                case 'blotter':
+                    $blotterRequests->push($item->request);
+                    break;
+                case 'complaint':
+                    $communityComplaints->push($item->request);
+                    break;
+            }
+        }
 
         // Compute resident notifications (mirror admin style but for this user only)
         $residentNotifications = collect();
-        foreach ($documentRequests as $req) {
-            if ($req->status === 'approved') {
+        foreach ($allDocumentRequests as $docReq) {
+            if ($docReq->status === 'approved') {
                 $residentNotifications->push((object) [
-                    'id' => $req->id,
+                    'id' => $docReq->id,
                     'type' => 'document_request',
-                    'message' => 'Your ' . $req->document_type . ' is ready for pickup.',
-                    'created_at' => $req->updated_at,
-                    'is_read' => (bool) ($req->resident_is_read ?? true),
+                    'message' => 'Your ' . $docReq->document_type . ' is ready for pickup.',
+                    'created_at' => $docReq->updated_at,
+                    'is_read' => (bool) ($docReq->resident_is_read ?? true),
                     'link' => route('resident.my-requests')
                 ]);
             }
@@ -81,7 +154,8 @@ class ResidentRequestListController
             'documentRequests',
             'blotterRequests',
             'communityComplaints',
-            'residentNotifications'
+            'residentNotifications',
+            'paginatedRequests'
         ));
     }
 } 

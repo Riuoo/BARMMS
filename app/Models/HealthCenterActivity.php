@@ -27,6 +27,7 @@ class HealthCenterActivity extends Model
         'challenges',
         'recommendations',
         'status',
+        'is_featured',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class HealthCenterActivity extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'budget' => 'decimal:2',
+        'is_featured' => 'boolean',
     ];
 
     public function getParticipationRateAttribute()

@@ -961,6 +961,7 @@
                 this.loadNotifications();
                 this.startPolling();
                 this.bindEvents();
+                this.checkCurrentPageAndMarkNotifications();
             },
 
             // Load notifications from server
@@ -1223,6 +1224,52 @@
                 window.markAllAsRead = () => {
                     this.markAllAsRead();
                 };
+            },
+
+            // Check current page and mark relevant notifications as read
+            checkCurrentPageAndMarkNotifications: function() {
+                const currentPath = window.location.pathname;
+                let notificationType = null;
+                
+                // Map URL patterns to notification types
+                if (currentPath.includes('/document-requests')) {
+                    notificationType = 'document_request';
+                } else if (currentPath.includes('/blotter-reports')) {
+                    notificationType = 'blotter_report';
+                } else if (currentPath.includes('/new-account-requests')) {
+                    notificationType = 'account_request';
+                } else if (currentPath.includes('/community-complaints')) {
+                    notificationType = 'community_complaint';
+                }
+                
+                // If we're on a relevant page, mark notifications as read
+                if (notificationType) {
+                    this.markNotificationsAsReadByType(notificationType);
+                }
+            },
+
+            // Mark all notifications of a specific type as read
+            markNotificationsAsReadByType: function(type) {
+                fetch(`/admin/notifications/mark-as-read-by-type/${type}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Automatically marked notifications as read for:', type);
+                        // Reload notifications to update the count
+                        this.loadNotifications();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking notifications as read by type:', error);
+                });
             }
         };
 

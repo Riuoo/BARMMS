@@ -44,6 +44,10 @@ class ResidentNotificationController
             }
         }
 
+        // Totals across ALL notifications (not limited by pagination)
+        $total_unread = $notifications->where('is_read', false)->count();
+        $total_read = $notifications->where('is_read', true)->count();
+
         // Search filter
         if ($request->filled('search')) {
             $search = strtolower($request->get('search'));
@@ -63,7 +67,25 @@ class ResidentNotificationController
 
         $notifications = $notifications->sortByDesc('created_at');
 
-        return view('resident.notifications', compact('notifications'));
+        // Create a custom paginator for the filtered results
+        $perPage = 15; // Show 15 notifications per page
+        $currentPage = $request->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedNotifications = $notifications->slice($offset, $perPage);
+        
+        // Create a LengthAwarePaginator instance
+        $notifications = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedNotifications,
+            $notifications->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'page',
+            ]
+        );
+
+        return view('resident.notifications', compact('notifications', 'total_unread', 'total_read'));
     }
 
     public function count()
