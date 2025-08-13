@@ -98,6 +98,27 @@ class VaccinationRecordController
         return view('admin.vaccination-records.create', compact('residents'));
     }
 
+    public function createChild()
+    {
+        $residents = Residents::where('active', true)->get();
+        $ageGroup = 'child';
+        return view('admin.vaccination-records.create-child', compact('residents', 'ageGroup'));
+    }
+
+    public function createAdult()
+    {
+        $residents = Residents::where('active', true)->get();
+        $ageGroup = 'adult';
+        return view('admin.vaccination-records.create-adult', compact('residents', 'ageGroup'));
+    }
+
+    public function createElderly()
+    {
+        $residents = Residents::where('active', true)->get();
+        $ageGroup = 'elderly';
+        return view('admin.vaccination-records.create-elderly', compact('residents', 'ageGroup'));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

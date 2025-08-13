@@ -13,51 +13,99 @@ class BarangayProfileSeeder extends Seeder
     public function run(): void
     {
         BarangayProfile::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password123'),
-            'role' => 'admin',
-            'address' => '123 Barangay St.',
-        ]);
-
-        BarangayProfile::create([
-            'name' => 'Captain User',
-            'email' => 'captain@example.com',
+            'name' => 'Hon. Roberto Santos Dela Cruz',
+            'email' => 'brgy.captain@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'captain',
-            'address' => '456 Captain St.',
+            'address' => 'Purok 1, Lower Malinao, Zamboanga City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Secretary User',
-            'email' => 'secretary@example.com',
+            'name' => 'Maria Consuelo Reyes',
+            'email' => 'brgy.secretary@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'secretary',
-            'address' => '789 Secretary St.',
+            'address' => 'Purok 2, Lower Malinao, Zamboanga City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Treasurer User',
-            'email' => 'treasurer@example.com',
+            'name' => 'Antonio Mendoza Flores',
+            'email' => 'brgy.treasurer@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'treasurer',
-            'address' => '101 Treasurer St.',
+            'address' => 'Purok 3, Lower Malinao, Zamboanga City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Councilor User',
-            'email' => 'councilor@example.com',
+            'name' => 'Hon. Lourdes Garcia Santos',
+            'email' => 'brgy.councilor1@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
-            'address' => '202 Councilor St.',
+            'address' => 'Purok 4, Lower Malinao, Zamboanga City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Nurse User',
-            'email' => 'nurse@example.com',
+            'name' => 'Hon. Ramon Torres Cruz',
+            'email' => 'brgy.councilor2@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'councilor',
+            'address' => 'Purok 5, Lower Malinao, Zamboanga City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'Hon. Elena Martinez Lopez',
+            'email' => 'brgy.councilor3@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'councilor',
+            'address' => 'Purok 6, Lower Malinao, Zamboanga City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'Hon. Fernando Aquino Reyes',
+            'email' => 'brgy.councilor4@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'councilor',
+            'address' => 'Purok 7, Lower Malinao, Zamboanga City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'Hon. Rosario Lim Santos',
+            'email' => 'brgy.councilor5@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'councilor',
+            'address' => 'Purok 8, Lower Malinao, Zamboanga City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'Dr. Maria Teresa Gonzales',
+            'email' => 'brgy.nurse@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'nurse',
-            'address' => '205 Nurse St.',
+            'address' => 'Barangay Health Center, Lower Malinao, Zamboanga City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'Nurse Ana Patricia Cruz',
+            'email' => 'brgy.nurse2@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'nurse',
+            'address' => 'Barangay Health Center, Lower Malinao, Zamboanga City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'Barangay Tanod Captain Manuel Santos',
+            'email' => 'brgy.tanod@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'bhw',
+            'address' => 'Purok 1, Lower Malinao, Zamboanga City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'SK Chairperson Juan Miguel Dela Cruz',
+            'email' => 'sk.chair@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'sk_chairman',
+            'address' => 'Purok 2, Lower Malinao, Zamboanga City',
         ]);
     }
 }

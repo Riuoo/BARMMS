@@ -181,6 +181,9 @@ Route::prefix('admin')->group(function () {
         // Vaccination Records Routes
         Route::get('/vaccination-records', [VaccinationRecordController::class, 'index'])->name('admin.vaccination-records.index');
         Route::get('/vaccination-records/create', [VaccinationRecordController::class, 'create'])->name('admin.vaccination-records.create');
+        Route::get('/vaccination-records/create/child', [VaccinationRecordController::class, 'createChild'])->name('admin.vaccination-records.create.child');
+        Route::get('/vaccination-records/create/adult', [VaccinationRecordController::class, 'createAdult'])->name('admin.vaccination-records.create.adult');
+        Route::get('/vaccination-records/create/elderly', [VaccinationRecordController::class, 'createElderly'])->name('admin.vaccination-records.create.elderly');
         Route::post('/vaccination-records', [VaccinationRecordController::class, 'store'])->name('admin.vaccination-records.store');
         Route::get('/vaccination-records/{id}', [VaccinationRecordController::class, 'show'])->name('admin.vaccination-records.show');
         Route::get('/vaccination-records/{id}/edit', [VaccinationRecordController::class, 'edit'])->name('admin.vaccination-records.edit');

@@ -14,6 +14,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             BarangayProfileSeeder::class,
             ResidentSeeder::class,
+            MedicineSeeder::class,
+            MedicalRecordSeeder::class,
+            MedicineTransactionSeeder::class,
+            MedicineRequestSeeder::class,
             DocumentTemplateSeeder::class,
             AccomplishedProjectSeeder::class,
             HealthCenterActivitySeeder::class,
