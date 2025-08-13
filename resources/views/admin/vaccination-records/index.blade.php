@@ -16,6 +16,10 @@
                     <i class="fas fa-clock mr-2"></i>
                     Due Vaccinations
                 </a>
+                <a href="{{ route('admin.vaccination-records.child-profiles') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                    <i class="fas fa-child mr-2"></i>
+                    Child Profiles
+                </a>
                 <button type="button" id="openAddVaccinationModal" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add Vaccination
@@ -176,11 +180,15 @@
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No vaccination records found</h3>
             <p class="text-gray-500">Get started by adding the first vaccination record.</p>
-            <div class="mt-6">
+            <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                 <button type="button" id="openAddVaccinationModalEmpty" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add First Vaccination
                 </button>
+                <a href="{{ route('admin.vaccination-records.child-profiles') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-child mr-2"></i>
+                    Manage Child Profiles
+                </a>
             </div>
         </div>
     @else
@@ -227,8 +235,8 @@
                         <tr class="hover:bg-gray-50 transition duration-150">
                             <td class="px-6 py-4">
                                 <div class="items-center gap-2">
-                                        <div class="text-sm font-medium text-gray-900">{{ $record->resident->name }}</div>
-                                        <div class="text-sm text-gray-500">{{ $record->resident->email }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $record->patient_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $record->patient_type }}</div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -301,7 +309,7 @@
                             <i class="fas fa-user text-green-600"></i>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
-                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $record->resident->name }}</h3>
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $record->patient_name }}</h3>
                             <p class="text-sm text-gray-500 truncate">{{ $record->vaccine_name }}</p>
                             <div class="flex items-center mt-1">
                                 @php

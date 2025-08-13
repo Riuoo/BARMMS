@@ -11,26 +11,77 @@ class VaccinationRecord extends Model
 
     protected $fillable = [
         'resident_id',
+        'child_profile_id',
         'vaccine_name',
         'vaccine_type',
         'vaccination_date',
         'batch_number',
         'manufacturer',
         'dose_number',
+        'total_doses_required',
         'next_dose_date',
         'administered_by',
         'side_effects',
         'notes',
+        'age_group',
+        'age_at_vaccination',
+        'is_booster',
+        'is_annual',
     ];
 
     protected $casts = [
         'vaccination_date' => 'date',
         'next_dose_date' => 'date',
+        'is_booster' => 'boolean',
+        'is_annual' => 'boolean',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($vaccinationRecord) {
+            // Ensure either resident_id or child_profile_id is set, but not both
+            if (empty($vaccinationRecord->resident_id) && empty($vaccinationRecord->child_profile_id)) {
+                throw new \InvalidArgumentException('Either resident_id or child_profile_id must be set.');
+            }
+            
+            if (!empty($vaccinationRecord->resident_id) && !empty($vaccinationRecord->child_profile_id)) {
+                throw new \InvalidArgumentException('Only one of resident_id or child_profile_id can be set, not both.');
+            }
+        });
+    }
 
     public function resident()
     {
         return $this->belongsTo(Residents::class, 'resident_id');
+    }
+
+    public function childProfile()
+    {
+        return $this->belongsTo(ChildProfile::class, 'child_profile_id');
+    }
+
+    public function getPatientNameAttribute()
+    {
+        if ($this->resident) {
+            return $this->resident->name;
+        }
+        if ($this->childProfile) {
+            return $this->childProfile->first_name . ' ' . $this->childProfile->last_name;
+        }
+        return 'Unknown Patient';
+    }
+
+    public function getPatientTypeAttribute()
+    {
+        if ($this->resident) {
+            return 'Resident';
+        }
+        if ($this->childProfile) {
+            return 'Child';
+        }
+        return 'Unknown';
     }
 
     public function getNextDoseDueAttribute()
@@ -39,5 +90,18 @@ class VaccinationRecord extends Model
             return $this->next_dose_date->isPast();
         }
         return false;
+    }
+
+    public function getDoseProgressAttribute()
+    {
+        if ($this->total_doses_required > 1) {
+            return "{$this->dose_number} of {$this->total_doses_required}";
+        }
+        return "Complete";
+    }
+
+    public function getIsCompleteAttribute()
+    {
+        return $this->dose_number >= $this->total_doses_required;
     }
 } 

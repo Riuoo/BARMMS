@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             DocumentTemplateSeeder::class,
             AccomplishedProjectSeeder::class,
             HealthCenterActivitySeeder::class,
+            VaccinationScheduleSeeder::class,
         ]);
     }
 }

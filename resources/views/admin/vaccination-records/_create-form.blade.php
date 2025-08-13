@@ -9,25 +9,53 @@
                     <i class="fas fa-user mr-3 text-blue-600 text-2xl"></i>
                     <h2 class="text-xl font-bold text-gray-900">Patient Information</h2>
                 </div>
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="residentSearch" class="block text-sm font-medium text-gray-700 mb-2">Select Resident <span class="text-red-500">*</span></label>
-                        <input
-                            type="text"
-                            id="residentSearch"
-                            placeholder="Type to search for a resident..."
-                            autocomplete="off"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                            aria-label="Search for a resident"
-                        />
-                        <input type="hidden" id="resident_id" name="resident_id" required>
-                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
-                        <p class="mt-1 text-sm text-gray-500">Search and select the resident for this patient record</p>
-                        @error('resident_id')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                @php
+                    $isChildFlow = isset($ageGroup) && in_array(strtolower($ageGroup), ['child','infant','toddler','adolescent']);
+                @endphp
+                @if($isChildFlow)
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="relative">
+                            <label for="child_search" class="block text-sm font-medium text-gray-700 mb-2">Search Child <span class="text-red-500">*</span></label>
+                            <input type="text" id="child_search" placeholder="Type child's name..." autocomplete="off"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" />
+                            <input type="hidden" id="child_profile_id" name="child_profile_id">
+                            <input type="hidden" id="child_search_hidden" name="child_search" value="">
+                            <div id="child_results" class="absolute left-0 right-0 z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                            <p class="mt-1 text-xs text-gray-500">Search children from Child Profiles</p>
+                            <p id="child_hint" class="mt-1 text-xs text-red-600 hidden">No children found</p>
+                            <div class="mt-2">
+                                <a href="{{ route('admin.vaccination-records.create-child-profile') }}" class="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium text-white bg-blue-600 hover:bg-blue-700">
+                                    <i class="fas fa-child mr-2"></i>
+                                    Add New Child
+                                </a>
+                            </div>
+                            @error('child_profile_id')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
-                </div>
+                @else
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label for="residentSearch" class="block text-sm font-medium text-gray-700 mb-2">Select Resident <span class="text-red-500">*</span></label>
+                            <input
+                                type="text"
+                                id="residentSearch"
+                                placeholder="Type to search for a resident..."
+                                autocomplete="off"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                aria-label="Search for a resident"
+                            />
+                            <input type="hidden" id="resident_id" name="resident_id">
+                            <input type="hidden" id="resident_search_hidden" name="resident_search" value="">
+                            <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                            <p class="mt-1 text-sm text-gray-500">Search and select the resident for this patient record</p>
+                            @error('resident_id')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Vaccine Information -->
@@ -109,53 +137,10 @@
                 </div>
             </div>
 
-            <!-- Health Worker -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-user-md mr-3 text-yellow-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Health Worker</h2>
-                </div>
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="administered_by" class="block text-sm font-medium text-gray-700 mb-2">Administered By</label>
-                        <input type="text" name="administered_by" id="administered_by" value="{{ old('administered_by') }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="Name of health worker who administered the vaccine">
-                    </div>
-                </div>
-            </div>
+            <!-- Health Worker (auto-filled from session) -->
+            <input type="hidden" name="administered_by" value="{{ session('user_name') ?? 'Nurse' }}">
 
-            <!-- Side Effects -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-exclamation-triangle mr-3 text-indigo-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Side Effects</h2>
-                </div>
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="side_effects" class="block text-sm font-medium text-gray-700 mb-2">Side Effects</label>
-                        <textarea name="side_effects" id="side_effects" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Any side effects observed...">{{ old('side_effects') }}</textarea>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Additional Notes -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-sticky-note mr-3 text-gray-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Additional Notes</h2>
-                </div>
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                        <textarea name="notes" id="notes" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Any additional notes or observations...">{{ old('notes') }}</textarea>
-                    </div>
-                </div>
-            </div>
 
             <!-- Form Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
@@ -193,9 +178,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('residentSearch');
     const searchResults = document.getElementById('searchResults');
     const residentIdInput = document.getElementById('resident_id');
+    const childIdInput = document.getElementById('child_profile_id');
+    const childSearchInput = document.getElementById('child_search');
+    const childResults = document.getElementById('child_results');
 
-    searchInput.addEventListener('input', debounce(async () => {
-        const term = searchInput.value.trim();
+    // Prevent selecting both Resident and Child simultaneously
+    // Clear resident fields when child chosen via AJAX
+    function clearResidentSelection() {
+        if (residentIdInput) residentIdInput.value = '';
+        if (searchInput) searchInput.value = '';
+        if (searchResults) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+        }
+    }
+
+    searchInput && searchInput.addEventListener('input', debounce(async () => {
+        const term = searchInput ? searchInput.value.trim() : '';
+        const resHidden = document.getElementById('resident_search_hidden');
+        if (resHidden) resHidden.value = term;
         if (term.length < 2) {
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
@@ -220,12 +221,71 @@ document.addEventListener('DOMContentLoaded', () => {
     searchResults.addEventListener('click', (event) => {
         const target = event.target.closest('[data-id]');
         if (target && target.dataset.id) {
-            residentIdInput.value = target.dataset.id;
-            searchInput.value = target.dataset.name;
+            if (residentIdInput) residentIdInput.value = target.dataset.id;
+            if (searchInput) searchInput.value = target.dataset.name;
+            // Clear child selection if resident selected
+            if (childIdInput) childIdInput.value = '';
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
         }
     });
+    // Child AJAX search
+    if (childSearchInput && childResults) {
+        childSearchInput.addEventListener('input', debounce(async () => {
+            const term = childSearchInput.value.trim();
+            const childHidden = document.getElementById('child_search_hidden') || document.getElementById('child_search_hidden');
+            const hiddenSet = document.getElementById('child_search_hidden');
+            if (hiddenSet) hiddenSet.value = term;
+            if (term.length < 2) {
+                childResults.innerHTML = '';
+                childResults.classList.add('hidden');
+                return;
+            }
+        // Show searching state immediately
+        childResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Searching…</div>';
+        childResults.classList.remove('hidden');
+            const url = `{{ route('admin.vaccination-records.child-profiles') }}?search=${encodeURIComponent(term)}`;
+            const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }});
+            try {
+                const json = await response.json();
+                let items = [];
+                if (json && Array.isArray(json.data)) {
+                    items = json.data.map(c => ({ id: c.id, name: `${c.first_name} ${c.last_name}` }));
+                }
+                const hint = document.getElementById('child_hint');
+                if (items.length === 0) {
+                    childResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No children found</div>';
+                    if (hint) hint.classList.remove('hidden');
+                } else {
+                    childResults.innerHTML = items.map(c => `<div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${c.id}" data-name="${c.name}"><div class="font-medium text-gray-900">${c.name}</div></div>`).join('');
+                    if (hint) hint.classList.add('hidden');
+                }
+                childResults.classList.remove('hidden');
+            } catch(err) {
+                childResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Search unavailable.</div>';
+                childResults.classList.remove('hidden');
+            }
+        }, 250));
+
+        childResults.addEventListener('click', (event) => {
+            const target = event.target.closest('[data-id]');
+            if (target && target.dataset.id) {
+                if (childIdInput) childIdInput.value = target.dataset.id;
+                if (childSearchInput) childSearchInput.value = target.dataset.name;
+                // Clear resident selection
+                clearResidentSelection();
+                childResults.innerHTML = '';
+                childResults.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!childSearchInput.contains(event.target) && !childResults.contains(event.target)) {
+                childResults.innerHTML = '';
+                childResults.classList.add('hidden');
+            }
+        });
+    }
 
     document.addEventListener('click', (event) => {
         if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {

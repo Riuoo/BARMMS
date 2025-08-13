@@ -13,6 +13,13 @@ class BarangayProfileSeeder extends Seeder
     public function run(): void
     {
         BarangayProfile::create([
+            'name' => 'Admin',
+            'email' => 'admin@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'admin',
+            'address' => 'Purok 1, Lower Malinao, Zamboanga City',
+        ]);
+        BarangayProfile::create([
             'name' => 'Hon. Roberto Santos Dela Cruz',
             'email' => 'brgy.captain@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),

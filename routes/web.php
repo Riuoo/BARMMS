@@ -182,16 +182,39 @@ Route::prefix('admin')->group(function () {
         Route::get('/vaccination-records', [VaccinationRecordController::class, 'index'])->name('admin.vaccination-records.index');
         Route::get('/vaccination-records/create', [VaccinationRecordController::class, 'create'])->name('admin.vaccination-records.create');
         Route::get('/vaccination-records/create/child', [VaccinationRecordController::class, 'createChild'])->name('admin.vaccination-records.create.child');
+        Route::get('/vaccination-records/create/infant', [VaccinationRecordController::class, 'createInfant'])->name('admin.vaccination-records.create.infant');
+        Route::get('/vaccination-records/create/toddler', [VaccinationRecordController::class, 'createToddler'])->name('admin.vaccination-records.create.toddler');
         Route::get('/vaccination-records/create/adult', [VaccinationRecordController::class, 'createAdult'])->name('admin.vaccination-records.create.adult');
+        Route::get('/vaccination-records/create/adolescent', [VaccinationRecordController::class, 'createAdolescent'])->name('admin.vaccination-records.create.adolescent');
         Route::get('/vaccination-records/create/elderly', [VaccinationRecordController::class, 'createElderly'])->name('admin.vaccination-records.create.elderly');
         Route::post('/vaccination-records', [VaccinationRecordController::class, 'store'])->name('admin.vaccination-records.store');
-        Route::get('/vaccination-records/{id}', [VaccinationRecordController::class, 'show'])->name('admin.vaccination-records.show');
-        Route::get('/vaccination-records/{id}/edit', [VaccinationRecordController::class, 'edit'])->name('admin.vaccination-records.edit');
-        Route::put('/vaccination-records/{id}', [VaccinationRecordController::class, 'update'])->name('admin.vaccination-records.update');
-        Route::delete('/vaccination-records/{id}', [VaccinationRecordController::class, 'destroy'])->name('admin.vaccination-records.destroy');
+
+        // Place specific routes BEFORE the {id} catch-all to avoid collisions
         Route::get('/vaccination-records/search', [VaccinationRecordController::class, 'search'])->name('admin.vaccination-records.search');
         Route::get('/vaccination-records/due', [VaccinationRecordController::class, 'dueVaccinations'])->name('admin.vaccination-records.due');
         Route::get('/vaccination-records/report', [VaccinationRecordController::class, 'generateReport'])->name('admin.vaccination-records.report');
+
+        // Constrain {id} to numeric to prevent matching words like 'due'
+        Route::get('/vaccination-records/{id}', [VaccinationRecordController::class, 'show'])
+            ->whereNumber('id')
+            ->name('admin.vaccination-records.show');
+        Route::get('/vaccination-records/{id}/edit', [VaccinationRecordController::class, 'edit'])
+            ->whereNumber('id')
+            ->name('admin.vaccination-records.edit');
+        Route::put('/vaccination-records/{id}', [VaccinationRecordController::class, 'update'])
+            ->whereNumber('id')
+            ->name('admin.vaccination-records.update');
+        Route::delete('/vaccination-records/{id}', [VaccinationRecordController::class, 'destroy'])
+            ->whereNumber('id')
+            ->name('admin.vaccination-records.destroy');
+        
+        // Child Profile Routes
+        Route::get('/child-profiles', [VaccinationRecordController::class, 'getChildProfiles'])->name('admin.vaccination-records.child-profiles');
+        Route::get('/child-profiles/create', [VaccinationRecordController::class, 'createChildProfile'])->name('admin.vaccination-records.create-child-profile');
+        Route::post('/child-profiles', [VaccinationRecordController::class, 'storeChildProfile'])->name('admin.vaccination-records.store-child-profile');
+        
+        // Vaccination Schedule API
+        Route::get('/vaccination-schedules/recommended', [VaccinationRecordController::class, 'getRecommendedVaccines'])->name('admin.vaccination-schedules.recommended');
 
         // Medical Records Routes
         Route::get('/medical-records', [MedicalRecordController::class, 'index'])->name('admin.medical-records.index');
