@@ -105,7 +105,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/residents/create', [ResidentController::class, 'create'])->name('admin.residents.create');
         Route::post('/residents', [ResidentController::class, 'store'])->name('admin.residents.store');
         Route::get('/residents/check-email', [ResidentController::class, 'checkEmailRequest'])->name('admin.residents.check-email');
-        Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
+        // moved search route to nurse-accessible group below
         Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('admin.residents.edit');
         Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
         Route::put('/residents/{id}/activate', [ResidentController::class, 'activate'])->name('admin.residents.activate');
@@ -177,6 +177,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/health-reports', [HealthReportController::class, 'healthReport'])->name('admin.health-reports');
         Route::get('/health-reports/comprehensive', [HealthReportController::class, 'generateComprehensiveReport'])->name('admin.health-reports.comprehensive');
         Route::get('/health-reports/export', [HealthReportController::class, 'exportReport'])->name('admin.health-reports.export');
+
+        // Resident search (needed by vaccination forms) - allow nurse access
+        Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
 
         // Vaccination Records Routes
         Route::get('/vaccination-records', [VaccinationRecordController::class, 'index'])->name('admin.vaccination-records.index');

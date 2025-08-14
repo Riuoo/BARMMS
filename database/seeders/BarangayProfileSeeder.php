@@ -17,18 +17,18 @@ class BarangayProfileSeeder extends Seeder
             'email' => 'admin@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'admin',
-            'address' => 'Purok 1, Lower Malinao, Zamboanga City',
+            'address' => 'Purok 1, Lower Malinao, Padada City',
         ]);
         BarangayProfile::create([
-            'name' => 'Hon. Roberto Santos Dela Cruz',
+            'name' => 'Hon. Romeo I. Centina Jr.',
             'email' => 'brgy.captain@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'captain',
-            'address' => 'Purok 1, Lower Malinao, Zamboanga City',
+            'address' => 'Purok 1, Lower Malinao, Padada City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Maria Consuelo Reyes',
+            'name' => 'Mrs. Prija P. Bancure',
             'email' => 'brgy.secretary@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'secretary',
@@ -36,23 +36,23 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Antonio Mendoza Flores',
+            'name' => 'Mrs. Evelyn P. Villanueva',
             'email' => 'brgy.treasurer@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'treasurer',
-            'address' => 'Purok 3, Lower Malinao, Zamboanga City',
+            'address' => 'Purok 3, Lower Malinao, Padada City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Hon. Lourdes Garcia Santos',
+            'name' => 'Hon. Joel R. Enghog',
             'email' => 'brgy.councilor1@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
-            'address' => 'Purok 4, Lower Malinao, Zamboanga City',
+            'address' => 'Purok 4, Lower Malinao, Padada City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Hon. Ramon Torres Cruz',
+            'name' => 'Hon. Ariel S. Loro',
             'email' => 'brgy.councilor2@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -60,7 +60,7 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Hon. Elena Martinez Lopez',
+            'name' => 'Hon. Raphy Chris V. Carpentero',
             'email' => 'brgy.councilor3@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -68,7 +68,7 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Hon. Fernando Aquino Reyes',
+            'name' => 'Hon. Mary Jean E. Berjame',
             'email' => 'brgy.councilor4@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -76,39 +76,47 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Hon. Rosario Lim Santos',
+            'name' => 'Hon. Ivy S. Go',
             'email' => 'brgy.councilor5@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
-            'address' => 'Purok 8, Lower Malinao, Zamboanga City',
+            'address' => 'Purok 8, Lower Malinao, Padada City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Dr. Maria Teresa Gonzales',
+            'name' => 'Hon. Marlown C. Cabongcal Sr.',
+            'email' => 'brgy.councilor6@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'councilor',
+            'address' => 'Purok 9, Lower Malinao, Padada City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'Hon. Rey A. Abon',
+            'email' => 'brgy.councilor7@lowermalinao.gov.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'councilor',
+            'address' => 'Purok 10, Lower Malinao, Padada City',
+        ]);
+
+        BarangayProfile::create([
+            'name' => 'Lourdes D. Tubalad',
             'email' => 'brgy.nurse@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'nurse',
-            'address' => 'Barangay Health Center, Lower Malinao, Zamboanga City',
+            'address' => 'Barangay Health Center, Lower Malinao, Padada City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'Nurse Ana Patricia Cruz',
-            'email' => 'brgy.nurse2@lowermalinao.gov.ph',
-            'password' => bcrypt('password123'),
-            'role' => 'nurse',
-            'address' => 'Barangay Health Center, Lower Malinao, Zamboanga City',
-        ]);
-
-        BarangayProfile::create([
-            'name' => 'Barangay Tanod Captain Manuel Santos',
-            'email' => 'brgy.tanod@lowermalinao.gov.ph',
+            'name' => 'Barangay Health Worker',
+            'email' => 'brgy.bhw@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'bhw',
-            'address' => 'Purok 1, Lower Malinao, Zamboanga City',
+            'address' => 'Purok 1, Lower Malinao, Padada City',
         ]);
 
         BarangayProfile::create([
-            'name' => 'SK Chairperson Juan Miguel Dela Cruz',
+            'name' => 'Hon. JC James C. Fernandez',
             'email' => 'sk.chair@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'sk_chairman',

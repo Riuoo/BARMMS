@@ -291,11 +291,7 @@
                     </tbody>
                 </table>
             </div>
-            @if($vaccinationRecords->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200">
-                {{ $vaccinationRecords->links() }}
-            </div>
-            @endif
+            
         </div>
 
         <!-- Mobile Cards -->

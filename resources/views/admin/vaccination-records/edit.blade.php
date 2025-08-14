@@ -96,21 +96,7 @@
                             </select>
                         </div>
 
-                        <div>
-                            <label for="manufacturer" class="block text-sm font-medium text-gray-700 mb-2">Manufacturer</label>
-                            <input type="text" name="manufacturer" id="manufacturer" 
-                               value="{{ old('manufacturer', $vaccinationRecord->manufacturer) }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., Pfizer, Moderna, AstraZeneca">
-                        </div>
-
-                        <div>
-                            <label for="batch_number" class="block text-sm font-medium text-gray-700 mb-2">Batch Number</label>
-                            <input type="text" name="batch_number" id="batch_number" 
-                               value="{{ old('batch_number', $vaccinationRecord->batch_number) }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="Batch number">
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -136,43 +122,9 @@
                     </div>
                 </div>
 
-                <!-- Administered By -->
-                <div class="border-b border-gray-200 pb-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-user-md text-yellow-600 mr-2"></i>Administered By
-                    </h3>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div>
-                            <label for="administered_by" class="block text-sm font-medium text-gray-700 mb-2">Administered By</label>
-                            <input type="text" name="administered_by" id="administered_by" 
-                               value="{{ old('administered_by', $vaccinationRecord->administered_by) }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="Name of healthcare provider">
-                        </div>
-                    </div>
-                </div>
+                <!-- Administered By is bound to session account; not editable here -->
 
-                <!-- Side Effects and Notes -->
-                <div class="border-b border-gray-200 pb-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-info-circle text-indigo-600 mr-2"></i>Side Effects and Notes
-                    </h3>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div>
-                            <label for="side_effects" class="block text-sm font-medium text-gray-700 mb-2">Side Effects</label>
-                            <textarea name="side_effects" id="side_effects" rows="4" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Any side effects experienced...">{{ old('side_effects', $vaccinationRecord->side_effects) }}</textarea>
-                        </div>
-
-                        <div>
-                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                            <textarea name="notes" id="notes" rows="4" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Any additional notes...">{{ old('notes', $vaccinationRecord->notes) }}</textarea>
-                        </div>
-                    </div>
-                </div>
+                
 
                 <!-- Submit Button -->
                 <div class="flex justify-between items-center mt-6">

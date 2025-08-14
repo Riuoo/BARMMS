@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             BarangayProfileSeeder::class,
             ResidentSeeder::class,
+            ChildProfileSeeder::class,
             MedicineSeeder::class,
             MedicalRecordSeeder::class,
             MedicineTransactionSeeder::class,
@@ -21,7 +22,7 @@ class DatabaseSeeder extends Seeder
             DocumentTemplateSeeder::class,
             AccomplishedProjectSeeder::class,
             HealthCenterActivitySeeder::class,
-            VaccinationScheduleSeeder::class,
+            VaccinationRecordSeeder::class,
         ]);
     }
 }

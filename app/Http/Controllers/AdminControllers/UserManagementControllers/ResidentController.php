@@ -239,11 +239,14 @@ class ResidentController
             return response()->json([]);
         }
 
-        $residents = Residents::where('active', true)
+        $residents = Residents::query()
+            ->where('active', true)
             ->where(function ($q) use ($term) {
                 $q->where('name', 'like', "%{$term}%")
-                  ->orWhere('email', 'like', "%{$term}%");
+                  ->orWhere('email', 'like', "%{$term}%")
+                  ->orWhere('address', 'like', "%{$term}%");
             })
+            ->orderBy('name')
             ->limit(10)
             ->get(['id', 'name', 'email']);
 

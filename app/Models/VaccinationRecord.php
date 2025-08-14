@@ -15,26 +15,22 @@ class VaccinationRecord extends Model
         'vaccine_name',
         'vaccine_type',
         'vaccination_date',
-        'batch_number',
-        'manufacturer',
         'dose_number',
-        'total_doses_required',
         'next_dose_date',
         'administered_by',
-        'side_effects',
-        'notes',
-        'age_group',
-        'age_at_vaccination',
-        'is_booster',
-        'is_annual',
+        
     ];
 
     protected $casts = [
         'vaccination_date' => 'date',
         'next_dose_date' => 'date',
-        'is_booster' => 'boolean',
-        'is_annual' => 'boolean',
+        
     ];
+
+    public function administeredByProfile()
+    {
+        return $this->belongsTo(BarangayProfile::class, 'administered_by');
+    }
 
     protected static function boot()
     {
@@ -92,16 +88,5 @@ class VaccinationRecord extends Model
         return false;
     }
 
-    public function getDoseProgressAttribute()
-    {
-        if ($this->total_doses_required > 1) {
-            return "{$this->dose_number} of {$this->total_doses_required}";
-        }
-        return "Complete";
-    }
-
-    public function getIsCompleteAttribute()
-    {
-        return $this->dose_number >= $this->total_doses_required;
-    }
+    // Dose progress helpers removed due to simplified schema
 } 

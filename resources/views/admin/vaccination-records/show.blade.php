@@ -27,8 +27,12 @@
                 </div>
                 <div class="ml-4">
                     <h2 class="text-2xl font-bold text-gray-900">{{ $vaccinationRecord->vaccine_name }}</h2>
-                    <p class="text-gray-600">{{ $vaccinationRecord->resident->name }}</p>
-                    <p class="text-gray-600">{{ $vaccinationRecord->resident->email }}</p>
+                    <p class="text-gray-600">{{ $vaccinationRecord->patient_name }}</p>
+                    @if($vaccinationRecord->resident)
+                        <p class="text-gray-600">{{ $vaccinationRecord->resident->email }}</p>
+                    @elseif($vaccinationRecord->childProfile)
+                        <p class="text-gray-600">Child • Mother: {{ $vaccinationRecord->childProfile->mother_name }}</p>
+                    @endif
                 </div>
             </div>
             <div class="text-right">
@@ -59,14 +63,7 @@
                     <span class="text-gray-600">Dose Number:</span>
                     <span class="font-medium">{{ $vaccinationRecord->dose_number }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Manufacturer:</span>
-                    <span class="font-medium">{{ $vaccinationRecord->manufacturer ?? 'Not specified' }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Batch Number:</span>
-                    <span class="font-medium">{{ $vaccinationRecord->batch_number ?? 'Not specified' }}</span>
-                </div>
+                
             </div>
         </div>
 
@@ -82,7 +79,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Administered By:</span>
-                    <span class="font-medium">{{ $vaccinationRecord->administered_by ?? 'Not specified' }}</span>
+                    <span class="font-medium">{{ optional($vaccinationRecord->administeredByProfile)->name ?? 'Not specified' }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Next Dose Date:</span>
@@ -116,48 +113,36 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
                 <h4 class="font-medium text-gray-900 mb-2">Full Name</h4>
-                <p class="text-gray-700">{{ $vaccinationRecord->resident->name }}</p>
+                <p class="text-gray-700">{{ $vaccinationRecord->patient_name }}</p>
             </div>
-            <div>
-                <h4 class="font-medium text-gray-900 mb-2">Email Address</h4>
-                <p class="text-gray-700">{{ $vaccinationRecord->resident->email }}</p>
-            </div>
-            <div>
-                <h4 class="font-medium text-gray-900 mb-2">Address</h4>
-                <p class="text-gray-700">{{ $vaccinationRecord->resident->address }}</p>
-            </div>
+            @if($vaccinationRecord->resident)
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">Email Address</h4>
+                    <p class="text-gray-700">{{ $vaccinationRecord->resident->email }}</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">Address</h4>
+                    <p class="text-gray-700">{{ $vaccinationRecord->resident->address }}</p>
+                </div>
+            @elseif($vaccinationRecord->childProfile)
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">Mother</h4>
+                    <p class="text-gray-700">{{ $vaccinationRecord->childProfile->mother_name }}</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">Purok</h4>
+                    <p class="text-gray-700">{{ $vaccinationRecord->childProfile->purok }}</p>
+                </div>
+            @endif
         </div>
     </div>
 
     <!-- Additional Information -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        @if($vaccinationRecord->side_effects)
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>Side Effects
-            </h3>
-            <p class="text-gray-700">{{ $vaccinationRecord->side_effects }}</p>
-        </div>
-        @endif
-
-        @if($vaccinationRecord->notes)
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-sticky-note text-yellow-500 mr-2"></i>Additional Notes
-            </h3>
-            <p class="text-gray-700">{{ $vaccinationRecord->notes }}</p>
-        </div>
-        @endif
+        
     </div>
 
-    @if(!$vaccinationRecord->side_effects && !$vaccinationRecord->notes)
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <div class="text-center text-gray-500">
-            <i class="fas fa-info-circle text-2xl mb-2"></i>
-            <p>No additional information recorded for this vaccination.</p>
-        </div>
-    </div>
-    @endif
+    
 
     <!-- Record Information -->
     <div class="bg-gray-50 rounded-lg p-4">

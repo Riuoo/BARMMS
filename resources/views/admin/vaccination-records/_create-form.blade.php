@@ -17,10 +17,11 @@
                         <div class="relative">
                             <label for="child_search" class="block text-sm font-medium text-gray-700 mb-2">Search Child <span class="text-red-500">*</span></label>
                             <input type="text" id="child_search" placeholder="Type child's name..." autocomplete="off"
+                                   value="{{ isset($prefillChild) ? ($prefillChild->first_name . ' ' . $prefillChild->last_name) : '' }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" />
-                            <input type="hidden" id="child_profile_id" name="child_profile_id">
-                            <input type="hidden" id="child_search_hidden" name="child_search" value="">
-                            <div id="child_results" class="absolute left-0 right-0 z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                            <input type="hidden" id="child_profile_id" name="child_profile_id" value="{{ isset($prefillChild) ? $prefillChild->id : '' }}">
+                            <input type="hidden" id="child_search_hidden" name="child_search" value="{{ isset($prefillChild) ? ($prefillChild->first_name . ' ' . $prefillChild->last_name) : '' }}">
+                            <div id="child_results" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
                             <p class="mt-1 text-xs text-gray-500">Search children from Child Profiles</p>
                             <p id="child_hint" class="mt-1 text-xs text-red-600 hidden">No children found</p>
                             <div class="mt-2">
@@ -115,30 +116,9 @@
                 </div>
             </div>
 
-            <!-- Vaccine Details -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-info-circle mr-3 text-purple-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Vaccine Details</h2>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="batch_number" class="block text-sm font-medium text-gray-700 mb-2">Batch Number</label>
-                        <input type="text" name="batch_number" id="batch_number" value="{{ old('batch_number') }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., BNT162b2-001">
-                    </div>
-                    <div>
-                        <label for="manufacturer" class="block text-sm font-medium text-gray-700 mb-2">Manufacturer</label>
-                        <input type="text" name="manufacturer" id="manufacturer" value="{{ old('manufacturer') }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., Pfizer-BioNTech">
-                    </div>
-                </div>
-            </div>
+            
 
-            <!-- Health Worker (auto-filled from session) -->
-            <input type="hidden" name="administered_by" value="{{ session('user_name') ?? 'Nurse' }}">
+            <!-- Administered By (FK) will be auto-filled from session in controller if missing -->
 
 
 
@@ -202,33 +182,47 @@ document.addEventListener('DOMContentLoaded', () => {
             searchResults.classList.add('hidden');
             return;
         }
-        const response = await fetch(`{{ route('admin.search.residents') }}?term=${term}`);
-        const results = await response.json();
-        if (results.length > 0) {
-            searchResults.innerHTML = results.map(resident => `
-                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
-                    <div class="font-medium text-gray-900">${resident.name}</div>
-                    <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
-                </div>
-            `).join('');
+        // Show searching… state immediately
+        if (searchResults) {
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Searching…</div>';
             searchResults.classList.remove('hidden');
-        } else {
-            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+        }
+        try {
+            const response = await fetch(`{{ route('admin.search.residents') }}?term=${encodeURIComponent(term)}` , {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            });
+            const results = await response.json();
+            if (Array.isArray(results) && results.length > 0) {
+                searchResults.innerHTML = results.map(resident => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                        <div class="font-medium text-gray-900">${resident.name}</div>
+                        <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                    </div>
+                `).join('');
+                searchResults.classList.remove('hidden');
+            } else {
+                searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+                searchResults.classList.remove('hidden');
+            }
+        } catch (e) {
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Search unavailable</div>';
             searchResults.classList.remove('hidden');
         }
     }, 250));
 
-    searchResults.addEventListener('click', (event) => {
-        const target = event.target.closest('[data-id]');
-        if (target && target.dataset.id) {
-            if (residentIdInput) residentIdInput.value = target.dataset.id;
-            if (searchInput) searchInput.value = target.dataset.name;
-            // Clear child selection if resident selected
-            if (childIdInput) childIdInput.value = '';
-            searchResults.innerHTML = '';
-            searchResults.classList.add('hidden');
-        }
-    });
+    if (searchResults) {
+        searchResults.addEventListener('click', (event) => {
+            const target = event.target.closest('[data-id]');
+            if (target && target.dataset.id) {
+                if (residentIdInput) residentIdInput.value = target.dataset.id;
+                if (searchInput) searchInput.value = target.dataset.name;
+                // Clear child selection if resident selected
+                if (childIdInput) childIdInput.value = '';
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+            }
+        });
+    }
     // Child AJAX search
     if (childSearchInput && childResults) {
         childSearchInput.addEventListener('input', debounce(async () => {
@@ -255,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hint = document.getElementById('child_hint');
                 if (items.length === 0) {
                     childResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No children found</div>';
-                    if (hint) hint.classList.remove('hidden');
+                    if (hint) hint.classList.add('hidden');
                 } else {
                     childResults.innerHTML = items.map(c => `<div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${c.id}" data-name="${c.name}"><div class="font-medium text-gray-900">${c.name}</div></div>`).join('');
                     if (hint) hint.classList.add('hidden');
@@ -288,9 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('click', (event) => {
-        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-            searchResults.innerHTML = '';
-            searchResults.classList.add('hidden');
+        if (searchInput && searchResults) {
+            if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+            }
         }
     });
 });

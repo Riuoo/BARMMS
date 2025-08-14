@@ -70,6 +70,7 @@
                             aria-label="Search for a resident"
                         />
                         <input type="hidden" id="resident_id" name="resident_id" required>
+                        <input type="hidden" id="resident_search_hidden" name="resident_search" value="">
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
                         <p class="mt-1 text-sm text-gray-500">Search and select the resident for this patient record</p>
                         @error('resident_id')
@@ -144,67 +145,19 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="batch_number" class="block text-sm font-medium text-gray-700 mb-2">Batch Number</label>
-                        <input type="text" name="batch_number" id="batch_number" value="{{ old('batch_number') }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., BNT162b2-001">
+                        
                     </div>
                     <div>
-                        <label for="manufacturer" class="block text-sm font-medium text-gray-700 mb-2">Manufacturer</label>
-                        <input type="text" name="manufacturer" id="manufacturer" value="{{ old('manufacturer') }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., Pfizer-BioNTech">
+                        
                     </div>
                 </div>
             </div>
 
-            <!-- Health Worker -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-user-md mr-3 text-yellow-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Health Worker</h2>
-                </div>
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="administered_by" class="block text-sm font-medium text-gray-700 mb-2">Administered By</label>
-                        <input type="text" name="administered_by" id="administered_by" value="{{ old('administered_by') }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="Name of health worker who administered the vaccine">
-                    </div>
-                </div>
-            </div>
+            <!-- Administered By is determined from session; no manual input required -->
 
-            <!-- Side Effects -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-exclamation-triangle mr-3 text-indigo-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Side Effects</h2>
-                </div>
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="side_effects" class="block text-sm font-medium text-gray-700 mb-2">Side Effects</label>
-                        <textarea name="side_effects" id="side_effects" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Any side effects observed...">{{ old('side_effects') }}</textarea>
-                    </div>
-                </div>
-            </div>
+            
 
-            <!-- Additional Notes -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-sticky-note mr-3 text-gray-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Additional Notes</h2>
-                </div>
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                        <textarea name="notes" id="notes" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Any additional notes or observations...">{{ old('notes') }}</textarea>
-                    </div>
-                </div>
-            </div>
+            
 
             <!-- Form Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
@@ -246,23 +199,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', debounce(async () => {
         const term = searchInput.value.trim();
+        const resHidden = document.getElementById('resident_search_hidden');
+        if (resHidden) resHidden.value = term;
         if (term.length < 2) {
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
             return;
         }
-        const response = await fetch(`{{ route('admin.search.residents') }}?term=${term}`);
-        const results = await response.json();
-        if (results.length > 0) {
-            searchResults.innerHTML = results.map(resident => `
-                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
-                    <div class="font-medium text-gray-900">${resident.name}</div>
-                    <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
-                </div>
-            `).join('');
-            searchResults.classList.remove('hidden');
-        } else {
-            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+        // Show searching… state immediately
+        searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Searching…</div>';
+        searchResults.classList.remove('hidden');
+        try {
+            const response = await fetch(`{{ route('admin.search.residents') }}?term=${encodeURIComponent(term)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            });
+            const results = await response.json();
+            if (Array.isArray(results) && results.length > 0) {
+                searchResults.innerHTML = results.map(resident => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                        <div class="font-medium text-gray-900">${resident.name}</div>
+                        <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                    </div>
+                `).join('');
+                searchResults.classList.remove('hidden');
+            } else {
+                searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+                searchResults.classList.remove('hidden');
+            }
+        } catch (e) {
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Search unavailable</div>';
             searchResults.classList.remove('hidden');
         }
     }, 250));

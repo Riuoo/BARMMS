@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 
 use App\Models\VaccinationRecord;
-use App\Models\VaccinationSchedule;
 use App\Models\ChildProfile;
 use Illuminate\Http\Request;
 use App\Models\Residents;
@@ -114,56 +113,54 @@ class VaccinationRecordController
         return view('admin.vaccination-records.create', compact('residents'));
     }
 
-    public function createChild()
+    public function createChild(Request $request)
     {
         $residents = Residents::where('active', true)->get();
         $ageGroup = 'child';
-        $schedules = VaccinationSchedule::active()->byAgeGroup('Child')->get();
         $childProfiles = ChildProfile::where('is_active', true)->orderBy('first_name')->get();
-        return view('admin.vaccination-records.create-child', compact('residents', 'ageGroup', 'schedules', 'childProfiles'));
+        $prefillChild = null;
+        if ($request->filled('child_id')) {
+            $prefillChild = ChildProfile::where('is_active', true)->find($request->get('child_id'));
+        }
+        return view('admin.vaccination-records.create-child', compact('residents', 'ageGroup', 'childProfiles', 'prefillChild'));
     }
 
     public function createInfant()
     {
         $residents = Residents::where('active', true)->get();
         $ageGroup = 'infant';
-        $schedules = VaccinationSchedule::active()->byAgeGroup('Infant')->get();
         $childProfiles = ChildProfile::where('is_active', true)->orderBy('first_name')->get();
-        return view('admin.vaccination-records.create-infant', compact('residents', 'ageGroup', 'schedules', 'childProfiles'));
+        return view('admin.vaccination-records.create-infant', compact('residents', 'ageGroup', 'childProfiles'));
     }
 
     public function createToddler()
     {
         $residents = Residents::where('active', true)->get();
         $ageGroup = 'toddler';
-        $schedules = VaccinationSchedule::active()->byAgeGroup('Toddler')->get();
         $childProfiles = ChildProfile::where('is_active', true)->orderBy('first_name')->get();
-        return view('admin.vaccination-records.create-toddler', compact('residents', 'ageGroup', 'schedules', 'childProfiles'));
+        return view('admin.vaccination-records.create-toddler', compact('residents', 'ageGroup', 'childProfiles'));
     }
 
     public function createAdolescent()
     {
         $residents = Residents::where('active', true)->get();
         $ageGroup = 'adolescent';
-        $schedules = VaccinationSchedule::active()->byAgeGroup('Adolescent')->get();
         $childProfiles = ChildProfile::where('is_active', true)->orderBy('first_name')->get();
-        return view('admin.vaccination-records.create-adolescent', compact('residents', 'ageGroup', 'schedules', 'childProfiles'));
+        return view('admin.vaccination-records.create-adolescent', compact('residents', 'ageGroup', 'childProfiles'));
     }
 
     public function createAdult()
     {
         $residents = Residents::where('active', true)->get();
         $ageGroup = 'adult';
-        $schedules = VaccinationSchedule::active()->byAgeGroup('Adult')->get();
-        return view('admin.vaccination-records.create-adult', compact('residents', 'ageGroup', 'schedules'));
+        return view('admin.vaccination-records.create-adult', compact('residents', 'ageGroup'));
     }
 
     public function createElderly()
     {
         $residents = Residents::where('active', true)->get();
         $ageGroup = 'elderly';
-        $schedules = VaccinationSchedule::active()->byAgeGroup('Elderly')->get();
-        return view('admin.vaccination-records.create-elderly', compact('residents', 'ageGroup', 'schedules'));
+        return view('admin.vaccination-records.create-elderly', compact('residents', 'ageGroup'));
     }
 
     public function store(Request $request)
@@ -175,16 +172,11 @@ class VaccinationRecordController
             'vaccine_name' => 'required|string|max:255',
             'vaccine_type' => 'required|string|in:COVID-19,Influenza,Pneumonia,Tetanus,Hepatitis B,MMR,Varicella,HPV,DTaP,Pneumococcal,Rotavirus,Hib,Other',
             'vaccination_date' => 'required|date|before_or_equal:today',
-            'batch_number' => 'nullable|string|max:100',
-            'manufacturer' => 'nullable|string|max:255',
             'dose_number' => 'required|integer|min:1',
-            'total_doses_required' => 'nullable|integer|min:1',
             'next_dose_date' => 'nullable|date|after:vaccination_date',
-            'administered_by' => 'nullable|string|max:255',
-            'age_group' => 'nullable|string|in:Infant,Toddler,Child,Adolescent,Adult,Elderly',
-            'age_at_vaccination' => 'nullable|integer|min:0',
-            'is_booster' => 'boolean',
-            'is_annual' => 'boolean',
+            // now ID based
+            'administered_by' => 'nullable|integer|exists:barangay_profiles,id',
+            
         ]);
 
         // Fallback: if IDs are missing, try to resolve from search text
@@ -231,20 +223,12 @@ class VaccinationRecordController
             }
         }
 
-        // Defaults
-        if (empty($validated['total_doses_required'])) {
-            $validated['total_doses_required'] = 1;
-        }
+        // Defaults removed with simplified schema
 
-        // Set administered_by from session if not provided
-        if (empty($validated['administered_by'])) {
-            // Prefer the session user id for auditing
-            $sessionUserId = Session::get('user_id');
-            if ($sessionUserId) {
-                $validated['administered_by'] = (string) $sessionUserId;
-            } else {
-                $validated['administered_by'] = session('user_name') ?: 'Nurse';
-            }
+        // Set administered_by from session as FK if not provided
+        $sessionUserId = Session::get('user_id');
+        if (empty($validated['administered_by']) && !empty($sessionUserId)) {
+            $validated['administered_by'] = (int) $sessionUserId;
         }
 
         try {
@@ -259,13 +243,13 @@ class VaccinationRecordController
 
     public function show($id)
     {
-        $vaccinationRecord = VaccinationRecord::with('resident')->findOrFail($id);
+        $vaccinationRecord = VaccinationRecord::with(['resident', 'childProfile', 'administeredByProfile'])->findOrFail($id);
         return view('admin.vaccination-records.show', compact('vaccinationRecord'));
     }
 
     public function edit($id)
     {
-        $vaccinationRecord = VaccinationRecord::with('resident')->findOrFail($id);
+        $vaccinationRecord = VaccinationRecord::with(['resident'])->findOrFail($id);
         $residents = Residents::all();
         return view('admin.vaccination-records.edit', compact('vaccinationRecord', 'residents'));
     }
@@ -279,13 +263,10 @@ class VaccinationRecordController
             'vaccine_name' => 'required|string|max:255',
             'vaccine_type' => 'required|string|in:COVID-19,Influenza,Pneumonia,Tetanus,Hepatitis B,MMR,Varicella,HPV,Other',
             'vaccination_date' => 'required|date|before_or_equal:today',
-            'batch_number' => 'nullable|string|max:100',
-            'manufacturer' => 'nullable|string|max:255',
             'dose_number' => 'required|integer|min:1',
             'next_dose_date' => 'nullable|date|after:vaccination_date',
-            'administered_by' => 'nullable|string|max:255',
-            'side_effects' => 'nullable|string|max:1000',
-            'notes' => 'nullable|string|max:2000',
+            'administered_by' => 'nullable|integer|exists:barangay_profiles,id',
+            
         ]);
 
         try {
@@ -378,18 +359,7 @@ class VaccinationRecordController
 
     public function getRecommendedVaccines(Request $request)
     {
-        $ageGroup = $request->get('age_group');
-        $ageInMonths = $request->get('age_months');
-        $ageInYears = $request->get('age_years');
-
-        $schedules = VaccinationSchedule::active()
-            ->byAgeGroup($ageGroup)
-            ->get()
-            ->filter(function($schedule) use ($ageInMonths, $ageInYears) {
-                return $schedule->isAgeAppropriate($ageInMonths, $ageInYears);
-            });
-
-        return response()->json($schedules);
+        return response()->json([]);
     }
 
     public function getChildProfiles(Request $request)
