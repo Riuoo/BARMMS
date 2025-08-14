@@ -5,11 +5,13 @@ namespace App\Services;
 use App\Models\Residents;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Phpml\Classification\DecisionTree;
+use Phpml\Metric\Accuracy;
 
 class ResidentClassificationPredictionService
 {
     /**
-     * Enhanced health condition prediction with validation
+     * Learned health condition tree using PHP-ML DecisionTree
      */
     public function buildHealthConditionTree(): array
     {
@@ -28,55 +30,52 @@ class ResidentClassificationPredictionService
             ];
         }
 
-        $rules = $this->generateHealthConditionRules();
+        // Prepare dataset (labels derived from health_status buckets)
+        [$samples, $labels, $residentRefs] = $this->buildSamplesForHealth($residents);
+
+        // Train/test split
+        $splitIndex = (int) ceil(count($samples) * 0.7);
+        $trainSamples = array_slice($samples, 0, $splitIndex);
+        $trainLabels = array_slice($labels, 0, $splitIndex);
+        $testSamples = array_slice($samples, $splitIndex);
+        $testLabels = array_slice($labels, $splitIndex);
+
+        // Train model
+        $classifier = new DecisionTree();
+        $classifier->train($trainSamples, $trainLabels);
+
+        // Evaluate
+        $predictedTest = [];
+        foreach ($testSamples as $s) { $predictedTest[] = $classifier->predict($s); }
+        $testingAccuracy = Accuracy::score($testLabels, $predictedTest);
+
         $predictions = [];
-        $accuracy = 0;
-        $correct = 0;
-        $validationMetrics = [];
-        
-        // Split data for validation (70% training, 30% testing)
-        $trainingResidents = $residents->take(ceil($residents->count() * 0.7));
-        $testingResidents = $residents->slice(ceil($residents->count() * 0.7));
-        
-        // Training phase
-        $trainingPredictions = [];
-        foreach ($trainingResidents as $resident) {
-            $predicted = $this->predictHealthCondition($resident);
-            $actual = $this->determineActualHealthCondition($resident);
-            $trainingPredictions[] = [
+        foreach ($residentRefs as $idx => $resident) {
+            $predictions[] = [
                 'resident' => $resident,
-                'predicted' => $predicted,
-                'actual' => $actual,
-                'correct' => $predicted === $actual
+                'predicted' => $classifier->predict($samples[$idx]),
+                'actual' => $labels[$idx],
+                'correct' => $classifier->predict($samples[$idx]) === $labels[$idx]
             ];
         }
-        
-        // Testing phase for validation
-        $testingPredictions = [];
-        foreach ($testingResidents as $resident) {
-            $predicted = $this->predictHealthCondition($resident);
-            $actual = $this->determineActualHealthCondition($resident);
-            $testingPredictions[] = [
-                'resident' => $resident,
-                'predicted' => $predicted,
-                'actual' => $actual,
-                'correct' => $predicted === $actual
-            ];
-        }
-        
-        // Calculate validation metrics
-        $validationMetrics = $this->calculateValidationMetrics($trainingPredictions, $testingPredictions);
         
         $result = [
-            'rules' => $rules,
-            'accuracy' => $validationMetrics['overall_accuracy'],
-            'training_accuracy' => $validationMetrics['training_accuracy'],
-            'testing_accuracy' => $validationMetrics['testing_accuracy'],
+            // Provide synthetic "rules" text for the UI
+            'rules' => [
+                ['condition' => 'Learned by DecisionTree (CART-like)', 'prediction' => 'Model-based splits', 'confidence' => null]
+            ],
+            'accuracy' => round($testingAccuracy * 100, 2),
+            'training_accuracy' => null,
+            'testing_accuracy' => round($testingAccuracy * 100, 2),
             'feature_importance' => $this->calculateHealthFeatureImportance(),
-            'validation_metrics' => $validationMetrics,
-            'sample_size' => count($trainingPredictions) + count($testingPredictions),
-            'training_predictions' => $trainingPredictions,
-            'testing_predictions' => $testingPredictions
+            'validation_metrics' => [
+                'overall_accuracy' => round($testingAccuracy * 100, 2),
+                'training_accuracy' => null,
+                'testing_accuracy' => round($testingAccuracy * 100, 2)
+            ],
+            'sample_size' => count($predictions),
+            'training_predictions' => [],
+            'testing_predictions' => $predictions
         ];
 
         // Cache the result for 30 minutes
@@ -86,7 +85,7 @@ class ResidentClassificationPredictionService
     }
 
     /**
-     * Enhanced service eligibility with health factors
+     * Learned service eligibility using PHP-ML DecisionTree
      */
     public function buildServiceEligibilityTree(): array
     {
@@ -105,31 +104,35 @@ class ResidentClassificationPredictionService
             ];
         }
 
-        $rules = $this->generateEnhancedServiceEligibilityRules();
+        [$samples, $labels, $residentRefs] = $this->buildSamplesForEligibility($residents);
+
+        $split = (int) ceil(count($samples) * 0.7);
+        $trainSamples = array_slice($samples, 0, $split);
+        $trainLabels = array_slice($labels, 0, $split);
+        $testSamples = array_slice($samples, $split);
+        $testLabels = array_slice($labels, $split);
+
+        $classifier = new DecisionTree();
+        $classifier->train($trainSamples, $trainLabels);
+
+        $predictedTest = [];
+        foreach ($testSamples as $s) { $predictedTest[] = $classifier->predict($s); }
+        $acc = Accuracy::score($testLabels, $predictedTest);
+
         $predictions = [];
-        $accuracy = 0;
-        $correct = 0;
-        
-        foreach ($residents as $resident) {
-            $predicted = $this->predictEnhancedServiceEligibility($resident);
-            $actual = $this->determineEnhancedServiceEligibility($resident);
+        foreach ($residentRefs as $idx => $resident) {
+            $pred = $classifier->predict($samples[$idx]);
             $predictions[] = [
                 'resident' => $resident,
-                'predicted' => $predicted,
-                'actual' => $actual,
-                'correct' => $predicted === $actual
+                'predicted' => $pred,
+                'actual' => $labels[$idx],
+                'correct' => $pred === $labels[$idx]
             ];
-            
-            if ($predicted === $actual) {
-                $correct++;
-            }
         }
         
-        $accuracy = $correct / count($predictions);
-        
         $result = [
-            'rules' => $rules,
-            'accuracy' => $accuracy,
+            'rules' => [['condition' => 'Learned DecisionTree', 'prediction' => 'Model predictions']],
+            'accuracy' => $acc,
             'feature_importance' => $this->calculateEnhancedFeatureImportance(),
             'sample_size' => count($predictions),
             'predictions' => $predictions,
@@ -143,7 +146,7 @@ class ResidentClassificationPredictionService
     }
 
     /**
-     * Enhanced health risk assessment with more factors
+     * Learned health risk assessment using PHP-ML DecisionTree
      */
     public function buildHealthRiskTree(): array
     {
@@ -162,43 +165,42 @@ class ResidentClassificationPredictionService
             ];
         }
 
-        $rules = $this->generateEnhancedHealthRiskRules();
+        [$samples, $labels, $residentRefs] = $this->buildSamplesForHealthRisk($residents);
+
+        $split = (int) ceil(count($samples) * 0.7);
+        $trainSamples = array_slice($samples, 0, $split);
+        $trainLabels = array_slice($labels, 0, $split);
+        $testSamples = array_slice($samples, $split);
+        $testLabels = array_slice($labels, $split);
+
+        $classifier = new DecisionTree();
+        $classifier->train($trainSamples, $trainLabels);
+
+        $predictedTest = [];
+        foreach ($testSamples as $s) { $predictedTest[] = $classifier->predict($s); }
+        $acc = Accuracy::score($testLabels, $predictedTest);
+
         $predictions = [];
-        $accuracy = 0;
-        $correct = 0;
         $riskLevels = [];
-        
-        foreach ($residents as $resident) {
-            $predicted = $this->predictEnhancedHealthRisk($resident);
-            $actual = $this->determineEnhancedHealthRisk($resident);
+        foreach ($residentRefs as $idx => $resident) {
+            $pred = $classifier->predict($samples[$idx]);
             $predictions[] = [
                 'resident' => $resident,
-                'predicted' => $predicted,
-                'actual' => $actual,
-                'correct' => $predicted === $actual
+                'predicted' => $pred,
+                'actual' => $labels[$idx],
+                'correct' => $pred === $labels[$idx]
             ];
-            
-            if ($predicted === $actual) {
-                $correct++;
-            }
-            
-            // Count risk levels
-            if (!isset($riskLevels[$actual])) {
-                $riskLevels[$actual] = ['count' => 0, 'percentage' => 0];
-            }
-            $riskLevels[$actual]['count']++;
+            $riskLevels[$labels[$idx]] = $riskLevels[$labels[$idx]] ?? ['count' => 0, 'percentage' => 0];
+            $riskLevels[$labels[$idx]]['count']++;
         }
-        
-        $accuracy = $correct / count($predictions);
-        
-        // Calculate percentages
+
         foreach ($riskLevels as $risk => $data) {
-            $riskLevels[$risk]['percentage'] = round(($data['count'] / count($predictions)) * 100, 1);
+            $riskLevels[$risk]['percentage'] = round(($data['count'] / max(count($predictions),1)) * 100, 1);
         }
         
         $result = [
-            'rules' => $rules,
-            'accuracy' => $accuracy,
+            'rules' => [['condition' => 'Learned DecisionTree', 'prediction' => 'Risk classification']],
+            'accuracy' => $acc,
             'risk_levels' => $riskLevels,
             'sample_size' => count($predictions),
             'predictions' => $predictions,
@@ -545,43 +547,8 @@ class ResidentClassificationPredictionService
      */
     private function generateHealthConditionRules(): array
     {
-        return [
-            [
-                'condition' => 'Age > 60 AND Health Status = Critical',
-                'prediction' => 'Critical Condition',
-                'confidence' => 0.95
-            ],
-            [
-                'condition' => 'Health Risk Score >= 8',
-                'prediction' => 'Critical Condition',
-                'confidence' => 0.90
-            ],
-            [
-                'condition' => 'Health Status = Poor',
-                'prediction' => 'Chronic Condition',
-                'confidence' => 0.85
-            ],
-            [
-                'condition' => 'Health Risk Score >= 6',
-                'prediction' => 'Chronic Condition',
-                'confidence' => 0.80
-            ],
-            [
-                'condition' => 'Health Status = Fair',
-                'prediction' => 'Minor Health Issues',
-                'confidence' => 0.75
-            ],
-            [
-                'condition' => 'Health Risk Score >= 4',
-                'prediction' => 'Minor Health Issues',
-                'confidence' => 0.70
-            ],
-            [
-                'condition' => 'Default',
-                'prediction' => 'Healthy',
-                'confidence' => 0.65
-            ]
-        ];
+        // Retained for compatibility; UI uses this for display when needed
+        return [['condition' => 'Learned by DecisionTree']];
     }
 
     /**
@@ -623,33 +590,7 @@ class ResidentClassificationPredictionService
      */
     private function generateEnhancedServiceEligibilityRules(): array
     {
-        return [
-            [
-                'condition' => 'Income Level = Low OR Lower Middle',
-                'prediction' => 'Eligible',
-                'confidence' => 0.95
-            ],
-            [
-                'condition' => 'Employment Status = Unemployed AND Age > 18',
-                'prediction' => 'Eligible',
-                'confidence' => 0.90
-            ],
-            [
-                'condition' => 'Health Status = Critical OR Poor',
-                'prediction' => 'Eligible',
-                'confidence' => 0.85
-            ],
-            [
-                'condition' => 'Age > 60',
-                'prediction' => 'Eligible',
-                'confidence' => 0.75
-            ],
-            [
-                'condition' => 'Default',
-                'prediction' => 'Ineligible',
-                'confidence' => 0.70
-            ]
-        ];
+        return [['condition' => 'Learned by DecisionTree']];
     }
 
     /**
@@ -678,38 +619,7 @@ class ResidentClassificationPredictionService
      */
     private function generateEnhancedHealthRiskRules(): array
     {
-        return [
-            [
-                'condition' => 'Comprehensive Risk Score >= 8',
-                'prediction' => 'High',
-                'confidence' => 0.95
-            ],
-            [
-                'condition' => 'Age > 60 AND Health Status = Critical',
-                'prediction' => 'High',
-                'confidence' => 0.90
-            ],
-            [
-                'condition' => 'Health Status = Poor',
-                'prediction' => 'High',
-                'confidence' => 0.85
-            ],
-            [
-                'condition' => 'Comprehensive Risk Score >= 5',
-                'prediction' => 'Medium',
-                'confidence' => 0.80
-            ],
-            [
-                'condition' => 'Health Status = Fair',
-                'prediction' => 'Medium',
-                'confidence' => 0.75
-            ],
-            [
-                'condition' => 'Default',
-                'prediction' => 'Low',
-                'confidence' => 0.70
-            ]
-        ];
+        return [['condition' => 'Learned by DecisionTree']];
     }
 
     /**
@@ -825,38 +735,7 @@ class ResidentClassificationPredictionService
      */
     private function generateProgramRecommendationRules(): array
     {
-        return [
-            [
-                'condition' => 'Employment = Unemployed',
-                'action' => 'Job Training & Placement',
-                'description' => 'Unemployed residents should be recommended for job training'
-            ],
-            [
-                'condition' => 'Education = Elementary OR Education = No Education',
-                'action' => 'Adult Education Program',
-                'description' => 'Residents with low education should be recommended for adult education'
-            ],
-            [
-                'condition' => 'Income = Low',
-                'action' => 'Livelihood Development',
-                'description' => 'Low-income residents should be recommended for livelihood development'
-            ],
-            [
-                'condition' => 'Age < 25',
-                'action' => 'Youth Development Program',
-                'description' => 'Young residents should be recommended for youth development'
-            ],
-            [
-                'condition' => 'Age >= 60',
-                'action' => 'Senior Citizen Program',
-                'description' => 'Senior citizens should be recommended for senior programs'
-            ],
-            [
-                'condition' => 'Default',
-                'action' => 'Skills Enhancement Program',
-                'description' => 'All other residents should be recommended for skills enhancement'
-            ]
-        ];
+        return [['condition' => 'Learned by DecisionTree']];
     }
 
     /**
@@ -965,38 +844,7 @@ class ResidentClassificationPredictionService
      */
     private function generateEnhancedProgramRecommendationRules(): array
     {
-        return [
-            [
-                'condition' => 'Health Status = Critical',
-                'prediction' => 'Emergency Health Services',
-                'confidence' => 0.95
-            ],
-            [
-                'condition' => 'Health Status = Poor',
-                'prediction' => 'Chronic Disease Management',
-                'confidence' => 0.90
-            ],
-            [
-                'condition' => 'Age > 60',
-                'prediction' => 'Senior Health Program',
-                'confidence' => 0.85
-            ],
-            [
-                'condition' => 'Income = Low AND Employment = Unemployed',
-                'prediction' => 'Job Training & Health Support',
-                'confidence' => 0.80
-            ],
-            [
-                'condition' => 'Health Status = Fair',
-                'prediction' => 'Preventive Health Care',
-                'confidence' => 0.75
-            ],
-            [
-                'condition' => 'Default',
-                'prediction' => 'General Wellness Program',
-                'confidence' => 0.70
-            ]
-        ];
+        return [['condition' => 'Learned by DecisionTree']];
     }
 
     // Legacy methods for compatibility
@@ -1066,5 +914,78 @@ class ResidentClassificationPredictionService
         ];
         
         return $levels[$health] ?? 0.5;
+    }
+
+    /**
+     * Build feature vectors and labels for learned models
+     */
+    private function buildSamplesForHealth(Collection $residents): array
+    {
+        $samples = [];
+        $labels = [];
+        $refs = [];
+        foreach ($residents as $r) {
+            $samples[] = [
+                $r->age ?? 30,
+                $r->family_size ?? 1,
+                $this->normalizeEducation($r->education_level ?? 'Elementary'),
+                $this->normalizeIncome($r->income_level ?? 'Low'),
+                $this->normalizeEmployment($r->employment_status ?? 'Unemployed'),
+                $this->normalizeHealth($r->health_status ?? 'Healthy')
+            ];
+            // Label buckets based on health_status
+            $labels[] = match ($r->health_status) {
+                'Critical' => 'Critical Condition',
+                'Poor' => 'Chronic Condition',
+                'Fair' => 'Minor Health Issues',
+                default => 'Healthy',
+            };
+            $refs[] = $r;
+        }
+        return [$samples, $labels, $refs];
+    }
+
+    private function buildSamplesForEligibility(Collection $residents): array
+    {
+        $samples = [];
+        $labels = [];
+        $refs = [];
+        foreach ($residents as $r) {
+            $samples[] = [
+                $r->age ?? 30,
+                $r->family_size ?? 1,
+                $this->normalizeEducation($r->education_level ?? 'Elementary'),
+                $this->normalizeIncome($r->income_level ?? 'Low'),
+                $this->normalizeEmployment($r->employment_status ?? 'Unemployed'),
+                $this->normalizeHealth($r->health_status ?? 'Healthy')
+            ];
+            // Label: Eligible/Ineligible (mirror previous heuristic for continuity)
+            $labels[] = (($r->income_level ?? 'Low') === 'Low' || ($r->employment_status ?? 'Unemployed') === 'Unemployed' || ($r->health_status ?? 'Healthy') === 'Critical' || ($r->age ?? 0) > 60)
+                ? 'Eligible' : 'Ineligible';
+            $refs[] = $r;
+        }
+        return [$samples, $labels, $refs];
+    }
+
+    private function buildSamplesForHealthRisk(Collection $residents): array
+    {
+        $samples = [];
+        $labels = [];
+        $refs = [];
+        foreach ($residents as $r) {
+            $samples[] = [
+                $r->age ?? 30,
+                $r->family_size ?? 1,
+                $this->normalizeEducation($r->education_level ?? 'Elementary'),
+                $this->normalizeIncome($r->income_level ?? 'Low'),
+                $this->normalizeEmployment($r->employment_status ?? 'Unemployed'),
+                $this->normalizeHealth($r->health_status ?? 'Healthy')
+            ];
+            // Label: Low/Medium/High risk derived from status and age
+            $labels[] = ($r->health_status === 'Critical' || ($r->age ?? 0) > 60) ? 'High'
+                : (($r->health_status === 'Poor' || $r->health_status === 'Fair') ? 'Medium' : 'Low');
+            $refs[] = $r;
+        }
+        return [$samples, $labels, $refs];
     }
 }

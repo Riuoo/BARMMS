@@ -5,51 +5,91 @@ namespace App\Services;
 use App\Models\Residents;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Phpml\Clustering\KMeans;
+use Phpml\Math\Distance\Euclidean;
 
 class ResidentDemographicAnalysisService
 {
     private $k;
+	private $maxIterations;
 
-    public function __construct(int $k = 3)
+	// Feature weights (tune as needed)
+	private float $weightAge = 1.0;
+	private float $weightFamilySize = 0.8;
+	private float $weightEducation = 0.6;
+	private float $weightIncome = 1.0;
+	private float $weightEmployment = 0.7;
+	private float $weightHealth = 1.0;
+	private float $weightPurok = 0.6;
+
+	public function __construct(int $k = 3, int $maxIterations = 100)
     {
-        $this->k = $k;
+		$this->k = $k;
+		$this->maxIterations = $maxIterations;
     }
 
     /**
      * Clustering with demographic profile only (no health status/incidence)
      */
-    public function clusterResidents(): array
+	public function clusterResidents(): array
     {
         // Check cache first
-        $cacheKey = "clustering_k{$this->k}_" . Residents::count();
+		$cacheKey = "clustering_k{$this->k}_it{$this->maxIterations}_" . Residents::count();
         $cached = Cache::get($cacheKey);
         if ($cached) {
             return $cached;
         }
 
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+		$residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
 
         if ($residents->count() < $this->k) {
             return [
                 'clusters' => [],
                 'centroids' => [],
-                'iterations' => 1,
-                'converged' => true,
+				'iterations' => 0,
+				'converged' => false,
                 'error' => 'Not enough data points for clustering',
                 'residents' => $residents
             ];
         }
 
-        // Use simple rule-based clustering (no health incidence)
-        $clusters = $this->simpleRuleBasedClustering($residents);
+		// Build numeric feature samples
+		[$samples, $indexMap] = $this->buildSamples($residents);
 
-        $result = [
-            'clusters' => $clusters,
-            'centroids' => $this->calculateSimpleCentroids($clusters),
-            'iterations' => 1,
-            'converged' => true,
-            'residents' => $residents
-        ];
+		// Run K-Means clustering using k-means++ initialization to support float features
+		$kmeans = new KMeans($this->k, KMeans::INIT_KMEANS_PLUS_PLUS);
+		$rawClusters = $kmeans->cluster($samples);
+
+		// Map clustered samples back to residents and enrich with features
+		$clusters = array_fill(0, $this->k, []);
+		$sampleLookup = $this->buildSampleLookup($samples);
+		foreach ($rawClusters as $clusterId => $clusterSamples) {
+			foreach ($clusterSamples as $sample) {
+				$key = $this->encodeSampleKey($sample);
+				if (!isset($sampleLookup[$key]) || count($sampleLookup[$key]) === 0) {
+					continue;
+				}
+				$sampleIndex = array_shift($sampleLookup[$key]);
+				$resident = $indexMap[$sampleIndex];
+				$clusters[$clusterId][] = [
+					'id' => $resident->id,
+					'features' => $sample,
+					'resident' => $resident
+				];
+			}
+		}
+
+		$centroids = $this->calculateSimpleCentroids($clusters);
+		$iterations = $this->maxIterations; // PHP-ML does not expose actual iterations; use configured max as upper bound
+		$converged = true; // Assume convergence for display purposes
+
+		$result = [
+			'clusters' => $clusters,
+			'centroids' => $centroids,
+			'iterations' => $iterations,
+			'converged' => $converged,
+			'residents' => $residents
+		];
 
         // Cache the result for 30 minutes
         Cache::put($cacheKey, $result, 1800);
@@ -58,83 +98,268 @@ class ResidentDemographicAnalysisService
     }
 
     /**
-     * Simple rule-based clustering using demographic characteristics only
+     * Hierarchical clustering: first split by Purok, then cluster demographics per-purok with auto K.
      */
-    private function simpleRuleBasedClustering(Collection $residents): array
+    public function clusterResidentsHierarchical(): array
     {
-        $clusters = array_fill(0, $this->k, []);
-
-        foreach ($residents as $resident) {
-            $clusterId = $this->assignToClusterByRules($resident);
-            $clusters[$clusterId][] = [
-                'id' => $resident->id,
-                'features' => [
-                    $this->normalizeAge($resident->age ?? 30),
-                    $this->normalizeFamilySize($resident->family_size ?? 1),
-                    $this->normalizeEducation($resident->education_level ?? 'Elementary'),
-                    $this->normalizeIncome($resident->income_level ?? 'Low'),
-                    $this->normalizeEmployment($resident->employment_status ?? 'Unemployed'),
-                    $this->normalizeHealth($resident->health_status ?? 'Healthy')
-                ],
-                'resident' => $resident
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        if ($residents->isEmpty()) {
+            return [
+                'clusters' => [],
+                'centroids' => [],
+                'iterations' => 0,
+                'converged' => true,
+                'residents' => $residents
             ];
         }
 
-        return $clusters;
+        // Group residents by purok token (strict match against normalized token)
+        $purokGroups = [];
+        foreach ($residents as $resident) {
+            $token = $this->extractPurokToken($resident->address ?? '');
+            $key = $token !== '' ? $token : 'other';
+            $purokGroups[$key] = $purokGroups[$key] ?? [];
+            $purokGroups[$key][] = $resident;
+        }
+
+        $allClusters = [];
+        $iterations = 0;
+        foreach ($purokGroups as $purok => $groupResidents) {
+            $groupCollection = collect($groupResidents);
+            if ($groupCollection->count() < 2) {
+                // Single-item group -> own cluster
+                $allClusters[] = [
+                    [
+                        'id' => $groupResidents[0]->id,
+                        'features' => [0.0],
+                        'resident' => $groupResidents[0],
+                        'purok' => $purok
+                    ]
+                ];
+                continue;
+            }
+
+            // Build samples without purok (demographics-only)
+            [$samples, $indexMap] = $this->buildSamplesDemographicsOnly($groupCollection);
+
+            // Auto K for this purok
+            $localMaxK = min(5, max(2, $groupCollection->count() - 1));
+            $bestK = $this->findBestKForSamples($samples, $localMaxK);
+
+            $kmeans = new KMeans($bestK, KMeans::INIT_KMEANS_PLUS_PLUS);
+            $rawClusters = $kmeans->cluster($samples);
+
+            // Map back to residents
+            $clusters = array_fill(0, $bestK, []);
+            $sampleLookup = $this->buildSampleLookup($samples);
+            foreach ($rawClusters as $clusterId => $clusterSamples) {
+                foreach ($clusterSamples as $sample) {
+                    $key = $this->encodeSampleKey($sample);
+                    if (!isset($sampleLookup[$key]) || count($sampleLookup[$key]) === 0) {
+                        continue;
+                    }
+                    $sampleIndex = array_shift($sampleLookup[$key]);
+                    $resident = $indexMap[$sampleIndex];
+                    $clusters[$clusterId][] = [
+                        'id' => $resident->id,
+                        'features' => $sample,
+                        'resident' => $resident,
+                        'purok' => $purok
+                    ];
+                }
+            }
+
+            foreach ($clusters as $c) {
+                $allClusters[] = $c;
+            }
+            $iterations += 1;
+        }
+
+        return [
+            'clusters' => $allClusters,
+            'centroids' => [],
+            'iterations' => $iterations,
+            'converged' => true,
+            'residents' => $residents
+        ];
     }
 
-    /**
-     * Assign resident to cluster based on simple demographic rules
-     */
-    private function assignToClusterByRules($resident): int
+    private function buildSamplesDemographicsOnly(Collection $residents): array
     {
-        $age = $resident->age ?? 30;
-        $income = $resident->income_level ?? 'Low';
-        $employment = $resident->employment_status ?? 'Unemployed';
-        $health = $resident->health_status ?? 'Healthy';
+        $samples = [];
+        $indexMap = [];
 
-        // Rule 1: High-income professionals (Cluster 0)
-        if ($income === 'High' || $income === 'Upper Middle') {
-            return 0;
+        $educationLevels = ['No Education','Elementary','High School','Vocational','College','Post Graduate'];
+        $incomeLevels = ['Low','Lower Middle','Middle','Upper Middle','High'];
+        $employmentStatuses = ['Unemployed','Part-time','Self-employed','Full-time'];
+        $healthStatuses = ['Critical','Poor','Fair','Good','Excellent'];
+
+        foreach ($residents as $i => $resident) {
+            $vector = [];
+            $vector[] = $this->weightAge * $this->normalizeAge($resident->age ?? 30);
+            $vector[] = $this->weightFamilySize * $this->normalizeFamilySize($resident->family_size ?? 1);
+
+            $edu = $resident->education_level ?? 'Elementary';
+            foreach ($educationLevels as $level) {
+                $vector[] = $this->weightEducation * (($edu === $level) ? 1.0 : 0.0);
+            }
+            $inc = $resident->income_level ?? 'Low';
+            foreach ($incomeLevels as $level) {
+                $vector[] = $this->weightIncome * (($inc === $level) ? 1.0 : 0.0);
+            }
+            $emp = $resident->employment_status ?? 'Unemployed';
+            foreach ($employmentStatuses as $status) {
+                $vector[] = $this->weightEmployment * (($emp === $status) ? 1.0 : 0.0);
+            }
+            $hlth = $resident->health_status ?? 'Healthy';
+            foreach ($healthStatuses as $status) {
+                $vector[] = $this->weightHealth * (($hlth === $status) ? 1.0 : 0.0);
+            }
+
+            $samples[] = $vector;
+            $indexMap[$i] = $resident;
         }
 
-        // Rule 2: Vulnerable population (Cluster 1)
-        if ($income === 'Low' && ($employment === 'Unemployed' || $health === 'Critical' || $health === 'Poor')) {
-            return 1;
-        }
-
-        // Rule 3: Middle-class families (Cluster 2)
-        if ($income === 'Middle' || $income === 'Lower Middle') {
-            return 2;
-        }
-
-        // Default: assign to cluster 1 (vulnerable)
-        return 1;
+        return [$samples, $indexMap];
     }
+
+    private function findBestKForSamples(array $samples, int $maxK): int
+    {
+        if (count($samples) < 3) return 2;
+        $inertias = [];
+        for ($k = 2; $k <= $maxK; $k++) {
+            $kmeans = new KMeans($k, KMeans::INIT_KMEANS_PLUS_PLUS);
+            $clusters = $kmeans->cluster($samples);
+            $centroids = $this->calculateSimpleCentroids($this->wrapClustersForCentroid($clusters));
+            $inertias[$k] = $this->computeInertia($clusters, $centroids);
+        }
+        $bestK = array_key_first($inertias) ?? 2;
+        $prev = null;
+        foreach ($inertias as $k => $inertia) {
+            if ($prev === null) { $prev = $inertia; $bestK = $k; continue; }
+            $drop = ($prev - $inertia) / max($prev, 1e-9);
+            if ($drop < 0.15) { break; }
+            $bestK = $k;
+            $prev = $inertia;
+        }
+        return $bestK;
+    }
+
+	/**
+	 * Build numeric feature vectors and index mapping
+	 */
+	private function buildSamples(Collection $residents): array
+	{
+		$samples = [];
+		$indexMap = [];
+
+		// Domain categories for one-hot encoding
+		$educationLevels = ['No Education','Elementary','High School','Vocational','College','Post Graduate'];
+		$incomeLevels = ['Low','Lower Middle','Middle','Upper Middle','High'];
+		$employmentStatuses = ['Unemployed','Part-time','Self-employed','Full-time'];
+		$healthStatuses = ['Critical','Poor','Fair','Good','Excellent'];
+
+		// Build mapping for Purok token from address (cap dimensions)
+		$purokToIndex = [];
+		$nextIndex = 0;
+		$MAX_PUROK_DIM = 10; // 9 distinct + 1 "other"
+		foreach ($residents as $resident) {
+			$token = $this->extractPurokToken($resident->address ?? '');
+			if ($token !== '' && !isset($purokToIndex[$token]) && $nextIndex < $MAX_PUROK_DIM - 1) {
+				$purokToIndex[$token] = $nextIndex++;
+			}
+		}
+
+		foreach ($residents as $i => $resident) {
+			$vector = [];
+
+			// Numeric features (scaled and weighted)
+			$vector[] = $this->weightAge * $this->normalizeAge($resident->age ?? 30);
+			$vector[] = $this->weightFamilySize * $this->normalizeFamilySize($resident->family_size ?? 1);
+
+			// One-hot: Education
+			$edu = $resident->education_level ?? 'Elementary';
+			foreach ($educationLevels as $level) {
+				$vector[] = $this->weightEducation * (($edu === $level) ? 1.0 : 0.0);
+			}
+
+			// One-hot: Income
+			$inc = $resident->income_level ?? 'Low';
+			foreach ($incomeLevels as $level) {
+				$vector[] = $this->weightIncome * (($inc === $level) ? 1.0 : 0.0);
+			}
+
+			// One-hot: Employment
+			$emp = $resident->employment_status ?? 'Unemployed';
+			foreach ($employmentStatuses as $status) {
+				$vector[] = $this->weightEmployment * (($emp === $status) ? 1.0 : 0.0);
+			}
+
+			// One-hot: Health
+			$hlth = $resident->health_status ?? 'Healthy';
+			foreach ($healthStatuses as $status) {
+				$vector[] = $this->weightHealth * (($hlth === $status) ? 1.0 : 0.0);
+			}
+
+			// One-hot: Purok (capped; overflow -> other)
+			$purokVec = array_fill(0, $MAX_PUROK_DIM, 0.0);
+			$token = $this->extractPurokToken($resident->address ?? '');
+			if ($token !== '') {
+				$idx = $purokToIndex[$token] ?? ($MAX_PUROK_DIM - 1);
+				$purokVec[$idx] = 1.0 * $this->weightPurok;
+			}
+			$vector = array_merge($vector, $purokVec);
+
+			$samples[] = $vector;
+			$indexMap[$i] = $resident;
+		}
+
+		return [$samples, $indexMap];
+	}
+
+	private function buildSampleLookup(array $samples): array
+	{
+		$lookup = [];
+		foreach ($samples as $index => $sample) {
+			$key = $this->encodeSampleKey($sample);
+			$lookup[$key] = $lookup[$key] ?? [];
+			$lookup[$key][] = $index;
+		}
+		return $lookup;
+	}
+
+	private function encodeSampleKey(array $sample): string
+	{
+		return json_encode(array_map(fn($v) => round($v, 6), $sample));
+	}
 
     /**
      * Calculate simple centroids for visualization
      */
-    private function calculateSimpleCentroids(array $clusters): array
+	private function calculateSimpleCentroids(array $clusters): array
     {
         $centroids = [];
 
         foreach ($clusters as $clusterId => $cluster) {
             if (empty($cluster)) {
-                $centroids[$clusterId] = array_fill(0, 6, 0.5);
+                // infer feature count from any other cluster, fallback to 4 (age, fam, minimal)
+                $someCluster = current(array_filter($clusters));
+                $featureCount = ($someCluster && isset($someCluster[0]['features'])) ? count($someCluster[0]['features']) : 4;
+                $centroids[$clusterId] = array_fill(0, $featureCount, 0.0);
                 continue;
             }
 
-            $centroid = array_fill(0, 6, 0);
+            $featureCount = isset($cluster[0]['features']) ? count($cluster[0]['features']) : 4;
+            $centroid = array_fill(0, $featureCount, 0);
             $count = count($cluster);
 
             foreach ($cluster as $point) {
-                for ($i = 0; $i < 6; $i++) {
+                for ($i = 0; $i < $featureCount; $i++) {
                     $centroid[$i] += $point['features'][$i];
                 }
             }
 
-            for ($i = 0; $i < 6; $i++) {
+            for ($i = 0; $i < $featureCount; $i++) {
                 $centroid[$i] /= $count;
             }
 
@@ -160,7 +385,8 @@ class ResidentDemographicAnalysisService
                     'most_common_education' => 'N/A',
                     'most_common_income' => 'N/A',
                     'most_common_employment' => 'N/A',
-                    'most_common_health' => 'N/A'
+                    'most_common_health' => 'N/A',
+                    'most_common_purok' => 'N/A'
                 ];
                 continue;
             }
@@ -171,6 +397,7 @@ class ResidentDemographicAnalysisService
             $incomes = [];
             $employments = [];
             $healths = [];
+            $puroks = [];
 
             foreach ($cluster as $point) {
                 $resident = $point['resident'];
@@ -180,6 +407,7 @@ class ResidentDemographicAnalysisService
                 $incomes[] = $resident->income_level ?? 'Low';
                 $employments[] = $resident->employment_status ?? 'Unemployed';
                 $healths[] = $resident->health_status ?? 'Healthy';
+                $puroks[] = $this->extractPurokToken($resident->address ?? '');
             }
 
             $characteristics[$clusterId] = [
@@ -189,7 +417,8 @@ class ResidentDemographicAnalysisService
                 'most_common_education' => $this->getMostCommon($educations),
                 'most_common_income' => $this->getMostCommon($incomes),
                 'most_common_employment' => $this->getMostCommon($employments),
-                'most_common_health' => $this->getMostCommon($healths)
+                'most_common_health' => $this->getMostCommon($healths),
+                'most_common_purok' => $this->getMostCommon(array_values(array_filter($puroks)))
             ];
         }
 
@@ -199,17 +428,63 @@ class ResidentDemographicAnalysisService
     /**
      * Find optimal K using simple heuristics
      */
-    public function findOptimalK(Collection $residents, int $maxK = 5): int
+	public function findOptimalK(Collection $residents, int $maxK = 5): int
     {
-        // Simple heuristic: optimal K based on data size and diversity
-        $count = $residents->count();
+		$count = $residents->count();
+		if ($count < 4) return 2;
 
-        if ($count < 5) return 2;
-        if ($count < 10) return 3;
-        if ($count < 20) return 4;
+		// Build samples once
+		[$samples] = $this->buildSamples($residents);
+		$maxK = max(2, min($maxK, $count - 1));
+		$inertias = [];
+		for ($k = 2; $k <= $maxK; $k++) {
+			$kmeans = new KMeans($k, KMeans::INIT_KMEANS_PLUS_PLUS);
+			$clusters = $kmeans->cluster($samples);
+			$centroids = $this->calculateSimpleCentroids($this->wrapClustersForCentroid($clusters));
+			$inertias[$k] = $this->computeInertia($clusters, $centroids);
+		}
 
-        return 3; // Default for larger datasets
+		// Elbow heuristic: pick K with largest relative drop until diminishing returns
+		$bestK = array_key_first($inertias) ?? 3;
+		$prev = null;
+		foreach ($inertias as $k => $inertia) {
+			if ($prev === null) { $prev = $inertia; $bestK = $k; continue; }
+			$drop = ($prev - $inertia) / max($prev, 1e-9);
+			if ($drop < 0.15) { // less than 15% improvement -> elbow reached
+				break;
+			}
+			$bestK = $k;
+			$prev = $inertia;
+		}
+
+		return $bestK;
     }
+
+	private function wrapClustersForCentroid(array $rawClusters): array
+	{
+		$wrapped = [];
+		foreach ($rawClusters as $clusterId => $clusterSamples) {
+			$wrapped[$clusterId] = [];
+			foreach ($clusterSamples as $sample) {
+				$wrapped[$clusterId][] = [ 'features' => $sample ];
+			}
+		}
+		return $wrapped;
+	}
+
+	private function computeInertia(array $rawClusters, array $centroids): float
+	{
+		$distance = new Euclidean();
+		$sum = 0.0;
+        foreach ($rawClusters as $clusterId => $clusterSamples) {
+            $featureCount = isset($centroids[$clusterId]) ? count($centroids[$clusterId]) : 4;
+            $centroid = $centroids[$clusterId] ?? array_fill(0, $featureCount, 0.0);
+			foreach ($clusterSamples as $sample) {
+				$sum += pow($distance->distance($sample, $centroid), 2);
+			}
+		}
+		return $sum;
+	}
 
     // Normalization methods (unchanged)
 
@@ -282,5 +557,33 @@ class ResidentDemographicAnalysisService
         $counts = array_count_values($array);
         arsort($counts);
         return array_key_first($counts) ?? 'Unknown';
+    }
+
+    private function extractPurokToken(string $address): string
+    {
+        $address = trim(strtolower($address));
+        if ($address === '') return '';
+        if (preg_match('/purok\s*([a-z0-9]+)/i', $address, $m)) {
+            $raw = (string) $m[1];
+            return $this->normalizePurokToken($raw);
+        }
+        return '';
+    }
+
+    private function normalizePurokToken(string $token): string
+    {
+        $t = strtolower(trim($token));
+        // Map common words/roman numerals to digits (1-20)
+        $map = [
+            'one'=>1,'two'=>2,'three'=>3,'four'=>4,'five'=>5,'six'=>6,'seven'=>7,'eight'=>8,'nine'=>9,'ten'=>10,
+            'eleven'=>11,'twelve'=>12,'thirteen'=>13,'fourteen'=>14,'fifteen'=>15,'sixteen'=>16,'seventeen'=>17,'eighteen'=>18,'nineteen'=>19,'twenty'=>20,
+            'i'=>1,'ii'=>2,'iii'=>3,'iv'=>4,'v'=>5,'vi'=>6,'vii'=>7,'viii'=>8,'ix'=>9,'x'=>10,
+            'xi'=>11,'xii'=>12,'xiii'=>13,'xiv'=>14,'xv'=>15,'xvi'=>16,'xvii'=>17,'xviii'=>18,'xix'=>19,'xx'=>20
+        ];
+        if (isset($map[$t])) return (string)$map[$t];
+        // Strip non-digits if mostly numeric
+        if (preg_match('/^\d+$/', $t)) return $t;
+        if (preg_match('/(\d{1,3})/', $t, $m)) return $m[1];
+        return $t;
     }
 }

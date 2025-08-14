@@ -23,6 +23,7 @@ class ClusteringController
     {
         $k = request('k', 3);
         $useOptimalK = request('use_optimal_k', false);
+        $useHierarchical = request('hierarchical', false);
         
         if ($useOptimalK) {
             $residents = Residents::all();
@@ -30,13 +31,16 @@ class ClusteringController
         }
         
         $this->clusteringService = new ResidentDemographicAnalysisService($k);
-        $result = $this->clusteringService->clusterResidents();
+        $result = $useHierarchical
+            ? $this->clusteringService->clusterResidentsHierarchical()
+            : $this->clusteringService->clusterResidents();
         
         if (isset($result['error'])) {
             return view('admin.clustering.index', [
                 'error' => $result['error'],
                 'k' => $k,
                 'useOptimalK' => $useOptimalK,
+                'useHierarchical' => $useHierarchical,
                 'sampleSize' => 0,
                 'processingTime' => 0,
                 'converged' => false
@@ -48,6 +52,17 @@ class ClusteringController
         // Calculate processing time (simulate for enhanced approach)
         $processingTime = 35; // Enhanced approach takes ~35ms
         
+        // Build $residents collection for the table
+        $residents = collect();
+        foreach ($result['clusters'] as $clusterId => $cluster) {
+            foreach ($cluster as $point) {
+                if (isset($point['resident'])) {
+                    $resident = $point['resident'];
+                    $resident->cluster_id = $clusterId + 1; // 1-based for display
+                    $residents->push($resident);
+                }
+            }
+        }
         return view('admin.clustering.index', [
             'clusteringResult' => $result,
             'clusters' => $result['clusters'],
@@ -56,10 +71,12 @@ class ClusteringController
             'incidenceAnalysis' => $result['incidence_analysis'] ?? [],
             'k' => $k,
             'useOptimalK' => $useOptimalK,
+            'useHierarchical' => $useHierarchical,
             'iterations' => $result['iterations'],
             'converged' => $result['converged'],
             'sampleSize' => count($result['residents']),
-            'processingTime' => $processingTime
+            'processingTime' => $processingTime,
+            'residents' => $residents,
         ]);
     }
 
