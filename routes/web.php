@@ -84,9 +84,11 @@ Route::prefix('admin')->group(function () {
         Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
         Route::post('/notifications/mark-all-as-read-ajax', [AdminNotificationController::class, 'markAllAsReadAjax'])->name('admin.notifications.mark-all-as-read-ajax');
         Route::post('/notifications/mark-as-read-by-type/{type}', [AdminNotificationController::class, 'markAsReadByType'])->name('admin.notifications.mark-as-read-by-type');
+        // Resident search (needed by vaccination and medical forms) - allow nurse access
+        Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
     });
 
-    Route::middleware(['admin.role:admin,secretary,captain,treasurer,councilor'])->group(function () {
+    Route::middleware(['admin.role:admin,secretary,captain,councilor,treasurer'])->group(function () {
         // Admin Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -132,9 +134,6 @@ Route::prefix('admin')->group(function () {
 
     Route::middleware(['admin.role:admin,secretary,captain,councilor'])->group(function () {
 
-        // Resident search (needed by blotter forms) - allow all admin roles access
-        Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
-
         // Blotter Reports route
         Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
         Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');
@@ -144,10 +143,10 @@ Route::prefix('admin')->group(function () {
         Route::post('/blotter-reports/{id}/new-summons', [BlotterReportController::class, 'generateNewSummons'])->name('admin.blotter-reports.new-summons');
         Route::post('/blotter-reports/{id}/complete', [BlotterReportController::class, 'markAsComplete'])->name('admin.blotter-reports.complete');
         
-        // Community Complaints route
-        Route::get('/community-complaints', [CommunityComplaintController::class, 'index'])->name('admin.community-complaints');
-        Route::get('/community-complaints/{id}/details', [CommunityComplaintController::class, 'getDetails'])->name('admin.community-complaints.details');
-        Route::post('/community-complaints/{id}/update-status', [CommunityComplaintController::class, 'updateStatus'])->name('admin.community-complaints.update-status');
+        // Community Concerns route
+        Route::get('/community-concerns', [CommunityComplaintController::class, 'index'])->name('admin.community-concerns');
+        Route::get('/community-concerns/{id}/details', [CommunityComplaintController::class, 'getDetails'])->name('admin.community-concerns.details');
+        Route::post('/community-concerns/{id}/update-status', [CommunityComplaintController::class, 'updateStatus'])->name('admin.community-concerns.update-status');
         
         // Document Requests route
         Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');

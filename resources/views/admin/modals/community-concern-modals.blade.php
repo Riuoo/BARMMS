@@ -3,7 +3,7 @@
     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Complaint Details</h3>
+                <h3 class="text-lg font-medium text-gray-900">Concern Details</h3>
                 <button onclick="document.getElementById('complaintDetailsModal').classList.add('hidden')" 
                         class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times text-xl"></i>
@@ -27,7 +27,7 @@
     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Update Complaint Status</h3>
+                <h3 class="text-lg font-medium text-gray-900">Update Concern Status</h3>
                 <button onclick="closeUpdateModal()" 
                         class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times text-xl"></i>
@@ -75,7 +75,7 @@
 <script>
 // Global function to open update status modal
 function openUpdateStatusModal(id, currentStatus) { // Added currentStatus parameter
-    console.log('Opening update modal for complaint ID:', id, 'with current status:', currentStatus);
+    console.log('Opening update modal for concern ID:', id, 'with current status:', currentStatus);
     
     // Set the complaint ID
     document.getElementById('updateComplaintId').value = id;
@@ -84,7 +84,7 @@ function openUpdateStatusModal(id, currentStatus) { // Added currentStatus param
     
     // Set the form action
     const form = document.getElementById('updateStatusForm');
-    form.action = `/admin/community-complaints/${id}/update-status`;
+            form.action = `/admin/community-concerns/${id}/update-status`;
     
     // Get the status dropdown
     const statusSelect = document.getElementById('status');
@@ -154,13 +154,13 @@ function openUpdateStatusModal(id, currentStatus) { // Added currentStatus param
             setTimeout(() => { window.location.reload(); }, 200);
         })
         .catch(error => {
-            console.error('Error updating complaint:', error);
+            console.error('Error updating concern:', error);
             
             // Show error message
             if (typeof notify !== 'undefined') {
-                notify('error', 'Failed to update complaint status');
+                notify('error', 'Failed to update concern status');
             } else {
-                alert('Failed to update complaint status');
+                alert('Failed to update concern status');
             }
             
             // Reset button
@@ -198,23 +198,27 @@ document.addEventListener('keydown', function(event) {
 });
 
 // Debug: Log when script loads
-console.log('Community complaint modals script loaded');
+console.log('Community concern modals script loaded');
 console.log('openUpdateStatusModal function available:', typeof openUpdateStatusModal);
 
-// View complaint details (desktop and mobile)
+// View concern details (desktop and mobile)
 function viewComplaintDetails(id) {
+    console.log('viewComplaintDetails called with ID:', id);
     const modal = document.getElementById('complaintDetailsModal');
     const content = document.getElementById('complaintDetailsContent');
-    if (!modal || !content) return;
+    if (!modal || !content) {
+        console.error('Modal or content element not found');
+        return;
+    }
     content.innerHTML = '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div><span class="ml-2 text-gray-500 text-sm">Loading...</span></div>';
     modal.classList.remove('hidden');
 
-    fetch(`/admin/community-complaints/${id}/details`, {
+    fetch(`/admin/community-concerns/${id}/details`, {
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
     })
         .then(r => r.json())
         .then(data => {
-            const title = (data && data.title) ? data.title : 'Complaint';
+            const title = (data && data.title) ? data.title : 'Concern';
             const location = (data && data.location) ? data.location : 'Not specified';
             const description = (data && data.description) ? data.description : 'No description provided.';
             content.innerHTML = `
@@ -255,7 +259,7 @@ function viewComplaintDetails(id) {
                 </div>`;
         })
         .catch(() => {
-            content.innerHTML = '<p class="text-sm text-red-600">Failed to load complaint details.</p>';
+            content.innerHTML = '<p class="text-sm text-red-600">Failed to load concern details.</p>';
         });
 }
 
@@ -281,7 +285,7 @@ function viewComplaintDetailsMobile(id) {
                     <div class="flex items-center justify-between p-4 border-b">
                         <h3 class="text-base font-semibold text-gray-900">
                             <i class="fas fa-clipboard-list mr-2 text-blue-600"></i>
-                            Complaint Details
+                            Concern Details
                         </h3>
                         <button onclick="document.getElementById('complaintDetailsModalMobile').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
                             <i class="fas fa-times text-lg"></i>
@@ -301,10 +305,10 @@ function viewComplaintDetailsMobile(id) {
     content.innerHTML = '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div><span class="ml-2 text-gray-500 text-sm">Loading...</span></div>';
     modal.classList.remove('hidden');
 
-    fetch(`/admin/community-complaints/${id}/details`, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+    fetch(`/admin/community-concerns/${id}/details`, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
         .then(r => r.json())
         .then(data => {
-            const title = data?.title || 'Complaint';
+            const title = data?.title || 'Concern';
             const location = data?.location || 'Not specified';
             const description = data?.description || 'No description provided.';
             const userName = data?.user_name || 'N/A';
@@ -386,7 +390,7 @@ function viewComplaintDetailsMobile(id) {
                 </div>`;
         })
         .catch(() => {
-            content.innerHTML = '<p class="text-sm text-red-600">Failed to load complaint details.</p>';
+            content.innerHTML = '<p class="text-sm text-red-600">Failed to load concern details.</p>';
         });
 }
 
@@ -400,13 +404,15 @@ document.addEventListener('keydown', function(e){
 
 // Delegate clicks to avoid inline handlers
 document.addEventListener('click', function(e){
-    const desktopBtn = e.target.closest('.js-complaint-view');
+    const desktopBtn = e.target.closest('.js-concern-view');
     if (desktopBtn) {
+        console.log('Desktop concern view button clicked');
         const id = desktopBtn.getAttribute('data-id');
+        console.log('Concern ID:', id);
         if (id) viewComplaintDetails(id);
         return;
     }
-    const mobileBtn = e.target.closest('.js-complaint-view-mobile');
+    const mobileBtn = e.target.closest('.js-concern-view-mobile');
     if (mobileBtn) {
         const id = mobileBtn.getAttribute('data-id');
         if (id) viewComplaintDetailsMobile(id);

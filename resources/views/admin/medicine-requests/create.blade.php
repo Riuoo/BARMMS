@@ -64,12 +64,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Resident <span class="text-red-500">*</span></label>
-                        <select name="resident_id" class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
-                            @foreach($residents as $resident)
-                                <option value="{{ $resident->id }}" {{ $selectedResidentId == $resident->id ? 'selected' : '' }}>{{ $resident->name }}</option>
-                            @endforeach
-                        </select>
-                        <p class="mt-1 text-sm text-gray-500">Select the resident for this request</p>
+                        <input
+                            type="text"
+                            id="residentSearch"
+                            placeholder="Type to search for a resident..."
+                            autocomplete="off"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                            aria-label="Search for a resident"
+                            required
+                        />
+                        <input type="hidden" id="resident_id" name="resident_id" required>
+                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                        <p class="mt-1 text-sm text-gray-500">Search and select the resident for this request</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Medicine <span class="text-red-500">*</span></label>
@@ -138,6 +144,69 @@
         </form>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+    const searchInput = document.getElementById('residentSearch');
+    const searchResults = document.getElementById('searchResults');
+    const residentIdInput = document.getElementById('resident_id');
+    searchInput.addEventListener('input', debounce(async () => {
+        const term = searchInput.value.trim();
+        if (term.length < 2) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+            return;
+        }
+        searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Searching…</div>';
+        searchResults.classList.remove('hidden');
+        try {
+            const response = await fetch(`{{ route('admin.search.residents') }}?term=${encodeURIComponent(term)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            });
+            const results = await response.json();
+            if (Array.isArray(results) && results.length > 0) {
+                searchResults.innerHTML = results.map(resident => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                        <div class="font-medium text-gray-900">${resident.name}</div>
+                        <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                    </div>
+                `).join('');
+                searchResults.classList.remove('hidden');
+            } else {
+                searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+                searchResults.classList.remove('hidden');
+            }
+        } catch (e) {
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Search unavailable</div>';
+            searchResults.classList.remove('hidden');
+        }
+    }, 250));
+    searchResults.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-id]');
+        if (target && target.dataset.id) {
+            residentIdInput.value = target.dataset.id;
+            searchInput.value = target.dataset.name;
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+        }
+    });
+    document.addEventListener('click', (event) => {
+        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+        }
+    });
+});
+</script>
 @endsection
 
 

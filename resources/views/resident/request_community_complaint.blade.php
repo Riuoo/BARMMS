@@ -214,7 +214,7 @@
                 <h3 class="text-sm font-medium text-blue-800">Important Information</h3>
                 <div class="mt-2 text-sm text-blue-700">
                     <ul class="list-disc pl-5 space-y-1">
-                        <li>Community complaints help improve barangay services and infrastructure</li>
+                        <li>Community concerns help improve barangay services and infrastructure</li>
                         <li>Please provide accurate and detailed information</li>
                         <li>You may be contacted for additional details if needed</li>
                         <li>Urgent issues will be prioritized for immediate action</li>

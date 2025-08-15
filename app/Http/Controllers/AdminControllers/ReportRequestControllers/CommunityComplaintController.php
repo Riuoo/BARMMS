@@ -31,7 +31,7 @@ class CommunityComplaintController
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
-        $complaints = $query->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")->orderByDesc('created_at')->paginate(10);
+        $concerns = $query->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")->orderByDesc('created_at')->paginate(10);
         $stats = [
             'total' => $total,
             'pending' => $pending,
@@ -40,7 +40,7 @@ class CommunityComplaintController
             'resolved' => $resolved,
             'closed' => $closed,
         ];
-        return view('admin.requests.community-complaints', compact('complaints', 'stats'));
+        return view('admin.requests.community-concerns', compact('concerns', 'stats'));
     }
 
     public function getDetails($id)
@@ -115,11 +115,11 @@ class CommunityComplaintController
             
             $complaint->save();
 
-            notify()->success('Complaint status updated successfully.');
+            notify()->success('Concern status updated successfully.');
             return redirect()->back();
         } catch (\Exception $e) {
             Log::error("Error updating complaint status: " . $e->getMessage());
-            notify()->error('Failed to update complaint status: ' . $e->getMessage());
+            notify()->error('Failed to update concern status: ' . $e->getMessage());
             return redirect()->back();
         }
     }

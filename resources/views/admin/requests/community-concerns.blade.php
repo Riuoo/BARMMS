@@ -1,6 +1,6 @@
 @extends('admin.main.layout')
 
-@section('title', 'Community Complaints')
+@section('title', 'Community Concerns')
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
@@ -8,8 +8,8 @@
     <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Community Complaints</h1>
-                <p class="text-gray-600">Manage and track community complaints from residents</p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Community Concerns</h1>
+                <p class="text-gray-600">Manage and track community concerns from residents</p>
             </div>
         </div>
     </div>
@@ -42,7 +42,7 @@
     @endif
 
     <!-- Filters and Search -->
-    <form method="GET" action="{{ route('admin.community-complaints') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.community-concerns') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -50,7 +50,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" id="complaintSearchInput" placeholder="Search complaints..." 
+                    <input type="text" name="search" id="concernSearchInput" placeholder="Search concerns..." 
                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                     value="{{ request('search') }}">
                 </div>
@@ -69,7 +69,7 @@
                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     Filter
                 </button>
-                <a href="{{ route('admin.community-complaints') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <a href="{{ route('admin.community-concerns') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     Reset
                 </a>
             </div>
@@ -86,7 +86,7 @@
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Complaints</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Concerns</p>
                     <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['total'] }}</p>
                 </div>
             </div>
@@ -158,10 +158,10 @@
         </div>
     </div>
 
-    <!-- Complaints List -->
-    @if($complaints->count() > 0)
+    <!-- Concerns List -->
+    @if($concerns->count() > 0)
         @php
-            $hasThreadActions = $complaints->contains(function ($c) {
+            $hasThreadActions = $concerns->contains(function ($c) {
                 return !in_array($c->status, ['resolved','closed']);
             });
         @endphp
@@ -174,7 +174,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-clipboard-list mr-2"></i>
-                                    Complaint
+                                    Concern
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -212,12 +212,12 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($complaints as $complaint)
-                        <tr class="complaint-item hover:bg-gray-50 transition duration-150" data-status="{{ $complaint->status }}">
+                        @foreach($concerns as $concern)
+                        <tr class="concern-item hover:bg-gray-50 transition duration-150" data-status="{{ $concern->status }}">
                             <td class="px-6 py-4">
                                 <button type="button"
-                                        data-id="{{ $complaint->id }}"
-                                        class="js-complaint-view hidden md:inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
+                                        data-id="{{ $concern->id }}"
+                                        class="js-concern-view hidden md:inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
                                     <i class="fas fa-eye mr-1"></i>
                                     View Details
                                 </button>
@@ -225,7 +225,7 @@
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                     <i class="fas fa-tag mr-1"></i>
-                                    {{ $complaint->category }}
+                                    {{ $concern->category }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
@@ -238,22 +238,22 @@
                                         'closed' => 'bg-purple-100 text-purple-800'
                                     ];
                                 @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$complaint->status] }}">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$concern->status] }}">
                                     <i class="fas fa-info-circle mr-1"></i>
-                                    {{ str_replace('_', ' ', ucfirst($complaint->status)) }}
+                                    {{ str_replace('_', ' ', ucfirst($concern->status)) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $complaint->resident->name ?? 'N/A' }}</div>
+                                <div class="text-sm text-gray-900">{{ $concern->resident->name ?? 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $complaint->created_at->format('M d, Y') }}</div>
+                                <div class="text-sm text-gray-900">{{ $concern->created_at->format('M d, Y') }}</div>
                             </td>
                             @if($hasThreadActions)
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center justify-center space-x-2">
-                                        @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
-                                            <button type="button" data-id="{{ $complaint->id }}" data-status="{{ $complaint->status }}"
+                                        @if($concern->status !== 'resolved' && $concern->status !== 'closed')
+                                            <button type="button" data-id="{{ $concern->id }}" data-status="{{ $concern->status }}"
                                                     class="js-open-update inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                                                 <i class="fas fa-edit mr-1"></i>
                                                 Update
@@ -271,8 +271,8 @@
 
         <!-- Mobile Cards (hidden on desktop) -->
         <div class="md:hidden space-y-4">
-            @foreach($complaints as $complaint)
-            <div class="complaint-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $complaint->status }}">
+            @foreach($concerns as $concern)
+            <div class="concern-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $concern->status }}">
                 <!-- Header Section -->
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center flex-1 min-w-0">
@@ -280,8 +280,8 @@
                             <i class="fas fa-clipboard-list text-blue-600"></i>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
-                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $complaint->title }}</h3>
-                            <p class="text-sm text-gray-500 truncate">{{ $complaint->resident->name ?? 'N/A' }}</p>
+                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $concern->title }}</h3>
+                            <p class="text-sm text-gray-500 truncate">{{ $concern->resident->name ?? 'N/A' }}</p>
                             <div class="flex items-center mt-1">
                                 @php
                                     $statusColors = [
@@ -292,13 +292,13 @@
                                         'closed' => 'bg-purple-100 text-purple-800'
                                     ];
                                 @endphp
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$complaint->status] }}">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$concern->status] }}">
                                     <i class="fas fa-info-circle mr-1"></i>
-                                    {{ str_replace('_', ' ', ucfirst($complaint->status)) }}
+                                    {{ str_replace('_', ' ', ucfirst($concern->status)) }}
                                 </span>
                                 <span class="ml-2 text-xs text-gray-500">
                                     <i class="fas fa-calendar mr-1"></i>
-                                    {{ $complaint->created_at->format('M d, Y') }}
+                                    {{ $concern->created_at->format('M d, Y') }}
                                 </span>
                             </div>
                         </div>
@@ -309,19 +309,19 @@
                 <div class="mb-3 flex flex-wrap gap-2">
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                         <i class="fas fa-tag mr-1"></i>
-                        {{ $complaint->category }}
+                        {{ $concern->category }}
                     </span>
                 </div>
 
                 <!-- Actions Section -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                    <button type="button" data-id="{{ $complaint->id }}"
-                            class="js-complaint-view-mobile inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200 md:hidden">
+                    <button type="button" data-id="{{ $concern->id }}"
+                            class="js-concern-view-mobile inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200 md:hidden">
                         <i class="fas fa-eye mr-1"></i>
                         View Full Details
                     </button>
-                    @if($complaint->status !== 'resolved' && $complaint->status !== 'closed')
-                        <button type="button" data-id="{{ $complaint->id }}" data-status="{{ $complaint->status }}"
+                    @if($concern->status !== 'resolved' && $concern->status !== 'closed')
+                        <button type="button" data-id="{{ $concern->id }}" data-status="{{ $concern->status }}"
                                 class="js-open-update inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
                             <i class="fas fa-edit mr-1"></i>
                             Update
@@ -336,23 +336,23 @@
             <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No complaints found</h3>
-            <p class="text-gray-500">No community complaints have been submitted yet.</p>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No concerns found</h3>
+            <p class="text-gray-500">No community concerns have been submitted yet.</p>
         </div>
     @endif
 
     <!-- Modern Pagination -->
-    @if($complaints->hasPages())
+    @if($concerns->hasPages())
         <div class="mt-6">
             <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
                 <div class="-mt-px flex w-0 flex-1">
-                    @if($complaints->onFirstPage())
+                    @if($concerns->onFirstPage())
                         <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
                             <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
                             Previous
                         </span>
                     @else
-                        <a href="{{ $complaints->appends(request()->except('page'))->previousPageUrl() }}" 
+                        <a href="{{ $concerns->appends(request()->except('page'))->previousPageUrl() }}" 
                            class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                             <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
                             Previous
@@ -362,14 +362,14 @@
                 
                 <div class="hidden md:-mt-px md:flex">
                     @php
-                        $currentPage = $complaints->currentPage();
-                        $lastPage = $complaints->lastPage();
+                        $currentPage = $concerns->currentPage();
+                        $lastPage = $concerns->lastPage();
                         $startPage = max(1, $currentPage - 2);
                         $endPage = min($lastPage, $currentPage + 2);
                     @endphp
                     
                     @if($startPage > 1)
-                        <a href="{{ $complaints->appends(request()->except('page'))->url(1) }}" 
+                        <a href="{{ $concerns->appends(request()->except('page'))->url(1) }}" 
                            class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                             1
                         </a>
@@ -386,7 +386,7 @@
                                 {{ $page }}
                             </span>
                         @else
-                            <a href="{{ $complaints->appends(request()->except('page'))->url($page) }}" 
+                            <a href="{{ $concerns->appends(request()->except('page'))->url($page) }}" 
                                class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                                 {{ $page }}
                             </a>
@@ -399,7 +399,7 @@
                                 ...
                             </span>
                         @endif
-                        <a href="{{ $complaints->appends(request()->except('page'))->url($lastPage) }}" 
+                        <a href="{{ $concerns->appends(request()->except('page'))->url($lastPage) }}" 
                            class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                             {{ $lastPage }}
                         </a>
@@ -407,8 +407,8 @@
                 </div>
                 
                 <div class="-mt-px flex w-0 flex-1 justify-end">
-                    @if($complaints->hasMorePages())
-                        <a href="{{ $complaints->appends(request()->except('page'))->nextPageUrl() }}" 
+                    @if($concerns->hasMorePages())
+                        <a href="{{ $concerns->appends(request()->except('page'))->nextPageUrl() }}" 
                            class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
                             Next
                             <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
@@ -424,23 +424,23 @@
             
             <!-- Mobile Pagination -->
             <div class="mt-4 flex justify-between sm:hidden">
-                @if($complaints->onFirstPage())
+                @if($concerns->onFirstPage())
                     <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
                         Previous
                     </span>
                 @else
-                    <a href="{{ $complaints->appends(request()->except('page'))->previousPageUrl() }}" 
+                    <a href="{{ $concerns->appends(request()->except('page'))->previousPageUrl() }}" 
                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                         Previous
                     </a>
                 @endif
                 
                 <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
-                    Page {{ $complaints->currentPage() }} of {{ $complaints->lastPage() }}
+                    Page {{ $concerns->currentPage() }} of {{ $concerns->lastPage() }}
                 </span>
                 
-                @if($complaints->hasMorePages())
-                    <a href="{{ $complaints->appends(request()->except('page'))->nextPageUrl() }}" 
+                @if($concerns->hasMorePages())
+                    <a href="{{ $concerns->appends(request()->except('page'))->nextPageUrl() }}" 
                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                         Next
                     </a>
@@ -453,7 +453,7 @@
             
             <!-- Results Info -->
             <div class="mt-4 text-center text-sm text-gray-500">
-                Showing {{ $complaints->firstItem() }} to {{ $complaints->lastItem() }} of {{ $complaints->total() }} results
+                Showing {{ $concerns->firstItem() }} to {{ $concerns->lastItem() }} of {{ $concerns->total() }} results
             </div>
         </div>
     @endif
@@ -462,6 +462,6 @@
 </div>
 
 <!-- Modals -->
-@include('admin.modals.community-complaint-modals')
+@include('admin.modals.community-concern-modals')
 
 @endsection

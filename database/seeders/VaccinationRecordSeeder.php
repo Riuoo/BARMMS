@@ -16,7 +16,7 @@ class VaccinationRecordSeeder extends Seeder
     public function run(): void
     {
         $administeredById = BarangayProfile::query()
-            ->whereIn('role', ['nurse', 'bhw'])
+            ->whereIn('role', ['nurse'])
             ->inRandomOrder()
             ->value('id');
 
@@ -24,8 +24,8 @@ class VaccinationRecordSeeder extends Seeder
             return;
         }
 
-        $residentIds = Residents::query()->inRandomOrder()->limit(6)->pluck('id');
-        $childIds = ChildProfile::query()->inRandomOrder()->limit(6)->pluck('id');
+        $residentIds = Residents::query()->inRandomOrder()->limit(1)->pluck('id');
+        $childIds = ChildProfile::query()->inRandomOrder()->limit(1)->pluck('id');
 
         $adultVaccines = [
             ['vaccine_name' => 'Pfizer-BioNTech', 'vaccine_type' => 'COVID-19'],

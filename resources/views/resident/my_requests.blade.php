@@ -89,7 +89,7 @@
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm font-medium text-gray-500">Community Complaints</p>
+                    <p class="text-sm font-medium text-gray-500">Community Concerns</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $communityComplaints->count() }}</p>
                 </div>
             </div>

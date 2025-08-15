@@ -121,32 +121,6 @@
                 </div>
             </div>
 
-            <!-- Processing Information -->
-            <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
-                    <i class="fas fa-clock mr-2 text-blue-600"></i>
-                    Processing Information
-                </h3>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-info-circle text-blue-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h4 class="text-sm font-medium text-blue-800">Processing Time</h4>
-                            <div class="mt-2 text-sm text-blue-700">
-                                <ul class="list-disc pl-5 space-y-1">
-                                    <li>Barangay Clearance: 1-2 business days</li>
-                                    <li>Certificate of Residency: 1-2 business days</li>
-                                    <li>Certificate of Indigency: 2-3 business days</li>
-                                    <li>Other documents: 3-5 business days</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Form Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
                 <div class="text-sm text-gray-500">
@@ -179,9 +153,6 @@
                 <h3 class="text-sm font-medium text-yellow-800">Important Requirements</h3>
                 <div class="mt-2 text-sm text-yellow-700">
                     <ul class="list-disc pl-5 space-y-1">
-                        <li>Valid government-issued ID (passport, driver's license, etc.)</li>
-                        <li>Proof of residency (utility bills, lease agreement, etc.)</li>
-                        <li>Recent 2x2 ID picture (for some documents)</li>
                         <li>Additional requirements may vary by document type</li>
                         <li>Processing fees may apply depending on the document</li>
                     </ul>

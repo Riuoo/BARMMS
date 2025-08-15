@@ -17,7 +17,7 @@ class MedicineRequestSeeder extends Seeder
     {
         $medicines = Medicine::all();
         $medicalRecords = MedicalRecord::all();
-        $approvers = BarangayProfile::query()->whereIn('role', ['nurse', 'bhw'])->pluck('id');
+        $approvers = BarangayProfile::query()->whereIn('role', ['nurse'])->pluck('id');
 
         if ($medicines->isEmpty() || $medicalRecords->isEmpty() || $approvers->isEmpty()) {
             return;

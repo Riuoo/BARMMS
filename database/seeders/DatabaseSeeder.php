@@ -16,13 +16,11 @@ class DatabaseSeeder extends Seeder
             ResidentSeeder::class,
             ChildProfileSeeder::class,
             MedicineSeeder::class,
-            MedicalRecordSeeder::class,
-            MedicineTransactionSeeder::class,
-            MedicineRequestSeeder::class,
             DocumentTemplateSeeder::class,
             AccomplishedProjectSeeder::class,
             HealthCenterActivitySeeder::class,
-            VaccinationRecordSeeder::class,
+            MedicalRecordSeeder::class,
+            MedicineTransactionSeeder::class,
         ]);
     }
 }

@@ -119,10 +119,10 @@ class AdminNotificationController
             $notifications->push((object)[
                 'id' => $complaint->id,
                 'type' => 'community_complaint',
-                'message' => 'New community complaint pending review.',
+                'message' => 'New community concern pending review.',
                 'created_at' => $complaint->created_at,
                 'is_read' => $complaint->is_read,
-                'link' => route('admin.community-complaints'),
+                'link' => route('admin.community-concerns'),
             ]);
         }
 
@@ -216,9 +216,9 @@ class AdminNotificationController
                         $notificationsData[] = [
                             'id' => $complaint->id,
                             'type' => 'community_complaint',
-                            'message' => 'Community complaint from ' . ($complaint->resident->name ?? 'Unknown Resident'),
+                            'message' => 'Community concern from ' . ($complaint->resident->name ?? 'Unknown Resident'),
                             'created_at' => Carbon::parse($complaint->created_at)->toDateTimeString(),
-                            'link' => route('admin.community-complaints'),
+                            'link' => route('admin.community-concerns'),
                             'priority' => 'medium'
                         ];
                     } catch (\Exception $e) {

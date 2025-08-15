@@ -366,7 +366,7 @@
                     </section>
                     @endif
 
-                    @if(!$isNurse)
+                    @if($isAdmin || $isSecretary)
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
@@ -378,10 +378,10 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.community-complaints') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.community-complaints*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.community-complaints*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('admin.community-complaints*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Community Complaints</span>
-                                </a>
+                                                <a href="{{ route('admin.community-concerns') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.community-concerns*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.community-concerns*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('admin.community-concerns*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                    <span>Community Concerns</span>
+                </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.document-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.document-requests*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.document-requests*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
@@ -560,7 +560,7 @@
                     </section>
                     @endif
 
-                    @if(!$isNurse)
+                    @if($isAdmin || $isSecretary)
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
@@ -572,10 +572,10 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.community-complaints') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.community-complaints*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('admin.community-complaints*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Community Complaints</span>
-                                </a>
+                                                <a href="{{ route('admin.community-concerns') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.community-concerns*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('admin.community-concerns*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                    <span>Community Concerns</span>
+                </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.document-requests') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.document-requests*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
@@ -593,7 +593,7 @@
                     </section>
                     @endif
 
-                    @if(!$isNurse)
+                    @if($isTreasurer || $isAdmin)
                     <!-- Projects -->
                     <section class="mb-6" aria-label="Projects">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Projects</h3>
@@ -1283,7 +1283,7 @@
                         url = '/admin/new-account-requests';
                         break;
                     case 'community_complaint':
-                        url = '/admin/community-complaints';
+                        url = '/admin/community-concerns';
                         break;
                     default:
                         toast.error('Unknown notification type');
@@ -1367,7 +1367,7 @@
                     notificationType = 'blotter_report';
                 } else if (currentPath.includes('/new-account-requests')) {
                     notificationType = 'account_request';
-                } else if (currentPath.includes('/community-complaints')) {
+                } else if (currentPath.includes('/community-concerns')) {
                     notificationType = 'community_complaint';
                 }
                 
@@ -1427,4 +1427,5 @@
             }
         });
     </script>
+    @yield('scripts')
 </html>
