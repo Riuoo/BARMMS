@@ -15,13 +15,11 @@ class AccountRequestController
 {
     public function accountRequest(Request $request)
     {
-        // Statistics from full dataset
         $totalRequests = AccountRequest::count();
         $pendingCount = AccountRequest::where('status', 'pending')->count();
         $approvedCount = AccountRequest::where('status', 'approved')->count();
         $completedCount = AccountRequest::where('status', 'completed')->count();
 
-        // For display (filtered)
         $query = AccountRequest::query();
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
@@ -47,11 +45,10 @@ class AccountRequestController
             // This prevents approving a new request if an older one for the same email is still pending
             $existingRequest = AccountRequest::where('email', $accountRequest->email)
                 ->where('status', 'pending')
-                ->where('id', '!=', $accountRequest->id) // Exclude the current request being processed
+                ->where('id', '!=', $accountRequest->id)
                 ->first();
 
             if ($existingRequest) {
-                // If a duplicate pending request exists, reject it and rollback the current transaction
                 AccountRequest::where('id', $existingRequest->id)->update(['status' => 'rejected']);
                 DB::rollBack();
                 Log::warning('Duplicate account request found for email: ' . $accountRequest->email . '. Older request rejected.');
@@ -67,20 +64,17 @@ class AccountRequestController
 
             // Get the ID of the currently logged-in admin user from the session
             $adminUserId = Session::get('user_id');
-            Log::debug('Admin User ID from session: ' . $adminUserId); // For debugging purposes
+            Log::debug('Admin User ID from session: ' . $adminUserId);
 
             if ($adminUserId) {
-                $accountRequest->barangay_profile_id = $adminUserId; // Assign the admin's id
+                $accountRequest->barangay_profile_id = $adminUserId;
             } else {
-                // Log a warning if the admin user ID is not found in the session
                 Log::warning('Admin User ID not found in session for account request approval: ' . $accountRequest->id);
-                // Optionally, you could assign a default 'system' user_id or prevent approval here
-                // For now, it will just leave user_id as null if not found, which might be desired if it's nullable
             }
 
             // Update status to 'approved' and save the approver id
-            $accountRequest->status = 'approved'; // Explicitly set status
-            $accountRequest->save(); // Save changes including user_id and status
+            $accountRequest->status = 'approved';
+            $accountRequest->save();
 
             // Generate the full registration link for the email
             $registrationLink = route('register.form', ['token' => $accountRequest->token]);
@@ -91,29 +85,24 @@ class AccountRequestController
                 Log::info('Email sent successfully to: ' . $accountRequest->email);
             } catch (\Exception $e) {
                 Log::error('Error sending email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
-                // If email sending fails, you might want to rollback the approval or just warn
-                // For now, we'll proceed with the approval but show an error about the email
-                DB::rollBack(); // Rollback the transaction if email fails
+                DB::rollBack();
                 notify()->error('Account request approved, but email sending failed. Error: ' . $e->getMessage());
                 return redirect()->route('admin.new-account-requests');
             
             }
 
-            DB::commit(); // Commit the transaction if everything above succeeded
+            DB::commit();
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Rollback if any error occurred within the transaction
+            DB::rollBack();
             Log::error('Error approving account request ' . $accountRequest->id . ': ' . $e->getMessage());
             notify()->error('Error approving account request: ' . $e->getMessage());
             return redirect()->route('admin.new-account-requests');
             
         }
 
-        // Prepare success message with admin name
         $adminUserName = 'Admin';
         if ($adminUserId) {
-            // Attempt to find the admin's name from either BarangayProfile or Residents model
-            // This assumes admin users are stored in one of these tables
             $adminUser = \App\Models\BarangayProfile::find($adminUserId);
             if (!$adminUser) {
                 $adminUser = \App\Models\Residents::find($adminUserId);

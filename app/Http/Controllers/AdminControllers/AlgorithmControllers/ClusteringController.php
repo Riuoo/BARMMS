@@ -48,6 +48,32 @@ class ClusteringController
         }
         
         $characteristics = $this->clusteringService->getClusterCharacteristics($result);
+        // Build grouped array for purok summary
+        $grouped = [];
+        foreach ($characteristics as $idx => $c) {
+            $p = $c['most_common_purok'] ?? 'N/A';
+            if ($p === '' || $p === null) { $p = 'N/A'; }
+            $grouped[$p] = $grouped[$p] ?? [];
+            $grouped[$p][] = ['idx' => $idx, 'c' => $c];
+        }
+
+        // Compute global most common employment and health across all clusters
+        $employmentCounts = [];
+        $healthCounts = [];
+        foreach ($characteristics as $c) {
+            $size = $c['size'] ?? 0;
+            if ($size <= 0) { continue; }
+            $emp = $c['most_common_employment'] ?? null;
+            $hlth = $c['most_common_health'] ?? null;
+            if (!empty($emp) && $emp !== 'N/A') {
+                $employmentCounts[$emp] = ($employmentCounts[$emp] ?? 0) + $size;
+            }
+            if (!empty($hlth) && $hlth !== 'N/A') {
+                $healthCounts[$hlth] = ($healthCounts[$hlth] ?? 0) + $size;
+            }
+        }
+        $mostCommonEmployment = count($employmentCounts) ? array_search(max($employmentCounts), $employmentCounts) : 'N/A';
+        $mostCommonHealth = count($healthCounts) ? array_search(max($healthCounts), $healthCounts) : 'N/A';
         
         // Calculate processing time (simulate for enhanced approach)
         $processingTime = 35; // Enhanced approach takes ~35ms
@@ -77,6 +103,9 @@ class ClusteringController
             'sampleSize' => count($result['residents']),
             'processingTime' => $processingTime,
             'residents' => $residents,
+            'grouped' => $grouped,
+            'mostCommonEmployment' => $mostCommonEmployment,
+            'mostCommonHealth' => $mostCommonHealth,
         ]);
     }
 

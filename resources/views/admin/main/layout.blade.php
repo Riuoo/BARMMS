@@ -399,7 +399,7 @@
                     </section>
                     @endif
 
-                    @if(!$isNurse)
+                    @if($isTreasurer || $isAdmin)
                     <!-- Projects -->
                     <section class="mb-6" aria-label="Projects">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Projects</h3>

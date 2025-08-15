@@ -239,17 +239,22 @@ class ResidentController
             return response()->json([]);
         }
 
-        $residents = Residents::query()
-            ->where('active', true)
-            ->where(function ($q) use ($term) {
-                $q->where('name', 'like', "%{$term}%")
-                  ->orWhere('email', 'like', "%{$term}%")
-                  ->orWhere('address', 'like', "%{$term}%");
-            })
-            ->orderBy('name')
-            ->limit(10)
-            ->get(['id', 'name', 'email']);
+        try {
+            $residents = Residents::query()
+                ->where('active', true)
+                ->where(function ($q) use ($term) {
+                    $q->where('name', 'like', "%{$term}%")
+                      ->orWhere('email', 'like', "%{$term}%")
+                      ->orWhere('address', 'like', "%{$term}%");
+                })
+                ->orderBy('name')
+                ->limit(10)
+                ->get(['id', 'name', 'email']);
 
-        return response()->json($residents);
+            return response()->json($residents);
+        } catch (\Exception $e) {
+            \Log::error('Resident search error: ' . $e->getMessage());
+            return response()->json(['error' => 'Search failed'], 500);
+        }
     }
 }

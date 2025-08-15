@@ -20,7 +20,7 @@ class CheckAdminRole
         $userRole = Session::get('user_role');
 
         if (!Session::has('user_id')) {
-            abort(403, 'Access Denied — Please Log In');
+            abort(403, 'Access Denied');
         }
 
         if ($userRole === 'admin') {
@@ -34,7 +34,7 @@ class CheckAdminRole
         }
 
         if (!in_array($userRole, $roles)) {
-            abort(403, 'Access Denied — Please Log In');
+            abort(403, 'Access Denied');
         }
 
         return $next($request);

@@ -60,7 +60,7 @@
                     Complainant Information
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
-                    <div>
+                    <div class="relative">
                         <label for="complainantSearch" class="block text-sm font-medium text-gray-700 mb-2">
                             Complainant <span class="text-red-500">*</span>
                         </label>
@@ -74,7 +74,7 @@
                             required
                         />
                         <input type="hidden" id="resident_id" name="resident_id" required>
-                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
                         <p class="mt-1 text-sm text-gray-500">Search and select the resident filing the complaint</p>
                     </div>
                 </div>
@@ -439,25 +439,60 @@
     const searchResults = document.getElementById('searchResults');
     const residentIdInput = document.getElementById('resident_id');
 
+    // Debug: Check if elements exist
+    if (!searchInput) {
+        console.error('Search input not found');
+    }
+    if (!searchResults) {
+        console.error('Search results container not found');
+    }
+    if (!residentIdInput) {
+        console.error('Resident ID input not found');
+    }
+
     searchInput.addEventListener('input', debounce(async () => {
         const term = searchInput.value.trim();
+        console.log('Search term:', term); // Debug log
+        
         if (term.length < 2) {
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
             return;
         }
-        const response = await fetch(`{{ route('admin.search.residents') }}?term=${term}`);
-        const results = await response.json();
-        if (results.length > 0) {
-            searchResults.innerHTML = results.map(resident => `
-                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
-                    <div class="font-medium text-gray-900">${resident.name}</div>
-                    <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
-                </div>
-            `).join('');
+        
+        try {
+            // Show loading state
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Searching...</div>';
             searchResults.classList.remove('hidden');
-        } else {
-            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+            
+            const searchUrl = `{{ route('admin.search.residents') }}?term=${encodeURIComponent(term)}`;
+            console.log('Search URL:', searchUrl); // Debug log
+            
+            const response = await fetch(searchUrl);
+            console.log('Response status:', response.status); // Debug log
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const results = await response.json();
+            console.log('Search results:', results); // Debug log
+            
+            if (results.length > 0) {
+                searchResults.innerHTML = results.map(resident => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                        <div class="font-medium text-gray-900">${resident.name}</div>
+                        <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                    </div>
+                `).join('');
+                searchResults.classList.remove('hidden');
+            } else {
+                searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+                searchResults.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            searchResults.innerHTML = '<div class="p-3 text-red-500 text-center">Search error. Please try again.</div>';
             searchResults.classList.remove('hidden');
         }
     }, 250));

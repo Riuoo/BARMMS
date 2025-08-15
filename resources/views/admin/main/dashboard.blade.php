@@ -111,33 +111,7 @@
                 <div class="chart-container" style="position: relative; height:200px; width:100%">
                     <canvas id="residentDemographicsChart"></canvas>
                 </div>
-                <!-- Fallback table for resident demographics -->
-                <div id="residentDemographicsTable" class="hidden mt-4">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age Group</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($residentDemographics as $demographic)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $demographic->age_bracket ?? 'Unknown' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $demographic->count }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    @php
-                                        $total = collect($residentDemographics)->sum('count');
-                                        $percentage = $total > 0 ? round(($demographic->count / $total) * 100, 1) : 0;
-                                    @endphp
-                                    {{ $percentage }}%
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+
             </div>
         </div>
 
@@ -148,76 +122,7 @@
                 <div class="chart-container" style="position: relative; height:200px; width:100%">
                     <canvas id="documentRequestsChart"></canvas>
                 </div>
-                <!-- Fallback table for document requests -->
-                <div id="documentRequestsTable" class="hidden mt-4">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($documentRequestTypes as $requestType)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $requestType->document_type ?? 'Unknown' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $requestType->count }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    @php
-                                        $total = collect($documentRequestTypes)->sum('count');
-                                        $percentage = $total > 0 ? round(($requestType->count / $total) * 100, 1) : 0;
-                                    @endphp
-                                    {{ $percentage }}%
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Additional Metrics Row -->
-    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Vaccination Records Card -->
-        <div class="bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
-            <div class="p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-teal-100 text-xs font-medium">Vaccination Records</p>
-                        <p class="text-white text-2xl font-bold">{{ $totalVaccinationRecords }}</p>
-                    </div>
-                    <div class="bg-teal-400 bg-opacity-30 rounded-full p-2">
-                        <i class="fas fa-syringe text-white text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <a href="{{ route('admin.vaccination-records.index') }}" class="text-teal-100 hover:text-white text-xs font-medium flex items-center">
-                        View <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upcoming Health Activities Card -->
-        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
-            <div class="p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-amber-100 text-xs font-medium">Upcoming Activities</p>
-                        <p class="text-white text-2xl font-bold">{{ $upcomingHealthActivities }}</p>
-                    </div>
-                    <div class="bg-amber-400 bg-opacity-30 rounded-full p-2">
-                        <i class="fas fa-calendar-alt text-white text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <a href="{{ route('admin.health-center-activities.index') }}" class="text-amber-100 hover:text-white text-xs font-medium flex items-center">
-                        View <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -316,13 +221,6 @@
                         <p class="text-sm text-gray-600">Classification & prediction</p>
                     </div>
                 </a>
-                <a href="{{ route('admin.vaccination-records.create') }}" class="flex items-center p-4 bg-teal-50 rounded-lg hover:bg-teal-100 transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-syringe text-teal-600 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-medium text-gray-900">Add Vaccination Record</p>
-                        <p class="text-sm text-gray-600">Record new vaccination</p>
-                    </div>
-                </a>
             </div>
         </div>
     </div>
@@ -376,11 +274,7 @@
         max-height: 80px;
     }
     
-    /* Ensure tables don't extend infinitely */
-    #residentDemographicsTable, #documentRequestsTable {
-        max-height: 200px;
-        overflow-y: auto;
-    }
+
 </style>
 
 <!-- Chart initialization scripts -->
@@ -407,6 +301,32 @@
             // Validate data
             if (!residentDemographicsData || !Array.isArray(residentDemographicsData) || residentDemographicsData.length === 0) {
                 console.warn('No resident demographics data available');
+                // Create empty chart with placeholder data
+                const residentCtx = document.getElementById('residentDemographicsChart').getContext('2d');
+                window.residentChartInstance = new Chart(residentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['No Data Available'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#E5E7EB'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
                 return;
             }
             
@@ -416,6 +336,32 @@
             // Validate that we have data to display
             if (residentLabels.length === 0 || residentCounts.length === 0) {
                 console.warn('No resident demographics data to display');
+                // Create empty chart with placeholder data
+                const residentCtx = document.getElementById('residentDemographicsChart').getContext('2d');
+                window.residentChartInstance = new Chart(residentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['No Data Available'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#E5E7EB'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
                 return;
             }
 
@@ -464,6 +410,32 @@
             // Validate data
             if (!documentRequestsData || !Array.isArray(documentRequestsData) || documentRequestsData.length === 0) {
                 console.warn('No document requests data available');
+                // Create empty chart with placeholder data
+                const documentCtx = document.getElementById('documentRequestsChart').getContext('2d');
+                window.documentChartInstance = new Chart(documentCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['No Data Available'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#E5E7EB'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
                 return;
             }
             
@@ -473,6 +445,32 @@
             // Validate that we have data to display
             if (documentLabels.length === 0 || documentCounts.length === 0) {
                 console.warn('No document requests data to display');
+                // Create empty chart with placeholder data
+                const documentCtx = document.getElementById('documentRequestsChart').getContext('2d');
+                window.documentChartInstance = new Chart(documentCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['No Data Available'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#E5E7EB'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
                 return;
             }
 
@@ -521,6 +519,47 @@
             // Validate data
             if (!residentTrendsData || !Array.isArray(residentTrendsData) || residentTrendsData.length === 0) {
                 console.warn('No resident trends data available');
+                // Create empty chart with placeholder data
+                const trendsCtx = document.getElementById('residentTrendsChart').getContext('2d');
+                window.trendsChartInstance = new Chart(trendsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['No Data'],
+                        datasets: [{
+                            label: 'New Residents',
+                            data: [0],
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10B981',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
                 return;
             }
             
@@ -531,6 +570,47 @@
             // Validate that we have data to display
             if (trendLabels.length === 0 || trendCounts.length === 0) {
                 console.warn('No resident trends data to display');
+                // Create empty chart with placeholder data
+                const trendsCtx = document.getElementById('residentTrendsChart').getContext('2d');
+                window.trendsChartInstance = new Chart(trendsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['No Data'],
+                        datasets: [{
+                            label: 'New Residents',
+                            data: [0],
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10B981',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
                 return;
             }
 
@@ -597,32 +677,6 @@
         }, 100);
     });
 
-    // Fallback to tables if charts fail to initialize
-    function showChartFallback() {
-        // Show fallback tables if charts fail
-        const residentChartContainer = document.querySelector('#residentDemographicsChart').closest('.chart-container');
-        const documentChartContainer = document.querySelector('#documentRequestsChart').closest('.chart-container');
-        const residentTable = document.getElementById('residentDemographicsTable');
-        const documentTable = document.getElementById('documentRequestsTable');
 
-        if (residentChartContainer && residentTable) {
-            residentChartContainer.classList.add('hidden');
-            residentTable.classList.remove('hidden');
-        }
-
-        if (documentChartContainer && documentTable) {
-            documentChartContainer.classList.add('hidden');
-            documentTable.classList.remove('hidden');
-        }
-    }
-
-    // Add a timeout to show fallback if charts don't initialize in time
-    setTimeout(function() {
-        // Check if charts are initialized
-        if (!window.residentChartInstance || !window.documentChartInstance) {
-            console.warn('Charts failed to initialize, showing fallback tables');
-            showChartFallback();
-        }
-    }, 5000); // 5 second timeout
 </script>
 @endsection

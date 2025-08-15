@@ -132,6 +132,9 @@ Route::prefix('admin')->group(function () {
 
     Route::middleware(['admin.role:admin,secretary,captain,councilor'])->group(function () {
 
+        // Resident search (needed by blotter forms) - allow all admin roles access
+        Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
+
         // Blotter Reports route
         Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
         Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');
@@ -179,7 +182,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/health-reports/export', [HealthReportController::class, 'exportReport'])->name('admin.health-reports.export');
 
         // Resident search (needed by vaccination forms) - allow nurse access
-        Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
+        // Note: This route is now in the admin,secretary,captain,councilor group for blotter forms
 
         // Vaccination Records Routes
         Route::get('/vaccination-records', [VaccinationRecordController::class, 'index'])->name('admin.vaccination-records.index');

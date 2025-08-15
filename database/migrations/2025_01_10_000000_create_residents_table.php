@@ -20,8 +20,8 @@ return new class extends Migration
             $table->integer('family_size');
             $table->enum('education_level', ['No Education', 'Elementary', 'High School', 'Vocational', 'College', 'Post Graduate']);
             $table->enum('income_level', ['Low', 'Lower Middle', 'Middle', 'Upper Middle', 'High']);
-            $table->enum('employment_status', ['Unemployed', 'Part-time', 'Self-employed', 'Full-time']);
-            $table->enum('health_status', ['Critical', 'Poor', 'Fair', 'Good', 'Excellent']);
+            $table->enum('employment_status', ['Unemployed', 'Part-time', 'Self-employed', 'Full-time'])->default('Unemployed');
+            $table->enum('health_status', ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'])->default('Fair');
             $table->boolean('active')->default(true);
             $table->rememberToken();
             $table->timestamps();

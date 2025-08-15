@@ -67,7 +67,6 @@ class DocumentRequestController
             '{{document_type}}' => $documentRequest->document_type,
             '{{purpose}}' => $documentRequest->description,
             '{{admin_name}}' => $adminUser ? $adminUser->name : '',
-            // Add more as needed
         ];
         return strtr($html, $replacements);
     }
@@ -128,13 +127,10 @@ class DocumentRequestController
             // Generate the PDF
             $pdf = Pdf::loadHTML($html);
 
-            // Mark as approved
             $documentRequest->status = 'approved';
-            // Flag for resident notification: set to unread so it appears as resident notification
             $documentRequest->resident_is_read = false;
             $documentRequest->save();
 
-            // Send email to resident informing that the document is ready for pickup
             if ($user && $user->email) {
                 try {
                     Mail::to($user->email)->send(new DocumentReadyForPickupMail($user->name, $documentRequest->document_type));
@@ -143,7 +139,6 @@ class DocumentRequestController
                 }
             }
 
-            // Download the PDF
             $filename = $this->generateFilename($documentRequest);
             return $pdf->download($filename);
 
@@ -200,19 +195,15 @@ class DocumentRequestController
                 'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
             ];
 
-            // Generate the HTML using the template's generateHtml method
             $html = $template->generateHtml($values);
 
-            // Generate the PDF
             $pdf = Pdf::loadHTML($html);
 
-            // If status is 'approved', mark as 'completed'
             if ($documentRequest->status === 'approved') {
                 $documentRequest->status = 'completed';
                 $documentRequest->save();
             }
 
-            // Download the PDF
             $filename = $this->generateFilename($documentRequest);
             return $pdf->download($filename);
 

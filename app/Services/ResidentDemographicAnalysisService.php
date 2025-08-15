@@ -414,11 +414,17 @@ class ResidentDemographicAnalysisService
                 'size' => count($cluster),
                 'avg_age' => round(array_sum($ages) / count($ages), 1),
                 'avg_family_size' => round(array_sum($familySizes) / count($familySizes), 1),
+                'most_common_age' => $this->getMostCommon($ages),
+                'most_common_family_size' => $this->getMostCommon($familySizes),
                 'most_common_education' => $this->getMostCommon($educations),
                 'most_common_income' => $this->getMostCommon($incomes),
                 'most_common_employment' => $this->getMostCommon($employments),
                 'most_common_health' => $this->getMostCommon($healths),
-                'most_common_purok' => $this->getMostCommon(array_values(array_filter($puroks)))
+                'most_common_purok' => $this->getMostCommon(array_values(array_filter($puroks))),
+                'income_distribution' => array_count_values($incomes),
+                'employment_distribution' => array_count_values($employments),
+                'health_distribution' => array_count_values($healths),
+                'education_distribution' => array_count_values($educations)
             ];
         }
 
@@ -435,29 +441,177 @@ class ResidentDemographicAnalysisService
 
 		// Build samples once
 		[$samples] = $this->buildSamples($residents);
-		$maxK = max(2, min($maxK, $count - 1));
-		$inertias = [];
-		for ($k = 2; $k <= $maxK; $k++) {
-			$kmeans = new KMeans($k, KMeans::INIT_KMEANS_PLUS_PLUS);
-			$clusters = $kmeans->cluster($samples);
-			$centroids = $this->calculateSimpleCentroids($this->wrapClustersForCentroid($clusters));
-			$inertias[$k] = $this->computeInertia($clusters, $centroids);
-		}
+		return $this->findOptimalKEnhanced($samples);
+    }
 
-		// Elbow heuristic: pick K with largest relative drop until diminishing returns
-		$bestK = array_key_first($inertias) ?? 3;
-		$prev = null;
-		foreach ($inertias as $k => $inertia) {
-			if ($prev === null) { $prev = $inertia; $bestK = $k; continue; }
-			$drop = ($prev - $inertia) / max($prev, 1e-9);
-			if ($drop < 0.15) { // less than 15% improvement -> elbow reached
-				break;
-			}
-			$bestK = $k;
-			$prev = $inertia;
-		}
+    /**
+     * Enhanced K selection using multiple heuristics
+     */
+    private function findOptimalKEnhanced(array $samples): int
+    {
+        $maxK = min(10, count($samples) - 1);
+        if ($maxK < 2) return 2;
 
-		return $bestK;
+        $elbowK = $this->findElbowK($samples, $maxK);
+        $silhouetteK = $this->findSilhouetteK($samples, $maxK);
+        $gapK = $this->findGapK($samples, $maxK);
+
+        // Combine results with weights
+        $kScores = [];
+        for ($k = 2; $k <= $maxK; $k++) {
+            $score = 0;
+            if ($k === $elbowK) $score += 0.4;
+            if ($k === $silhouetteK) $score += 0.4;
+            if ($k === $gapK) $score += 0.2;
+            $kScores[$k] = $score;
+        }
+
+        return array_search(max($kScores), $kScores) ?: 3;
+    }
+
+    private function findElbowK(array $samples, int $maxK): int
+    {
+        $inertias = [];
+        for ($k = 2; $k <= $maxK; $k++) {
+            $kmeans = new KMeans($k, 100, new Euclidean(), KMeans::INIT_KMEANS_PLUS_PLUS);
+            $clusters = $kmeans->cluster($samples);
+            $centroids = $this->calculateSimpleCentroids($this->wrapClustersForCentroid($clusters));
+            $inertias[$k] = $this->computeInertia($clusters, $centroids);
+        }
+
+        $bestK = 2;
+        $maxCurvature = 0;
+        for ($k = 3; $k <= $maxK - 1; $k++) {
+            $curvature = abs($inertias[$k-1] - 2*$inertias[$k] + $inertias[$k+1]);
+            if ($curvature > $maxCurvature) {
+                $maxCurvature = $curvature;
+                $bestK = $k;
+            }
+        }
+        return $bestK;
+    }
+
+    private function findSilhouetteK(array $samples, int $maxK): int
+    {
+        $bestK = 2;
+        $bestScore = -1;
+
+        for ($k = 2; $k <= $maxK; $k++) {
+            $kmeans = new KMeans($k, 100, new Euclidean(), KMeans::INIT_KMEANS_PLUS_PLUS);
+            $clusters = $kmeans->cluster($samples);
+            $centroids = $this->calculateSimpleCentroids($this->wrapClustersForCentroid($clusters));
+            $score = $this->computeSilhouetteScore($samples, $clusters, $centroids);
+            
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestK = $k;
+            }
+        }
+        return $bestK;
+    }
+
+    private function computeSilhouetteScore(array $samples, array $clusters, array $centroids): float
+    {
+        $totalScore = 0;
+        $totalPoints = 0;
+        $distance = new Euclidean();
+
+        foreach ($clusters as $clusterId => $clusterSamples) {
+            foreach ($clusterSamples as $sample) {
+                $a = 0;
+                $clusterSize = count($clusterSamples);
+                if ($clusterSize > 1) {
+                    foreach ($clusterSamples as $otherSample) {
+                        if ($sample !== $otherSample) {
+                            $a += $distance->distance($sample, $otherSample);
+                        }
+                    }
+                    $a /= ($clusterSize - 1);
+                }
+
+                $b = PHP_FLOAT_MAX;
+                foreach ($clusters as $otherClusterId => $otherClusterSamples) {
+                    if ($otherClusterId !== $clusterId) {
+                        $avgDistance = 0;
+                        foreach ($otherClusterSamples as $otherSample) {
+                            $avgDistance += $distance->distance($sample, $otherSample);
+                        }
+                        $avgDistance /= count($otherClusterSamples);
+                        $b = min($b, $avgDistance);
+                    }
+                }
+
+                if ($a < $b) {
+                    $totalScore += 1 - ($a / $b);
+                } elseif ($a > $b) {
+                    $totalScore += ($b / $a) - 1;
+                }
+                $totalPoints++;
+            }
+        }
+
+        return $totalPoints > 0 ? $totalScore / $totalPoints : 0;
+    }
+
+    private function findGapK(array $samples, int $maxK): int
+    {
+        $originalInertias = [];
+        $referenceInertias = [];
+
+        for ($k = 2; $k <= $maxK; $k++) {
+            $kmeans = new KMeans($k, 100, new Euclidean(), KMeans::INIT_KMEANS_PLUS_PLUS);
+            $clusters = $kmeans->cluster($samples);
+            $centroids = $this->calculateSimpleCentroids($this->wrapClustersForCentroid($clusters));
+            $originalInertias[$k] = log($this->computeInertia($clusters, $centroids));
+
+            $referenceInertia = 0;
+            $numReferences = 5;
+            for ($ref = 0; $ref < $numReferences; $ref++) {
+                $referenceSamples = $this->generateReferenceData($samples);
+                $refKmeans = new KMeans($k, 100, new Euclidean(), KMeans::INIT_KMEANS_PLUS_PLUS);
+                $refClusters = $refKmeans->cluster($referenceSamples);
+                $refCentroids = $this->calculateSimpleCentroids($this->wrapClustersForCentroid($refClusters));
+                $referenceInertia += log($this->computeInertia($refClusters, $refCentroids));
+            }
+            $referenceInertias[$k] = $referenceInertia / $numReferences;
+        }
+
+        $bestK = 2;
+        $maxGap = 0;
+        for ($k = 2; $k <= $maxK; $k++) {
+            $gap = $referenceInertias[$k] - $originalInertias[$k];
+            if ($gap > $maxGap) {
+                $maxGap = $gap;
+                $bestK = $k;
+            }
+        }
+        return $bestK;
+    }
+
+    private function generateReferenceData(array $samples): array
+    {
+        $referenceSamples = [];
+        $numFeatures = count($samples[0]);
+        
+        $mins = array_fill(0, $numFeatures, PHP_FLOAT_MAX);
+        $maxs = array_fill(0, $numFeatures, PHP_FLOAT_MIN);
+        
+        foreach ($samples as $sample) {
+            for ($i = 0; $i < $numFeatures; $i++) {
+                $mins[$i] = min($mins[$i], $sample[$i]);
+                $maxs[$i] = max($maxs[$i], $sample[$i]);
+            }
+        }
+
+        for ($i = 0; $i < count($samples); $i++) {
+            $referenceSample = [];
+            for ($j = 0; $j < $numFeatures; $j++) {
+                $referenceSample[] = $mins[$j] + (mt_rand() / mt_getrandmax()) * ($maxs[$j] - $mins[$j]);
+            }
+            $referenceSamples[] = $referenceSample;
+        }
+
+        return $referenceSamples;
     }
 
 	private function wrapClustersForCentroid(array $rawClusters): array
@@ -573,7 +727,6 @@ class ResidentDemographicAnalysisService
     private function normalizePurokToken(string $token): string
     {
         $t = strtolower(trim($token));
-        // Map common words/roman numerals to digits (1-20)
         $map = [
             'one'=>1,'two'=>2,'three'=>3,'four'=>4,'five'=>5,'six'=>6,'seven'=>7,'eight'=>8,'nine'=>9,'ten'=>10,
             'eleven'=>11,'twelve'=>12,'thirteen'=>13,'fourteen'=>14,'fifteen'=>15,'sixteen'=>16,'seventeen'=>17,'eighteen'=>18,'nineteen'=>19,'twenty'=>20,
@@ -581,7 +734,6 @@ class ResidentDemographicAnalysisService
             'xi'=>11,'xii'=>12,'xiii'=>13,'xiv'=>14,'xv'=>15,'xvi'=>16,'xvii'=>17,'xviii'=>18,'xix'=>19,'xx'=>20
         ];
         if (isset($map[$t])) return (string)$map[$t];
-        // Strip non-digits if mostly numeric
         if (preg_match('/^\d+$/', $t)) return $t;
         if (preg_match('/(\d{1,3})/', $t, $m)) return $m[1];
         return $t;

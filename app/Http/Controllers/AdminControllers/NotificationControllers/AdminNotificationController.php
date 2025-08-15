@@ -130,7 +130,7 @@ class AdminNotificationController
         $notifications = $notifications->sortByDesc('created_at');
 
         // Create a custom paginator for the combined results
-        $perPage = 20; // Show 20 notifications per page
+        $perPage = 20;
         $currentPage = $request->get('page', 1);
         $offset = ($currentPage - 1) * $perPage;
         $paginatedNotifications = $notifications->slice($offset, $perPage);
