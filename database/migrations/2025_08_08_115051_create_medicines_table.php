@@ -19,8 +19,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('dosage_form')->nullable(); // tablet, capsule, syrup, etc.
             $table->string('manufacturer')->nullable();
-            $table->integer('current_stock')->default(0);
-            $table->integer('minimum_stock')->default(0);
+            $table->integer('current_stock')->default(0)->index();
+            $table->integer('minimum_stock')->default(0)->index();
             $table->date('expiry_date')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

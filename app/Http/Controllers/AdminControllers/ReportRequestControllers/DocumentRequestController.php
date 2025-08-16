@@ -74,8 +74,11 @@ class DocumentRequestController
     public function approve($id)
     {
         try {
+            $start = microtime(true);
+            Log::info('Approve: Start', ['id' => $id]);
             $documentRequest = DocumentRequest::with('resident')->findOrFail($id);
             $user = $documentRequest->resident;
+            Log::info('Approve: Fetched request and resident', ['elapsed' => microtime(true) - $start]);
             if (!$user) {
                 notify()->error('This resident record no longer exists.');
                 return redirect()->back();
@@ -95,6 +98,7 @@ class DocumentRequestController
             if (session()->has('user_role') && session('user_role') === 'barangay') {
                 $adminUser = BarangayProfile::find(session('user_id'));
             }
+            Log::info('Approve: Admin user fetched', ['elapsed' => microtime(true) - $start]);
 
             // Prefer FK to template, fallback to case-insensitive document_type match
             $template = $documentRequest->documentTemplate
@@ -104,6 +108,7 @@ class DocumentRequestController
                 notify()->error('No template found for this document type.');
                 return redirect()->back();
             }
+            Log::info('Approve: Template fetched', ['elapsed' => microtime(true) - $start]);
 
             // Prepare values for placeholders
             $values = [
@@ -123,23 +128,29 @@ class DocumentRequestController
 
             // Generate the HTML using the template's generateHtml method
             $html = $template->generateHtml($values);
+            Log::info('Approve: HTML generated', ['elapsed' => microtime(true) - $start]);
 
             // Generate the PDF
             $pdf = Pdf::loadHTML($html);
+            Log::info('Approve: PDF generated', ['elapsed' => microtime(true) - $start]);
 
             $documentRequest->status = 'approved';
             $documentRequest->resident_is_read = false;
             $documentRequest->save();
+            Log::info('Approve: Document request saved', ['elapsed' => microtime(true) - $start]);
 
             if ($user && $user->email) {
                 try {
+                    // Send email synchronously for now to ensure it works
                     Mail::to($user->email)->send(new DocumentReadyForPickupMail($user->name, $documentRequest->document_type));
+                    Log::info('Approve: Email sent synchronously', ['elapsed' => microtime(true) - $start]);
                 } catch (\Exception $e) {
                     Log::error('Failed sending DocumentReadyForPickupMail: ' . $e->getMessage());
                 }
             }
 
             $filename = $this->generateFilename($documentRequest);
+            Log::info('Approve: Returning PDF download', ['elapsed' => microtime(true) - $start]);
             return $pdf->download($filename);
 
         } catch (\Exception $e) {

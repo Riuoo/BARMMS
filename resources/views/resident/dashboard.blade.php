@@ -105,7 +105,7 @@
             </div>
         </div>
 
-        <!-- Community Complaint Card -->
+        <!-- Community Concern Card -->
         <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
             <div class="p-6">
                 <div class="flex items-center">
@@ -114,10 +114,10 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Community Complaint</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Community Concern</dt>
                             <dd class="flex items-baseline">
                                 <div class="text-2xl font-semibold text-gray-900">
-                                    New Complaint
+                                    New Concern
                                 </div>
                             </dd>
                         </dl>
@@ -126,8 +126,8 @@
             </div>
             <div class="bg-gray-50 px-6 py-4">
                 <div class="text-sm">
-                    <a href="{{ route('resident.request_community_complaint') }}" class="font-medium text-indigo-600 hover:text-indigo-900 transition duration-200">
-                        Report community issue <span aria-hidden="true">&rarr;</span>
+                    <a href="{{ route('resident.request_community_concern') }}" class="font-medium text-indigo-600 hover:text-indigo-900 transition duration-200">
+                        Report community concern <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>

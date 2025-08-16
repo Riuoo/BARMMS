@@ -17,6 +17,8 @@ class ResidentNotificationController
             return redirect()->route('landing');
         }
 
+        // (Reverted) No auto-mark as read here
+
         $docs = DocumentRequest::where('resident_id', $userId)
             ->orderBy('updated_at', 'desc')
             ->get();
@@ -96,31 +98,40 @@ class ResidentNotificationController
                 return response()->json(['total' => 0, 'notifications' => []]);
             }
 
-            $unreadDocs = DocumentRequest::where('resident_id', $userId)
+            // Only get the count for unread notifications
+            $total = \App\Models\DocumentRequest::where('resident_id', $userId)
+                ->where('status', 'approved')
+                ->where(function ($q) {
+                    $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
+                })
+                ->count();
+
+            // Optionally, fetch the latest 5 unread notifications for display
+            $latest = \App\Models\DocumentRequest::where('resident_id', $userId)
                 ->where('status', 'approved')
                 ->where(function ($q) {
                     $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
                 })
                 ->orderBy('updated_at', 'desc')
-                ->get();
-
-            $data = $unreadDocs->map(function ($d) {
-                return [
-                    'id' => $d->id,
-                    'type' => 'document_request',
-                    'message' => 'Your ' . $d->document_type . ' is ready for pickup.',
-                    'created_at' => Carbon::parse($d->updated_at)->toDateTimeString(),
-                    'link' => route('resident.my-requests'),
-                    'priority' => 'medium',
-                ];
-            })->values();
+                ->limit(5)
+                ->get()
+                ->map(function ($d) {
+                    return [
+                        'id' => $d->id,
+                        'type' => 'document_request',
+                        'message' => 'Your ' . $d->document_type . ' is ready for pickup.',
+                        'created_at' => \Carbon\Carbon::parse($d->updated_at)->toDateTimeString(),
+                        'link' => route('resident.my-requests'),
+                        'priority' => 'medium',
+                    ];
+                });
 
             return response()->json([
-                'total' => $data->count(),
-                'notifications' => $data,
+                'total' => $total,
+                'notifications' => $latest,
             ]);
         } catch (\Exception $e) {
-            Log::error('Resident notifications count error: ' . $e->getMessage());
+            \Log::error('Resident notifications count error: ' . $e->getMessage());
             return response()->json(['total' => 0, 'notifications' => []], 500);
         }
     }
@@ -149,11 +160,13 @@ class ResidentNotificationController
             DocumentRequest::where('resident_id', $userId)
                 ->where('status', 'approved')
                 ->update(['resident_is_read' => true]);
-            return redirect()->back()->with('success', 'All notifications marked as read.');
+            notify()->success('All notifications marked as read.');
+            return redirect()->back();
         } catch (\Exception $e) {
             Log::error('Resident markAllAsRead error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to mark all as read.');
-        }
+            notify()->error('Failed to mark all as read.');
+            return redirect()->back();
+            }
     }
 }
 

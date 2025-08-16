@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('resident_id');
-            $table->unsignedBigInteger('attending_health_worker_id');
-            $table->dateTime('consultation_datetime')->useCurrent();
+            $table->unsignedBigInteger('resident_id')->index();
+            $table->unsignedBigInteger('attending_health_worker_id')->index();
+            $table->dateTime('consultation_datetime')->useCurrent()->index();
             $table->string('consultation_type');
             $table->text('chief_complaint')->nullable();
             $table->text('symptoms')->nullable();
@@ -30,6 +30,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->date('follow_up_date')->nullable();
             $table->timestamps();
+            $table->index('created_at');
 
             $table->foreign('resident_id')->references('id')->on('residents')->onDelete('cascade');
             $table->foreign('attending_health_worker_id')->references('id')->on('barangay_profiles')->onDelete('cascade');

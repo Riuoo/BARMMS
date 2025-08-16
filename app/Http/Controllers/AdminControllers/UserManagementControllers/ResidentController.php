@@ -11,11 +11,19 @@ class ResidentController
 {
     public function residentProfile(Request $request)
     {
-        // Statistics from full dataset
-        $totalResidents = Residents::count();
-        $activeResidents = Residents::where('active', true)->count();
-        $recentResidents = Residents::where('created_at', '>=', now()->startOfMonth())->count();
-        $withAddress = Residents::whereNotNull('address')->count();
+        // Statistics from full dataset (cache for 5 minutes to reduce DB load)
+        $totalResidents = \Cache::remember('total_residents', 300, function() {
+            return Residents::count();
+        });
+        $activeResidents = \Cache::remember('active_residents', 300, function() {
+            return Residents::where('active', true)->count();
+        });
+        $recentResidents = \Cache::remember('recent_residents', 300, function() {
+            return Residents::where('created_at', '>=', now()->startOfMonth())->count();
+        });
+        $withAddress = \Cache::remember('with_address_residents', 300, function() {
+            return Residents::whereNotNull('address')->count();
+        });
 
         // For display (filtered)
         $query = Residents::query();
@@ -40,7 +48,12 @@ class ResidentController
         if ($request->filled('recent') && $request->get('recent') === 'recent') {
             $query->where('created_at', '>=', now()->subDays(30));
         }
-        $residents = $query->orderByDesc('active')->orderBy('name')->paginate(10);
+        // Only select needed columns for the residents list and demographics modal
+        $residents = $query->select([
+            'id', 'name', 'email', 'address', 'active', 'created_at',
+            'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status'
+        ])
+        ->orderByDesc('active')->orderBy('name')->paginate(10);
         return view('admin.residents.residents', compact('residents', 'totalResidents', 'activeResidents', 'recentResidents', 'withAddress'));
     }
 

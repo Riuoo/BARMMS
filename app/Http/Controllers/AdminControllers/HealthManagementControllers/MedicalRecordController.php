@@ -23,12 +23,21 @@ class MedicalRecordController
               ->orWhere('diagnosis', 'like', "%{$search}%");
         }
 
-        // Calculate Statistics
+        // Calculate Statistics (cache for 5 min)
         $stats = [
-            'total' => MedicalRecord::count(),
-            'last_month' => MedicalRecord::where('consultation_datetime', '>=', now()->subDays(30))->count()
+            'total' => \Cache::remember('total_medical_records', 300, function() {
+                return MedicalRecord::count();
+            }),
+            'last_month' => \Cache::remember('last_month_medical_records', 300, function() {
+                return MedicalRecord::where('consultation_datetime', '>=', now()->subDays(30))->count();
+            })
         ];
-        $medicalRecords = $query->orderBy('created_at', 'desc')->paginate(10);
+        // Only select needed columns for paginated medical records and eager load relationships
+        $medicalRecords = $query->select([
+            'id', 'resident_id', 'attending_health_worker_id', 'created_at', 'consultation_datetime',
+            'consultation_type', 'chief_complaint', 'diagnosis', 'follow_up_date'
+        ])->with(['resident:id,name,email', 'attendingHealthWorker:id,name'])
+        ->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.medical-records.index', compact('medicalRecords', 'stats'));
     }
 

@@ -10,11 +10,11 @@ return new class extends Migration
     {
         Schema::create('residents', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->string('name')->index();
+            $table->string('email')->unique()->index();
             $table->string('password');
             $table->string('role');
-            $table->string('address');
+            $table->string('address')->index();
             // Demographic fields
             $table->integer('age');
             $table->integer('family_size');
@@ -22,9 +22,10 @@ return new class extends Migration
             $table->enum('income_level', ['Low', 'Lower Middle', 'Middle', 'Upper Middle', 'High']);
             $table->enum('employment_status', ['Unemployed', 'Part-time', 'Self-employed', 'Full-time'])->default('Unemployed');
             $table->enum('health_status', ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'])->default('Fair');
-            $table->boolean('active')->default(true);
+            $table->boolean('active')->default(true)->index();
             $table->rememberToken();
             $table->timestamps();
+            $table->index('created_at');
         });
     }
 

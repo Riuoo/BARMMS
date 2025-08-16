@@ -90,7 +90,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Community Concerns</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $communityComplaints->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $communityConcerns->count() }}</p>
                 </div>
             </div>
         </div>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $communityComplaints->where('status', 'pending')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'pending')->count() + $documentRequests->where('status', 'pending')->count() + $communityConcerns->where('status', 'pending')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $communityComplaints->where('status', 'resolved')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $blotterRequests->where('status', 'completed')->count() + $documentRequests->where('status', 'completed')->count() + $communityConcerns->where('status', 'resolved')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -157,7 +157,7 @@
     </form>
 
     <!-- Requests List -->
-    @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $communityComplaints->isEmpty())
+    @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $communityConcerns->isEmpty())
         <div class="text-center py-12">
             <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
@@ -169,9 +169,9 @@
                     <i class="fas fa-plus mr-2"></i>
                     Submit Blotter Report
                 </a>
-                <a href="{{ route('resident.request_community_complaint') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-200">
+                <a href="{{ route('resident.request_community_concern') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
-                    Community Complaint
+                    Community Concern
                 </a>
                 <a href="{{ route('resident.request_document_request') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
@@ -217,23 +217,14 @@
                         <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="blotter" data-status="{{ $request->status }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-file-alt text-red-600"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
+                                    <div>
                                         <div class="text-sm font-medium text-gray-900">Blotter Report</div>
-                                        <div class="text-sm text-gray-500">vs {{ $request->recipient_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $request->recipient_name }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ Str::limit($request->description, 50) }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-align-left mr-1"></i>
-                                    Incident Details
-                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 @if($request->status === 'pending')
@@ -256,7 +247,6 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
                                 <div class="text-sm text-gray-500">
-                                    <i class="fas fa-calendar mr-1"></i>
                                     {{ $request->created_at->diffForHumans() }}
                                 </div>
                             </td>
@@ -267,12 +257,7 @@
                         <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="document" data-status="{{ $request->status }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-file-signature text-blue-600"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
+                                    <div>
                                         <div class="text-sm font-medium text-gray-900">{{ $request->document_type }}</div>
                                         <div class="text-sm text-gray-500">Document Request</div>
                                     </div>
@@ -280,10 +265,6 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ Str::limit($request->description, 50) }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-align-left mr-1"></i>
-                                    Description
-                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 @if($request->status === 'pending')
@@ -306,23 +287,17 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
                                 <div class="text-sm text-gray-500">
-                                    <i class="fas fa-calendar mr-1"></i>
                                     {{ $request->created_at->diffForHumans() }}
                                 </div>
                             </td>
                         </tr>
                         @endforeach
 
-                        @foreach($communityComplaints as $request)
+                        @foreach($communityConcerns as $request)
                         <tr class="request-item hover:bg-gray-50 transition duration-150" data-type="complaint" data-status="{{ $request->status }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-clipboard-list text-indigo-600"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
+                                    <div>
                                         <div class="text-sm font-medium text-gray-900">{{ $request->title }}</div>
                                         <div class="text-sm text-gray-500">{{ $request->category }}</div>
                                     </div>
@@ -330,10 +305,6 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ Str::limit($request->description, 50) }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-map-marker-alt mr-1"></i>
-                                    {{ $request->location ?: 'Location not specified' }}
-                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 @if($request->status === 'pending')
@@ -365,10 +336,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    {{ $request->created_at->diffForHumans() }}
-                                </div>
+                                <div class="text-sm text-gray-500">{{ $request->created_at->diffForHumans() }}</div>
                             </td>
                         </tr>
                         @endforeach
@@ -388,7 +356,6 @@
                         </div>
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-gray-900">Blotter Report</h3>
-                            <p class="text-sm text-gray-500">vs {{ $request->recipient_name }}</p>
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
                                 @if($request->status === 'pending') bg-yellow-100 text-yellow-800
                                 @elseif($request->status === 'approved') bg-blue-100 text-blue-800

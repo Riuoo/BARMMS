@@ -4,7 +4,7 @@ namespace App\Http\Controllers\ResidentControllers;
 
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
-use App\Models\CommunityComplaint;
+use App\Models\CommunityConcern;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -14,10 +14,18 @@ class ResidentRequestListController
     {
         $userId = Session::get('user_id');
 
+        // Auto-mark all unread approved document notifications as read when visiting this page
+        \App\Models\DocumentRequest::where('resident_id', $userId)
+            ->where('status', 'approved')
+            ->where(function ($q) {
+                $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
+            })
+            ->update(['resident_is_read' => true]);
+
         // Get all requests without pagination first
         $documentQuery = DocumentRequest::where('resident_id', $userId);
         $blotterQuery = BlotterRequest::where('resident_id', $userId);
-        $complaintQuery = CommunityComplaint::where('resident_id', $userId);
+        $concernQuery = CommunityConcern::where('resident_id', $userId);
 
         // Apply search filter if provided
         if ($request->filled('search')) {
@@ -34,7 +42,7 @@ class ResidentRequestListController
                   ->orWhere('description', 'like', "%{$search}%");
             });
             
-            $complaintQuery->where(function ($q) use ($search) {
+            $concernQuery->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('category', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
@@ -47,7 +55,7 @@ class ResidentRequestListController
             $status = $request->get('status');
             $documentQuery->where('status', $status);
             $blotterQuery->where('status', $status);
-            $complaintQuery->where('status', $status);
+            $concernQuery->where('status', $status);
         }
 
         // Get all results
@@ -57,7 +65,7 @@ class ResidentRequestListController
             ->get();
 
         $allBlotterRequests = $blotterQuery->orderByDesc('created_at')->get();
-        $allCommunityComplaints = $complaintQuery->orderByDesc('created_at')->get();
+        $allCommunityConcerns = $concernQuery->orderByDesc('created_at')->get();
 
         // Combine all requests into a single collection
         $allRequests = collect();
@@ -84,14 +92,14 @@ class ResidentRequestListController
             ]);
         }
 
-        // Add community complaints
-        foreach ($allCommunityComplaints as $complaint) {
+        // Add community concerns
+        foreach ($allCommunityConcerns as $concern) {
             $allRequests->push((object) [
-                'id' => $complaint->id,
-                'type' => 'complaint',
-                'request' => $complaint,
-                'created_at' => $complaint->created_at,
-                'status' => $complaint->status,
+                'id' => $concern->id,
+                'type' => 'concern',
+                'request' => $concern,
+                'created_at' => $concern->created_at,
+                'status' => $concern->status,
             ]);
         }
 
@@ -119,7 +127,7 @@ class ResidentRequestListController
         // Separate the paginated requests back into their types for the view
         $documentRequests = collect();
         $blotterRequests = collect();
-        $communityComplaints = collect();
+        $communityConcerns = collect();
 
         foreach ($paginatedRequests as $item) {
             switch ($item->type) {
@@ -129,8 +137,8 @@ class ResidentRequestListController
                 case 'blotter':
                     $blotterRequests->push($item->request);
                     break;
-                case 'complaint':
-                    $communityComplaints->push($item->request);
+                case 'concern':
+                    $communityConcerns->push($item->request);
                     break;
             }
         }
@@ -153,7 +161,7 @@ class ResidentRequestListController
         return view('resident.my_requests', compact(
             'documentRequests',
             'blotterRequests',
-            'communityComplaints',
+            'communityConcerns',
             'residentNotifications',
             'paginatedRequests'
         ));

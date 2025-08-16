@@ -5,7 +5,7 @@ namespace App\Http\Controllers\AdminControllers\NotificationControllers;
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\AccountRequest;
-use App\Models\CommunityComplaint;
+use App\Models\CommunityConcern;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +28,7 @@ class AdminNotificationController
         $blotterQuery = BlotterRequest::query();
         $documentQuery = DocumentRequest::query();
         $accountQuery = AccountRequest::query();
-        $complaintQuery = CommunityComplaint::query();
+        $complaintQuery = CommunityConcern::query();
 
         // Apply search filter if provided
         if ($request->filled('search')) {
@@ -211,13 +211,13 @@ class AdminNotificationController
                 });
                 
                 // Process Community Complaints
-                CommunityComplaint::where('is_read', false)->get()->each(function ($complaint) use (&$notificationsData) {
+                CommunityConcern::where('is_read', false)->get()->each(function ($concern) use (&$notificationsData) {
                     try {
                         $notificationsData[] = [
-                            'id' => $complaint->id,
+                            'id' => $concern->id,
                             'type' => 'community_complaint',
-                            'message' => 'Community concern from ' . ($complaint->resident->name ?? 'Unknown Resident'),
-                            'created_at' => Carbon::parse($complaint->created_at)->toDateTimeString(),
+                            'message' => 'Community concern from ' . ($concern->resident->name ?? 'Unknown Resident'),
+                            'created_at' => Carbon::parse($concern->created_at)->toDateTimeString(),
                             'link' => route('admin.community-concerns'),
                             'priority' => 'medium'
                         ];
@@ -246,19 +246,19 @@ class AdminNotificationController
                     'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
                     'document_requests' => DocumentRequest::where('is_read', false)->count(),
                     'account_requests' => AccountRequest::where('is_read', false)->count(),
-                    'community_complaints' => CommunityComplaint::where('is_read', false)->count(),
+                    'community_complaints' => CommunityConcern::where('is_read', false)->count(),
                 ];
                 $readCounts = [
                     'blotter_reports' => BlotterRequest::where('is_read', true)->count(),
                     'document_requests' => DocumentRequest::where('is_read', true)->count(),
                     'account_requests' => AccountRequest::where('is_read', true)->count(),
-                    'community_complaints' => CommunityComplaint::where('is_read', true)->count(),
+                    'community_complaints' => CommunityConcern::where('is_read', true)->count(),
                 ];
                 $totalCounts = [
                     'blotter_reports' => BlotterRequest::count(),
                     'document_requests' => DocumentRequest::count(),
                     'account_requests' => AccountRequest::count(),
-                    'community_complaints' => CommunityComplaint::count(),
+                    'community_complaints' => CommunityConcern::count(),
                 ];
             } else {
                 // For nurses, only show health-related counts (all zeros for barangay-related)
@@ -345,7 +345,7 @@ class AdminNotificationController
             BlotterRequest::where('is_read', false)->update(['is_read' => true]);
             DocumentRequest::where('is_read', false)->update(['is_read' => true]);
             AccountRequest::where('is_read', false)->update(['is_read' => true]);
-            CommunityComplaint::where('is_read', false)->update(['is_read' => true]);
+            CommunityConcern::where('is_read', false)->update(['is_read' => true]);
             DB::commit();
             notify()->success('All notifications marked as read.');
             return redirect()->back();
@@ -379,7 +379,7 @@ class AdminNotificationController
                     $updated = AccountRequest::where('id', $id)->update(['is_read' => true]) > 0;
                     break;
                 case 'community_complaint':
-                    $updated = CommunityComplaint::where('id', $id)->update(['is_read' => true]) > 0;
+                    $updated = CommunityConcern::where('id', $id)->update(['is_read' => true]) > 0;
                     break;
                 default:
                     return response()->json(['message' => 'Invalid notification type.'], 400);
@@ -411,7 +411,7 @@ class AdminNotificationController
             BlotterRequest::where('is_read', false)->update(['is_read' => true]);
             DocumentRequest::where('is_read', false)->update(['is_read' => true]);
             AccountRequest::where('is_read', false)->update(['is_read' => true]);
-            CommunityComplaint::where('is_read', false)->update(['is_read' => true]);
+            CommunityConcern::where('is_read', false)->update(['is_read' => true]);
             DB::commit();
             
             return response()->json([
@@ -453,7 +453,7 @@ class AdminNotificationController
                     $updated = AccountRequest::where('is_read', false)->update(['is_read' => true]) > 0;
                     break;
                 case 'community_complaint':
-                    $updated = CommunityComplaint::where('is_read', false)->update(['is_read' => true]) > 0;
+                    $updated = CommunityConcern::where('is_read', false)->update(['is_read' => true]) > 0;
                     break;
                 default:
                     return response()->json(['message' => 'Invalid notification type.'], 400);

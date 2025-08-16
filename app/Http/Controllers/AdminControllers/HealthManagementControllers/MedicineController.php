@@ -36,30 +36,40 @@ class MedicineController
             }
         }
 
-        $medicines = $query->orderBy('name')->paginate(10)->withQueryString();
+        // Only select needed columns for paginated medicines
+        $medicines = $query->select([
+            'id', 'name', 'generic_name', 'category', 'current_stock', 'minimum_stock', 'expiry_date'
+        ])->orderBy('name')->paginate(10)->withQueryString();
 
+        // Use caching for stats (5 min)
         $stats = [
-            'total_medicines' => Medicine::count(),
-            'low_stock' => Medicine::whereColumn('current_stock', '<=', 'minimum_stock')->count(),
-            'expiring_soon' => Medicine::whereNotNull('expiry_date')->where('expiry_date', '<=', now()->addDays(30))->count(),
+            'total_medicines' => \Cache::remember('total_medicines', 300, function() {
+                return Medicine::count();
+            }),
+            'low_stock' => \Cache::remember('low_stock_medicines', 300, function() {
+                return Medicine::whereColumn('current_stock', '<=', 'minimum_stock')->count();
+            }),
+            'expiring_soon' => \Cache::remember('expiring_soon_medicines', 300, function() {
+                return Medicine::whereNotNull('expiry_date')->where('expiry_date', '<=', now()->addDays(30))->count();
+            }),
         ];
 
+        // Only select needed columns for top requested/dispensed
         $topRequested = MedicineRequest::select('medicine_id')
             ->selectRaw('COUNT(*) as requests')
             ->whereBetween('request_date', [now()->subDays(30)->toDateString(), now()->toDateString()])
             ->groupBy('medicine_id')
             ->orderByDesc('requests')
-            ->with('medicine')
+            ->with(['medicine:id,name'])
             ->limit(5)
             ->get();
-
         $topDispensed = MedicineTransaction::select('medicine_id')
             ->selectRaw('SUM(quantity) as total_qty')
             ->where('transaction_type', 'OUT')
             ->whereBetween('transaction_date', [now()->subDays(30), now()])
             ->groupBy('medicine_id')
             ->orderByDesc('total_qty')
-            ->with('medicine')
+            ->with(['medicine:id,name'])
             ->limit(5)
             ->get();
 

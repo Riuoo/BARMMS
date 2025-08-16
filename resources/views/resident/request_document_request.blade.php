@@ -72,15 +72,7 @@
                             <option value="Barangay Clearance" {{ old('document_type') == 'Barangay Clearance' ? 'selected' : '' }}>Barangay Clearance</option>
                             <option value="Certificate of Residency" {{ old('document_type') == 'Certificate of Residency' ? 'selected' : '' }}>Certificate of Residency</option>
                             <option value="Certificate of Indigency" {{ old('document_type') == 'Certificate of Indigency' ? 'selected' : '' }}>Certificate of Indigency</option>
-                            <option value="Certificate of Good Moral Character" {{ old('document_type') == 'Certificate of Good Moral Character' ? 'selected' : '' }}>Certificate of Good Moral Character</option>
-                            <option value="Certificate of Live Birth" {{ old('document_type') == 'Certificate of Live Birth' ? 'selected' : '' }}>Certificate of Live Birth</option>
-                            <option value="Certificate of Death" {{ old('document_type') == 'Certificate of Death' ? 'selected' : '' }}>Certificate of Death</option>
-                            <option value="Certificate of Marriage" {{ old('document_type') == 'Certificate of Marriage' ? 'selected' : '' }}>Certificate of Marriage</option>
                             <option value="Business Permit" {{ old('document_type') == 'Business Permit' ? 'selected' : '' }}>Business Permit</option>
-                            <option value="Barangay ID" {{ old('document_type') == 'Barangay ID' ? 'selected' : '' }}>Barangay ID</option>
-                            <option value="Certificate of No Pending Case" {{ old('document_type') == 'Certificate of No Pending Case' ? 'selected' : '' }}>Certificate of No Pending Case</option>
-                            <option value="Certificate of No Derogatory Record" {{ old('document_type') == 'Certificate of No Derogatory Record' ? 'selected' : '' }}>Certificate of No Derogatory Record</option>
-                            <option value="Other" {{ old('document_type') == 'Other' ? 'selected' : '' }}>Other</option>
                         </select>
                         <p class="mt-1 text-sm text-gray-500">Choose the type of document you need</p>
                     </div>

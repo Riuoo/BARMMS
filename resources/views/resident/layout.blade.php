@@ -229,14 +229,14 @@
                         </ul>
                     </section>
 
-                    <!-- Community Complaint -->
-                    <section class="mb-6" aria-label="Complaint">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Complaint</h3>
+                    <!-- Community Concern -->
+                    <section class="mb-6" aria-label="Concern">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Concern</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('resident.request_community_complaint') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_complaint') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_complaint') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_complaint') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Community Complaint</span>
+                                <a href="{{ route('resident.request_community_concern') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_concern') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_concern') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_concern') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Concern</span>
                                 </a>
                             </li>
                         </ul>
@@ -298,14 +298,14 @@
                         </ul>
                     </section>
 
-                    <!-- Community Complaint -->
-                    <section class="mb-6" aria-label="Complaint">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Complaint</h3>
+                    <!-- Community Concern -->
+                    <section class="mb-6" aria-label="Concern">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Concern</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
-                                <a href="{{ route('resident.request_community_complaint') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_complaint') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_complaint') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_complaint') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Community Complaint</span>
+                                <a href="{{ route('resident.request_community_concern') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_concern') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_concern') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_concern') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Concern</span>
                                 </a>
                             </li>
                         </ul>
