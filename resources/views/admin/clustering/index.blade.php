@@ -17,33 +17,55 @@
                     $qs = request()->query();
                     $isHier = !empty($useHierarchical);
                     $isAutoK = !empty($useOptimalK);
-                    $toggleHierUrl = $isHier
-                        ? $baseUrl . '?' . http_build_query(array_merge($qs, ['hierarchical' => null]))
-                        : $baseUrl . '?' . http_build_query(array_merge($qs, ['hierarchical' => 1]));
-                    $toggleAutoKUrl = $isAutoK
-                        ? $baseUrl . '?' . http_build_query(array_merge($qs, ['use_optimal_k' => null]))
-                        : $baseUrl . '?' . http_build_query(array_merge($qs, ['use_optimal_k' => 1]));
+                    $kValue = $k ?? 3;
+                    $urlWith = function($arr) use ($baseUrl, $qs) {
+                        return $baseUrl . '?' . http_build_query(array_merge($qs, $arr));
+                    };
                 @endphp
-                <a href="{{ $toggleHierUrl }}" class="inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium {{ $isHier ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300' }} hover:opacity-90 {{ $isAutoK ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}" title="{{ $isAutoK ? 'Disable Auto-K to enable Hierarchical mode' : ($isHier ? 'Hierarchical clustering per purok is ON' : 'Enable hierarchical clustering per purok') }}">
+                <!-- Hierarchical toggle -->
+                <a href="{{ $urlWith(['hierarchical' => $isHier ? null : 1, 'use_optimal_k' => null]) }}" class="inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium {{ $isHier ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300' }} hover:opacity-90">
                     <i class="fas fa-layer-group mr-2"></i>
                     {{ $isHier ? 'Hierarchical ON' : 'Hierarchical OFF' }}
                 </a>
-                <a href="{{ $toggleAutoKUrl }}" class="inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium {{ $isAutoK ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-300' }} hover:opacity-90 {{ $isHier ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}" title="{{ $isHier ? 'Disable Hierarchical to enable Auto-K mode' : ($isAutoK ? 'Auto-K is ON (optimal K will be chosen automatically)' : 'Enable Auto-K (optimal K)') }}">
-                    <i class="fas fa-magic mr-2"></i>
-                    {{ $isAutoK ? 'Auto-K ON' : 'Auto-K OFF' }}
-                </a>
-                <form method="GET" action="{{ route('admin.clustering') }}" class="flex items-center space-x-2">
-                    @foreach(request()->except(['k']) as $key => $val)
-                        @if(!is_null($val) && $val !== '')
-                            <input type="hidden" name="{{ $key }}" value="{{ $val }}">
-                        @endif
-                    @endforeach
-                    <label class="text-sm text-gray-700">K</label>
-                    <input type="number" name="k" min="2" max="10" value="{{ $k ?? 3 }}" class="w-16 px-2 py-1 border border-gray-300 rounded" />
-                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                        Apply
-                    </button>
-                </form>
+                <!-- K mode controls -->
+                @if($isHier)
+                    <form method="GET" action="{{ $baseUrl }}" class="flex items-center space-x-2">
+                        @foreach(request()->except(['use_optimal_k', 'k']) as $key => $val)
+                            @if(!is_null($val) && $val !== '')
+                                <input type="hidden" name="{{ $key }}" value="{{ $val }}">
+                            @endif
+                        @endforeach
+                        <input type="hidden" name="hierarchical" value="1">
+                        <label class="text-sm text-gray-700">K mode:</label>
+                        <label class="inline-flex items-center text-sm">
+                            <input type="radio" name="use_optimal_k" value="1" {{ $isAutoK ? 'checked' : '' }} onchange="this.form.submit()">
+                            <span class="ml-1">Auto-K per purok</span>
+                        </label>
+                        <label class="inline-flex items-center text-sm ml-2">
+                            <input type="radio" name="use_optimal_k" value="0" {{ !$isAutoK ? 'checked' : '' }} onchange="this.form.submit()">
+                            <span class="ml-1">Manual K per purok</span>
+                        </label>
+                        <input type="number" name="k" min="2" max="10" value="{{ $kValue }}" class="w-16 px-2 py-1 border border-gray-300 rounded ml-2" {{ $isAutoK ? 'disabled' : '' }} />
+                    </form>
+                @else
+                    <form method="GET" action="{{ $baseUrl }}" class="flex items-center space-x-2">
+                        @foreach(request()->except(['use_optimal_k', 'k', 'hierarchical']) as $key => $val)
+                            @if(!is_null($val) && $val !== '')
+                                <input type="hidden" name="{{ $key }}" value="{{ $val }}">
+                            @endif
+                        @endforeach
+                        <label class="text-sm text-gray-700">K mode:</label>
+                        <label class="inline-flex items-center text-sm">
+                            <input type="radio" name="use_optimal_k" value="1" {{ $isAutoK ? 'checked' : '' }} onchange="this.form.submit()">
+                            <span class="ml-1">Auto-K (global)</span>
+                        </label>
+                        <label class="inline-flex items-center text-sm ml-2">
+                            <input type="radio" name="use_optimal_k" value="0" {{ !$isAutoK ? 'checked' : '' }} onchange="this.form.submit()">
+                            <span class="ml-1">Manual K (global)</span>
+                        </label>
+                        <input type="number" name="k" min="2" max="10" value="{{ $kValue }}" class="w-16 px-2 py-1 border border-gray-300 rounded ml-2" {{ $isAutoK ? 'disabled' : '' }} />
+                    </form>
+                @endif
                 <button onclick="refreshAnalysis()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
                     <i class="fas fa-sync-alt mr-2"></i>
                     Refresh Analysis
@@ -70,6 +92,12 @@
             <i class="fas fa-magic mr-1"></i>
             {{ !empty($useOptimalK) ? 'Global Auto-K' : 'Manual K='.$k }}
         </span>
+        @if(isset($silhouette))
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Silhouette score indicates cluster separation quality (higher is better)">
+            <i class="fas fa-chart-line mr-1"></i>
+            Silhouette: {{ number_format($silhouette ?? 0, 3) }}
+        </span>
+        @endif
     </div>
 
     @if($sampleSize > 1000)
@@ -216,6 +244,156 @@
                 </div>
             </div>
 
+            <!-- Toggle for Detailed Analysis -->
+            <div class="flex justify-start mb-2">
+                <button id="toggleDetailsBtn" onclick="toggleDetails()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                    <i class="fas fa-chevron-down mr-2"></i>
+                </button>
+            </div>
+
+            <!-- Detailed Analysis Section -->
+            <div id="detailedAnalysisSection" class="bg-white rounded-xl shadow-lg border border-gray-100 mb-3 hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            <i class="fas fa-table text-green-600 mr-2"></i>
+                            Detailed Resident Analysis
+                        </h3>
+                        @php
+                            // Build flat rows once for table and filters
+                            $rows = [];
+                            $purokSet = [];
+                            foreach (($clusters ?? []) as $cid => $cl) {
+                                if (!is_array($cl)) continue;
+                                foreach ($cl as $pt) {
+                                    if (is_array($pt) && isset($pt['resident'])) {
+                                        $rows[] = ['clusterId' => $cid, 'point' => $pt];
+                                        $addr = strtolower($pt['resident']->address ?? '');
+                                        $purok = 'N/A';
+                                        if (preg_match('/purok\s*([a-z0-9]+)/i', $addr, $m)) { $purok = strtoupper($m[1]); }
+                                        $purokSet[$purok] = true;
+                                    }
+                                }
+                            }
+                            ksort($purokSet);
+                        @endphp
+                        <div class="flex flex-wrap gap-2 items-center mb-2">
+                            <input type="text" id="searchTable" placeholder="Search residents..." class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <select id="filterPurok" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                <option value="">All Puroks</option>
+                                @foreach(array_keys($purokSet) as $p)
+                                    <option value="{{ $p }}">Purok {{ $p }}</option>
+                                @endforeach
+                            </select>
+                            <select id="rowsPerPage" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="25">25 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
+                        <div id="tableLoading" class="hidden flex items-center justify-center py-8"><span class="loader mr-2"></span> Loading...</div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 sticky-header-table" id="residentsTable">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resident Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Family Size</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Education</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Income</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employment</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purok</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Health Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Predicted Eligibility</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Predicted Risk</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Predicted Program</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($residents as $resident)
+                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                @if(!empty($resident->is_outlier))
+                                                    <span class="inline-block w-2 h-2 mr-2 rounded-full bg-red-500" title="Outlier"></span>
+                                                @endif
+                                                {{ $resident->name ?? 'N/A' }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->age ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->family_size ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->education_level ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($resident->income_level ?? '') === 'High' ? 'bg-green-100 text-green-800' : (($resident->income_level ?? '') === 'Low' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                                {{ $resident->income_level ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($resident->employment_status ?? '') === 'Full-time' ? 'bg-green-100 text-green-800' : (($resident->employment_status ?? '') === 'Unemployed' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800') }}">
+                                                {{ $resident->employment_status ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @php
+                                                $addr = strtolower($resident->address ?? '');
+                                                $purok = 'N/A';
+                                                if (preg_match('/purok\s*([a-z0-9]+)/i', $addr, $m)) { $purok = strtoupper($m[1]); }
+                                            @endphp
+                                            {{ $purok }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($resident->health_status ?? '') === 'Excellent' ? 'bg-green-100 text-green-800' : (($resident->health_status ?? '') === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                                {{ $resident->health_status ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @php $elig = $resident->predicted_eligibility ?? null; @endphp
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $elig === 'Eligible' ? 'bg-green-100 text-green-800' : ($elig === 'Ineligible' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800') }}">
+                                                {{ $elig ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @php $risk = $resident->predicted_risk ?? null; @endphp
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $risk === 'High' ? 'bg-red-100 text-red-800' : ($risk === 'Medium' ? 'bg-yellow-100 text-yellow-800' : ($risk === 'Low' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
+                                                {{ $risk ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                {{ $resident->predicted_program ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button onclick="viewResident({{ $resident->id ?? 0 }})" class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                @if(count($residents) === 0)
+                                    <tr>
+                                        <td colspan="9" class="px-6 py-6 text-center text-gray-500">No residents to display</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                        <div id="emptyState" class="hidden text-center text-gray-500 py-8">
+                            <i class="fas fa-user-slash text-3xl mb-2"></i><br>No residents to display
+                        </div>
+                        <div class="flex flex-wrap justify-between items-center mt-4" id="paginationControls">
+                            <div class="text-sm text-gray-700" id="paginationInfo"></div>
+                            <div class="flex gap-2">
+                                <button id="prevPage" class="px-3 py-1 border rounded bg-white hover:bg-gray-100">Prev</button>
+                                <span id="currentPage" class="px-2"></span>
+                                <button id="nextPage" class="px-3 py-1 border rounded bg-white hover:bg-gray-100">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Cluster Characteristics -->
             <div class="bg-white rounded-xl shadow-lg border border-gray-100">
                 <div class="p-6">
@@ -303,39 +481,33 @@
                                         </span>
                                         <span class="bg-indigo-200 text-indigo-800 text-xs font-semibold px-2 py-1 rounded-full">{{ $total }} residents</span>
                                     </div>
-                                    <div class="mb-2 text-sm text-gray-600">Most common: <span class="font-semibold text-indigo-700">{{ $mostCommonIncome }}</span> income, <span class="font-semibold text-indigo-700">{{ $mostCommonEmployment }}</span> employment, <span class="font-semibold text-indigo-700">{{ $mostCommonHealth }}</span> health</div>
-                                    <div class="grid grid-cols-2 gap-4 mb-3">
-                                        <div class="text-center">
-                                            <span class="text-xs text-gray-600 flex items-center justify-center"><i class="fas fa-birthday-cake mr-1"></i>Most Common Age</span>
-                                            <span class="text-lg font-bold text-gray-900">{{ $mostCommonAge }}</span>
+                                    @php $purokKey = strtolower($purok); @endphp
+                                    @if(isset($perPurokInsights[$purokKey]))
+                                        @php $pins = $perPurokInsights[$purokKey]; @endphp
+                                        <div class="mb-2 flex flex-wrap gap-2">
+                                            @if(!empty($pins['program']))
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                    <i class="fas fa-magic mr-1"></i>
+                                                    Model: {{ $pins['program'] }} ({{ $pins['program_confidence'] }}%)
+                                                </span>
+                                            @endif
+                                            @if(!empty($pins['eligibility']))
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    Eligibility: {{ $pins['eligibility'] }} ({{ $pins['eligibility_confidence'] }}%)
+                                                </span>
+                                            @endif
+                                            @if(!empty($pins['risk']))
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    <i class="fas fa-heartbeat mr-1"></i>
+                                                    Risk: {{ $pins['risk'] }} ({{ $pins['risk_confidence'] }}%)
+                                                </span>
+                                            @endif
                                         </div>
-                                        <div class="text-center">
-                                            <span class="text-xs text-gray-600 flex items-center justify-center"><i class="fas fa-home mr-1"></i>Most Common Family Size</span>
-                                            <span class="text-lg font-bold text-gray-900">{{ $mostCommonFamilySize }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2 mb-2">
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $mostCommonIncome === 'High' ? 'bg-green-100 text-green-800' : ($mostCommonIncome === 'Low' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                            <i class="fas fa-coins mr-1"></i>{{ $mostCommonIncome }}
-                                        </span>
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $mostCommonEmployment === 'Full-time' ? 'bg-green-100 text-green-800' : ($mostCommonEmployment === 'Unemployed' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800') }}">
-                                            <i class="fas fa-briefcase mr-1"></i>{{ $mostCommonEmployment }}
-                                        </span>
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $mostCommonHealth === 'Excellent' ? 'bg-green-100 text-green-800' : ($mostCommonHealth === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                            <i class="fas fa-heartbeat mr-1"></i>{{ $mostCommonHealth }}
-                                        </span>
-                                    </div>
-                                    <div class="text-xs text-gray-700 mt-2"><i class="fas fa-lightbulb text-yellow-400 mr-1"></i>
-                                        @if($mostCommonIncome === 'Low')
-                                            This purok may benefit from financial assistance or livelihood programs.
-                                        @elseif($mostCommonEmployment === 'Unemployed')
-                                            Consider job placement and skills development for this purok.
-                                        @elseif($mostCommonHealth === 'Critical')
-                                            Health interventions may be needed for this purok.
-                                        @else
-                                            General community services and health programs are recommended.
-                                        @endif
-                                    </div>
+                                    @endif
+                                    <div class="mb-2 text-xs text-gray-700"><i class="fas fa-tag mr-1 text-gray-500"></i>Label: <span class="font-semibold text-gray-900">{{ $it['c']['label'] ?? 'N/A' }}</span></div>
+                                    <!-- Simplified summary removed to avoid redundancy -->
+                                    <!-- Model-driven tips replace heuristic block -->
                                 </div>
                             @endforeach
                         </div>
@@ -359,39 +531,70 @@
                                             </span>
                                             <span class="bg-blue-200 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">{{ $cluster['size'] }} residents</span>
                                         </div>
-                                        <div class="mb-2 text-sm text-gray-600">Most common: <span class="font-semibold text-blue-700">{{ $cluster['most_common_income'] }}</span> income, <span class="font-semibold text-blue-700">{{ $cluster['most_common_employment'] }}</span> employment, <span class="font-semibold text-blue-700">{{ $cluster['most_common_health'] }}</span> health</div>
-                                        <div class="grid grid-cols-2 gap-4 mb-3">
-                                            <div class="text-center">
-                                                <span class="text-xs text-gray-600 flex items-center justify-center"><i class="fas fa-birthday-cake mr-1"></i>Most Common Age</span>
-                                                <span class="text-lg font-bold text-gray-900">{{ $mostCommonAge }}</span>
+                                        @if(isset($perClusterInsights[$clusterId]))
+                                            @php $ins = $perClusterInsights[$clusterId]; @endphp
+                                            <div class="mb-2 flex flex-wrap gap-2">
+                                                @if(!empty($ins['program']))
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                        <i class="fas fa-magic mr-1"></i>
+                                                        Model: {{ $ins['program'] }} ({{ $ins['program_confidence'] }}%)
+                                                    </span>
+                                                @endif
+                                                @if(!empty($ins['eligibility']))
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <i class="fas fa-check mr-1"></i>
+                                                        Eligibility: {{ $ins['eligibility'] }} ({{ $ins['eligibility_confidence'] }}%)
+                                                    </span>
+                                                @endif
+                                                @if(!empty($ins['risk']))
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                        <i class="fas fa-heartbeat mr-1"></i>
+                                                        Risk: {{ $ins['risk'] }} ({{ $ins['risk_confidence'] }}%)
+                                                    </span>
+                                                @endif
                                             </div>
-                                            <div class="text-center">
-                                                <span class="text-xs text-gray-600 flex items-center justify-center"><i class="fas fa-home mr-1"></i>Most Common Family Size</span>
-                                                <span class="text-lg font-bold text-gray-900">{{ $mostCommonFamilySize }}</span>
+                                        @endif
+                                        @if(!empty($cluster['label']))
+                                            <div class="mb-2 text-xs text-gray-700">
+                                                <i class="fas fa-tag mr-1 text-gray-500"></i>
+                                                Label: <span class="font-semibold text-gray-900">{{ $cluster['label'] }}</span>
                                             </div>
-                                        </div>
-                                        <div class="flex flex-wrap gap-2 mb-2">
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $cluster['most_common_income'] === 'High' ? 'bg-green-100 text-green-800' : ($cluster['most_common_income'] === 'Low' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                <i class="fas fa-coins mr-1"></i>{{ $cluster['most_common_income'] }}
-                                            </span>
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $cluster['most_common_employment'] === 'Full-time' ? 'bg-green-100 text-green-800' : ($cluster['most_common_employment'] === 'Unemployed' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800') }}">
-                                                <i class="fas fa-briefcase mr-1"></i>{{ $cluster['most_common_employment'] }}
-                                            </span>
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $cluster['most_common_health'] === 'Excellent' ? 'bg-green-100 text-green-800' : ($cluster['most_common_health'] === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                <i class="fas fa-heartbeat mr-1"></i>{{ $cluster['most_common_health'] }}
-                                            </span>
-                                        </div>
-                                        <div class="text-xs text-gray-700 mt-2"><i class="fas fa-lightbulb text-yellow-400 mr-1"></i>
-                                            @if($cluster['most_common_income'] === 'Low')
-                                                This cluster may benefit from financial assistance or livelihood programs.
-                                            @elseif($cluster['most_common_employment'] === 'Unemployed')
-                                                Consider job placement and skills development for this cluster.
-                                            @elseif($cluster['most_common_health'] === 'Critical')
-                                                Health interventions may be needed for this cluster.
-                                            @else
-                                                General community services and health programs are recommended.
+                                        @endif
+                                        <!-- Simplified summary removed to avoid redundancy -->
+                                        <!-- Model-driven tips replace heuristic block -->
+                                        {{-- ADVANCED CHARACTERISTICS BLOCK --}}
+                                        @php
+                                            $traits = topTraits($cluster);
+                                        @endphp
+                                        <div class="mb-2 text-xs text-gray-700">
+                                            <span class="font-semibold">Size:</span> {{ $cluster['size'] }} ({{ $cluster['percent_of_total'] ?? '?' }}%)
+                                            @if(!empty($cluster['outlier_count']))
+                                                <span class="ml-2 inline-block px-2 py-0.5 rounded-full bg-red-100 text-red-800">{{ $cluster['outlier_count'] }} outlier{{ $cluster['outlier_count']>1?'s':'' }}</span>
                                             @endif
                                         </div>
+                                        <div class="mb-2 text-xs text-gray-700">
+                                            <span class="font-semibold">Age:</span> {{ $cluster['avg_age'] }} ± {{ $cluster['std_age'] }}
+                                            <span class="ml-2 font-semibold">Family size:</span> {{ $cluster['avg_family_size'] }} ± {{ $cluster['std_family_size'] }}
+                                        </div>
+                                        @if(count($traits))
+                                            <div class="mb-2 text-xs">
+                                                <span class="font-semibold">Top Traits:</span>
+                                                @foreach($traits as $t)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t['diff']>0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}" title="{{ $t['label'] }}: {{ $t['pct'] }}% (overall: {{ $t['overall'] }}%)">
+                                                        @if($t['diff']>0)<i class="fas fa-arrow-up mr-1"></i>@elseif($t['diff']<0)<i class="fas fa-arrow-down mr-1"></i>@else<i class="fas fa-minus mr-1"></i>@endif
+                                                        {{ $t['label'] }} {{ $t['pct'] }}%
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        <div class="mb-2 text-xs">
+                                            <span class="font-semibold">Income:</span> {!! miniBar($cluster['income_distribution']??[], $incomeColors) !!}
+                                            <span class="ml-2 font-semibold">Employment:</span> {!! miniBar($cluster['employment_distribution']??[], $employmentColors) !!}
+                                            <span class="ml-2 font-semibold">Health:</span> {!! miniBar($cluster['health_distribution']??[], $healthColors) !!}
+                                        </div>
+                                        @if(!empty($cluster['health_percent']['Critical']) && $cluster['health_percent']['Critical'] > 40)
+                                            <span class="inline-block px-2 py-0.5 rounded-full bg-red-600 text-white text-xs font-bold"><i class="fas fa-exclamation-triangle mr-1"></i>High Health Risk!</span>
+                                        @endif
                                     </div>
                                 @endif
                             @endforeach
@@ -485,316 +688,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Detailed Analysis Section -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 mb-3">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                        <i class="fas fa-table text-green-600 mr-2"></i>
-                        Detailed Resident Analysis
-                    </h3>
-                    @php
-                        // Build flat rows once for table and filters
-                        $rows = [];
-                        $purokSet = [];
-                        foreach (($clusters ?? []) as $cid => $cl) {
-                            if (!is_array($cl)) continue;
-                            foreach ($cl as $pt) {
-                                if (is_array($pt) && isset($pt['resident'])) {
-                                    $rows[] = ['clusterId' => $cid, 'point' => $pt];
-                                    $addr = strtolower($pt['resident']->address ?? '');
-                                    $purok = 'N/A';
-                                    if (preg_match('/purok\s*([a-z0-9]+)/i', $addr, $m)) { $purok = strtoupper($m[1]); }
-                                    $purokSet[$purok] = true;
-                                }
-                            }
-                        }
-                        ksort($purokSet);
-                    @endphp
-                    <div class="flex flex-wrap gap-2 items-center mb-2">
-                        <input type="text" id="searchTable" placeholder="Search residents..." class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        <select id="filterPurok" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                            <option value="">All Puroks</option>
-                            @foreach(array_keys($purokSet) as $p)
-                                <option value="{{ $p }}">Purok {{ $p }}</option>
-                            @endforeach
-                        </select>
-                        <select id="rowsPerPage" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
-                            <option value="25">25 per page</option>
-                            <option value="50">50 per page</option>
-                            <option value="100">100 per page</option>
-                        </select>
-                    </div>
-                    <div id="tableLoading" class="hidden flex items-center justify-center py-8"><span class="loader mr-2"></span> Loading...</div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 sticky-header-table" id="residentsTable">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resident Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Family Size</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Education</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Income</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employment</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purok</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Health Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($residents as $resident)
-                                <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">{{ $resident->name ?? 'N/A' }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->age ?? 'N/A' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->family_size ?? 'N/A' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->education_level ?? 'N/A' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($resident->income_level ?? '') === 'High' ? 'bg-green-100 text-green-800' : (($resident->income_level ?? '') === 'Low' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                            {{ $resident->income_level ?? 'N/A' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($resident->employment_status ?? '') === 'Full-time' ? 'bg-green-100 text-green-800' : (($resident->employment_status ?? '') === 'Unemployed' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800') }}">
-                                            {{ $resident->employment_status ?? 'N/A' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        @php
-                                            $addr = strtolower($resident->address ?? '');
-                                            $purok = 'N/A';
-                                            if (preg_match('/purok\s*([a-z0-9]+)/i', $addr, $m)) { $purok = strtoupper($m[1]); }
-                                        @endphp
-                                        {{ $purok }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($resident->health_status ?? '') === 'Excellent' ? 'bg-green-100 text-green-800' : (($resident->health_status ?? '') === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                            {{ $resident->health_status ?? 'N/A' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button onclick="viewResident({{ $resident->id ?? 0 }})" class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                            @if(count($residents) === 0)
-                                <tr>
-                                    <td colspan="9" class="px-6 py-6 text-center text-gray-500">No residents to display</td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                    <div id="emptyState" class="hidden text-center text-gray-500 py-8">
-                        <i class="fas fa-user-slash text-3xl mb-2"></i><br>No residents to display
-                    </div>
-                    <div class="flex flex-wrap justify-between items-center mt-4" id="paginationControls">
-                        <div class="text-sm text-gray-700" id="paginationInfo"></div>
-                        <div class="flex gap-2">
-                            <button id="prevPage" class="px-3 py-1 border rounded bg-white hover:bg-gray-100">Prev</button>
-                            <span id="currentPage" class="px-2"></span>
-                            <button id="nextPage" class="px-3 py-1 border rounded bg-white hover:bg-gray-100">Next</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Insights and Recommendations -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">
-                    <i class="fas fa-lightbulb text-yellow-600 mr-2"></i>
-                    Insights & Recommendations
-                </h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="text-md font-semibold text-blue-900 mb-3">
-                            <i class="fas fa-chart-line text-blue-600 mr-2"></i>
-                            Key Findings
-                        </h4>
-                        <div class="space-y-4">
-                            @if($isHier)
-                                @foreach($grouped as $purok => $items)
-                                    @php
-                                        $total = 0; $allAges = []; $incomes = []; $employments = []; $healths = [];
-                                        foreach ($items as $it) {
-                                            $c = $it['c'];
-                                            $clusterSize = $c['size'];
-                                            $total += $clusterSize;
-                                            
-                                            // Collect all individual values for mode calculation
-                                            // Since we don't have individual resident data, we'll use the cluster's most common values
-                                            for ($i = 0; $i < $clusterSize; $i++) {
-                                                $age = $c['most_common_age'] ?? $c['avg_age'];
-                                                if (is_numeric($age) && $age > 0) {
-                                                    $allAges[] = (int)$age;
-                                                }
-                                            }
-                                            
-                                            $incomes[] = $c['most_common_income'];
-                                            $employments[] = $c['most_common_employment'];
-                                            $healths[] = $c['most_common_health'];
-                                        }
-                                        
-                                        // Skip puroks with no residents or N/A purok
-                                        if ($total === 0 || $purok === 'N/A') {
-                                            continue;
-                                        }
-                                        
-                                        $mostCommonIncome = array_count_values($incomes) ? array_search(max(array_count_values($incomes)), array_count_values($incomes)) : 'N/A';
-                                        $mostCommonEmployment = array_count_values($employments) ? array_search(max(array_count_values($employments)), array_count_values($employments)) : 'N/A';
-                                        $mostCommonHealth = array_count_values($healths) ? array_search(max(array_count_values($healths)), array_count_values($healths)) : 'N/A';
-                                        $mostCommonAge = !empty($allAges) && array_count_values($allAges) ? array_search(max(array_count_values($allAges)), array_count_values($allAges)) : 'N/A';
-                                    @endphp
-                                    <div class="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all duration-200">
-                                        <div class="flex items-start">
-                                            <div class="flex-shrink-0">
-                                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                                    <i class="fas fa-users text-white text-sm"></i>
-                                                </div>
-                                            </div>
-                                            <div class="ml-4">
-                                                <h5 class="text-sm font-medium text-blue-900">Purok {{ $purok }}</h5>
-                                                <p class="text-sm text-blue-700 mt-1">
-                                                    {{ $total }} residents with most common age {{ $mostCommonAge }}.
-                                                    Most common income level is {{ $mostCommonIncome }}.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @else
-                                @foreach($characteristics as $clusterId => $cluster)
-                                    @if($cluster['size'] > 0)
-                                        @php
-                                            $allAges = [];
-                                            for ($i = 0; $i < $cluster['size']; $i++) {
-                                                $age = $cluster['most_common_age'] ?? $cluster['avg_age'];
-                                                if (is_numeric($age) && $age > 0) {
-                                                    $allAges[] = (int)$age;
-                                                }
-                                            }
-                                            $mostCommonAge = array_count_values($allAges) ? array_search(max(array_count_values($allAges)), array_count_values($allAges)) : 'N/A';
-                                        @endphp
-                                        <div class="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all duration-200">
-                                            <div class="flex items-start">
-                                                <div class="flex-shrink-0">
-                                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                                        <i class="fas fa-users text-white text-sm"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="ml-4">
-                                                    <h5 class="text-sm font-medium text-blue-900">Cluster {{ $clusterId + 1 }}</h5>
-                                                    <p class="text-sm text-blue-700 mt-1">
-                                                        {{ $cluster['size'] }} residents with most common age {{ $mostCommonAge }}.
-                                                        Most common income level is {{ $cluster['most_common_income'] }}.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="text-md font-semibold text-green-900 mb-3">
-                            <i class="fas fa-check-circle text-green-600 mr-2"></i>
-                            Actionable Recommendations
-                        </h4>
-                        <div class="space-y-4">
-                            @if($isHier)
-                                @foreach($grouped as $purok => $items)
-                                    @php
-                                        // Skip N/A purok in recommendations
-                                        if ($purok === 'N/A') {
-                                            continue;
-                                        }
-                                        
-                                        $incomes = []; $employments = []; $healths = [];
-                                        foreach ($items as $it) {
-                                            $c = $it['c'];
-                                            $incomes[] = $c['most_common_income'];
-                                            $employments[] = $c['most_common_employment'];
-                                            $healths[] = $c['most_common_health'];
-                                        }
-                                        $mostCommonIncome = array_count_values($incomes) ? array_search(max(array_count_values($incomes)), array_count_values($incomes)) : 'N/A';
-                                        $mostCommonEmployment = array_count_values($employments) ? array_search(max(array_count_values($employments)), array_count_values($employments)) : 'N/A';
-                                        $mostCommonHealth = array_count_values($healths) ? array_search(max(array_count_values($healths)), array_count_values($healths)) : 'N/A';
-                                    @endphp
-                                    <div class="p-4 border-l-4 border-green-500 bg-green-50 rounded-lg hover:bg-green-100 transition-all duration-200">
-                                        <div class="flex items-start">
-                                            <div class="flex-shrink-0">
-                                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                                    <i class="fas fa-lightbulb text-white text-sm"></i>
-                                                </div>
-                                            </div>
-                                            <div class="ml-4">
-                                                <h5 class="text-sm font-medium text-green-900">Purok {{ $purok }}</h5>
-                                                <p class="text-sm text-green-700 mt-1">
-                                                    @if($mostCommonIncome === 'Low')
-                                                        Consider financial assistance programs and livelihood training.
-                                                    @elseif($mostCommonEmployment === 'Unemployed')
-                                                        Focus on job placement and skills development programs.
-                                                    @elseif($mostCommonHealth === 'Critical')
-                                                        Health interventions may be needed for this purok.
-                                                    @else
-                                                        Provide general community services and health programs.
-                                                    @endif
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @else
-                                @foreach($characteristics as $clusterId => $cluster)
-                                    @if($cluster['size'] > 0)
-                                        @php
-                                            $allAges = [];
-                                            for ($i = 0; $i < $cluster['size']; $i++) {
-                                                $age = $cluster['most_common_age'] ?? $cluster['avg_age'];
-                                                if (is_numeric($age) && $age > 0) {
-                                                    $allAges[] = (int)$age;
-                                                }
-                                            }
-                                            $mostCommonAge = array_count_values($allAges) ? array_search(max(array_count_values($allAges)), array_count_values($allAges)) : 'N/A';
-                                        @endphp
-                                        <div class="p-4 border-l-4 border-green-500 bg-green-50 rounded-lg hover:bg-green-100 transition-all duration-200">
-                                            <div class="flex items-start">
-                                                <div class="flex-shrink-0">
-                                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                                        <i class="fas fa-lightbulb text-white text-sm"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="ml-4">
-                                                    <h5 class="text-sm font-medium text-green-900">Cluster {{ $clusterId + 1 }}</h5>
-                                                    <p class="text-sm text-green-700 mt-1">
-                                                        @if($cluster['most_common_income'] === 'Low')
-                                                            Consider financial assistance programs and livelihood training.
-                                                        @elseif($cluster['most_common_employment'] === 'Unemployed')
-                                                            Focus on job placement and skills development programs.
-                                                        @elseif($cluster['most_common_health'] === 'Critical')
-                                                            Health interventions may be needed for this cluster.
-                                                        @else
-                                                            Provide general community services and health programs.
-                                                        @endif
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     @endif
 </div>
 
@@ -847,7 +740,40 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    // Initialize details collapsed
+    const details = document.getElementById('detailedAnalysisSection');
+    const toggleBtn = document.getElementById('toggleDetailsBtn');
+    if (details && toggleBtn) {
+        details.classList.add('hidden');
+        const icon = toggleBtn.querySelector('i');
+        if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+        toggleBtn.setAttribute('data-state', 'hidden');
+        toggleBtn.querySelector('span.btn-text')?.remove();
+        const span = document.createElement('span');
+        span.className = 'btn-text';
+        span.textContent = ' Show Details';
+        toggleBtn.appendChild(span);
+    }
 });
+
+function toggleDetails() {
+    const section = document.getElementById('detailedAnalysisSection');
+    const btn = document.getElementById('toggleDetailsBtn');
+    if (!section || !btn) return;
+    const icon = btn.querySelector('i');
+    const state = btn.getAttribute('data-state') || 'hidden';
+    if (state === 'hidden') {
+        section.classList.remove('hidden');
+        if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); }
+        btn.setAttribute('data-state', 'shown');
+        btn.querySelector('span.btn-text').textContent = ' Hide Details';
+    } else {
+        section.classList.add('hidden');
+        if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+        btn.setAttribute('data-state', 'hidden');
+        btn.querySelector('span.btn-text').textContent = ' Show Details';
+    }
+}
 
 function initializeClusterChart() {
     const isHier = @json($isHier ?? false);

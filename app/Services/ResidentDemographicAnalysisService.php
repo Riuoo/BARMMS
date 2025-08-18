@@ -12,6 +12,8 @@ class ResidentDemographicAnalysisService
 {
     private $k;
 	private $maxIterations;
+	private int $numRuns = 3;
+	private int $maxKPerPurok = 5;
 
 	// Feature weights (tune as needed)
 	private float $weightAge = 1.0;
@@ -27,6 +29,27 @@ class ResidentDemographicAnalysisService
 		$this->k = $k;
 		$this->maxIterations = $maxIterations;
     }
+
+	public function setNumRuns(int $numRuns): void
+	{
+		$this->numRuns = max(1, min($numRuns, 10));
+	}
+
+	public function setMaxKPerPurok(int $maxK): void
+	{
+		$this->maxKPerPurok = max(2, min($maxK, 10));
+	}
+
+	public function setWeights(array $weights): void
+	{
+		if (isset($weights['age'])) $this->weightAge = (float)$weights['age'];
+		if (isset($weights['family'])) $this->weightFamilySize = (float)$weights['family'];
+		if (isset($weights['education'])) $this->weightEducation = (float)$weights['education'];
+		if (isset($weights['income'])) $this->weightIncome = (float)$weights['income'];
+		if (isset($weights['employment'])) $this->weightEmployment = (float)$weights['employment'];
+		if (isset($weights['health'])) $this->weightHealth = (float)$weights['health'];
+		if (isset($weights['purok'])) $this->weightPurok = (float)$weights['purok'];
+	}
 
     /**
      * Clustering with demographic profile only (no health status/incidence)
@@ -56,9 +79,8 @@ class ResidentDemographicAnalysisService
 		// Build numeric feature samples
 		[$samples, $indexMap] = $this->buildSamples($residents);
 
-		// Run K-Means clustering using k-means++ initialization to support float features
-		$kmeans = new KMeans($this->k, KMeans::INIT_KMEANS_PLUS_PLUS);
-		$rawClusters = $kmeans->cluster($samples);
+		// Run K-Means multiple times and keep the best by inertia
+		[$rawClusters, $bestCentroids] = $this->runBestKMeans($samples, $this->k);
 
 		// Map clustered samples back to residents and enrich with features
 		$clusters = array_fill(0, $this->k, []);
@@ -83,11 +105,23 @@ class ResidentDemographicAnalysisService
 		$iterations = $this->maxIterations; // PHP-ML does not expose actual iterations; use configured max as upper bound
 		$converged = true; // Assume convergence for display purposes
 
+		// Mark outliers (top 10% farthest from centroid)
+		$this->markOutliers($clusters, $centroids, 0.10);
+
+		// Compute silhouette score for transparency
+		$silhouetteScore = 0.0;
+		try {
+			$silhouetteScore = $this->computeSilhouetteScore($samples, $rawClusters, $bestCentroids);
+		} catch (\Throwable $e) {
+			$silhouetteScore = 0.0;
+		}
+
 		$result = [
 			'clusters' => $clusters,
 			'centroids' => $centroids,
 			'iterations' => $iterations,
 			'converged' => $converged,
+			'silhouette' => round($silhouetteScore, 3),
 			'residents' => $residents
 		];
 
@@ -143,11 +177,9 @@ class ResidentDemographicAnalysisService
             [$samples, $indexMap] = $this->buildSamplesDemographicsOnly($groupCollection);
 
             // Auto K for this purok
-            $localMaxK = min(5, max(2, $groupCollection->count() - 1));
+            $localMaxK = min($this->maxKPerPurok, max(2, $groupCollection->count() - 1));
             $bestK = $this->findBestKForSamples($samples, $localMaxK);
-
-            $kmeans = new KMeans($bestK, KMeans::INIT_KMEANS_PLUS_PLUS);
-            $rawClusters = $kmeans->cluster($samples);
+            [$rawClusters] = $this->runBestKMeans($samples, $bestK);
 
             // Map back to residents
             $clusters = array_fill(0, $bestK, []);
@@ -375,45 +407,77 @@ class ResidentDemographicAnalysisService
     public function getClusterCharacteristics(array $clusteringResult): array
     {
         $characteristics = [];
-
+        $allAges = [];
+        $allFamilySizes = [];
+        $allIncomes = [];
+        $allEmployments = [];
+        $allHealths = [];
+        $allEducations = [];
+        $totalResidents = 0;
+        foreach ($clusteringResult['clusters'] as $cluster) {
+            foreach ($cluster as $point) {
+                $resident = $point['resident'];
+                $allAges[] = $resident->age ?? 30;
+                $allFamilySizes[] = $resident->family_size ?? 1;
+                $allIncomes[] = $resident->income_level ?? 'Low';
+                $allEmployments[] = $resident->employment_status ?? 'Unemployed';
+                $allHealths[] = $resident->health_status ?? 'Healthy';
+                $allEducations[] = $resident->education_level ?? 'Elementary';
+                $totalResidents++;
+            }
+        }
+        $overall = [
+            'age_avg' => $totalResidents ? array_sum($allAges)/$totalResidents : 0,
+            'age_std' => $this->stddev($allAges),
+            'family_avg' => $totalResidents ? array_sum($allFamilySizes)/$totalResidents : 0,
+            'family_std' => $this->stddev($allFamilySizes),
+            'income_dist' => array_count_values($allIncomes),
+            'employment_dist' => array_count_values($allEmployments),
+            'health_dist' => array_count_values($allHealths),
+            'education_dist' => array_count_values($allEducations),
+        ];
         foreach ($clusteringResult['clusters'] as $clusterId => $cluster) {
             if (empty($cluster)) {
-                $characteristics[$clusterId] = [
-                    'size' => 0,
-                    'avg_age' => 0,
-                    'avg_family_size' => 0,
-                    'most_common_education' => 'N/A',
-                    'most_common_income' => 'N/A',
-                    'most_common_employment' => 'N/A',
-                    'most_common_health' => 'N/A',
-                    'most_common_purok' => 'N/A'
-                ];
+                $characteristics[$clusterId] = [ 'size' => 0 ];
                 continue;
             }
-
             $ages = [];
             $familySizes = [];
-            $educations = [];
             $incomes = [];
             $employments = [];
             $healths = [];
+            $educations = [];
             $puroks = [];
-
+            $outlierCount = 0;
             foreach ($cluster as $point) {
                 $resident = $point['resident'];
                 $ages[] = $resident->age ?? 30;
                 $familySizes[] = $resident->family_size ?? 1;
-                $educations[] = $resident->education_level ?? 'Elementary';
                 $incomes[] = $resident->income_level ?? 'Low';
                 $employments[] = $resident->employment_status ?? 'Unemployed';
                 $healths[] = $resident->health_status ?? 'Healthy';
+                $educations[] = $resident->education_level ?? 'Elementary';
                 $puroks[] = $this->extractPurokToken($resident->address ?? '');
+                if (!empty($resident->is_outlier)) $outlierCount++;
             }
-
+            $size = count($cluster);
+            $percent = $totalResidents ? round(($size/$totalResidents)*100,1) : 0;
+            $label = $this->buildClusterLabel([
+                'income' => $this->getMostCommon($incomes),
+                'employment' => $this->getMostCommon($employments),
+                'health' => $this->getMostCommon($healths)
+            ]);
+            $incomeDist = $this->percentDist($incomes, $size);
+            $employmentDist = $this->percentDist($employments, $size);
+            $healthDist = $this->percentDist($healths, $size);
+            $educationDist = $this->percentDist($educations, $size);
             $characteristics[$clusterId] = [
-                'size' => count($cluster),
-                'avg_age' => round(array_sum($ages) / count($ages), 1),
-                'avg_family_size' => round(array_sum($familySizes) / count($familySizes), 1),
+                'size' => $size,
+                'percent_of_total' => $percent,
+                'avg_age' => round(array_sum($ages)/$size,1),
+                'std_age' => $this->stddev($ages),
+                'avg_family_size' => round(array_sum($familySizes)/$size,1),
+                'std_family_size' => $this->stddev($familySizes),
                 'most_common_age' => $this->getMostCommon($ages),
                 'most_common_family_size' => $this->getMostCommon($familySizes),
                 'most_common_education' => $this->getMostCommon($educations),
@@ -424,17 +488,21 @@ class ResidentDemographicAnalysisService
                 'income_distribution' => array_count_values($incomes),
                 'employment_distribution' => array_count_values($employments),
                 'health_distribution' => array_count_values($healths),
-                'education_distribution' => array_count_values($educations)
+                'education_distribution' => array_count_values($educations),
+                'income_percent' => $incomeDist,
+                'employment_percent' => $employmentDist,
+                'health_percent' => $healthDist,
+                'education_percent' => $educationDist,
+                'label' => $label,
+                'outlier_count' => $outlierCount,
+                // 'silhouette' => null, // Optionally add per-cluster silhouette if feasible
+                'overall' => $overall,
             ];
         }
-
         return $characteristics;
     }
 
-    /**
-     * Find optimal K using simple heuristics
-     */
-	public function findOptimalK(Collection $residents, int $maxK = 5): int
+    public function findOptimalK(Collection $residents, int $maxK = 5): int
     {
 		$count = $residents->count();
 		if ($count < 4) return 2;
@@ -640,6 +708,48 @@ class ResidentDemographicAnalysisService
 		return $sum;
 	}
 
+	private function runBestKMeans(array $samples, int $k): array
+	{
+		$bestInertia = PHP_FLOAT_MAX;
+		$bestClusters = [];
+		$bestCentroids = [];
+		for ($run = 0; $run < $this->numRuns; $run++) {
+			$kmeans = new KMeans($k, KMeans::INIT_KMEANS_PLUS_PLUS);
+			$clusters = $kmeans->cluster($samples);
+			$centroids = $this->calculateSimpleCentroids($this->wrapClustersForCentroid($clusters));
+			$inertia = $this->computeInertia($clusters, $centroids);
+			if ($inertia < $bestInertia) {
+				$bestInertia = $inertia;
+				$bestClusters = $clusters;
+				$bestCentroids = $centroids;
+			}
+		}
+		return [$bestClusters, $bestCentroids];
+	}
+
+	private function markOutliers(array &$clusters, array $centroids, float $topFraction): void
+	{
+		$distance = new Euclidean();
+		foreach ($clusters as $clusterId => &$cluster) {
+			if (empty($cluster)) continue;
+			$centroid = $centroids[$clusterId] ?? null;
+			if ($centroid === null) continue;
+			$distances = [];
+			foreach ($cluster as $idx => $point) {
+				$distances[$idx] = $distance->distance($point['features'], $centroid);
+			}
+			arsort($distances);
+			$numOutliers = max(1, (int) floor(count($distances) * $topFraction));
+			$outlierIdxs = array_slice(array_keys($distances), 0, $numOutliers);
+			foreach ($outlierIdxs as $oi) {
+				if (isset($cluster[$oi]['resident'])) {
+					$cluster[$oi]['resident']->is_outlier = true;
+				}
+			}
+		}
+		unset($cluster);
+	}
+
     // Normalization methods (unchanged)
 
     private function normalizeAge(?int $age): float
@@ -737,5 +847,33 @@ class ResidentDemographicAnalysisService
         if (preg_match('/^\d+$/', $t)) return $t;
         if (preg_match('/(\d{1,3})/', $t, $m)) return $m[1];
         return $t;
+    }
+
+    private function buildClusterLabel(array $modes): string
+    {
+        $parts = [];
+        if (!empty($modes['income'])) $parts[] = $modes['income'] . ' income';
+        if (!empty($modes['employment'])) $parts[] = strtolower($modes['employment']);
+        if (!empty($modes['health'])) $parts[] = strtolower($modes['health']) . ' health';
+        return ucfirst(implode(', ', $parts));
+    }
+
+    private function percentDist(array $arr, int $total): array
+    {
+        $counts = array_count_values($arr);
+        $out = [];
+        foreach ($counts as $k => $v) {
+            $out[$k] = $total ? round(($v/$total)*100,1) : 0;
+        }
+        return $out;
+    }
+    private function stddev(array $arr): float
+    {
+        $n = count($arr);
+        if ($n < 2) return 0.0;
+        $mean = array_sum($arr)/$n;
+        $sum = 0.0;
+        foreach ($arr as $v) $sum += pow($v-$mean,2);
+        return round(sqrt($sum/($n-1)),1);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\AdminControllers\AlgorithmControllers;
 
 use App\Services\ResidentDemographicAnalysisService;
+use App\Services\ResidentClassificationPredictionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Residents;
@@ -30,23 +31,34 @@ class ClusteringController
             $k = $this->clusteringService->findOptimalK($residents);
         }
         
-        $this->clusteringService = new ResidentDemographicAnalysisService($k);
-        $result = $useHierarchical
-            ? $this->clusteringService->clusterResidentsHierarchical()
-            : $this->clusteringService->clusterResidents();
+        // Always compute both global and hierarchical summaries for comparison
+        $globalService = new ResidentDemographicAnalysisService($k);
+        $globalResult = $globalService->clusterResidents();
+        $globalCharacteristics = $globalService->getClusterCharacteristics($globalResult);
+        $globalSummary = [
+            'sizes' => array_map(fn($c) => $c['size'], $globalCharacteristics),
+            'silhouette' => $globalResult['silhouette'] ?? null,
+            'k' => $k,
+        ];
         
-        if (isset($result['error'])) {
-            return view('admin.clustering.index', [
-                'error' => $result['error'],
-                'k' => $k,
-                'useOptimalK' => $useOptimalK,
-                'useHierarchical' => $useHierarchical,
-                'sampleSize' => 0,
-                'processingTime' => 0,
-                'converged' => false
-            ]);
+        $hierService = new ResidentDemographicAnalysisService($k);
+        $hierResult = $hierService->clusterResidentsHierarchical();
+        $hierCharacteristics = $hierService->getClusterCharacteristics($hierResult);
+        // Group by purok for summary
+        $purokTotals = [];
+        foreach ($hierCharacteristics as $c) {
+            $p = $c['most_common_purok'] ?? 'N/A';
+            if ($p === '' || $p === null) { $p = 'N/A'; }
+            $purokTotals[$p] = ($purokTotals[$p] ?? 0) + $c['size'];
         }
+        $hierSummary = [
+            'purok_totals' => $purokTotals,
+            'k' => $k,
+        ];
         
+        // Now select the main mode for detailed display
+        $this->clusteringService = $useHierarchical ? $hierService : $globalService;
+        $result = $useHierarchical ? $hierResult : $globalResult;
         $characteristics = $this->clusteringService->getClusterCharacteristics($result);
         // Build grouped array for purok summary
         $grouped = [];
@@ -78,16 +90,136 @@ class ClusteringController
         // Calculate processing time (simulate for enhanced approach)
         $processingTime = 35; // Enhanced approach takes ~35ms
         
-        // Build $residents collection for the table
+        // Build $residents collection for the table and compute model-driven predictions/insights per cluster
+        $predictionService = new ResidentClassificationPredictionService();
         $residents = collect();
+        $insightCounts = [];
+        $purokInsightCounts = [];
         foreach ($result['clusters'] as $clusterId => $cluster) {
             foreach ($cluster as $point) {
                 if (isset($point['resident'])) {
                     $resident = $point['resident'];
                     $resident->cluster_id = $clusterId + 1; // 1-based for display
+
+                    // Per-resident predictions (model-driven)
+                    try {
+                        $resident->predicted_program = $predictionService->predictEnhancedRecommendedProgram($resident);
+                    } catch (\Throwable $e) {
+                        $resident->predicted_program = null;
+                    }
+                    try {
+                        $resident->predicted_eligibility = $predictionService->predictEnhancedServiceEligibility($resident);
+                    } catch (\Throwable $e) {
+                        $resident->predicted_eligibility = null;
+                    }
+                    try {
+                        $resident->predicted_risk = $predictionService->predictEnhancedHealthRisk($resident);
+                    } catch (\Throwable $e) {
+                        $resident->predicted_risk = null;
+                    }
+
+                    // Aggregate per-cluster counts for insights
+                    $insightCounts[$clusterId] = $insightCounts[$clusterId] ?? [
+                        'program' => [],
+                        'eligibility' => [],
+                        'risk' => [],
+                        'total' => 0
+                    ];
+                    $insightCounts[$clusterId]['total']++;
+                    if (!empty($resident->predicted_program)) {
+                        $p = $resident->predicted_program;
+                        $insightCounts[$clusterId]['program'][$p] = ($insightCounts[$clusterId]['program'][$p] ?? 0) + 1;
+                    }
+                    if (!empty($resident->predicted_eligibility)) {
+                        $e = $resident->predicted_eligibility;
+                        $insightCounts[$clusterId]['eligibility'][$e] = ($insightCounts[$clusterId]['eligibility'][$e] ?? 0) + 1;
+                    }
+                    if (!empty($resident->predicted_risk)) {
+                        $r = $resident->predicted_risk;
+                        $insightCounts[$clusterId]['risk'][$r] = ($insightCounts[$clusterId]['risk'][$r] ?? 0) + 1;
+                    }
+
+                    // Aggregate per-purok insights
+                    $addr = strtolower($resident->address ?? '');
+                    $purokToken = 'N/A';
+                    if (preg_match('/purok\s*([a-z0-9]+)/i', $addr, $m)) {
+                        $purokToken = strtolower($m[1]);
+                    }
+                    $purokInsightCounts[$purokToken] = $purokInsightCounts[$purokToken] ?? [
+                        'program' => [],
+                        'eligibility' => [],
+                        'risk' => [],
+                        'total' => 0
+                    ];
+                    $purokInsightCounts[$purokToken]['total']++;
+                    if (!empty($resident->predicted_program)) {
+                        $p = $resident->predicted_program;
+                        $purokInsightCounts[$purokToken]['program'][$p] = ($purokInsightCounts[$purokToken]['program'][$p] ?? 0) + 1;
+                    }
+                    if (!empty($resident->predicted_eligibility)) {
+                        $e = $resident->predicted_eligibility;
+                        $purokInsightCounts[$purokToken]['eligibility'][$e] = ($purokInsightCounts[$purokToken]['eligibility'][$e] ?? 0) + 1;
+                    }
+                    if (!empty($resident->predicted_risk)) {
+                        $r = $resident->predicted_risk;
+                        $purokInsightCounts[$purokToken]['risk'][$r] = ($purokInsightCounts[$purokToken]['risk'][$r] ?? 0) + 1;
+                    }
+
                     $residents->push($resident);
                 }
             }
+        }
+
+        // Compute dominant predictions and confidence per cluster
+        $perClusterInsights = [];
+        foreach ($insightCounts as $cid => $counts) {
+            $total = max(1, (int)($counts['total'] ?? 0));
+            $top = function(array $arr) {
+                if (empty($arr)) return [null, 0];
+                arsort($arr);
+                $key = array_key_first($arr);
+                return [$key, (int)$arr[$key]];
+            };
+            [$prog, $pc] = $top($counts['program']);
+            [$elig, $ec] = $top($counts['eligibility']);
+            [$risk, $rc] = $top($counts['risk']);
+            $perClusterInsights[$cid] = [
+                'program' => $prog,
+                'program_confidence' => $pc ? round(($pc / $total) * 100) : 0,
+                'eligibility' => $elig,
+                'eligibility_confidence' => $ec ? round(($ec / $total) * 100) : 0,
+                'risk' => $risk,
+                'risk_confidence' => $rc ? round(($rc / $total) * 100) : 0,
+            ];
+        }
+
+        // Compute dominant predictions and confidence per purok (hierarchical summaries)
+        $perPurokInsights = [];
+        foreach ($purokInsightCounts as $purok => $counts) {
+            $total = max(1, (int)($counts['total'] ?? 0));
+            $top = function(array $arr) {
+                if (empty($arr)) return [null, 0];
+                arsort($arr);
+                $key = array_key_first($arr);
+                return [$key, (int)$arr[$key]];
+            };
+            [$prog, $pc] = $top($counts['program']);
+            [$elig, $ec] = $top($counts['eligibility']);
+            [$risk, $rc] = $top($counts['risk']);
+            // Normalize purok key to match view group label (digits or 'N/A')
+            $key = $purok;
+            if ($key !== 'N/A') {
+                // The view shows numeric or roman; we keep the raw token (lowercase)
+                // It will be printed as-is by the view where grouping uses the token
+            }
+            $perPurokInsights[$key] = [
+                'program' => $prog,
+                'program_confidence' => $pc ? round(($pc / $total) * 100) : 0,
+                'eligibility' => $elig,
+                'eligibility_confidence' => $ec ? round(($ec / $total) * 100) : 0,
+                'risk' => $risk,
+                'risk_confidence' => $rc ? round(($rc / $total) * 100) : 0,
+            ];
         }
         return view('admin.clustering.index', [
             'clusteringResult' => $result,
@@ -106,6 +238,11 @@ class ClusteringController
             'grouped' => $grouped,
             'mostCommonEmployment' => $mostCommonEmployment,
             'mostCommonHealth' => $mostCommonHealth,
+            'perClusterInsights' => $perClusterInsights,
+            'perPurokInsights' => $perPurokInsights,
+            'silhouette' => $result['silhouette'] ?? null,
+            'globalSummary' => $globalSummary,
+            'hierSummary' => $hierSummary,
         ]);
     }
 
