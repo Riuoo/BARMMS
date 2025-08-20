@@ -30,6 +30,7 @@ use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineRe
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineTransactionController;
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringController;
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\DecisionTreeController;
+use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringAnalysisController;
 use App\Http\Controllers\ResidentControllers\ResidentDashboardController;
 use App\Http\Controllers\ResidentControllers\ResidentBlotterController;
 use App\Http\Controllers\ResidentControllers\ResidentCommunityConcernController;
@@ -164,6 +165,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/templates/create', [DocumentTemplateController::class, 'create'])->name('admin.templates.create');
         Route::post('/templates', [DocumentTemplateController::class, 'store'])->name('admin.templates.store');
         Route::get('/templates/{template}/edit', [DocumentTemplateController::class, 'edit'])->name('admin.templates.edit');
+        Route::get('/templates/{template}/preview', [DocumentTemplateController::class, 'preview'])->name('admin.templates.preview');
+        Route::get('/templates/{template}/word-integration', [DocumentTemplateController::class, 'wordIntegration'])->name('admin.templates.word-integration');
+        Route::get('/templates/{template}/download-word', [DocumentTemplateController::class, 'downloadWord'])->name('admin.templates.download-word');
+        Route::post('/templates/{template}/upload-word', [DocumentTemplateController::class, 'uploadWord'])->name('admin.templates.upload-word');
         Route::put('/templates/{template}', [DocumentTemplateController::class, 'update'])->name('admin.templates.update');
         Route::post('/templates/{template}/reset', [DocumentTemplateController::class, 'reset'])->name('admin.templates.reset');
         Route::post('/templates/{template}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
@@ -276,6 +281,13 @@ Route::prefix('admin')->group(function () {
         Route::put('/accomplished-projects/{id}', [AccomplishProjectController::class, 'update'])->name('admin.accomplished-projects.update');
         Route::delete('/accomplished-projects/{id}', [AccomplishProjectController::class, 'destroy'])->name('admin.accomplished-projects.destroy');
         Route::post('/accomplished-projects/{id}/toggle-featured', [AccomplishProjectController::class, 'toggleFeatured'])->name('admin.accomplished-projects.toggle-featured');
+        
+        // Clustering Analysis Routes
+        Route::prefix('clustering')->group(function () {
+
+            Route::get('blotter/analysis', [ClusteringAnalysisController::class, 'blotterAnalysis'])->name('clustering.blotter.analysis');
+            Route::get('document/analysis', [ClusteringAnalysisController::class, 'documentAnalysis'])->name('clustering.document.analysis');
+        });
     });
 });
 

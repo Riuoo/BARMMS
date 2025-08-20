@@ -20,7 +20,9 @@ class CheckAdminRole
         $userRole = Session::get('user_role');
 
         if (!Session::has('user_id')) {
-            abort(403, 'Access Denied');
+            // If session expired, redirect to the landing page
+            notify()->error('Session expired. Please log in again.');
+            return redirect()->route('landing');
         }
 
         if ($userRole === 'admin') {
@@ -34,7 +36,9 @@ class CheckAdminRole
         }
 
         if (!in_array($userRole, $roles)) {
-            abort(403, 'Access Denied');
+            // If not authorized or session expired, redirect to the landing page
+            notify()->error('Session expired. Please log in again.');
+            return redirect()->route('landing');
         }
 
         return $next($request);

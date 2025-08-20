@@ -62,11 +62,35 @@ class ClusteringController
         $characteristics = $this->clusteringService->getClusterCharacteristics($result);
         // Build grouped array for purok summary
         $grouped = [];
+        
+        // First, get all unique puroks from the system
+        $allPuroks = [];
+        $residents = Residents::all();
+        foreach ($residents as $resident) {
+            $address = strtolower($resident->address ?? '');
+            if (preg_match('/purok\s*([a-z0-9]+)/i', $address, $m)) {
+                $purok = strtoupper($m[1]);
+                $allPuroks[$purok] = true;
+            }
+        }
+        $allPuroks = array_keys($allPuroks);
+        sort($allPuroks);
+        
+        // Group clusters by purok
         foreach ($characteristics as $idx => $c) {
             $p = $c['most_common_purok'] ?? 'N/A';
             if ($p === '' || $p === null) { $p = 'N/A'; }
             $grouped[$p] = $grouped[$p] ?? [];
             $grouped[$p][] = ['idx' => $idx, 'c' => $c];
+        }
+        
+        // For hierarchical view, ensure all puroks are represented
+        if ($useHierarchical) {
+            foreach ($allPuroks as $purok) {
+                if (!isset($grouped[$purok])) {
+                    $grouped[$purok] = [];
+                }
+            }
         }
 
         // Compute global most common employment and health across all clusters
@@ -243,6 +267,9 @@ class ClusteringController
             'silhouette' => $result['silhouette'] ?? null,
             'globalSummary' => $globalSummary,
             'hierSummary' => $hierSummary,
+            'incomeColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981', '#3B82F6'],
+            'employmentColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'],
+            'healthColors' => ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'],
         ]);
     }
 
@@ -433,4 +460,6 @@ class ClusteringController
         }
         return $distribution;
     }
+
+
 }

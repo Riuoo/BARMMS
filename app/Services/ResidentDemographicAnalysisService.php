@@ -502,6 +502,146 @@ class ResidentDemographicAnalysisService
         return $characteristics;
     }
 
+    /**
+     * Get top traits across all residents or filtered by category
+     */
+    public function getTopTraits(int $limit = 5, ?string $category = null): array
+    {
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        
+        if ($residents->isEmpty()) {
+            return [
+                'traits' => [],
+                'total_residents' => 0,
+                'category' => $category ?? 'all'
+            ];
+        }
+
+        $traits = [];
+        $totalResidents = $residents->count();
+
+        if ($category === null || $category === 'all') {
+            // Get top traits across all categories
+            $categories = ['education_level', 'income_level', 'employment_status', 'health_status'];
+            
+            foreach ($categories as $cat) {
+                $values = $residents->pluck($cat)->filter()->values();
+                $counts = array_count_values($values->toArray());
+                arsort($counts);
+                
+                $topValues = array_slice($counts, 0, $limit, true);
+                foreach ($topValues as $value => $count) {
+                    $percentage = round(($count / $totalResidents) * 100, 1);
+                    $traits[] = [
+                        'category' => $cat,
+                        'value' => $value,
+                        'count' => $count,
+                        'percentage' => $percentage
+                    ];
+                }
+            }
+            
+            // Sort by count descending
+            usort($traits, function($a, $b) {
+                return $b['count'] <=> $a['count'];
+            });
+            
+            // Return top overall traits
+            $traits = array_slice($traits, 0, $limit);
+            
+        } else {
+            // Get top traits for specific category
+            $values = $residents->pluck($category)->filter()->values();
+            $counts = array_count_values($values->toArray());
+            arsort($counts);
+            
+            $topValues = array_slice($counts, 0, $limit, true);
+            foreach ($topValues as $value => $count) {
+                $percentage = round(($count / $totalResidents) * 100, 1);
+                $traits[] = [
+                    'category' => $category,
+                    'value' => $value,
+                    'count' => $count,
+                    'percentage' => $percentage
+                ];
+            }
+        }
+
+        return [
+            'traits' => $traits,
+            'total_residents' => $totalResidents,
+            'category' => $category ?? 'all'
+        ];
+    }
+
+    /**
+     * Get demographic summary statistics
+     */
+    public function getDemographicSummary(): array
+    {
+        $residents = Residents::select('id', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status')->get();
+        
+        if ($residents->isEmpty()) {
+            return [
+                'total_residents' => 0,
+                'age_stats' => [],
+                'family_size_stats' => [],
+                'category_distributions' => []
+            ];
+        }
+
+        $ages = $residents->pluck('age')->filter()->values();
+        $familySizes = $residents->pluck('family_size')->filter()->values();
+        
+        $ageStats = [
+            'min' => $ages->min(),
+            'max' => $ages->max(),
+            'average' => round($ages->avg(), 1),
+            'median' => $this->calculateMedian($ages->toArray()),
+            'std_dev' => $this->stddev($ages->toArray())
+        ];
+        
+        $familySizeStats = [
+            'min' => $familySizes->min(),
+            'max' => $familySizes->max(),
+            'average' => round($familySizes->avg(), 1),
+            'median' => $this->calculateMedian($familySizes->toArray()),
+            'std_dev' => $this->stddev($familySizes->toArray())
+        ];
+
+        $categoryDistributions = [
+            'education' => array_count_values($residents->pluck('education_level')->filter()->toArray()),
+            'income' => array_count_values($residents->pluck('income_level')->filter()->toArray()),
+            'employment' => array_count_values($residents->pluck('employment_status')->filter()->toArray()),
+            'health' => array_count_values($residents->pluck('health_status')->filter()->toArray())
+        ];
+
+        return [
+            'total_residents' => $residents->count(),
+            'age_stats' => $ageStats,
+            'family_size_stats' => $familySizeStats,
+            'category_distributions' => $categoryDistributions
+        ];
+    }
+
+    /**
+     * Calculate median value from array
+     */
+    private function calculateMedian(array $values): float
+    {
+        if (empty($values)) return 0.0;
+        
+        sort($values);
+        $count = count($values);
+        $middle = floor($count / 2);
+        
+        if ($count % 2 === 0) {
+            return ($values[$middle - 1] + $values[$middle]) / 2;
+        } else {
+            return $values[$middle];
+        }
+    }
+
     public function findOptimalK(Collection $residents, int $maxK = 5): int
     {
 		$count = $residents->count();
@@ -875,5 +1015,179 @@ class ResidentDemographicAnalysisService
         $sum = 0.0;
         foreach ($arr as $v) $sum += pow($v-$mean,2);
         return round(sqrt($sum/($n-1)),1);
+    }
+
+    /**
+     * Generate mini bar chart HTML for view display
+     */
+    public function generateMiniBar(array $distribution, array $colors = []): string
+    {
+        if (empty($distribution)) {
+            return '<span class="text-gray-400">No data</span>';
+        }
+        
+        $total = array_sum($distribution);
+        if ($total <= 0) {
+            return '<span class="text-gray-400">No data</span>';
+        }
+        
+        $html = '<div class="flex items-center space-x-1">';
+        foreach ($distribution as $value => $count) {
+            $percentage = round(($count / $total) * 100);
+            $color = $colors[$value] ?? 'bg-gray-400';
+            
+            $html .= '<div class="flex flex-col items-center">';
+            $html .= '<div class="w-8 h-16 ' . $color . ' rounded-t" style="height: ' . max(8, ($percentage / 100) * 64) . 'px;" title="' . $value . ': ' . $percentage . '%"></div>';
+            $html .= '<span class="text-xs text-gray-600 mt-1">' . $percentage . '%</span>';
+            $html .= '</div>';
+        }
+        $html .= '</div>';
+        
+        return $html;
+    }
+
+    /**
+     * Calculate standard deviation with enhanced precision
+     */
+    public function calculateStandardDeviation(array $values, ?float $mean = null): float
+    {
+        $n = count($values);
+        if ($n < 2) return 0.0;
+        
+        if ($mean === null) {
+            $mean = array_sum($values) / $n;
+        }
+        
+        $sum = 0.0;
+        foreach ($values as $value) {
+            $sum += pow($value - $mean, 2);
+        }
+        
+        return round(sqrt($sum / ($n - 1)), 1);
+    }
+
+    /**
+     * Format cluster traits for view display
+     */
+    public function formatClusterTraits(array $cluster): array
+    {
+        $traits = [];
+        $total = $cluster['size'] ?? 0;
+        if ($total <= 0) return $traits;
+        
+        // Age analysis
+        if (isset($cluster['avg_age']) && isset($cluster['std_age'])) {
+            $age = $cluster['avg_age'];
+            $ageCategory = $age < 18 ? 'Youth' : ($age < 35 ? 'Young Adult' : ($age < 55 ? 'Middle Age' : ($age < 70 ? 'Senior' : 'Elderly')));
+            $traits[] = [
+                'label' => 'Age: ' . $ageCategory,
+                'pct' => round($age, 1),
+                'overall' => round($age, 1),
+                'diff' => 0
+            ];
+        }
+        
+        // Family size analysis
+        if (isset($cluster['avg_family_size'])) {
+            $size = $cluster['avg_family_size'];
+            $familyCategory = $size <= 2 ? 'Small' : ($size <= 4 ? 'Medium' : ($size <= 6 ? 'Large' : 'Very Large'));
+            $traits[] = [
+                'label' => 'Family: ' . $familyCategory,
+                'pct' => round($size, 1),
+                'overall' => round($size, 1),
+                'diff' => 0
+            ];
+        }
+        
+        // Education analysis
+        if (isset($cluster['education_distribution']) && !empty($cluster['education_distribution'])) {
+            $topEducation = null;
+            $maxCount = 0;
+            foreach ($cluster['education_distribution'] as $value => $count) {
+                if ($count > $maxCount) {
+                    $maxCount = $count;
+                    $topEducation = $value;
+                }
+            }
+            if ($topEducation) {
+                $pct = round(($maxCount / $total) * 100);
+                $traits[] = [
+                    'label' => 'Education: ' . $topEducation,
+                    'pct' => $pct,
+                    'overall' => $pct,
+                    'diff' => 0
+                ];
+            }
+        }
+        
+        // Income analysis
+        if (isset($cluster['income_distribution']) && !empty($cluster['income_distribution'])) {
+            $topIncome = null;
+            $maxCount = 0;
+            foreach ($cluster['income_distribution'] as $value => $count) {
+                if ($count > $maxCount) {
+                    $maxCount = $count;
+                    $topIncome = $value;
+                }
+            }
+            if ($topIncome) {
+                $pct = round(($maxCount / $total) * 100);
+                $traits[] = [
+                    'label' => 'Income: ' . $topIncome,
+                    'pct' => $pct,
+                    'overall' => $pct,
+                    'diff' => 0
+                ];
+            }
+        }
+        
+        // Employment analysis
+        if (isset($cluster['employment_distribution']) && !empty($cluster['employment_distribution'])) {
+            $topEmployment = null;
+            $maxCount = 0;
+            foreach ($cluster['employment_distribution'] as $value => $count) {
+                if ($count > $maxCount) {
+                    $maxCount = $count;
+                    $topEmployment = $value;
+                }
+            }
+            if ($topEmployment) {
+                $pct = round(($maxCount / $total) * 100);
+                $traits[] = [
+                    'label' => 'Employment: ' . $topEmployment,
+                    'pct' => $pct,
+                    'overall' => $pct,
+                    'diff' => 0
+                ];
+            }
+        }
+        
+        // Health analysis
+        if (isset($cluster['health_distribution']) && !empty($cluster['health_distribution'])) {
+            $topHealth = null;
+            $maxCount = 0;
+            foreach ($cluster['health_distribution'] as $value => $count) {
+                if ($count > $maxCount) {
+                    $maxCount = $count;
+                    $topHealth = $value;
+                }
+            }
+            if ($topHealth) {
+                $pct = round(($maxCount / $total) * 100);
+                $traits[] = [
+                    'label' => 'Health: ' . $topHealth,
+                    'pct' => $pct,
+                    'overall' => $pct,
+                    'diff' => 0
+                ];
+            }
+        }
+        
+        // Sort by percentage and return top 3
+        usort($traits, function($a, $b) {
+            return $b['pct'] <=> $a['pct'];
+        });
+        
+        return array_slice($traits, 0, 3);
     }
 }

@@ -13,10 +13,14 @@
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Blotter Reports</h1>
                 <p class="text-gray-600">Manage and review incident reports from residents</p>
             </div>
-            <div class="mt-4 sm:mt-0">
+            <div class="mt-4 sm:mt-0 flex space-x-2">
                 <a href="{{ route('admin.blotter-reports.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Create New Report
+                </a>
+                <a href="{{ route('clustering.blotter.analysis') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Analysis Dashboard
                 </a>
             </div>
         </div>

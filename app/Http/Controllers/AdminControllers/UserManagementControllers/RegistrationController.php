@@ -27,11 +27,10 @@ class RegistrationController
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:residents,email', // Ensure email is unique in residents table
-            'address' => 'required|string|max:500', // Added address validation
+            'email' => 'required|email|max:255|unique:residents,email',
+            'address' => 'required|string|max:500',
             'password' => 'required|string|min:8|confirmed',
             'token' => 'required|string',
-            // 'role' is now hardcoded in the form, so no need to validate it here from user input
         ]);
 
         if ($validator->fails()) {
@@ -51,17 +50,13 @@ class RegistrationController
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'resident', // Explicitly set role to 'resident'
-            'address' => $request->address, // Save the address
+            'role' => 'resident',
+            'address' => $request->address,
         ]);
 
-        // Update the account request status
         $accountRequest->status = 'completed';
-        $accountRequest->token = null; // Invalidate the token after use
+        $accountRequest->token = null;
         $accountRequest->save();
-
-        // Optionally, log the user in (uncomment if desired)
-        // auth()->login($user);
 
         notify()->success('Registration successful! You can now log in.');
         return redirect()->route('landing');

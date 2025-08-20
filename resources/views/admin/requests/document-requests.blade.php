@@ -20,6 +20,10 @@
                     <i class="fas fa-file-code mr-2"></i>
                     Manage Templates
                 </a>
+                <a href="{{ route('clustering.document.analysis') }}" class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Analysis Dashboard
+                </a>
             </div>
         </div>
     </div>

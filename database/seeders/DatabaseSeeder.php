@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             HealthCenterActivitySeeder::class,
             MedicalRecordSeeder::class,
             MedicineTransactionSeeder::class,
+            BlotterRequestSeeder::class,
+            DocumentRequestSeeder::class,
         ]);
     }
 }

@@ -1,83 +1,99 @@
 @extends('admin.main.layout')
 
-@section('title', 'Resident Clustering Analysis')
+@section('title', 'Resident Groups Analysis')
 
 @section('content')
+@php
+    // Service instance for data processing
+    $demographicService = app(\App\Services\ResidentDemographicAnalysisService::class);
+@endphp
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Enhanced Header Section -->
-    <div class="mb-3">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">Resident Demographic Clustering</h1>
-                <p class="text-gray-600 text-lg">AI-powered demographic analysis to group residents for targeted services</p>
-            </div>
-            <div class="hidden md:flex items-center space-x-4">
+    <!-- Simple Header Section -->
+    <div class="mb-6">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-3">Resident Groups Analysis</h1>
+            <p class="text-gray-600 text-lg mb-4">Understanding our community by grouping residents with similar characteristics</p>
+            
+            <!-- Simple Controls -->
+            <div class="flex flex-wrap justify-center gap-3 mb-4">
                 @php
                     $baseUrl = route('admin.clustering');
-                    $qs = request()->query();
                     $isHier = !empty($useHierarchical);
                     $isAutoK = !empty($useOptimalK);
                     $kValue = $k ?? 3;
-                    $urlWith = function($arr) use ($baseUrl, $qs) {
-                        return $baseUrl . '?' . http_build_query(array_merge($qs, $arr));
-                    };
                 @endphp
-                <!-- Hierarchical toggle -->
-                <a href="{{ $urlWith(['hierarchical' => $isHier ? null : 1, 'use_optimal_k' => null]) }}" class="inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium {{ $isHier ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300' }} hover:opacity-90">
-                    <i class="fas fa-layer-group mr-2"></i>
-                    {{ $isHier ? 'Hierarchical ON' : 'Hierarchical OFF' }}
+                
+                <!-- Simple Mode Toggle -->
+                <a href="{{ $baseUrl }}?hierarchical={{ $isHier ? '' : '1' }}" 
+                   class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium {{ $isHier ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} hover:opacity-90">
+                    <i class="fas fa-map-marker-alt mr-2"></i>
+                    {{ $isHier ? 'By Area' : 'Overall' }}
                 </a>
-                <!-- K mode controls -->
-                @if($isHier)
-                    <form method="GET" action="{{ $baseUrl }}" class="flex items-center space-x-2">
-                        @foreach(request()->except(['use_optimal_k', 'k']) as $key => $val)
-                            @if(!is_null($val) && $val !== '')
-                                <input type="hidden" name="{{ $key }}" value="{{ $val }}">
-                            @endif
-                        @endforeach
+                
+                <!-- Auto-K Toggle -->
+                <form method="GET" action="{{ $baseUrl }}" class="inline-flex items-center gap-2">
+                    @foreach(request()->except(['use_optimal_k', 'k', 'hierarchical']) as $key => $val)
+                        @if(!is_null($val) && $val !== '')
+                            <input type="hidden" name="{{ $key }}" value="{{ $val }}">
+                        @endif
+                    @endforeach
+                    @if($isHier)
                         <input type="hidden" name="hierarchical" value="1">
-                        <label class="text-sm text-gray-700">K mode:</label>
-                        <label class="inline-flex items-center text-sm">
-                            <input type="radio" name="use_optimal_k" value="1" {{ $isAutoK ? 'checked' : '' }} onchange="this.form.submit()">
-                            <span class="ml-1">Auto-K per purok</span>
-                        </label>
-                        <label class="inline-flex items-center text-sm ml-2">
-                            <input type="radio" name="use_optimal_k" value="0" {{ !$isAutoK ? 'checked' : '' }} onchange="this.form.submit()">
-                            <span class="ml-1">Manual K per purok</span>
-                        </label>
-                        <input type="number" name="k" min="2" max="10" value="{{ $kValue }}" class="w-16 px-2 py-1 border border-gray-300 rounded ml-2" {{ $isAutoK ? 'disabled' : '' }} />
-                    </form>
-                @else
-                    <form method="GET" action="{{ $baseUrl }}" class="flex items-center space-x-2">
-                        @foreach(request()->except(['use_optimal_k', 'k', 'hierarchical']) as $key => $val)
-                            @if(!is_null($val) && $val !== '')
-                                <input type="hidden" name="{{ $key }}" value="{{ $val }}">
-                            @endif
-                        @endforeach
-                        <label class="text-sm text-gray-700">K mode:</label>
-                        <label class="inline-flex items-center text-sm">
-                            <input type="radio" name="use_optimal_k" value="1" {{ $isAutoK ? 'checked' : '' }} onchange="this.form.submit()">
-                            <span class="ml-1">Auto-K (global)</span>
-                        </label>
-                        <label class="inline-flex items-center text-sm ml-2">
-                            <input type="radio" name="use_optimal_k" value="0" {{ !$isAutoK ? 'checked' : '' }} onchange="this.form.submit()">
-                            <span class="ml-1">Manual K (global)</span>
-                        </label>
-                        <input type="number" name="k" min="2" max="10" value="{{ $kValue }}" class="w-16 px-2 py-1 border border-gray-300 rounded ml-2" {{ $isAutoK ? 'disabled' : '' }} />
-                    </form>
+                    @endif
+                    <label class="inline-flex items-center text-sm">
+                        <input type="checkbox" name="use_optimal_k" value="1" {{ $isAutoK ? 'checked' : '' }} onchange="this.form.submit()" class="mr-2">
+                        <span>Auto-detect groups</span>
+                    </label>
+                </form>
+                
+                <!-- Manual K Selection (only when not using auto-K) -->
+                @if(!$isAutoK)
+                <form method="GET" action="{{ $baseUrl }}" class="inline-flex items-center gap-2">
+                    @foreach(request()->except(['k', 'hierarchical']) as $key => $val)
+                        @if(!is_null($val) && $val !== '')
+                            <input type="hidden" name="{{ $key }}" value="{{ $val }}">
+                        @endif
+                    @endforeach
+                    @if($isHier)
+                        <input type="hidden" name="hierarchical" value="1">
+                    @endif
+                    <label class="text-sm text-gray-700 font-medium">Number of Groups:</label>
+                    <select name="k" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" onchange="this.form.submit()">
+                        @for($i = 2; $i <= 6; $i++)
+                            <option value="{{ $i }}" {{ $kValue == $i ? 'selected' : '' }}>{{ $i }}</option>
+                        @endfor
+                    </select>
+                </form>
                 @endif
-                <button onclick="refreshAnalysis()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
+                
+                <!-- Action Buttons -->
+                <button onclick="refreshAnalysis()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">
                     <i class="fas fa-sync-alt mr-2"></i>
-                    Refresh Analysis
+                    Refresh
                 </button>
-                <button onclick="window.print()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
+                
+                <button onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
                     <i class="fas fa-print mr-2"></i>
-                    Print Report
+                    Print
                 </button>
-                <button onclick="exportData()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                    <i class="fas fa-download mr-2"></i>
-                    Export Data
-                </button>
+            </div>
+            
+            <!-- Current Settings -->
+            <div class="flex flex-wrap justify-center gap-2 text-sm">
+                <span class="inline-flex items-center px-3 py-1 rounded-full {{ $isHier ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700' }}">
+                    <i class="fas fa-map-marker-alt mr-1"></i>
+                    {{ $isHier ? 'Grouped by Area' : 'Overall Groups' }}
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full {{ $isAutoK ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-700' }}">
+                    <i class="fas fa-users mr-1"></i>
+                    {{ $isAutoK ? 'Auto Groups' : $k . ' Groups' }}
+                </span>
+                @if(isset($silhouette))
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800" title="Quality score - higher is better">
+                    <i class="fas fa-star mr-1"></i>
+                    Quality: {{ number_format($silhouette ?? 0, 2) }}
+                </span>
+                @endif
             </div>
         </div>
     </div>
@@ -138,7 +154,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Clusters Found or Puroks Found Card -->
+            <!-- Groups Found -->
             @if(!$isHier)
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
                 <div class="flex items-center">
@@ -148,7 +164,7 @@
                         </div>
                     </div>
                     <div class="ml-3 md:ml-4">
-                        <p class="text-xs md:text-sm font-medium text-gray-500">Clusters Found</p>
+                        <p class="text-xs md:text-sm font-medium text-gray-500">Groups Found</p>
                         <p class="text-lg md:text-2xl font-bold text-gray-900">{{ count($clusters) }}</p>
                     </div>
                 </div>
@@ -157,12 +173,12 @@
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center">
-                            <i class="fas fa-map-marker-alt text-indigo-600 text-sm md:text-base"></i>
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt text-purple-600 text-sm md:text-base"></i>
                         </div>
                     </div>
-                    <div class="ml-3 md:ml-4">
-                        <p class="text-xs md:text-sm font-medium text-gray-500">Puroks Found</p>
+                    <div class="ml-3 md:ml-4">  
+                        <p class="text-xs md:text-sm font-medium text-gray-500">Areas Found</p>
                         <p class="text-lg md:text-2xl font-bold text-gray-900">{{ count(array_filter(array_keys($grouped), fn($p) => $p !== 'N/A')) }}</p>
                     </div>
                 </div>
@@ -256,8 +272,8 @@
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-lg font-semibold text-gray-900">
-                            <i class="fas fa-table text-green-600 mr-2"></i>
-                            Detailed Resident Analysis
+                            <i class="fas fa-users text-green-600 mr-2"></i>
+                            Resident List
                         </h3>
                         @php
                             // Build flat rows once for table and filters
@@ -366,7 +382,7 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <button onclick="viewResident({{ $resident->id ?? 0 }})" class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+                                            <button data-action="view-resident" data-resident-id="{{ $resident->id ?? 0 }}" class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                         </td>
@@ -394,7 +410,7 @@
                 </div>
             </div>
 
-            <!-- Cluster Characteristics -->
+            <!-- Group Summary -->
             <div class="bg-white rounded-xl shadow-lg border border-gray-100">
                 <div class="p-6">
                     <!-- Section Header and Description -->
@@ -402,26 +418,24 @@
                         <h2 class="text-2xl font-extrabold text-indigo-900 flex items-center gap-2 mb-2">
                             <i class="fas fa-info-circle text-indigo-600"></i>
                             @if($isHier)
-                                Cluster Characteristics by Purok
+                                Group Summary by Area
                             @else
-                                Cluster Characteristics
+                                Group Summary
                             @endif
                         </h2>
                         <p class="text-gray-700 text-base">
                             @if($isHier)
-                                This section summarizes the demographic clusters found within each purok. Click a purok to expand and see its clusters. Each cluster card highlights the most common traits and a quick insight for that group.
+                                This section shows how residents are grouped within each area. Each group highlights the most common characteristics of its members.
                             @else
-                                This section summarizes the demographic clusters found in the dataset. Each cluster card highlights the most common traits and a quick insight for that group.
+                                This section shows how residents are grouped based on similar characteristics. Each group highlights the most common traits of its members.
                             @endif
                         </p>
                     </div>
-                    <!-- Legend -->
+                    <!-- Simple Legend -->
                     <div class="mb-3 flex flex-wrap gap-4 items-center text-xs">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-800 font-semibold"><i class="fas fa-arrow-up mr-1"></i> High/Good</span>
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-semibold"><i class="fas fa-minus mr-1"></i> Medium/Fair</span>
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-red-100 text-red-800 font-semibold"><i class="fas fa-arrow-down mr-1"></i> Low/Critical</span>
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 font-semibold"><i class="fas fa-briefcase mr-1"></i> Employed</span>
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 font-semibold"><i class="fas fa-users mr-1"></i> Residents</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-800 font-semibold"><i class="fas fa-check mr-1"></i> Good</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-semibold"><i class="fas fa-minus mr-1"></i> Average</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-red-100 text-red-800 font-semibold"><i class="fas fa-exclamation-triangle mr-1"></i> Needs Attention</span>
                     </div>
                     @php
                         $grouped = [];
@@ -458,13 +472,13 @@
                                             }
                                         }
                                         
-                                        $incomes[] = $c['most_common_income'];
-                                        $employments[] = $c['most_common_employment'];
-                                        $healths[] = $c['most_common_health'];
+                                        $incomes[] = $c['most_common_income'] ?? 'N/A';
+                                        $employments[] = $c['most_common_employment'] ?? 'N/A';
+                                        $healths[] = $c['most_common_health'] ?? 'N/A';
                                     }
                                     
-                                    // Skip puroks with no residents or N/A purok
-                                    if ($total === 0 || $purok === 'N/A') {
+                                    // Skip N/A purok
+                                    if ($purok === 'N/A') {
                                         continue;
                                     }
                                     
@@ -473,6 +487,17 @@
                                     $mostCommonHealth = array_count_values($healths) ? array_search(max(array_count_values($healths)), array_count_values($healths)) : 'N/A';
                                     $mostCommonAge = !empty($allAges) && array_count_values($allAges) ? array_search(max(array_count_values($allAges)), array_count_values($allAges)) : 'N/A';
                                     $mostCommonFamilySize = !empty($allFamilySizes) && array_count_values($allFamilySizes) ? array_search(max(array_count_values($allFamilySizes)), array_count_values($allFamilySizes)) : 'N/A';
+                                    
+                                    // Calculate detailed statistics for expanded view
+                                    $avgAge = !empty($allAges) ? round(array_sum($allAges) / count($allAges), 1) : 'N/A';
+                                    $stdAge = !empty($allAges) && count($allAges) > 1 ? round(sqrt(array_sum(array_map(function($x) use ($avgAge) { return pow($x - $avgAge, 2); }, $allAges)) / (count($allAges) - 1)), 1) : 'N/A';
+                                    $avgFamilySize = !empty($allFamilySizes) ? round(array_sum($allFamilySizes) / count($allFamilySizes), 1) : 'N/A';
+                                    $stdFamilySize = !empty($allFamilySizes) && count($allFamilySizes) > 1 ? round(sqrt(array_sum(array_map(function($x) use ($avgFamilySize) { return pow($x - $avgFamilySize, 2); }, $allFamilySizes)) / (count($allFamilySizes) - 1)), 1) : 'N/A';
+                                    
+                                    // Calculate distributions for bar charts
+                                    $incomeDistribution = array_count_values($incomes);
+                                    $employmentDistribution = array_count_values($employments);
+                                    $healthDistribution = array_count_values($healths);
                                 @endphp
                                 <div class="purok-group-card shadow-lg rounded-xl bg-white border border-indigo-100 mb-3 p-4">
                                     <div class="flex items-center gap-2 mb-2">
@@ -481,33 +506,145 @@
                                         </span>
                                         <span class="bg-indigo-200 text-indigo-800 text-xs font-semibold px-2 py-1 rounded-full">{{ $total }} residents</span>
                                     </div>
-                                    @php $purokKey = strtolower($purok); @endphp
-                                    @if(isset($perPurokInsights[$purokKey]))
-                                        @php $pins = $perPurokInsights[$purokKey]; @endphp
-                                        <div class="mb-2 flex flex-wrap gap-2">
-                                            @if(!empty($pins['program']))
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                                    <i class="fas fa-magic mr-1"></i>
-                                                    Model: {{ $pins['program'] }} ({{ $pins['program_confidence'] }}%)
-                                                </span>
-                                            @endif
-                                            @if(!empty($pins['eligibility']))
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    <i class="fas fa-check mr-1"></i>
-                                                    Eligibility: {{ $pins['eligibility'] }} ({{ $pins['eligibility_confidence'] }}%)
-                                                </span>
-                                            @endif
-                                            @if(!empty($pins['risk']))
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                    <i class="fas fa-heartbeat mr-1"></i>
-                                                    Risk: {{ $pins['risk'] }} ({{ $pins['risk_confidence'] }}%)
-                                                </span>
-                                            @endif
+                                    
+                                    @if($total > 0)
+                                        @php $purokKey = strtolower($purok); @endphp
+                                        @if(isset($perPurokInsights[$purokKey]))
+                                            @php $pins = $perPurokInsights[$purokKey]; @endphp
+                                            <div class="mb-2 flex flex-wrap gap-2">
+                                                @if(!empty($pins['program']))
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                        <i class="fas fa-magic mr-1"></i>
+                                                        Model: {{ $pins['program'] }} ({{ $pins['program_confidence'] }}%)
+                                                    </span>
+                                                @endif
+                                                @if(!empty($pins['eligibility']))
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <i class="fas fa-check mr-1"></i>
+                                                        Eligibility: {{ $pins['eligibility'] }} ({{ $pins['eligibility_confidence'] }}%)
+                                                    </span>
+                                                @endif
+                                                @if(!empty($pins['risk']))
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                        <i class="fas fa-heartbeat mr-1"></i>
+                                                        Risk: {{ $pins['risk'] }} ({{ $pins['risk_confidence'] }}%)
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                        <div class="mb-2 text-xs text-gray-700"><i class="fas fa-tag mr-1 text-gray-500"></i>Label: <span class="font-semibold text-gray-900">{{ $items[0]['c']['label'] ?? 'N/A' }}</span></div>
+                                        
+                                        <!-- Compact View (Default) -->
+                                        <div class="compact-view">
+                                            <div class="mb-2 text-xs text-gray-700">
+                                                <span class="font-semibold">Most Common:</span>
+                                                <span class="ml-2">Age: {{ $mostCommonAge }}, Family: {{ $mostCommonFamilySize }}, Income: {{ $mostCommonIncome }}, Employment: {{ $mostCommonEmployment }}, Health: {{ $mostCommonHealth }}</span>
+                                            </div>
+                                            
+                                            <!-- Expand Button -->
+                                            <div class="flex justify-between items-center mt-3">
+                                                <button data-action="toggle-purok-details" data-purok="{{ $purok }}" class="text-indigo-600 hover:text-indigo-800 text-xs font-medium flex items-center gap-1">
+                                                    <i class="fas fa-chevron-down" id="icon-{{ $purok }}"></i>
+                                                    Show Details
+                                                </button>
+                                                <button data-action="show-purok-modal" data-purok="{{ $purok }}" data-payload="{{ e(json_encode([
+                                                    'total' => $total,
+                                                    'avgAge' => $avgAge,
+                                                    'stdAge' => $stdAge,
+                                                    'avgFamilySize' => $avgFamilySize,
+                                                    'stdFamilySize' => $stdFamilySize,
+                                                    'mostCommonAge' => $mostCommonAge,
+                                                    'mostCommonFamilySize' => $mostCommonFamilySize,
+                                                    'mostCommonIncome' => $mostCommonIncome,
+                                                    'mostCommonEmployment' => $mostCommonEmployment,
+                                                    'mostCommonHealth' => $mostCommonHealth,
+                                                    'incomeDistribution' => $incomeDistribution,
+                                                    'employmentDistribution' => $employmentDistribution,
+                                                    'healthDistribution' => $healthDistribution,
+                                                    'label' => $items[0]["c"]["label"] ?? "N/A",
+                                                    'pins' => isset($pins) ? [
+                                                        'program' => $pins['program'] ?? null,
+                                                        'program_confidence' => $pins['program_confidence'] ?? null,
+                                                        'eligibility' => $pins['eligibility'] ?? null,
+                                                        'eligibility_confidence' => $pins['eligibility_confidence'] ?? null,
+                                                        'risk' => $pins['risk'] ?? null,
+                                                        'risk_confidence' => $pins['risk_confidence'] ?? null
+                                                    ] : null
+                                                ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                    Full Analysis
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Expanded View (Hidden by default) -->
+                                        <div class="expanded-view hidden" id="expanded-{{ $purok }}">
+                                            <div class="border-t pt-3 mt-3">
+                                                <div class="mb-2 text-xs text-gray-700">
+                                                    <span class="font-semibold">Size:</span> {{ $total }} ({{ round(($total / array_sum(array_column($characteristics, 'size'))) * 100, 1) }}%)
+                                                </div>
+                                                <div class="mb-2 text-xs text-gray-700">
+                                                    <span class="font-semibold">Age:</span> {{ $avgAge }} ± {{ $stdAge }}
+                                                    <span class="ml-2 font-semibold">Family size:</span> {{ $avgFamilySize }} ± {{ $stdFamilySize }}
+                                                </div>
+                                                
+                                                <!-- Top Traits -->
+                                                <div class="mb-3">
+                                                    <h6 class="text-xs font-semibold text-gray-700 mb-2">Top Traits:</h6>
+                                                    <div class="flex flex-wrap gap-1">
+                                                        @php
+                                                            $traits = [];
+                                                            if (!empty($incomeDistribution)) {
+                                                                $topIncome = array_search(max($incomeDistribution), $incomeDistribution);
+                                                                $traits[] = "Income: {$topIncome} " . round(($incomeDistribution[$topIncome] / $total) * 100) . "%";
+                                                            }
+                                                            if (!empty($employmentDistribution)) {
+                                                                $topEmployment = array_search(max($employmentDistribution), $employmentDistribution);
+                                                                $traits[] = "Employment: {$topEmployment} " . round(($employmentDistribution[$topEmployment] / $total) * 100) . "%";
+                                                            }
+                                                            if (!empty($healthDistribution)) {
+                                                                $topHealth = array_search(max($healthDistribution), $healthDistribution);
+                                                                $traits[] = "Health: {$topHealth} " . round(($healthDistribution[$topHealth] / $total) * 100) . "%";
+                                                            }
+                                                            $traits = array_slice($traits, 0, 3);
+                                                        @endphp
+                                                        @foreach($traits as $trait)
+                                                            <span class="inline-block px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-bold">{{ $trait }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Mini Bar Charts -->
+                                                <div class="space-y-2">
+                                                    @if(!empty($incomeDistribution))
+                                                        <div class="text-xs">
+                                                            <span class="font-semibold text-gray-700">Income:</span>
+                                                            {!! $demographicService->generateMiniBar($incomeDistribution, $incomeColors) !!}
+                                                        </div>
+                                                    @endif
+                                                    @if(!empty($employmentDistribution))
+                                                        <div class="text-xs">
+                                                            <span class="font-semibold text-gray-700">Employment:</span>
+                                                            {!! $demographicService->generateMiniBar($employmentDistribution, $employmentColors) !!}
+                                                        </div>
+                                                    @endif
+                                                    @if(!empty($healthDistribution))
+                                                        <div class="text-xs">
+                                                            <span class="font-semibold text-gray-700">Health:</span>
+                                                            {!! $demographicService->generateMiniBar($healthDistribution, $healthColors) !!}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <!-- Show empty purok message -->
+                                        <div class="text-center py-4 text-gray-500">
+                                            <i class="fas fa-map-marker-alt text-2xl mb-2"></i>
+                                            <p class="text-sm">No residents assigned to this area yet</p>
+                                            <p class="text-xs mt-1">Residents will appear here once they are added to the system</p>
                                         </div>
                                     @endif
-                                    <div class="mb-2 text-xs text-gray-700"><i class="fas fa-tag mr-1 text-gray-500"></i>Label: <span class="font-semibold text-gray-900">{{ $it['c']['label'] ?? 'N/A' }}</span></div>
-                                    <!-- Simplified summary removed to avoid redundancy -->
-                                    <!-- Model-driven tips replace heuristic block -->
                                 </div>
                             @endforeach
                         </div>
@@ -520,81 +657,115 @@
                                         $age = $cluster['most_common_age'] ?? $cluster['avg_age'];
                                         $familySize = $cluster['most_common_family_size'] ?? $cluster['avg_family_size'];
                                         
-                                        // Validate and format the values
-                                        $mostCommonAge = (is_numeric($age) && $age > 0) ? (int)$age : 'N/A';
-                                        $mostCommonFamilySize = (is_numeric($familySize) && $familySize > 0) ? (int)$familySize : 'N/A';
+                                        // Get top traits for this cluster
+                                        $traits = $demographicService->formatClusterTraits($cluster);
                                     @endphp
-                                    <div class="purok-group-card shadow-lg rounded-xl bg-white border border-indigo-100 mb-3 p-4">
+                                    <div class="cluster-card shadow-lg rounded-xl bg-white border border-purple-100 mb-3 p-4">
                                         <div class="flex items-center gap-2 mb-2">
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-base font-bold bg-blue-600 text-white shadow mr-2">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-base font-bold bg-purple-600 text-white shadow mr-2">
                                                 <i class="fas fa-layer-group mr-1"></i> Cluster {{ $clusterId + 1 }}
                                             </span>
-                                            <span class="bg-blue-200 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">{{ $cluster['size'] }} residents</span>
+                                            <span class="bg-purple-200 text-purple-800 text-xs font-semibold px-2 py-1 rounded-full">{{ $cluster['size'] }} residents</span>
                                         </div>
-                                        @if(isset($perClusterInsights[$clusterId]))
-                                            @php $ins = $perClusterInsights[$clusterId]; @endphp
+                                        
+                                        @if(isset($insightCounts[$clusterId]))
+                                            @php $insights = $insightCounts[$clusterId]; @endphp
                                             <div class="mb-2 flex flex-wrap gap-2">
-                                                @if(!empty($ins['program']))
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                @if(!empty($insights['program']))
+                                                    @php $topProgram = array_search(max($insights['program']), $insights['program']); $programConfidence = round(($insights['program'][$topProgram] / $insights['total']) * 100); @endphp
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                                         <i class="fas fa-magic mr-1"></i>
-                                                        Model: {{ $ins['program'] }} ({{ $ins['program_confidence'] }}%)
+                                                        Model: {{ $topProgram }} ({{ $programConfidence }}%)
                                                     </span>
                                                 @endif
-                                                @if(!empty($ins['eligibility']))
+                                                @if(!empty($insights['eligibility']))
+                                                    @php $topEligibility = array_search(max($insights['eligibility']), $insights['eligibility']); $eligibilityConfidence = round(($insights['eligibility'][$topEligibility] / $insights['total']) * 100); @endphp
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         <i class="fas fa-check mr-1"></i>
-                                                        Eligibility: {{ $ins['eligibility'] }} ({{ $ins['eligibility_confidence'] }}%)
+                                                        Eligibility: {{ $topEligibility }} ({{ $eligibilityConfidence }}%)
                                                     </span>
                                                 @endif
-                                                @if(!empty($ins['risk']))
+                                                @if(!empty($insights['risk']))
+                                                    @php $topRisk = array_search(max($insights['risk']), $insights['risk']); $riskConfidence = round(($insights['risk'][$topRisk] / $insights['total']) * 100); @endphp
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                                         <i class="fas fa-heartbeat mr-1"></i>
-                                                        Risk: {{ $ins['risk'] }} ({{ $ins['risk_confidence'] }}%)
+                                                        Risk: {{ $topRisk }} ({{ $riskConfidence }}%)
                                                     </span>
                                                 @endif
                                             </div>
                                         @endif
-                                        @if(!empty($cluster['label']))
+                                        <div class="mb-2 text-xs text-gray-700"><i class="fas fa-tag mr-1 text-gray-500"></i>Label: <span class="font-semibold text-gray-900">{{ $cluster['label'] ?? 'N/A' }}</span></div>
+                                        
+                                        <!-- Compact View (Default) -->
+                                        <div class="compact-view">
                                             <div class="mb-2 text-xs text-gray-700">
-                                                <i class="fas fa-tag mr-1 text-gray-500"></i>
-                                                Label: <span class="font-semibold text-gray-900">{{ $cluster['label'] }}</span>
+                                                <span class="font-semibold">Size:</span> {{ $cluster['size'] }} ({{ $cluster['percent_of_total'] ?? '?' }}%)
+                                                @if(!empty($cluster['outlier_count']))
+                                                    <span class="ml-2 inline-block px-2 py-0.5 rounded-full bg-red-100 text-red-800">{{ $cluster['outlier_count'] }} outlier{{ $cluster['outlier_count']>1?'s':'' }}</span>
+                                                @endif
                                             </div>
-                                        @endif
-                                        <!-- Simplified summary removed to avoid redundancy -->
-                                        <!-- Model-driven tips replace heuristic block -->
-                                        {{-- ADVANCED CHARACTERISTICS BLOCK --}}
-                                        @php
-                                            $traits = topTraits($cluster);
-                                        @endphp
-                                        <div class="mb-2 text-xs text-gray-700">
-                                            <span class="font-semibold">Size:</span> {{ $cluster['size'] }} ({{ $cluster['percent_of_total'] ?? '?' }}%)
-                                            @if(!empty($cluster['outlier_count']))
-                                                <span class="ml-2 inline-block px-2 py-0.5 rounded-full bg-red-100 text-red-800">{{ $cluster['outlier_count'] }} outlier{{ $cluster['outlier_count']>1?'s':'' }}</span>
-                                            @endif
-                                        </div>
-                                        <div class="mb-2 text-xs text-gray-700">
-                                            <span class="font-semibold">Age:</span> {{ $cluster['avg_age'] }} ± {{ $cluster['std_age'] }}
-                                            <span class="ml-2 font-semibold">Family size:</span> {{ $cluster['avg_family_size'] }} ± {{ $cluster['std_family_size'] }}
-                                        </div>
-                                        @if(count($traits))
-                                            <div class="mb-2 text-xs">
-                                                <span class="font-semibold">Top Traits:</span>
-                                                @foreach($traits as $t)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t['diff']>0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}" title="{{ $t['label'] }}: {{ $t['pct'] }}% (overall: {{ $t['overall'] }}%)">
-                                                        @if($t['diff']>0)<i class="fas fa-arrow-up mr-1"></i>@elseif($t['diff']<0)<i class="fas fa-arrow-down mr-1"></i>@else<i class="fas fa-minus mr-1"></i>@endif
-                                                        {{ $t['label'] }} {{ $t['pct'] }}%
-                                                    </span>
-                                                @endforeach
+                                            <div class="mb-2 text-xs text-gray-700">
+                                                <span class="font-semibold">Age:</span> {{ $cluster['avg_age'] ?? 'N/A' }} ± {{ $cluster['std_age'] ?? 'N/A' }}
+                                                <span class="ml-2 font-semibold">Family size:</span> {{ $cluster['avg_family_size'] ?? 'N/A' }} ± {{ $cluster['std_family_size'] ?? 'N/A' }}
                                             </div>
-                                        @endif
-                                        <div class="mb-2 text-xs">
-                                            <span class="font-semibold">Income:</span> {!! miniBar($cluster['income_distribution']??[], $incomeColors) !!}
-                                            <span class="ml-2 font-semibold">Employment:</span> {!! miniBar($cluster['employment_distribution']??[], $employmentColors) !!}
-                                            <span class="ml-2 font-semibold">Health:</span> {!! miniBar($cluster['health_distribution']??[], $healthColors) !!}
+                                            
+                                            <!-- Expand Button -->
+                                            <div class="flex justify-between items-center mt-3">
+                                                <button data-action="toggle-cluster-details" data-cluster-id="{{ $clusterId }}" class="text-purple-600 hover:text-purple-800 text-xs font-medium flex items-center gap-1">
+                                                    <i class="fas fa-chevron-down" id="cluster-icon-{{ $clusterId }}"></i>
+                                                    Show Details
+                                                </button>
+                                                <button data-action="show-cluster-modal" data-cluster-id="{{ $clusterId }}" data-payload="{{ e(json_encode([
+                                                    'cluster' => $cluster,
+                                                    'traits' => $traits,
+                                                    'insights' => isset($insights) ? $insights : null
+                                                ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                    Full Analysis
+                                                </button>
+                                            </div>
                                         </div>
-                                        @if(!empty($cluster['health_percent']['Critical']) && $cluster['health_percent']['Critical'] > 40)
-                                            <span class="inline-block px-2 py-0.5 rounded-full bg-red-600 text-white text-xs font-bold"><i class="fas fa-exclamation-triangle mr-1"></i>High Health Risk!</span>
-                                        @endif
+                                        
+                                        <!-- Expanded View (Hidden by default) -->
+                                        <div class="expanded-view hidden" id="expanded-cluster-{{ $clusterId }}">
+                                            <div class="border-t pt-3 mt-3">
+                                                <!-- Top Traits -->
+                                                <div class="mb-3">
+                                                    <h6 class="text-xs font-semibold text-gray-700 mb-2">Top Traits:</h6>
+                                                    <div class="flex flex-wrap gap-1">
+                                                        @foreach($traits as $trait)
+                                                            <span class="inline-block px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-bold">{{ $trait['label'] }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Mini Bar Charts -->
+                                                <div class="space-y-2">
+                                                    @if(!empty($cluster['income_distribution']))
+                                                        <div class="text-xs">
+                                                            <span class="font-semibold text-gray-700">Income:</span>
+                                                            {!! $demographicService->generateMiniBar($cluster['income_distribution'], $incomeColors) !!}
+                                                        </div>
+                                                    @endif
+                                                    @if(!empty($cluster['employment_distribution']))
+                                                        <div class="text-xs">
+                                                            <span class="font-semibold text-gray-700">Employment:</span>
+                                                            {!! $demographicService->generateMiniBar($cluster['employment_distribution'], $employmentColors) !!}
+                                                        </div>
+                                                    @endif
+                                                    @if(!empty($cluster['health_distribution']))
+                                                        <div class="text-xs">
+                                                            <span class="font-semibold text-gray-700">Health:</span>
+                                                            {!! $demographicService->generateMiniBar($cluster['health_distribution'], $healthColors) !!}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                
+                                                @if(!empty($cluster['health_percent']['Critical'] ?? null) && ($cluster['health_percent']['Critical'] ?? 0) > 40)
+                                                    <span class="inline-block px-2 py-0.5 rounded-full bg-red-600 text-white text-xs font-bold mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>High Health Risk!</span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                 @endif
                             @endforeach
@@ -604,23 +775,14 @@
             </div>
         </div>
 
-        <!-- Analytics Dashboard Section -->
+        <!-- Charts and Graphs -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100 mb-3">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-3">
-                                            <h3 class="text-lg font-semibold text-gray-900">
-                            <i class="fas fa-chart-bar text-blue-600 mr-2"></i>
-                            Analytics Dashboard
-                            @if(!empty($useOptimalK))
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 ml-2">
-                                    <i class="fas fa-magic mr-1"></i>Auto K={{ $k }}
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 ml-2">
-                                    <i class="fas fa-cog mr-1"></i>Manual K={{ $k }}
-                                </span>
-                            @endif
-                        </h3>
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        <i class="fas fa-chart-bar text-blue-600 mr-2"></i>
+                        Charts and Graphs
+                    </h3>
                     <div class="flex space-x-2">
                         <button onclick="downloadAllCharts()" class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
                             <i class="fas fa-download mr-1"></i>
@@ -635,7 +797,7 @@
                     <div class="bg-gray-50 rounded-lg p-4">
                         <h4 class="text-md font-semibold text-gray-900 mb-3">
                             <i class="fas fa-coins text-green-600 mr-2"></i>
-                            Income Level Distribution
+                            Income Levels
                         </h4>
                         <div class="chart-container" style="position: relative; height: 300px;">
                             <canvas id="incomeChart"></canvas>
@@ -646,7 +808,7 @@
                     <div class="bg-gray-50 rounded-lg p-4">
                         <h4 class="text-md font-semibold text-gray-900 mb-3">
                             <i class="fas fa-briefcase text-blue-600 mr-2"></i>
-                            Employment Status Distribution
+                            Employment Status
                         </h4>
                         <div class="chart-container" style="position: relative; height: 300px;">
                             <canvas id="employmentChart"></canvas>
@@ -657,7 +819,7 @@
                     <div class="bg-gray-50 rounded-lg p-4">
                         <h4 class="text-md font-semibold text-gray-900 mb-3">
                             <i class="fas fa-birthday-cake text-purple-600 mr-2"></i>
-                            Age Distribution
+                            Age Groups
                         </h4>
                         <div class="chart-container" style="position: relative; height: 300px;">
                             <canvas id="ageChart"></canvas>
@@ -668,7 +830,7 @@
                     <div class="bg-gray-50 rounded-lg p-4">
                         <h4 class="text-md font-semibold text-gray-900 mb-3">
                             <i class="fas fa-heartbeat text-red-600 mr-2"></i>
-                            Health Status Distribution
+                            Health Status
                         </h4>
                         <div class="chart-container" style="position: relative; height: 300px;">
                             <canvas id="healthChart"></canvas>
@@ -676,11 +838,11 @@
                     </div>
                 </div>
 
-                <!-- Comparative Analysis -->
+                <!-- Group Comparison -->
                 <div class="mt-8">
                     <h4 class="text-md font-semibold text-gray-900 mb-3">
                         <i class="fas fa-chart-line text-indigo-600 mr-2"></i>
-                        Comparative Analysis
+                        Group Comparison
                     </h4>
                     <div class="chart-container" style="position: relative; height: 400px;">
                         <canvas id="comparativeChart"></canvas>
@@ -694,28 +856,34 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- Clustering JavaScript -->
+<script src="{{ asset('js/clustering.js') }}"></script>
+
+<!-- Clustering Charts JavaScript -->
+<script src="{{ asset('js/clustering-charts.js') }}"></script>
+
+<!-- Pass PHP data to JavaScript safely -->
+<script type="application/json" id="clustering-data">
+{!! json_encode([
+    'isHier' => $isHier ?? false,
+    'isAutoK' => $useOptimalK ?? false,
+    'k' => $k ?? 3,
+    'characteristics' => $characteristics ?? [],
+    'grouped' => $grouped ?? [],
+    'silhouette' => $silhouette ?? null,
+], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
+</script>
 <script>
-// Debounce helper
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
+// Initialize global data from embedded JSON
+(function(){
+    try {
+        var el = document.getElementById('clustering-data');
+        if (el) { window.clusteringData = JSON.parse(el.textContent || '{}'); }
+    } catch (e) { window.clusteringData = {}; }
+})();
+</script>
 
-function togglePurokGroup(purok) {
-    const clustersDiv = document.getElementById('purok-clusters-' + purok);
-    const chevron = document.getElementById('chevron-' + purok);
-    if (clustersDiv.classList.contains('hidden')) {
-        clustersDiv.classList.remove('hidden');
-        chevron.classList.remove('rotate-180');
-    } else {
-        clustersDiv.classList.add('hidden');
-        chevron.classList.add('rotate-180');
-    }
-}
-
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     initializeClusterChart();
     initializeAnalyticsCharts(); // Initialize all new charts
@@ -756,410 +924,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function toggleDetails() {
-    const section = document.getElementById('detailedAnalysisSection');
-    const btn = document.getElementById('toggleDetailsBtn');
-    if (!section || !btn) return;
-    const icon = btn.querySelector('i');
-    const state = btn.getAttribute('data-state') || 'hidden';
-    if (state === 'hidden') {
-        section.classList.remove('hidden');
-        if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); }
-        btn.setAttribute('data-state', 'shown');
-        btn.querySelector('span.btn-text').textContent = ' Hide Details';
-    } else {
-        section.classList.add('hidden');
-        if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
-        btn.setAttribute('data-state', 'hidden');
-        btn.querySelector('span.btn-text').textContent = ' Show Details';
-    }
-}
-
-function initializeClusterChart() {
-    const isHier = @json($isHier ?? false);
-    const isAutoK = @json($useOptimalK ?? false);
-    const kValue = @json($k ?? 3);
-    const kIndicator = isAutoK ? ` (Auto K=${kValue})` : ` (Manual K=${kValue})`;
-    if (isHier) {
-        // Purok Distribution Chart
-        const ctx = document.getElementById('purokChart').getContext('2d');
-        const grouped = @json($grouped);
-        const labels = [];
-        const data = [];
-        const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#6366F1', '#F472B6', '#FBBF24', '#34D399', '#60A5FA'];
-        Object.keys(grouped).forEach((purok, idx) => {
-            const total = grouped[purok].reduce((a, b) => a + b.c.size, 0);
-            labels.push(`Purok ${purok} (${total} residents)`);
-            data.push(total);
-        });
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: colors.slice(0, labels.length),
-                    borderWidth: 3,
-                    borderColor: '#fff',
-                    hoverBorderWidth: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true,
-                            font: { size: 12 }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            title: function(context) {
-                                return 'Purok Distribution' + kIndicator;
-                            },
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return `${context.label}: ${context.parsed} (${percentage}%)`;
-                            },
-                            afterLabel: function() {
-                                return isAutoK ? 'Auto-optimized clustering' : 'Manual clustering';
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true
-                }
-            }
-        });
-    } else {
-        // Cluster Distribution Chart
-        const ctx = document.getElementById('clusterChart').getContext('2d');
-        const characteristics = @json($characteristics);
-        const labels = [];
-        const data = [];
-        const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#6366F1', '#F472B6', '#FBBF24', '#34D399', '#60A5FA'];
-        characteristics.forEach((cluster, idx) => {
-            if (cluster.size > 0) {
-                labels.push(`Cluster ${idx + 1} (${cluster.size} residents)`);
-                data.push(cluster.size);
-            }
-        });
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: colors.slice(0, labels.length),
-                    borderWidth: 3,
-                    borderColor: '#fff',
-                    hoverBorderWidth: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true,
-                            font: { size: 12 }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return `${context.label}: ${context.parsed} (${percentage}%)`;
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true
-                }
-            }
-        });
-    }
-}
-
-function initializeAnalyticsCharts() {
-    const isHier = @json($isHier ?? false);
-    const characteristics = @json($characteristics);
-    const grouped = @json($grouped ?? []);
-    const isAutoK = @json($useOptimalK ?? false);
-    const kValue = @json($k ?? 3);
-    
-    // Enhanced color palette - no duplicates
-    const colorPalette = [
-        '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', 
-        '#6366F1', '#F472B6', '#FBBF24', '#34D399', '#60A5FA',
-        '#84CC16', '#EC4899', '#06B6D4', '#F97316', '#A855F7'
-    ];
-    
-    // Add K selection indicator to chart titles
-    const kIndicator = isAutoK ? ` (Auto K=${kValue})` : ` (Manual K=${kValue})`;
-    const kBadge = isAutoK ? 
-        '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 ml-2">Auto K</span>' :
-        '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 ml-2">Manual K</span>';
-    
-    // Prepare data for charts
-    let chartData = [];
-    if (isHier) {
-        // Use purok-based data
-        Object.keys(grouped).forEach((purok, idx) => {
-            if (purok !== 'N/A') {
-                const items = grouped[purok];
-                let total = 0;
-                let incomes = { 'Low': 0, 'Lower Middle': 0, 'Middle': 0, 'Upper Middle': 0, 'High': 0 };
-                let employments = { 'Unemployed': 0, 'Part-time': 0, 'Self-employed': 0, 'Full-time': 0 };
-                let healths = { 'Critical': 0, 'Poor': 0, 'Fair': 0, 'Good': 0, 'Excellent': 0 };
-                let ages = [];
-                let familySizes = [];
-                
-                items.forEach(item => {
-                    const c = item.c;
-                    total += c.size;
-                    
-                    // Count income levels using distribution data
-                    const incomeDistribution = c.income_distribution || {};
-                    let totalCountedIncome = 0;
-                    Object.keys(incomeDistribution).forEach(incomeLevel => {
-                        if (incomeDistribution[incomeLevel] && incomeDistribution[incomeLevel] > 0) {
-                            incomes[incomeLevel] = (incomes[incomeLevel] || 0) + incomeDistribution[incomeLevel];
-                            totalCountedIncome += incomeDistribution[incomeLevel];
-                        }
-                    });
-                    
-                    // Ensure all residents are counted - add remaining to most common or distribute evenly
-                    const remainingResidents = c.size - totalCountedIncome;
-                    if (remainingResidents > 0) {
-                        if (c.most_common_income) {
-                            incomes[c.most_common_income] = (incomes[c.most_common_income] || 0) + remainingResidents;
-                        } else {
-                            // Distribute remaining residents evenly across income levels
-                            const incomeLevels = ['Low', 'Lower Middle', 'Middle', 'Upper Middle', 'High'];
-                            const perLevel = Math.floor(remainingResidents / incomeLevels.length);
-                            const extra = remainingResidents % incomeLevels.length;
-                            incomeLevels.forEach((level, idx) => {
-                                incomes[level] = (incomes[level] || 0) + perLevel + (idx < extra ? 1 : 0);
-                            });
-                        }
-                    }
-                    
-                    // Count employment status using distribution data
-                    const employmentDistribution = c.employment_distribution || {};
-                    let totalCountedEmployment = 0;
-                    Object.keys(employmentDistribution).forEach(employmentStatus => {
-                        if (employmentDistribution[employmentStatus] && employmentDistribution[employmentStatus] > 0) {
-                            employments[employmentStatus] = (employments[employmentStatus] || 0) + employmentDistribution[employmentStatus];
-                            totalCountedEmployment += employmentDistribution[employmentStatus];
-                        }
-                    });
-                    
-                    // Ensure all residents are counted - add remaining to most common or distribute evenly
-                    const remainingEmployment = c.size - totalCountedEmployment;
-                    if (remainingEmployment > 0) {
-                        if (c.most_common_employment) {
-                            employments[c.most_common_employment] = (employments[c.most_common_employment] || 0) + remainingEmployment;
-                        } else {
-                            // Distribute remaining residents evenly across employment statuses
-                            const employmentStatuses = ['Unemployed', 'Part-time', 'Self-employed', 'Full-time'];
-                            const perStatus = Math.floor(remainingEmployment / employmentStatuses.length);
-                            const extra = remainingEmployment % employmentStatuses.length;
-                            employmentStatuses.forEach((status, idx) => {
-                                employments[status] = (employments[status] || 0) + perStatus + (idx < extra ? 1 : 0);
-                            });
-                        }
-                    }
-                    
-                    // Count health status using distribution data
-                    const healthDistribution = c.health_distribution || {};
-                    let totalCountedHealth = 0;
-                    Object.keys(healthDistribution).forEach(healthStatus => {
-                        if (healthDistribution[healthStatus] && healthDistribution[healthStatus] > 0) {
-                            healths[healthStatus] = (healths[healthStatus] || 0) + healthDistribution[healthStatus];
-                            totalCountedHealth += healthDistribution[healthStatus];
-                        }
-                    });
-                    
-                    // Ensure all residents are counted - add remaining to most common or distribute evenly
-                    const remainingHealth = c.size - totalCountedHealth;
-                    if (remainingHealth > 0) {
-                        if (c.most_common_health) {
-                            healths[c.most_common_health] = (healths[c.most_common_health] || 0) + remainingHealth;
-                        } else {
-                            // Distribute remaining residents evenly across health statuses
-                            const healthStatuses = ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'];
-                            const perStatus = Math.floor(remainingHealth / healthStatuses.length);
-                            const extra = remainingHealth % healthStatuses.length;
-                            healthStatuses.forEach((status, idx) => {
-                                healths[status] = (healths[status] || 0) + perStatus + (idx < extra ? 1 : 0);
-                            });
-                        }
-                    }
-                    
-                    // Collect ages and family sizes
-                    for (let i = 0; i < c.size; i++) {
-                        const age = c.most_common_age || c.avg_age;
-                        const familySize = c.most_common_family_size || c.avg_family_size;
-                        if (is_numeric(age) && age > 0) {
-                            ages.push(parseInt(age));
-                        }
-                        if (is_numeric(familySize) && familySize > 0) {
-                            familySizes.push(parseInt(familySize));
-                        }
-                    }
-                });
-                
-                if (total > 0) {
-                    chartData.push({
-                        label: `Purok ${purok}`,
-                        total: total,
-                        incomes: incomes,
-                        employments: employments,
-                        healths: healths,
-                        ages: ages,
-                        familySizes: familySizes,
-                        color: colorPalette[idx % colorPalette.length]
-                    });
-                }
-            }
-        });
-    } else {
-        // Use cluster-based data
-        characteristics.forEach((cluster, idx) => {
-            if (cluster.size > 0) {
-                let incomes = { 'Low': 0, 'Lower Middle': 0, 'Middle': 0, 'Upper Middle': 0, 'High': 0 };
-                let employments = { 'Unemployed': 0, 'Part-time': 0, 'Self-employed': 0, 'Full-time': 0 };
-                let healths = { 'Critical': 0, 'Poor': 0, 'Fair': 0, 'Good': 0, 'Excellent': 0 };
-                let ages = [];
-                let familySizes = [];
-                
-                // Count income levels using distribution data
-                const incomeDistribution = cluster.income_distribution || {};
-                let totalCountedIncome = 0;
-                Object.keys(incomeDistribution).forEach(incomeLevel => {
-                    if (incomeDistribution[incomeLevel] && incomeDistribution[incomeLevel] > 0) {
-                        incomes[incomeLevel] = (incomes[incomeLevel] || 0) + incomeDistribution[incomeLevel];
-                        totalCountedIncome += incomeDistribution[incomeLevel];
-                    }
-                });
-                
-                // Ensure all residents are counted - add remaining to most common or distribute evenly
-                const remainingResidents = cluster.size - totalCountedIncome;
-                if (remainingResidents > 0) {
-                    if (cluster.most_common_income) {
-                        incomes[cluster.most_common_income] = (incomes[cluster.most_common_income] || 0) + remainingResidents;
-                    } else {
-                        // Distribute remaining residents evenly across income levels
-                        const incomeLevels = ['Low', 'Middle', 'Upper Middle', 'High'];
-                        const perLevel = Math.floor(remainingResidents / incomeLevels.length);
-                        const extra = remainingResidents % incomeLevels.length;
-                        incomeLevels.forEach((level, idx) => {
-                            incomes[level] = (incomes[level] || 0) + perLevel + (idx < extra ? 1 : 0);
-                        });
-                    }
-                }
-                
-                // Count employment status using distribution data
-                const employmentDistribution = cluster.employment_distribution || {};
-                let totalCountedEmployment = 0;
-                Object.keys(employmentDistribution).forEach(employmentStatus => {
-                    if (employmentDistribution[employmentStatus] && employmentDistribution[employmentStatus] > 0) {
-                        employments[employmentStatus] = (employments[employmentStatus] || 0) + employmentDistribution[employmentStatus];
-                        totalCountedEmployment += employmentDistribution[employmentStatus];
-                    }
-                });
-                
-                // Ensure all residents are counted - add remaining to most common or distribute evenly
-                const remainingEmployment = cluster.size - totalCountedEmployment;
-                if (remainingEmployment > 0) {
-                    if (cluster.most_common_employment) {
-                        employments[cluster.most_common_employment] = (employments[cluster.most_common_employment] || 0) + remainingEmployment;
-                    } else {
-                        // Distribute remaining residents evenly across employment statuses
-                        const employmentStatuses = ['Full-time', 'Part-time', 'Unemployed'];
-                        const perStatus = Math.floor(remainingEmployment / employmentStatuses.length);
-                        const extra = remainingEmployment % employmentStatuses.length;
-                        employmentStatuses.forEach((status, idx) => {
-                            employments[status] = (employments[status] || 0) + perStatus + (idx < extra ? 1 : 0);
-                        });
-                    }
-                }
-                
-                // Count health status using distribution data
-                const healthDistribution = cluster.health_distribution || {};
-                let totalCountedHealth = 0;
-                Object.keys(healthDistribution).forEach(healthStatus => {
-                    if (healthDistribution[healthStatus] && healthDistribution[healthStatus] > 0) {
-                        healths[healthStatus] = (healths[healthStatus] || 0) + healthDistribution[healthStatus];
-                        totalCountedHealth += healthDistribution[healthStatus];
-                    }
-                });
-                
-                // Ensure all residents are counted - add remaining to most common or distribute evenly
-                const remainingHealth = cluster.size - totalCountedHealth;
-                if (remainingHealth > 0) {
-                    if (cluster.most_common_health) {
-                        healths[cluster.most_common_health] = (healths[cluster.most_common_health] || 0) + remainingHealth;
-                    } else {
-                        // Distribute remaining residents evenly across health statuses
-                        const healthStatuses = ['Excellent', 'Good', 'Fair', 'Critical'];
-                        const perStatus = Math.floor(remainingHealth / healthStatuses.length);
-                        const extra = remainingHealth % healthStatuses.length;
-                        healthStatuses.forEach((status, idx) => {
-                            healths[status] = (healths[status] || 0) + perStatus + (idx < extra ? 1 : 0);
-                        });
-                    }
-                }
-                
-                // Collect ages and family sizes
-                for (let i = 0; i < cluster.size; i++) {
-                    const age = cluster.most_common_age || cluster.avg_age;
-                    const familySize = cluster.most_common_family_size || cluster.avg_family_size;
-                    if (is_numeric(age) && age > 0) {
-                        ages.push(parseInt(age));
-                    }
-                    if (is_numeric(familySize) && familySize > 0) {
-                        familySizes.push(parseInt(familySize));
-                    }
-                }
-                
-                chartData.push({
-                    label: `Cluster ${idx + 1}`,
-                    total: cluster.size,
-                    incomes: incomes,
-                    employments: employments,
-                    healths: healths,
-                    ages: ages,
-                    familySizes: familySizes,
-                    color: colorPalette[idx % colorPalette.length]
-                });
-            }
-        });
-    }
-    
-    // Initialize all charts with enhanced features
-    initializeIncomeChart(chartData);
-    initializeEmploymentChart(chartData);
-    initializeAgeChart(chartData);
-    initializeHealthChart(chartData);
-    initializeComparativeChart(chartData);
-    initializeFamilySizeChart(chartData);
-    initializeDemographicOverview(chartData);
-}
 
 function initializeIncomeChart(chartData) {
     const ctx = document.getElementById('incomeChart').getContext('2d');
@@ -1491,11 +1255,6 @@ function downloadAllCharts() {
     });
 }
 
-// Helper function to check if value is numeric
-function is_numeric(value) {
-    return !isNaN(parseFloat(value)) && isFinite(value);
-}
-
 function initializeTableFeatures() {
     const searchInput = document.getElementById('searchTable');
     const filterPurok = document.getElementById('filterPurok');
@@ -1591,39 +1350,7 @@ function initializeTableFeatures() {
     filterRows();
 }
 
-function refreshAnalysis() {
-    location.reload();
-}
 
-function exportData() {
-    // Create download link for CSV
-    const link = document.createElement('a');
-    link.href = '{{ route("admin.clustering.export") }}?format=csv';
-    link.download = 'clustering_results.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-function downloadChart() {
-    const canvas = document.getElementById('clusterChart');
-    const link = document.createElement('a');
-    link.download = 'cluster_chart.png';
-    link.href = canvas.toDataURL();
-    link.click();
-}
-
-function fullscreenChart() {
-    const chartContainer = document.querySelector('.chart-container');
-    if (chartContainer.requestFullscreen) {
-        chartContainer.requestFullscreen();
-    }
-}
-
-function viewResident(residentId) {
-    // Open resident details in modal or redirect
-    window.open(`/admin/residents/${residentId}`, '_blank');
-}
 </script>
 
 <style>
@@ -1726,4 +1453,40 @@ function viewResident(residentId) {
     box-shadow: 0 4px 12px rgba(59,130,246,0.08);
 }
 </style>
+
+<!-- Modal for Detailed Analysis -->
+<div id="analysisModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">Detailed Analysis</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="text-sm">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+// Close modal when clicking outside
+document.getElementById('analysisModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+</script>
+
 @endsection 
