@@ -227,8 +227,8 @@
                        class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition duration-300">
                         <i class="fas fa-edit mr-1"></i>Edit
                     </a>
-                    <button onclick="deleteProject({{ $project->id }})" 
-                            class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition duration-300">
+                    <button type="button" data-project-id="{{ $project->id }}"
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition duration-300 js-delete-project">
                         <i class="fas fa-trash mr-1"></i>Delete
                     </button>
                 </div>
@@ -417,18 +417,30 @@ function deleteProject(projectId) {
         form.submit();
     }
 }
+
+// Delegate click for delete buttons to avoid inline JS with Blade braces
+document.addEventListener('click', function (event) {
+    const button = event.target.closest('.js-delete-project');
+    if (!button) return;
+    const id = button.getAttribute('data-project-id');
+    if (id) {
+        deleteProject(id);
+    }
+});
 </script>
 
 <style>
 .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

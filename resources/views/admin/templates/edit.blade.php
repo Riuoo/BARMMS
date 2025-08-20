@@ -13,9 +13,13 @@
                 <span class="font-medium">{{ $template->document_type }} - Template Editor</span>
             </div>
             <div class="flex items-center space-x-2">
-                <button id="saveBtn" class="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-sm">
-                    <i class="fas fa-save mr-1"></i>Save
-                </button>
+                <form id="docxUploadForm" action="{{ route('admin.templates.upload-word', $template) }}" method="POST" enctype="multipart/form-data" class="inline-flex items-center gap-2">
+                    @csrf
+                    <label class="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm cursor-pointer text-white">
+                        <i class="fas fa-file-word mr-1"></i>Upload DOCX
+                        <input type="file" name="word_file" accept=".docx,.html,.htm,.txt" class="hidden" onchange="this.form.submit()">
+                    </label>
+                </form>
                 <button id="previewBtn" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded text-sm">
                     <i class="fas fa-eye mr-1"></i>Preview
                 </button>
@@ -206,10 +210,10 @@
                                 <button class="ribbon-btn" onclick="insertSpecialChar('°')">°</button>
                                 <button class="ribbon-btn" onclick="insertSpecialChar('±')">±</button>
                                 <button class="ribbon-btn" onclick="insertSpecialChar('×')">×</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+                </div>
+            </div>
+        </div>
 
                 <!-- Layout Tab -->
                 <div id="layout-tab" class="ribbon-content hidden">
@@ -265,11 +269,11 @@
                                 <button class="ribbon-btn" onclick="setLineSpacing(2.5)">
                                     <span class="text-xs">2.5</span>
                                 </button>
-                            </div>
+                        </div>
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Review Tab -->
                 <div id="review-tab" class="ribbon-content hidden">
                     <div class="grid grid-cols-2 gap-6">
@@ -286,7 +290,7 @@
                                     <span class="text-xs">Validate</span>
                                 </button>
                             </div>
-                        </div>
+            </div>
 
                         <!-- View Group -->
                         <div class="space-y-2">
@@ -304,9 +308,9 @@
                         </div>
                     </div>
                 </div>
+                        </div>
+                </div>
             </div>
-        </div>
-    </div>
 
     <!-- Document Area -->
     <div class="flex-1 flex">
@@ -325,7 +329,7 @@
                 <div class="max-w-4xl mx-auto p-8 bg-white min-h-full">
                     <div id="documentEditor" 
                          class="prose prose-lg max-w-none min-h-[800px] outline-none"
-                         contenteditable="true"
+                         contenteditable="false"
                          style="font-family: 'Times New Roman', serif; line-height: 1.6;">
                         {!! $template->header_content !!}
                         {!! $template->body_content !!}
@@ -376,78 +380,52 @@
     </div>
 </div>
 
-@endsection
+@endsection 
 
 @push('styles')
 <style>
 .ribbon-btn {
-    @apply px-2 py-1 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded text-gray-700 text-xs flex flex-col items-center justify-center transition-colors;
+    padding: 0.25rem 0.5rem;
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    color: #374151;
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 150ms ease-in-out, color 150ms ease-in-out, border-color 150ms ease-in-out;
 }
-
-.ribbon-btn:hover {
-    @apply bg-gray-200;
-}
-
-.ribbon-btn.active {
-    @apply bg-blue-100 border-blue-300 text-blue-700;
-}
+.ribbon-btn:hover { background-color: #e5e7eb; }
+.ribbon-btn.active { background-color: #dbeafe; border-color: #93c5fd; color: #1d4ed8; }
 
 .ribbon-select {
-    @apply px-2 py-1 bg-white border border-gray-300 rounded text-gray-700;
+    padding: 0.25rem 0.5rem;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    color: #374151;
+    font-size: 0.75rem;
 }
 
-.ribbon-tab {
-    @apply transition-colors;
-}
+.ribbon-tab { transition: color 150ms ease-in-out, border-color 150ms ease-in-out; }
+.ribbon-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
 
-.ribbon-tab.active {
-    @apply text-blue-600 border-blue-600;
-}
+.ribbon-content { transition: all 200ms ease-in-out; }
 
-.ribbon-content {
-    @apply transition-all duration-200;
-}
+.placeholder-btn { font-size: 0.75rem; }
 
-.placeholder-btn {
-    @apply text-xs;
-}
+#documentEditor:focus { outline: none; }
 
-#documentEditor {
-    @apply focus:outline-none;
-}
-
-#documentEditor:focus {
-    @apply outline-none;
-}
-
-/* Word-like styling */
-.prose {
-    @apply text-gray-900;
-}
-
-.prose h1 {
-    @apply text-2xl font-bold mb-4;
-}
-
-.prose h2 {
-    @apply text-xl font-bold mb-3;
-}
-
-.prose h3 {
-    @apply text-lg font-bold mb-2;
-}
-
-.prose p {
-    @apply mb-3;
-}
-
-.prose ul, .prose ol {
-    @apply mb-3 pl-6;
-}
-
-.prose li {
-    @apply mb-1;
-}
+/* Word-like styling fallbacks in case Tailwind Typography isn't present */
+.prose { color: #111827; }
+.prose h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+.prose h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+.prose h3 { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; }
+.prose p { margin-bottom: 0.75rem; }
+.prose ul, .prose ol { margin-bottom: 0.75rem; padding-left: 1.5rem; }
+.prose li { margin-bottom: 0.25rem; }
 </style>
 @endpush
 
@@ -495,7 +473,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('fontSize').addEventListener('change', function() {
-        document.execCommand('fontSize', false, this.value);
+        applyFontSize(this.value);
     });
 
     // Word count and character count
@@ -533,21 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Save functionality
-    saveBtn.addEventListener('click', function() {
-        const content = editor.innerHTML;
-        
-        // Split content into header, body, and footer (simple implementation)
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = content;
-        
-        // For now, put everything in body content
-        document.getElementById('body_content').value = content;
-        document.getElementById('header_content').value = '';
-        document.getElementById('footer_content').value = '';
-        
-        document.getElementById('saveForm').submit();
-    });
+    // No save functionality in upload-only mode
 
     // Preview functionality
     previewBtn.addEventListener('click', function() {
@@ -598,11 +562,23 @@ document.addEventListener('DOMContentLoaded', function() {
         document.execCommand('insertText', false, text);
     }
 
-    function insertSpecialChar(char) {
-        insertText(char);
+    function applyFontSize(pointSize) {
+        // Use execCommand to create a wrapper, then convert to inline style with the requested size
+        document.execCommand('fontSize', false, '7');
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        const editorFonts = editor.querySelectorAll('font[size="7"]');
+        editorFonts.forEach(function(el) {
+            const span = document.createElement('span');
+            span.style.fontSize = pointSize + 'pt';
+            span.innerHTML = el.innerHTML;
+            el.parentNode.replaceChild(span, el);
+        });
     }
 
-    function insertHeader() {
+    // Expose functions used by inline onclick handlers to the global scope
+    window.insertSpecialChar = function(char) { insertText(char); };
+    window.insertHeader = function() {
         const headerContent = `
             <div style="text-align: center; margin-bottom: 30px;">
                 <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">REPUBLIC OF THE PHILIPPINES</h1>
@@ -612,9 +588,8 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         document.execCommand('insertHTML', false, headerContent);
-    }
-
-    function insertSignature() {
+    };
+    window.insertSignature = function() {
         const signatureContent = `
             <div style="margin-top: 50px; text-align: right;">
                 <div style="border-top: 1px solid #000; width: 200px; margin-left: auto; margin-bottom: 10px;"></div>
@@ -623,16 +598,14 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         document.execCommand('insertHTML', false, signatureContent);
-    }
-
-    function insertDate() {
+    };
+    window.insertDate = function() {
         const dateContent = `
             <p>Issued this [current_date] at Barangay [barangay_name], [municipality_name], [province_name], Philippines.</p>
         `;
         document.execCommand('insertHTML', false, dateContent);
-    }
-
-    function insertTable() {
+    };
+    window.insertTable = function() {
         const tableContent = `
             <table border="1" style="width: 100%; border-collapse: collapse; margin: 10px 0;">
                 <tr>
@@ -648,44 +621,29 @@ document.addEventListener('DOMContentLoaded', function() {
             </table>
         `;
         document.execCommand('insertHTML', false, tableContent);
-    }
-
-    function setMargins(type) {
-        // Implementation for setting margins
+    };
+    window.setMargins = function(type) {
         console.log('Setting margins:', type);
-    }
-
-    function setLineSpacing(spacing) {
+    };
+    window.setLineSpacing = function(spacing) {
         editor.style.lineHeight = spacing;
-    }
-
-    function spellCheck() {
-        // Implementation for spell checking
+    };
+    window.spellCheck = function() {
         alert('Spell check feature would be implemented here');
-    }
-
-    function validateTemplate() {
-        // Implementation for template validation
+    };
+    window.validateTemplate = function() {
         alert('Template validation would be implemented here');
-    }
-
-    function toggleRulers() {
+    };
+    window.toggleRulers = function() {
         const verticalRuler = document.getElementById('verticalRuler');
         const horizontalRuler = document.getElementById('horizontalRuler');
-        
-        if (verticalRuler.style.display === 'none') {
-            verticalRuler.style.display = 'block';
-            horizontalRuler.style.display = 'block';
-        } else {
-            verticalRuler.style.display = 'none';
-            horizontalRuler.style.display = 'none';
-        }
-    }
-
-    function toggleGrid() {
-        // Implementation for grid toggle
+        const isHidden = verticalRuler.style.display === 'none';
+        verticalRuler.style.display = isHidden ? 'block' : 'none';
+        horizontalRuler.style.display = isHidden ? 'block' : 'none';
+    };
+    window.toggleGrid = function() {
         console.log('Grid toggle');
-    }
+    };
 
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {

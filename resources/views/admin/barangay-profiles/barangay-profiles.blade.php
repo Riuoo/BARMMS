@@ -253,13 +253,18 @@
                                        title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button onclick="{{ $user->active ? 'deactivateOfficial' : 'activateOfficial' }}({{ $user->id }}, '{{ addslashes($user->name) }}')" 
-                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" 
+                                    <button type="button"
+                                            data-action="{{ $user->active ? 'deactivate' : 'activate' }}"
+                                            data-user-id="{{ $user->id }}"
+                                            data-user-name="{{ addslashes($user->name) }}"
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-official" 
                                             title="{{ $user->active ? 'Deactivate' : 'Activate' }}">
                                         <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
                                     </button>
-                                    <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
-                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
+                                    <button type="button"
+                                            data-user-id="{{ $user->id }}"
+                                            data-user-name="{{ addslashes($user->name) }}"
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-official"
                                             title="Delete">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -329,14 +334,19 @@
                         <i class="fas fa-edit mr-1"></i>
                         Edit
                     </a>
-                    <button onclick="{{ $user->active ? 'deactivateOfficial' : 'activateOfficial' }}({{ $user->id }}, '{{ addslashes($user->name) }}')" 
-                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" 
+                    <button type="button"
+                            data-action="{{ $user->active ? 'deactivate' : 'activate' }}"
+                            data-user-id="{{ $user->id }}"
+                            data-user-name="{{ addslashes($user->name) }}"
+                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-official" 
                             title="{{ $user->active ? 'Deactivate' : 'Activate' }}">
                         <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
                         {{ $user->active ? 'Disable' : 'Enable' }}
                     </button>
-                    <button onclick="deleteOfficial({{ $user->id }}, '{{ addslashes($user->name) }}')" 
-                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
+                    <button type="button"
+                            data-user-id="{{ $user->id }}"
+                            data-user-name="{{ addslashes($user->name) }}"
+                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-official"
                             title="Delete">
                         <i class="fas fa-trash-alt mr-1"></i>
                         Delete
@@ -587,6 +597,25 @@ function closeDeactivateModal() {
     document.getElementById('deactivateModal').classList.add('hidden');
     document.getElementById('deactivateModal').classList.remove('flex');
 }
+
+// Delegated handlers to avoid inline JS with Blade values
+document.addEventListener('click', function (event) {
+    const toggleBtn = event.target.closest('.js-toggle-official');
+    if (toggleBtn) {
+        const id = toggleBtn.getAttribute('data-user-id');
+        const name = toggleBtn.getAttribute('data-user-name');
+        const action = toggleBtn.getAttribute('data-action');
+        if (id && action === 'activate') activateOfficial(id, name);
+        if (id && action === 'deactivate') deactivateOfficial(id, name);
+        return;
+    }
+    const deleteBtn = event.target.closest('.js-delete-official');
+    if (deleteBtn) {
+        const id = deleteBtn.getAttribute('data-user-id');
+        const name = deleteBtn.getAttribute('data-user-name');
+        if (id) deleteOfficial(id, name);
+    }
+});
 </script>
 
 @endsection

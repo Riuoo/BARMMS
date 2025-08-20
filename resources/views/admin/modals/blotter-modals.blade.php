@@ -289,7 +289,8 @@ function approveAndDownload(event) {
     })
     .then(async response => {
         const contentType = response.headers.get('content-type') || '';
-        if (response.ok && contentType.includes('application/pdf')) {
+        const contentDisposition = response.headers.get('content-disposition') || '';
+        if (response.ok && (contentType.includes('application/pdf') || contentDisposition.toLowerCase().includes('attachment'))) {
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -300,18 +301,75 @@ function approveAndDownload(event) {
             a.remove();
             window.URL.revokeObjectURL(url);
             setTimeout(() => location.reload(), 1000);
-        } else {
-            // Try to extract error message from response
+        } else if (response.ok) {
+            // Fallback: try to download even if content-type header is missing
+            const blob = await response.blob();
+            if (blob && blob.size > 0) {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `blotter_approve_${blotterId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                setTimeout(() => location.reload(), 1000);
+                return;
+            }
+            // If blob empty, treat as error
             let errorMsg = 'Error approving and downloading PDF.';
             try {
-                const text = await response.text();
-                if (text.includes('This user account is inactive')) {
-                    errorMsg = 'This user account is inactive and cannot make transactions.';
-                } else if (text.includes('<ul class="list-disc')) {
-                    const match = text.match(/<li>(.*?)<\/li>/);
-                    if (match) errorMsg = match[1];
+                const raw = await response.text();
+                // Prefer JSON error if present
+                try {
+                    const json = JSON.parse(raw);
+                    if (json && json.error) {
+                        errorMsg = json.error;
+                        throw new Error('handled');
+                    }
+                } catch (_) {}
+                // Parse HTML and ignore scripts to avoid false positives
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(raw, 'text/html');
+                const firstLi = doc.querySelector('ul.list-disc li');
+                if (firstLi) {
+                    errorMsg = firstLi.textContent.trim();
+                } else {
+                    // Remove scripts then check visible text
+                    doc.querySelectorAll('script').forEach(s => s.remove());
+                    const bodyText = (doc.body && doc.body.textContent) ? doc.body.textContent : raw;
+                    if (bodyText.includes('This user account is inactive')) {
+                        errorMsg = 'This user account is inactive and cannot make transactions.';
+                    }
                 }
-            } catch (e) {}
+            } catch (_) {}
+            alert(errorMsg);
+        } else {
+            let errorMsg = 'Error approving and downloading PDF.';
+            try {
+                const raw = await response.text();
+                // Prefer JSON error if present
+                try {
+                    const json = JSON.parse(raw);
+                    if (json && json.error) {
+                        errorMsg = json.error;
+                        throw new Error('handled');
+                    }
+                } catch (_) {}
+                // Parse HTML and ignore scripts to avoid false positives
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(raw, 'text/html');
+                const firstLi = doc.querySelector('ul.list-disc li');
+                if (firstLi) {
+                    errorMsg = firstLi.textContent.trim();
+                } else {
+                    doc.querySelectorAll('script').forEach(s => s.remove());
+                    const bodyText = (doc.body && doc.body.textContent) ? doc.body.textContent : raw;
+                    if (bodyText.includes('This user account is inactive')) {
+                        errorMsg = 'This user account is inactive and cannot make transactions.';
+                    }
+                }
+            } catch (_) {}
             alert(errorMsg);
         }
     })

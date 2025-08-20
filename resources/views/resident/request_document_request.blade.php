@@ -69,10 +69,11 @@
                                 name="document_type" 
                                 required>
                             <option value="">Select a document type</option>
-                            <option value="Barangay Clearance" {{ old('document_type') == 'Barangay Clearance' ? 'selected' : '' }}>Barangay Clearance</option>
-                            <option value="Certificate of Residency" {{ old('document_type') == 'Certificate of Residency' ? 'selected' : '' }}>Certificate of Residency</option>
-                            <option value="Certificate of Indigency" {{ old('document_type') == 'Certificate of Indigency' ? 'selected' : '' }}>Certificate of Indigency</option>
-                            <option value="Business Permit" {{ old('document_type') == 'Business Permit' ? 'selected' : '' }}>Business Permit</option>
+                            @foreach(($templates ?? []) as $t)
+                                <option value="{{ optional($t)->document_type ?? '' }}" {{ old('document_type') == (optional($t)->document_type ?? '') ? 'selected' : '' }}>
+                                    {{ optional($t)->document_type ?? '' }}
+                                </option>
+                            @endforeach
                         </select>
                         <p class="mt-1 text-sm text-gray-500">Choose the type of document you need</p>
                     </div>

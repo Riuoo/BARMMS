@@ -141,7 +141,8 @@
                 function checkEmail(value) {
                     if (!value || value === lastQueried) return;
                     lastQueried = value;
-                    const url = '{{ route('admin.residents.check-email') }}' + '?email=' + encodeURIComponent(value);
+                    const baseUrl = `{{ route('admin.residents.check-email') }}`;
+                    const url = baseUrl + '?email=' + encodeURIComponent(value);
                     fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }})
                         .then(r => r.json())
                         .then(data => {

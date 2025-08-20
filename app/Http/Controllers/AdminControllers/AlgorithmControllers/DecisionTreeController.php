@@ -164,7 +164,8 @@ class DecisionTreeController
         $maxDepth = $request->input('max_depth', 10);
         $minSamplesSplit = $request->input('min_samples_split', 2);
         
-        $this->decisionTreeService = new ResidentClassificationPredictionService($maxDepth, $minSamplesSplit);
+        // Service does not accept constructor arguments; parameters are currently unused
+        $this->decisionTreeService = new ResidentClassificationPredictionService();
         
         switch ($type) {
             case 'health-risk':

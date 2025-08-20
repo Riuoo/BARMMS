@@ -54,8 +54,8 @@
                 
                 <div class="space-y-6">
                     <!-- Document Type -->
-                    <div>
-                        <label for="document_type" class="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+                <label for="document_type" class="block text-sm font-medium text-gray-700 mb-2">
                             Document Type *
                         </label>
                         <select id="document_type" name="document_type" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
@@ -89,20 +89,20 @@
                     <div id="custom_document_type_div" class="hidden">
                         <label for="custom_document_type" class="block text-sm font-medium text-gray-700 mb-2">
                             Custom Document Type *
-                        </label>
+                </label>
                         <input type="text" id="custom_document_type" name="custom_document_type" 
-                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                                placeholder="e.g., Certificate of Employment, Special Permit">
                         <p class="mt-1 text-sm text-gray-500">Enter the name of your custom document type</p>
-                    </div>
+            </div>
 
                     <!-- Description -->
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                            Description
-                        </label>
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
                         <textarea id="description" name="description" rows="3"
-                                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                                   placeholder="Brief description of what this document is used for"></textarea>
                         <p class="mt-1 text-sm text-gray-500">Optional: Describe the purpose and use of this document</p>
                     </div>
@@ -280,7 +280,7 @@
                             <!-- Preview content will be loaded here -->
                         </div>
                     </div>
-                </div>
+            </div>
 
                 <div class="mt-8 flex justify-between">
                     <button type="button" id="prevStep3" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
@@ -288,16 +288,16 @@
                         Previous Step
                     </button>
                     <button type="submit" class="inline-flex items-center px-6 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        <i class="fas fa-save mr-2"></i>
-                        Create Template
-                    </button>
+                    <i class="fas fa-save mr-2"></i>
+                    Create Template
+                </button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-@endsection
+@endsection 
 
 @push('scripts')
 <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>

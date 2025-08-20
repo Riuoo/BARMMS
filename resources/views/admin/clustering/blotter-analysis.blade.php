@@ -326,13 +326,17 @@
 // Purok Chart
 const purokCtx = document.getElementById('purokChart');
 if (purokCtx) {
+    const purokLabels = JSON.parse(`@json(array_keys($purokCounts))`);
+    const purokValues = JSON.parse(`@json(array_values($purokCounts))`);
+    const purokTotal = JSON.parse(`@json(array_sum($purokCounts))`);
+
     const purokChart = new Chart(purokCtx.getContext('2d'), {
         type: 'bar',
         data: {
-            labels: {!! json_encode(array_keys($purokCounts)) !!},
+            labels: purokLabels,
             datasets: [{
                 label: 'Blotter Reports',
-                data: {!! json_encode(array_values($purokCounts)) !!},
+                data: purokValues,
                 backgroundColor: [
                     'rgba(59, 130, 246, 0.8)',
                     'rgba(16, 185, 129, 0.8)',
@@ -378,8 +382,7 @@ if (purokCtx) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const total = parseInt({!! array_sum($purokCounts) !!});
-                            const percentage = total > 0 ? ((parseInt(context.parsed.y) / total) * 100).toFixed(1) : 0;
+                            const percentage = purokTotal > 0 ? ((parseInt(context.parsed.y) / purokTotal) * 100).toFixed(1) : 0;
                             return `${context.parsed.y} reports (${percentage}%)`;
                         }
                     }
@@ -392,12 +395,15 @@ if (purokCtx) {
 // Cluster Chart
 const clusterCtx = document.getElementById('clusterChart');
 if (clusterCtx) {
+    const clusterLabels = JSON.parse(`@json(array_map(function($clusterId) { return 'Cluster ' . ((int)$clusterId + 1); }, array_keys($clusters)))`);
+    const clusterCounts = JSON.parse(`@json(array_map('count', $clusters))`);
+
     const clusterChart = new Chart(clusterCtx.getContext('2d'), {
         type: 'doughnut',
         data: {
-            labels: {!! json_encode(array_map(function($clusterId) { return 'Cluster ' . ((int)$clusterId + 1); }, array_keys($clusters))) !!},
+            labels: clusterLabels,
             datasets: [{
-                data: {!! json_encode(array_map('count', $clusters)) !!},
+                data: clusterCounts,
                 backgroundColor: [
                     'rgba(139, 92, 246, 0.8)',
                     'rgba(59, 130, 246, 0.8)',

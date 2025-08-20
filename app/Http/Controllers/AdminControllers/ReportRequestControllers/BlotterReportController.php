@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Residents;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BlotterReportController
 {
@@ -98,6 +99,8 @@ class BlotterReportController
                 return redirect()->back();
             }
 
+            DB::beginTransaction();
+
             $blotter->status = 'approved';
             $blotter->approved_at = now();
             $blotter->summon_date = $validated['hearing_date']; // Save the hearing_date as summon_date
@@ -117,11 +120,17 @@ class BlotterReportController
                 'blotter' => $blotter,
                 'adminUser' => $adminUser
             ]);
-            return $pdf->download("summon_notice_{$blotter->id}.pdf");
-        } catch (\Exception $e) {
+            $response = $pdf->download("summon_notice_{$blotter->id}.pdf");
+
+            DB::commit();
+            return $response;
+        } catch (\Throwable $e) {
+            DB::rollBack();
             Log::error("Error approving blotter report: " . $e->getMessage());
-            notify()->error('Failed to approve blotter report: ' . $e->getMessage());
-            return redirect()->back();
+            // Return JSON so AJAX handler can surface a clear error
+            return response()->json([
+                'error' => 'Failed to approve blotter report: ' . $e->getMessage(),
+            ], 422);
         }
     }
 

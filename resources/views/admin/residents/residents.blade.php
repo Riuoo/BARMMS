@@ -232,8 +232,8 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">
                                     @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
-                                        <button onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                                                class="text-green-600 hover:text-green-800 font-medium cursor-pointer">
+                                        <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
+                                                class="text-green-600 hover:text-green-800 font-medium cursor-pointer js-show-demographics">
                                             <i class="fas fa-eye mr-1"></i>
                                             View Demographics
                                         </button>
@@ -262,13 +262,13 @@
                                        title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button onclick="{{ $resident->active ? 'deactivateResident' : 'activateResident' }}({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" 
+                                    <button type="button" data-action="{{ $resident->active ? 'deactivate' : 'activate' }}" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}"
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-resident" 
                                             title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
                                         <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
                                     </button>
-                                    <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
+                                    <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-resident"
                                             title="Delete">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -327,8 +327,8 @@
                 <!-- Demographics section -->
                 @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
                 <div class="mb-3">
-                    <button onclick="showDemographicsModal({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition duration-200">
+                    <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
+                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition duration-200 js-show-demographics">
                         <i class="fas fa-user-friends mr-1"></i>
                         View Demographics
                     </button>
@@ -343,14 +343,14 @@
                         <i class="fas fa-edit mr-1"></i>
                         Edit
                     </a>
-                    <button onclick="{{ $resident->active ? 'deactivateResident' : 'activateResident' }}({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" 
+                    <button type="button" data-action="{{ $resident->active ? 'deactivate' : 'activate' }}" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}"
+                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-resident" 
                             title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
                         <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
                         {{ $resident->active ? 'Disable' : 'Enable' }}
                     </button>
-                    <button onclick="deleteResident({{ $resident->id }}, '{{ addslashes($resident->name) }}')" 
-                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
+                    <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
+                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-resident"
                             title="Delete">
                         <i class="fas fa-trash-alt mr-1"></i>
                         Delete
@@ -699,5 +699,40 @@
         document.getElementById('deactivateModal').classList.add('hidden');
         document.getElementById('deactivateModal').classList.remove('flex');
     }
+</script>
+<script>
+	// Wire action buttons to modal handlers (works for dynamically rendered items)
+	document.addEventListener('DOMContentLoaded', function() {
+		document.addEventListener('click', function(event) {
+			const demographicsBtn = event.target.closest('.js-show-demographics');
+			if (demographicsBtn) {
+				const residentId = demographicsBtn.dataset.residentId;
+				const residentName = demographicsBtn.dataset.residentName;
+				showDemographicsModal(residentId, residentName);
+				return;
+			}
+
+			const toggleBtn = event.target.closest('.js-toggle-resident');
+			if (toggleBtn) {
+				const action = toggleBtn.dataset.action;
+				const residentId = toggleBtn.dataset.residentId;
+				const residentName = toggleBtn.dataset.residentName;
+				if (action === 'activate') {
+					activateResident(residentId, residentName);
+				} else {
+					deactivateResident(residentId, residentName);
+				}
+				return;
+			}
+
+			const deleteBtn = event.target.closest('.js-delete-resident');
+			if (deleteBtn) {
+				const residentId = deleteBtn.dataset.residentId;
+				const residentName = deleteBtn.dataset.residentName;
+				deleteResident(residentId, residentName);
+				return;
+			}
+		});
+	});
 </script>
 @endsection

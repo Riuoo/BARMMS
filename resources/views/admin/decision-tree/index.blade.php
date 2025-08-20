@@ -371,7 +371,7 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button onclick="viewResident({{ $resident->id }})" class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+                                        <button type="button" data-resident-id="{{ $resident->id }}" class="text-blue-600 hover:text-blue-900 transition-colors duration-200 js-view-resident">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </td>

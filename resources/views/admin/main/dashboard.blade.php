@@ -297,7 +297,7 @@
 
         // Prepare data for resident demographics chart
         try {
-            const residentDemographicsData = @json($residentDemographics);
+            const residentDemographicsData = JSON.parse(`@json($residentDemographics)`);
             // Validate data
             if (!residentDemographicsData || !Array.isArray(residentDemographicsData) || residentDemographicsData.length === 0) {
                 console.warn('No resident demographics data available');
@@ -406,7 +406,7 @@
 
         // Prepare data for document requests chart
         try {
-            const documentRequestsData = @json($documentRequestTypes);
+            const documentRequestsData = JSON.parse(`@json($documentRequestTypes)`);
             // Validate data
             if (!documentRequestsData || !Array.isArray(documentRequestsData) || documentRequestsData.length === 0) {
                 console.warn('No document requests data available');
@@ -515,7 +515,7 @@
 
         // Prepare data for resident trends chart
         try {
-            const residentTrendsData = @json($residentTrends);
+            const residentTrendsData = JSON.parse(`@json($residentTrends)`);
             // Validate data
             if (!residentTrendsData || !Array.isArray(residentTrendsData) || residentTrendsData.length === 0) {
                 console.warn('No resident trends data available');

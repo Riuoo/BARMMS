@@ -320,13 +320,16 @@
 <script>
 // Purok Chart
 const purokCtx = document.getElementById('purokChart').getContext('2d');
+const purokLabels = JSON.parse(`@json(array_keys($purokCounts))`);
+const purokValues = JSON.parse(`@json(array_values($purokCounts))`);
+const purokTotal = JSON.parse(`@json(array_sum($purokCounts))`);
 const purokChart = new Chart(purokCtx, {
     type: 'bar',
     data: {
-        labels: @json(array_keys($purokCounts)),
+        labels: purokLabels,
         datasets: [{
             label: 'Document Requests',
-            data: @json(array_values($purokCounts)),
+            data: purokValues,
             backgroundColor: [
                 'rgba(34, 197, 94, 0.8)',
                 'rgba(59, 130, 246, 0.8)',
@@ -369,27 +372,28 @@ const purokChart = new Chart(purokCtx, {
             legend: {
                 display: false
             },
-                         tooltip: {
-                 callbacks: {
-                     label: function(context) {
-                         const total = parseInt({{ array_sum($purokCounts) }});
-                         const percentage = total > 0 ? ((parseInt(context.parsed.y) / total) * 100).toFixed(1) : 0;
-                         return `${context.parsed.y} requests (${percentage}%)`;
-                     }
-                 }
-             }
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const percentage = purokTotal > 0 ? ((parseInt(context.parsed.y) / purokTotal) * 100).toFixed(1) : 0;
+                        return `${context.parsed.y} requests (${percentage}%)`;
+                    }
+                }
+            }
         }
     }
 });
 
 // Cluster Chart
 const clusterCtx = document.getElementById('clusterChart').getContext('2d');
+const clusterLabels = JSON.parse(`@json(array_map(function($clusterId) { return 'Cluster ' . ((int)$clusterId + 1); }, array_keys($clusters)))`);
+const clusterCounts = JSON.parse(`@json(array_map('count', $clusters))`);
 const clusterChart = new Chart(clusterCtx, {
     type: 'doughnut',
     data: {
-        labels: @json(array_map(function($clusterId) { return 'Cluster ' . ((int)$clusterId + 1); }, array_keys($clusters))),
+        labels: clusterLabels,
         datasets: [{
-            data: @json(array_map('count', $clusters)),
+            data: clusterCounts,
             backgroundColor: [
                 'rgba(139, 92, 246, 0.8)',
                 'rgba(59, 130, 246, 0.8)',
@@ -420,15 +424,15 @@ const clusterChart = new Chart(clusterCtx, {
                     padding: 15
                 }
             },
-                         tooltip: {
-                 callbacks: {
-                     label: function(context) {
-                         const total = context.dataset.data.reduce((a, b) => parseInt(a) + parseInt(b), 0);
-                         const percentage = total > 0 ? ((parseInt(context.parsed) / total) * 100).toFixed(1) : 0;
-                         return `${context.label}: ${context.parsed} requests (${percentage}%)`;
-                     }
-                 }
-             }
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const total = context.dataset.data.reduce((a, b) => parseInt(a) + parseInt(b), 0);
+                        const percentage = total > 0 ? ((parseInt(context.parsed) / total) * 100).toFixed(1) : 0;
+                        return `${context.label}: ${context.parsed} requests (${percentage}%)`;
+                    }
+                }
+            }
         }
     }
 });

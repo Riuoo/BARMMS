@@ -164,8 +164,9 @@
                     <h4 class="font-medium text-gray-700 mb-2">Template Preview</h4>
                     <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
                         <div class="text-sm text-gray-600 mb-2">Last updated: {{ $template->updated_at->format('M d, Y H:i') }}</div>
-                        <button onclick="previewTemplate({{ $template->id }})" 
-                                class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700">
+                        <button type="button" 
+                                class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 js-preview-template"
+                                data-template-id="{{ $template->id }}">
                             <i class="fas fa-eye mr-2"></i>
                             Preview Template
                         </button>
@@ -251,6 +252,16 @@ function previewTemplate(templateId) {
             document.getElementById('previewContent').innerHTML = '<div class="text-center text-red-600">Error loading preview</div>';
         });
 }
+
+// Delegated click for preview button
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.js-preview-template');
+    if (!btn) return;
+    const id = btn.getAttribute('data-template-id');
+    if (id) {
+        previewTemplate(id);
+    }
+});
 
 document.getElementById('closePreview').addEventListener('click', function() {
     document.getElementById('previewModal').classList.add('hidden');

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\AdminControllers\ReportRequestControllers;
 
 use App\Models\DocumentTemplate;
+use App\Models\DocumentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class DocumentTemplateController
 {
@@ -91,37 +93,44 @@ class DocumentTemplateController
 
             if (in_array($extension, ['html', 'htm'])) {
                 $raw = file_get_contents($file->getPathname());
-                // Keep placeholders, strip tags for storage as plain content
-                $content = strip_tags($raw);
+                // Clean Word HTML while preserving basic structure and placeholders
+                $content = $this->sanitizeWordHtml($raw);
             } elseif ($extension === 'txt') {
                 $content = file_get_contents($file->getPathname());
-            } elseif ($extension === 'docx') {
-                // Parse DOCX without external libraries using ZipArchive
-                $zip = new \ZipArchive();
-                if ($zip->open($file->getPathname()) === true) {
-                    $xml = $zip->getFromName('word/document.xml');
-                    $zip->close();
-                    if ($xml !== false) {
-                        // Extract text from <w:t> nodes
-                        if (preg_match_all('/<w:t[^>]*>(.*?)<\/w:t>/si', $xml, $matches)) {
-                            $text = implode('', $matches[1]);
-                        } else {
-                            // Fallback: strip tags from entire XML
-                            $text = strip_tags($xml);
-                        }
-                        // Decode entities and normalize whitespace
-                        $text = html_entity_decode($text, ENT_QUOTES | ENT_XML1, 'UTF-8');
-                        $text = preg_replace('/[\r\n\t]+/', ' ', $text);
-                        $text = preg_replace('/\s{2,}/', ' ', $text);
-                        // Fix placeholders potentially split by spaces
-                        $text = preg_replace('/\[\s+/', '[', $text);
-                        $text = preg_replace('/\s+\]/', ']', $text);
-                        $content = trim($text);
+                // Convert newlines to paragraphs for better formatting
+                $lines = preg_split('/\r\n|\r|\n/', $content);
+                $content = '';
+                foreach ($lines as $line) {
+                    $trimmed = trim($line);
+                    if ($trimmed === '') {
+                        $content .= "<br>";
                     } else {
-                        throw new \RuntimeException('Unable to read document.xml from DOCX file.');
+                        $content .= '<p>' . $trimmed . '</p>';
                     }
-                } else {
-                    throw new \RuntimeException('Failed to open DOCX file.');
+                }
+            } elseif ($extension === 'docx') {
+                // Use PHPWord for higher-fidelity HTML conversion
+                try {
+                    $phpWord = \PhpOffice\PhpWord\IOFactory::load($file->getPathname());
+                    $htmlWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
+                    ob_start();
+                    $htmlWriter->save('php://output');
+                    $raw = ob_get_clean();
+
+                    // Extract body inner HTML
+                    $dom = new \DOMDocument();
+                    @$dom->loadHTML($raw, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+                    $body = $dom->getElementsByTagName('body')->item(0);
+                    $content = '';
+                    if ($body) {
+                        foreach (iterator_to_array($body->childNodes) as $child) {
+                            $content .= $dom->saveHTML($child);
+                        }
+                    } else {
+                        $content = $raw;
+                    }
+                } catch (\Throwable $e) {
+                    throw new \RuntimeException('Failed to parse DOCX: ' . $e->getMessage());
                 }
             } else {
                 // .doc not supported without external libs; advise converting
@@ -163,6 +172,73 @@ class DocumentTemplateController
         }
     }
 
+    /**
+     * Sanitize Microsoft Word HTML while preserving basic structure and placeholders.
+     */
+    private function sanitizeWordHtml(string $rawHtml): string
+    {
+        // Remove MSO conditional comments and Office-specific XML blocks fast
+        $clean = preg_replace('/<!--\s*\[if.*?endif\]\s*-->/is', '', $rawHtml) ?? $rawHtml;
+        $clean = preg_replace('/<\/?(meta|link|script|style|xml)[^>]*>/is', '', $clean) ?? $clean;
+
+        $dom = new \DOMDocument();
+        // Suppress warnings for malformed Word HTML
+        @$dom->loadHTML($clean, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $xpath = new \DOMXPath($dom);
+
+        // Remove namespaced elements like o:p, v:*, w:*
+        foreach ($xpath->query('//*[contains(name(), ":")]') as $node) {
+            $node->parentNode->removeChild($node);
+        }
+
+        // Keep inline styles; style blocks can remain minimal. Remove <script> for safety
+        foreach ($dom->getElementsByTagName('script') as $script) {
+            $script->parentNode->removeChild($script);
+        }
+
+        // Allowed tags and attributes
+        $allowedTags = ['h1','h2','h3','p','div','span','b','strong','i','em','u','br','hr','ul','ol','li','table','thead','tbody','tr','td','th'];
+        $allowedAttrs = ['style','class','align','valign','width','height','border','cellpadding','cellspacing','colspan','rowspan'];
+
+        // Walk all elements
+        $all = $dom->getElementsByTagName('*');
+        // Because live NodeList changes during iteration, copy first
+        $nodes = [];
+        foreach ($all as $el) { $nodes[] = $el; }
+
+        foreach ($nodes as $el) {
+            $tag = strtolower($el->nodeName);
+            if (!in_array($tag, $allowedTags, true)) {
+                // Unwrap unknown tags: move children up, then remove
+                while ($el->firstChild) {
+                    $el->parentNode->insertBefore($el->firstChild, $el);
+                }
+                $el->parentNode->removeChild($el);
+                continue;
+            }
+
+            // Drop all attributes except allowed ones and keep placeholders intact
+            $attrs = [];
+            if ($el instanceof \DOMElement && $el->hasAttributes()) {
+                foreach (iterator_to_array($el->attributes) as $attr) {
+                    if (!in_array(strtolower($attr->name), $allowedAttrs, true)) {
+                        $el->removeAttribute($attr->name);
+                    }
+                }
+            }
+        }
+
+        // Convert multiple empty paragraphs into single break
+        $html = $dom->saveHTML();
+        $html = preg_replace('/(\s*<p>\s*<\/p>\s*){2,}/i', '<br>', $html) ?? $html;
+        // Compress excessive whitespace and remove MSO inline artifacts
+        $html = preg_replace('/\s{2,}/', ' ', $html) ?? $html;
+        $html = str_replace(['&nbsp;'], ' ', $html);
+
+        return trim($html);
+    }
+
     public function create()
     {
         return view('admin.templates.create');
@@ -192,14 +268,86 @@ class DocumentTemplateController
 
     }
 
+    /**
+     * Create or update a template directly from an uploaded Word/HTML/TXT file.
+     */
+    public function storeFromWord(Request $request)
+    {
+        $request->validate([
+            'document_type' => 'required|string',
+            'word_file' => 'required|file|mimes:html,htm,txt,docx,doc|max:10240'
+        ]);
+
+        try {
+            $docType = trim($request->input('document_type'));
+            $file = $request->file('word_file');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $content = '';
+
+            if (in_array($extension, ['html', 'htm'])) {
+                $raw = file_get_contents($file->getPathname());
+                $content = $this->sanitizeWordHtml($raw);
+            } elseif ($extension === 'txt') {
+                $text = file_get_contents($file->getPathname());
+                $lines = preg_split('/\r\n|\r|\n/', $text);
+                $html = '';
+                foreach ($lines as $line) {
+                    $trimmed = trim($line);
+                    $html .= $trimmed === '' ? '<br>' : '<p>' . e($trimmed) . '</p>';
+                }
+                $content = $html;
+            } elseif ($extension === 'docx') {
+                // High-fidelity conversion using PHPWord
+                $phpWord = \PhpOffice\PhpWord\IOFactory::load($file->getPathname());
+                $htmlWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
+                ob_start();
+                $htmlWriter->save('php://output');
+                $raw = ob_get_clean();
+                $content = $this->sanitizeWordHtml($raw);
+            } else {
+                throw new \RuntimeException('DOC format not supported. Please upload HTML, TXT, or DOCX.');
+            }
+
+            // Normalize encoding and strip BOM
+            $encoding = mb_detect_encoding($content, ['UTF-8','UTF-16LE','UTF-16BE','UTF-32LE','UTF-32BE','ISO-8859-1','Windows-1252'], true);
+            if ($encoding && $encoding !== 'UTF-8') {
+                $content = mb_convert_encoding($content, 'UTF-8', $encoding);
+            }
+            if (substr($content, 0, 3) === "\xEF\xBB\xBF") {
+                $content = substr($content, 3);
+            }
+
+            // Extract placeholders like [resident_name]
+            preg_match_all('/\[([^\]]+)\]/', $content, $matches);
+            $placeholders = array_values(array_unique($matches[1] ?? []));
+
+            // Create or update template by document_type
+            $template = DocumentTemplate::firstOrNew(['document_type' => $docType]);
+            $template->header_content = '';
+            $template->body_content = $content;
+            $template->footer_content = '';
+            $template->placeholders = $placeholders;
+            $template->is_active = true;
+            $template->save();
+
+            notify()->success('Template ' . ($template->wasRecentlyCreated ? 'created' : 'updated') . ' successfully from uploaded file.');
+            return redirect()->route('admin.templates.index');
+
+        } catch (\Throwable $e) {
+            Log::error('Error creating template from file: ' . $e->getMessage());
+            notify()->error('Failed to create template: ' . $e->getMessage());
+            return back()->withInput();
+        }
+    }
+
     public function update(Request $request, $id)
     {
         $template = DocumentTemplate::findOrFail($id);
 
         $validated = $request->validate([
-            'header_content' => 'required|string',
+            'header_content' => 'nullable|string',
             'body_content' => 'required|string',
-            'footer_content' => 'required|string',
+            'footer_content' => 'nullable|string',
             'custom_css' => 'nullable|string',
             'placeholders' => 'nullable|array',
             'settings' => 'nullable|array'
@@ -279,6 +427,28 @@ class DocumentTemplateController
         } catch (\Exception $e) {
             Log::error('Error toggling template status: ' . $e->getMessage());
             notify()->error('Failed to update template status.');
+            return back();
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $template = DocumentTemplate::findOrFail($id);
+
+            DB::transaction(function () use ($template) {
+                // Detach references in document_requests to avoid FK constraint errors
+                DocumentRequest::where('document_template_id', $template->id)
+                    ->update(['document_template_id' => null]);
+
+                $template->delete();
+            });
+
+            notify()->success('Template deleted successfully. Any linked requests have been detached.');
+            return redirect()->route('admin.templates.index');
+        } catch (\Throwable $e) {
+            Log::error('Error deleting template: ' . $e->getMessage());
+            notify()->error('Failed to delete template: ' . $e->getMessage());
             return back();
         }
     }

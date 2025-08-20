@@ -169,9 +169,11 @@ Route::prefix('admin')->group(function () {
         Route::get('/templates/{template}/word-integration', [DocumentTemplateController::class, 'wordIntegration'])->name('admin.templates.word-integration');
         Route::get('/templates/{template}/download-word', [DocumentTemplateController::class, 'downloadWord'])->name('admin.templates.download-word');
         Route::post('/templates/{template}/upload-word', [DocumentTemplateController::class, 'uploadWord'])->name('admin.templates.upload-word');
+        Route::post('/templates/upload-word', [DocumentTemplateController::class, 'storeFromWord'])->name('admin.templates.store-from-word');
         Route::put('/templates/{template}', [DocumentTemplateController::class, 'update'])->name('admin.templates.update');
         Route::post('/templates/{template}/reset', [DocumentTemplateController::class, 'reset'])->name('admin.templates.reset');
         Route::post('/templates/{template}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
+        Route::delete('/templates/{template}', [DocumentTemplateController::class, 'destroy'])->name('admin.templates.destroy');
         
         // Account Requests listing and approval
         Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');

@@ -1101,7 +1101,7 @@
                 if (!container) return;
 
                 if (notifications.length === 0) {
-                    const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                    const isNurse = JSON.parse(`@json($isNurse)`);
                     if (isNurse) {
                         container.innerHTML = `
                             <div class="flex items-center justify-center py-8">
@@ -1158,7 +1158,7 @@
             // Mark notification as read
             markAsRead: function(type, id) {
                 // Check if user is a nurse
-                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                const isNurse = JSON.parse(`@json($isNurse)`);
                 
                 if (isNurse) {
                     toast.info('Nurses can only access health-related notifications');
@@ -1205,7 +1205,7 @@
             // Mark all notifications as read
             markAllAsRead: function() {
                 // Check if user is a nurse
-                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                const isNurse = JSON.parse(`@json($isNurse)`);
                 
                 if (isNurse) {
                     toast.info('Nurses can only access health-related notifications');
@@ -1264,7 +1264,7 @@
             // View notification details
             viewDetails: function(type, id) {
                 // Check if user is a nurse
-                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                const isNurse = JSON.parse(`@json($isNurse)`);
                 
                 if (isNurse) {
                     toast.info('Nurses can only access health-related notifications');
@@ -1351,7 +1351,7 @@
             // Check current page and mark relevant notifications as read
             checkCurrentPageAndMarkNotifications: function() {
                 // Check if user is a nurse
-                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                const isNurse = JSON.parse(`@json($isNurse)`);
                 
                 if (isNurse) {
                     return; // Nurses don't have access to barangay-related notifications
@@ -1380,7 +1380,7 @@
             // Mark all notifications of a specific type as read
             markNotificationsAsReadByType: function(type) {
                 // Check if user is a nurse
-                const isNurse = {{ $isNurse ? 'true' : 'false' }};
+                const isNurse = JSON.parse(`@json($isNurse)`);
                 
                 if (isNurse) {
                     return; // Nurses don't have access to barangay-related notifications
@@ -1412,7 +1412,7 @@
         // Initialize notification system when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Skip initializing notifications for nurses
-            const isNurse = {{ $isNurse ? 'true' : 'false' }};
+            const isNurse = JSON.parse(`@json($isNurse)`);
             if (isNurse) return;
 
             try {

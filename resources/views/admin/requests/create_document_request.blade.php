@@ -97,8 +97,8 @@
                                 required>
                             <option value="">Select a template</option>
                             @foreach(($templates ?? []) as $t)
-                                <option value="{{ $t->id }}" {{ old('document_template_id') == $t->id ? 'selected' : '' }}>
-                                    {{ $t->document_type }}
+                                <option value="{{ optional($t)->id }}" {{ old('document_template_id') == optional($t)->id ? 'selected' : '' }}>
+                                    {{ optional($t)->document_type ?? '' }}
                                 </option>
                             @endforeach
                         </select>
@@ -209,6 +209,17 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => func.apply(this, args), delay);
         };
+    }
+
+    // Sync hidden document_type with selected template to ensure type strictly matches an active template
+    if (templateSelect && documentTypeHidden) {
+        templateSelect.addEventListener('change', () => {
+            const selected = templateSelect.options[templateSelect.selectedIndex];
+            documentTypeHidden.value = selected ? (selected.textContent || '').trim() : '';
+        });
+        // Initialize on load
+        const initSelected = templateSelect.options[templateSelect.selectedIndex];
+        documentTypeHidden.value = initSelected ? (initSelected.textContent || '').trim() : '';
     }
 
     // Create -> success -> download -> back with notify()

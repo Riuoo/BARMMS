@@ -206,36 +206,12 @@
                             @endif
                         </div>
 
-                        <!-- Action Buttons -->
+                        <!-- Action Buttons: Preview, Toggle, Delete -->
                         <div class="flex flex-wrap gap-2">
-                            <a href="{{ route('admin.templates.edit', $template) }}" 
-                               class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                                <i class="fas fa-file-word mr-1"></i>
-                                Edit
-                            </a>
-                            
-                            <a href="{{ route('admin.templates.word-integration', $template) }}" 
-                               class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200">
-                                <i class="fas fa-download mr-1"></i>
-                                Word Doc
-                            </a>
-
-                            <button type="button" 
-                                    onclick="previewTemplate({{ $template->id }})"
-                                    class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                            <a href="#" class="preview-link inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" data-template-id="{{ $template->id }}">
                                 <i class="fas fa-eye mr-1"></i>
                                 Preview
-                            </button>
-
-                            <form action="{{ route('admin.templates.reset', $template) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" 
-                                        onclick="return confirm('Are you sure you want to reset this template to default?')"
-                                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-200">
-                                    <i class="fas fa-undo mr-1"></i>
-                                    Reset
-                                </button>
-                            </form>
+                            </a>
 
                             <form action="{{ route('admin.templates.toggle-status', $template) }}" method="POST" class="inline">
                                 @csrf
@@ -243,6 +219,15 @@
                                         class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200">
                                     <i class="fas {{ $template->is_active ? 'fa-toggle-on text-green-600' : 'fa-toggle-off text-gray-400' }} mr-1"></i>
                                     {{ $template->is_active ? 'Deactivate' : 'Activate' }}
+                                </button>
+                            </form>
+
+                            <form action="{{ route('admin.templates.destroy', $template) }}" method="POST" class="inline" onsubmit="return confirm('Delete this template? This action cannot be undone.')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                                    <i class="fas fa-trash mr-1"></i>
+                                    Delete
                                 </button>
                             </form>
                         </div>
@@ -296,6 +281,23 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a.preview-link');
+        if (link) {
+            e.preventDefault();
+            const id = link.getAttribute('data-template-id');
+            if (typeof previewTemplate === 'function') {
+                previewTemplate(id);
+            }
+        }
+    });
+});
+</script>
+@endpush
 
 @push('scripts')
 <script>

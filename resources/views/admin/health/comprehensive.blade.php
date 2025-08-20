@@ -107,7 +107,7 @@
                         <span class="text-sm text-gray-600">{{ ucfirst($risk) }}</span>
                         <div class="flex items-center">
                             <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
-                                <div class="bg-blue-500 h-2 rounded-full" style="width: {{ ($count / $patientSummary['total']) * 100 }}%"></div>
+                                <div class="bg-blue-500 h-2 rounded-full progress-bar" data-width="{{ ($patientSummary['total'] > 0) ? round(($count / $patientSummary['total']) * 100, 2) : 0 }}"></div>
                             </div>
                             <span class="text-sm font-medium text-gray-900">{{ $count }}</span>
                         </div>
@@ -145,7 +145,7 @@
                         <span class="text-sm text-gray-600">{{ ucfirst($type) }}</span>
                         <div class="flex items-center">
                             <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
-                                <div class="bg-green-500 h-2 rounded-full" style="width: {{ ($count / $vaccinationSummary['total']) * 100 }}%"></div>
+                                <div class="bg-green-500 h-2 rounded-full progress-bar" data-width="{{ ($vaccinationSummary['total'] > 0) ? round(($count / $vaccinationSummary['total']) * 100, 2) : 0 }}"></div>
                             </div>
                             <span class="text-sm font-medium text-gray-900">{{ $count }}</span>
                         </div>
@@ -305,6 +305,15 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.progress-bar').forEach(function(el) {
+        const width = parseFloat(el.getAttribute('data-width')) || 0;
+        el.style.width = width + '%';
+    });
+});
+</script>
 
 <style>
 @media print {

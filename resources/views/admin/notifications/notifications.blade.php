@@ -205,8 +205,8 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex justify-center">
                                 <div class="flex items-center space-x-2">
                                     <a href="{{ $notification->link }}" 
-                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
-                                       onclick="markAsReadAndNavigate('{{ $notification->type }}', {{ $notification->id }}, '{{ $notification->link }}')">
+                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-mark-read-and-navigate"
+                                       data-type="{{ $notification->type }}" data-id="{{ $notification->id }}" data-link="{{ $notification->link }}">
                                         <i class="fas fa-eye mr-1"></i>
                                         View
                                     </a>
@@ -370,12 +370,15 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateNotificationCounts, 30000);
 });
 
-// Function to mark notification as read and navigate to the link
-function markAsReadAndNavigate(type, id, link) {
-    // Prevent default link behavior
+// Delegated click handler for mark-as-read and navigate
+document.addEventListener('click', function (event) {
+    const link = event.target.closest('.js-mark-read-and-navigate');
+    if (!link) return;
     event.preventDefault();
-    
-    // Make AJAX call to mark notification as read
+    const type = link.getAttribute('data-type');
+    const id = link.getAttribute('data-id');
+    const href = link.getAttribute('data-link');
+
     fetch(`/admin/notifications/mark-as-read/${type}/${id}`, {
         method: 'POST',
         headers: {
@@ -385,22 +388,14 @@ function markAsReadAndNavigate(type, id, link) {
         },
         credentials: 'same-origin'
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            if (typeof toast !== 'undefined') {
-                toast.success(data.message);
-            }
-        }
-        // Navigate to the link after marking as read
-        window.location.href = link;
+    .then(r => r.json())
+    .then(() => {
+        window.location.href = href;
     })
-    .catch(error => {
-        console.error('Error marking notification as read:', error);
-        // Still navigate to the link even if marking as read fails
-        window.location.href = link;
+    .catch(() => {
+        window.location.href = href;
     });
-}
+});
 </script>
 
 

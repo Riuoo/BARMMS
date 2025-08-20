@@ -12,7 +12,10 @@ class ResidentDocumentRequestController
 {
     public function requestDocument()
     {
-        return view('resident.request_document_request');
+        $templates = DocumentTemplate::where('is_active', true)
+            ->orderBy('document_type')
+            ->get();
+        return view('resident.request_document_request', compact('templates'));
     }
 
     public function storeDocument(Request $request)
