@@ -20,22 +20,106 @@
         </div>
     </div>
 
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+                        <i class="fas fa-pills text-blue-600"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Requests</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_requests']) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
+                        <i class="fas fa-check text-green-600"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Approved</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_approved']) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Pending</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_pending']) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
+                        <i class="fas fa-calendar text-purple-600"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">This Month</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['this_month']) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filters -->
     <form method="GET" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
             <div class="flex-1">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search resident or medicine..."
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search resident, medicine, or notes..."
                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" />
                 </div>
             </div>
-            
+
+            <!-- Approval Status Filter -->
+            <div class="sm:w-48">
+                <select name="approval_status" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Status</option>
+                    <option value="approved" {{ request('approval_status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="pending" {{ request('approval_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                </select>
+            </div>
+
+            <!-- Medicine Category Filter -->
+            <div class="sm:w-48">
+                <select name="medicine_category" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Categories</option>
+                    @foreach($medicineCategories as $category)
+                        <option value="{{ $category }}" {{ request('medicine_category') == $category ? 'selected' : '' }}>{{ $category }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
             <div class="flex space-x-2">
-                <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Filter</button>
-                <a href="{{ route('admin.medicine-requests.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Reset</a>
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+                <a href="{{ route('admin.medicine-requests.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <i class="fas fa-undo mr-2"></i>Reset
+                </a>
             </div>
         </div>
     </form>
@@ -52,6 +136,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sort-numeric-up mr-2 text-gray-400"></i>Quantity</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-user-md mr-2 text-gray-400"></i>Approved By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sticky-note mr-2 text-gray-400"></i>Notes</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-info-circle mr-2 text-gray-400"></i>Status</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -59,7 +144,12 @@
                     <tr class="hover:bg-gray-50 transition duration-150">
                         <td class="px-6 py-4">{{ $req->request_date->format('M d, Y') }}</td>
                         <td class="px-6 py-4">{{ $req->resident->name ?? 'Unknown' }}</td>
-                        <td class="px-6 py-4">{{ $req->medicine->name ?? 'Unknown' }}</td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ $req->medicine->name ?? 'Unknown' }}</div>
+                            @if($req->medicine && $req->medicine->category)
+                                <div class="text-xs text-gray-500">{{ $req->medicine->category }}</div>
+                            @endif
+                        </td>
                         <td class="px-6 py-4">{{ $req->quantity_requested }}</td>
                         <td class="px-6 py-4">{{ $req->approvedByUser->name ?? 'Unknown User' }}</td>
                         <td class="px-6 py-4">
@@ -69,20 +159,143 @@
                                 <span class="text-gray-400">No notes</span>
                             @endif
                         </td>
+                        <td class="px-6 py-4">
+                            @if($req->quantity_approved)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check mr-1"></i>Approved
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-clock mr-1"></i>Pending
+                                </span>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
-        @if($requests->hasPages())
-        <div class="px-6 py-4 border-t border-gray-200">
-            {{ $requests->links() }}
-        </div>
-        @endif
     </div>
 
+    <!-- Modern Pagination -->
+    @if($requests->hasPages())
+        <div class="mt-6">
+            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+                <div class="-mt-px flex w-0 flex-1">
+                    @if($requests->onFirstPage())
+                        <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </span>
+                    @else
+                        <a href="{{ $requests->appends(request()->except('page'))->previousPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="hidden md:-mt-px md:flex">
+                    @php
+                        $currentPage = $requests->currentPage();
+                        $lastPage = $requests->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
+                    
+                    @if($startPage > 1)
+                        <a href="{{ $requests->appends(request()->except('page'))->url(1) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            1
+                        </a>
+                        @if($startPage > 2)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                    @endif
+                    
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $requests->appends(request()->except('page'))->url($page) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endfor
+                    
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                        <a href="{{ $requests->appends(request()->except('page'))->url($lastPage) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            {{ $lastPage }}
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="-mt-px flex w-0 flex-1 justify-end">
+                    @if($requests->hasMorePages())
+                        <a href="{{ $requests->appends(request()->except('page'))->nextPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </a>
+                    @else
+                        <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </span>
+                    @endif
+                </div>
+            </nav>
+            
+            <!-- Mobile Pagination -->
+            <div class="mt-4 flex justify-between sm:hidden">
+                @if($requests->onFirstPage())
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Previous
+                    </span>
+                @else
+                    <a href="{{ $requests->appends(request()->except('page'))->previousPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Previous
+                    </a>
+                @endif
+                
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                    Page {{ $requests->currentPage() }} of {{ $requests->lastPage() }}
+                </span>
+                
+                @if($requests->hasMorePages())
+                    <a href="{{ $requests->appends(request()->except('page'))->nextPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Next
+                    </a>
+                @else
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Next
+                    </span>
+                @endif
+            </div>
+            
+            <!-- Results Info -->
+            <div class="mt-4 text-center text-sm text-gray-500">
+                Showing {{ $requests->firstItem() }} to {{ $requests->lastItem() }} of {{ $requests->total() }} results
+            </div>
+        </div>
+    @endif
+
     <!-- Mobile Cards -->
-        <div class="md:hidden space-y-3">
+    <div class="md:hidden space-y-3">
         @foreach($requests as $req)
         <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
             <div class="flex items-start justify-between mb-2">
@@ -90,26 +303,47 @@
                     <h3 class="text-sm font-semibold text-gray-900">{{ $req->medicine->name ?? 'Unknown' }}</h3>
                     <p class="text-xs text-gray-500">{{ $req->resident->name ?? 'Unknown' }}</p>
                 </div>
+                <div class="text-right">
+                    @if($req->quantity_approved)
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-check mr-1"></i>Approved
+                        </span>
+                    @else
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <i class="fas fa-clock mr-1"></i>Pending
+                        </span>
+                    @endif
+                </div>
             </div>
             <div class="text-sm text-gray-600 mb-2">
                 <p><i class="fas fa-calendar-day mr-1 text-gray-400"></i> {{ $req->request_date->format('M d, Y') }}</p>
                 <p><i class="fas fa-sort-numeric-up mr-1 text-gray-400"></i> {{ $req->quantity_requested }}</p>
                 <p><i class="fas fa-user-md mr-1 text-gray-400"></i> {{ $req->approvedByUser->name ?? 'Unknown User' }}</p>
+                @if($req->medicine && $req->medicine->category)
+                    <p><i class="fas fa-tag mr-1 text-gray-400"></i> {{ $req->medicine->category }}</p>
+                @endif
                 @if($req->notes)
                     <p><i class="fas fa-sticky-note mr-1 text-gray-400"></i> {{ Str::limit($req->notes, 50) }}</p>
                 @endif
             </div>
-                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
-                    <span class="text-gray-400 text-sm">—</span>
-                </div>
         </div>
         @endforeach
     </div>
 
-    @if($requests->hasPages())
-    <div class="mt-4">
-        {{ $requests->links() }}
-    </div>
+    <!-- No Results Message -->
+    @if($requests->total() == 0)
+        <div class="text-center py-12">
+            <div class="mx-auto h-12 w-12 text-gray-400">
+                <i class="fas fa-pills text-4xl"></i>
+            </div>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No medicine requests found</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by creating a new medicine request.</p>
+            <div class="mt-6">
+                <a href="{{ route('admin.medicine-requests.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <i class="fas fa-plus mr-2"></i>New Request
+                </a>
+            </div>
+        </div>
     @endif
 </div>
 @endsection

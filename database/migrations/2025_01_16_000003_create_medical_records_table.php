@@ -17,18 +17,17 @@ return new class extends Migration
             $table->unsignedBigInteger('attending_health_worker_id')->index();
             $table->dateTime('consultation_datetime')->useCurrent()->index();
             $table->string('consultation_type');
-            $table->text('chief_complaint')->nullable();
             $table->text('symptoms')->nullable();
+            $table->text('chief_complaint')->nullable();
+            $table->string('blood_pressure')->nullable();
+            $table->decimal('temperature', 4, 1)->nullable();
+            $table->integer('pulse_rate')->nullable();
+            $table->integer('respiratory_rate')->nullable();
             $table->text('diagnosis')->nullable();
             $table->text('prescribed_medications')->nullable();
-            $table->decimal('temperature', 4, 1)->nullable();
-            $table->integer('blood_pressure_systolic')->nullable();
-            $table->integer('blood_pressure_diastolic')->nullable();
-            $table->integer('pulse_rate')->nullable();
-            $table->decimal('weight_kg', 5, 2)->nullable();
-            $table->decimal('height_cm', 5, 2)->nullable();
             $table->text('notes')->nullable();
             $table->date('follow_up_date')->nullable();
+            $table->text('follow_up_notes')->nullable();
             $table->timestamps();
             $table->index('created_at');
 

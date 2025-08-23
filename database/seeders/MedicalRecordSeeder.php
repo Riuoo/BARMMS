@@ -29,13 +29,12 @@ class MedicalRecordSeeder extends Seeder
                 'diagnosis' => 'Normal pregnancy, 24 weeks gestation',
                 'prescribed_medications' => 'Prenatal vitamins; Iron supplements as needed',
                 'temperature' => 36.7,
-                'blood_pressure_systolic' => 118,
-                'blood_pressure_diastolic' => 76,
+                'blood_pressure' => '118/76',
                 'pulse_rate' => 88,
-                'weight_kg' => 62.8,
-                'height_cm' => 160.0,
+                'respiratory_rate' => 16,
                 'notes' => 'Fundal height appropriate. Fetal heart tones present.',
                 'follow_up_date' => now()->addDays(28)->toDateString(),
+                'follow_up_notes' => 'Continue prenatal vitamins. Schedule next appointment in 4 weeks.',
             ]
         ];
 

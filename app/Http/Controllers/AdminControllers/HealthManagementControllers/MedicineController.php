@@ -205,14 +205,8 @@ class MedicineController
             ->paginate(20)
             ->withQueryString();
 
-        $topRequested = MedicineRequest::select('medicine_id')
-            ->selectRaw('COUNT(*) as requests')
-            ->whereBetween('request_date', [$start->toDateString(), $end->toDateString()])
-            ->groupBy('medicine_id')
-            ->orderByDesc('requests')
-            ->with('medicine')
-            ->limit(10)
-            ->get();
+        // Consolidated medicine request analytics - single query for all request data
+        $requestAnalytics = $this->getConsolidatedRequestAnalytics($start, $end);
 
         $topDispensed = MedicineTransaction::select('medicine_id')
             ->selectRaw('SUM(quantity) as total_qty')
@@ -254,33 +248,116 @@ class MedicineController
             ->orderBy('bracket')
             ->get();
 
-        // Cluster-aware top medicines (using resident clustering)
-        $clusterTopMedicines = [];
-        try {
-            $clustering = new ResidentDemographicAnalysisService(3);
-            $clusterResult = $clustering->clusterResidents();
-            foreach ($clusterResult['clusters'] as $clusterId => $cluster) {
-                $residentIds = collect($cluster)->pluck('resident.id');
-                if ($residentIds->isEmpty()) { $clusterTopMedicines[$clusterId] = collect(); continue; }
-                $clusterTopMedicines[$clusterId] = MedicineRequest::select('medicine_id')
-                    ->selectRaw('COUNT(*) as requests')
-                    ->whereIn('resident_id', $residentIds)
-                    ->whereBetween('request_date', [$start->toDateString(), $end->toDateString()])
-                    ->groupBy('medicine_id')
-                    ->orderByDesc('requests')
-                    ->with('medicine')
-                    ->limit(3)
+        // Top requested people by purok (unique residents who made at least one request)
+        $topRequestedPeopleByPurok = DB::table('medicine_requests as mr')
+            ->join('residents as r', 'r.id', '=', 'mr.resident_id')
+            ->whereBetween('mr.request_date', [$start->toDateString(), $end->toDateString()])
+            ->selectRaw('CASE 
+                WHEN r.address LIKE "%Purok 1%" THEN "Purok 1"
+                WHEN r.address LIKE "%Purok 2%" THEN "Purok 2"
+                WHEN r.address LIKE "%Purok 3%" THEN "Purok 3"
+                WHEN r.address LIKE "%Purok 4%" THEN "Purok 4"
+                WHEN r.address LIKE "%Purok 5%" THEN "Purok 5"
+                WHEN r.address LIKE "%Purok 6%" THEN "Purok 6"
+                WHEN r.address LIKE "%Purok 7%" THEN "Purok 7"
+                WHEN r.address LIKE "%Purok 8%" THEN "Purok 8"
+                WHEN r.address LIKE "%Purok 9%" THEN "Purok 9"
+                ELSE "Other" 
+            END as purok, COUNT(DISTINCT mr.resident_id) as people')
+            ->groupBy('purok')
+            ->orderBy('purok')
                     ->get();
-            }
-        } catch (\Throwable $e) {
-            // Fail gracefully if clustering not available
-            $clusterTopMedicines = [];
-        }
 
         return view('admin.medicines.report', compact(
-            'transactions', 'topRequested', 'topDispensed', 'start', 'end',
-            'categoryCounts', 'monthlyDispensed', 'requestsByAgeBracket', 'clusterTopMedicines'
+            'transactions', 'requestAnalytics', 'topDispensed', 'start', 'end',
+            'categoryCounts', 'monthlyDispensed', 'requestsByAgeBracket',
+            'topRequestedPeopleByPurok'
         ));
+    }
+
+    /**
+     * Get consolidated medicine request analytics from a single query
+     * Eliminates redundancy by generating all request views from one data source
+     */
+    private function getConsolidatedRequestAnalytics($start, $end)
+    {
+        // Get medicine requests with purok information for geographic analysis
+        $requestsByPurok = DB::table('medicine_requests as mr')
+            ->join('residents as r', 'r.id', '=', 'mr.resident_id')
+            ->join('medicines as m', 'm.id', '=', 'mr.medicine_id')
+            ->whereBetween('mr.request_date', [$start->toDateString(), $end->toDateString()])
+            ->select([
+                'm.name as medicine_name',
+                'm.category as medicine_category',
+                DB::raw('CASE 
+                    WHEN r.address LIKE "%Purok 1%" THEN "Purok 1"
+                    WHEN r.address LIKE "%Purok 2%" THEN "Purok 2"
+                    WHEN r.address LIKE "%Purok 3%" THEN "Purok 3"
+                    WHEN r.address LIKE "%Purok 4%" THEN "Purok 4"
+                    WHEN r.address LIKE "%Purok 5%" THEN "Purok 5"
+                    WHEN r.address LIKE "%Purok 6%" THEN "Purok 6"
+                    WHEN r.address LIKE "%Purok 7%" THEN "Purok 7"
+                    WHEN r.address LIKE "%Purok 8%" THEN "Purok 8"
+                    WHEN r.address LIKE "%Purok 9%" THEN "Purok 9"
+                    ELSE "Other" 
+                END as purok'),
+                DB::raw('COUNT(*) as requests')
+            ])
+            ->groupBy('m.name', 'm.category', DB::raw('CASE 
+                WHEN r.address LIKE "%Purok 1%" THEN "Purok 1"
+                WHEN r.address LIKE "%Purok 2%" THEN "Purok 2"
+                WHEN r.address LIKE "%Purok 3%" THEN "Purok 3"
+                WHEN r.address LIKE "%Purok 4%" THEN "Purok 4"
+                WHEN r.address LIKE "%Purok 5%" THEN "Purok 5"
+                WHEN r.address LIKE "%Purok 6%" THEN "Purok 6"
+                WHEN r.address LIKE "%Purok 7%" THEN "Purok 7"
+                WHEN r.address LIKE "%Purok 8%" THEN "Purok 8"
+                WHEN r.address LIKE "%Purok 9%" THEN "Purok 9"
+                ELSE "Other" 
+            END'))
+            ->orderBy('purok')
+            ->orderByDesc('requests')
+            ->get();
+
+        // Get overall top requested medicines
+        $overallTopRequested = DB::table('medicine_requests as mr')
+            ->join('medicines as m', 'm.id', '=', 'mr.medicine_id')
+            ->whereBetween('mr.request_date', [$start->toDateString(), $end->toDateString()])
+            ->select([
+                'm.name as medicine_name',
+                'm.category as medicine_category',
+                DB::raw('COUNT(*) as requests')
+            ])
+            ->groupBy('m.name', 'm.category')
+            ->orderByDesc('requests')
+            ->limit(10)
+            ->get();
+
+        // Note: Debug logging removed for production
+
+        // Group by purok for geographic analysis
+        $byPurok = $requestsByPurok->groupBy('purok')
+            ->map(function ($purokGroup) {
+                return $purokGroup->take(5)->map(function ($item) {
+                    return [
+                        'medicine_name' => $item->medicine_name,
+                        'requests' => $item->requests
+                    ];
+                })->values();
+            });
+
+        // Overall top requested medicines
+        $overall = $overallTopRequested->map(function ($item) {
+            return [
+                'medicine' => ['name' => $item->medicine_name],
+                'requests' => $item->requests
+            ];
+        })->values();
+
+        return [
+            'by_purok' => $byPurok,
+            'overall' => $overall
+        ];
     }
 }
 

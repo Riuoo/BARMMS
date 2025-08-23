@@ -59,10 +59,10 @@
             </div>
             <div class="flex space-x-2">
                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    Filter
+                    <i class="fas fa-filter mr-2"></i>Filter
                 </button>
                 <a href="{{ route('admin.accomplished-projects') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    Reset
+                    <i class="fas fa-undo mr-2"></i>Reset
                 </a>
             </div>
         </div>

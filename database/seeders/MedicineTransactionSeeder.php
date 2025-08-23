@@ -7,6 +7,7 @@ use App\Models\MedicineTransaction;
 use App\Models\Medicine;
 use App\Models\MedicalRecord;
 use App\Models\BarangayProfile;
+use App\Models\MedicineRequest;
 
 class MedicineTransactionSeeder extends Seeder
 {
@@ -18,6 +19,7 @@ class MedicineTransactionSeeder extends Seeder
         $medicines = Medicine::all();
         $medicalRecords = MedicalRecord::all();
         $prescribers = BarangayProfile::query()->whereIn('role', ['nurse'])->pluck('id');
+        $requests = MedicineRequest::all();
 
         if ($medicines->isEmpty() || $medicalRecords->isEmpty() || $prescribers->isEmpty()) {
             return;
@@ -35,18 +37,17 @@ class MedicineTransactionSeeder extends Seeder
             ]);
         }
 
-        // Seed OUT transactions linked to medical records (dispensing)
-        foreach ($medicalRecords as $record) {
-            $medicine = $medicines->random();
+        // Seed OUT transactions based on medicine requests
+        foreach ($requests as $request) {
             MedicineTransaction::create([
-                'medicine_id' => $medicine->id,
-                'resident_id' => $record->resident_id,
-                'medical_record_id' => $record->id,
+                'medicine_id' => $request->medicine_id,
+                'resident_id' => $request->resident_id,
+                'medical_record_id' => $request->medical_record_id,
                 'transaction_type' => 'OUT',
-                'quantity' => rand(1, 10),
-                'transaction_date' => $record->consultation_datetime,
-                'prescribed_by' => $prescribers->random(),
-                'notes' => 'Dispensed as prescribed during consultation',
+                'quantity' => $request->quantity_approved ?? $request->quantity_requested,
+                'transaction_date' => $request->request_date,
+                'prescribed_by' => $request->approved_by,
+                'notes' => 'Dispensed for request ID: ' . $request->id,
             ]);
         }
 

@@ -6,6 +6,7 @@ use App\Models\MedicalRecord;
 use Illuminate\Http\Request;
 use App\Models\Residents;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cache;
 
 class MedicalRecordController
 {
@@ -25,10 +26,10 @@ class MedicalRecordController
 
         // Calculate Statistics (cache for 5 min)
         $stats = [
-            'total' => \Cache::remember('total_medical_records', 300, function() {
+            'total' => Cache::remember('total_medical_records', 300, function() {
                 return MedicalRecord::count();
             }),
-            'last_month' => \Cache::remember('last_month_medical_records', 300, function() {
+            'last_month' => Cache::remember('last_month_medical_records', 300, function() {
                 return MedicalRecord::where('consultation_datetime', '>=', now()->subDays(30))->count();
             })
         ];
@@ -60,13 +61,12 @@ class MedicalRecordController
             'diagnosis' => 'nullable|string|max:1000',
             'prescribed_medications' => 'nullable|string|max:1000',
             'temperature' => 'nullable|numeric|min:30|max:45',
-            'blood_pressure_systolic' => 'nullable|integer|min:50|max:300',
-            'blood_pressure_diastolic' => 'nullable|integer|min:30|max:200',
+            'blood_pressure' => 'nullable|string|max:20',
             'pulse_rate' => 'nullable|integer|min:40|max:200',
-            'weight_kg' => 'nullable|numeric|min:1|max:500',
-            'height_cm' => 'nullable|numeric|min:50|max:300',
+            'respiratory_rate' => 'nullable|integer|min:8|max:50',
             'notes' => 'nullable|string|max:2000',
             'follow_up_date' => 'nullable|date|after:consultation_datetime',
+            'follow_up_notes' => 'nullable|string|max:2000',
         ]);
 
         // Handle "Other" consultation type

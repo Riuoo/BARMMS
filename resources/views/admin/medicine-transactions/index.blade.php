@@ -16,18 +16,21 @@
 
     <!-- Filters -->
     <form method="GET" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
-            <div class="sm:col-span-2">
-                <label class="text-sm text-gray-600">Search</label>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search medicine or resident..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" />
+                    <input type="text" name="query" placeholder="Search medicine name..." 
+                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" 
+                           value="{{ request('query') }}">
                 </div>
             </div>
-            <div>
-                <label class="text-sm text-gray-600">Type</label>
+
+            <!-- Type Filter -->
+            <div class="sm:w-48">
                 <select name="type" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                     <option value="">Any Type</option>
                     @foreach(['IN','OUT','ADJUSTMENT','EXPIRED'] as $t)
@@ -35,17 +38,15 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="text-sm text-gray-600">Start</label>
-                <input type="date" name="start_date" value="{{ request('start_date') }}" class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
-            </div>
-            <div>
-                <label class="text-sm text-gray-600">End</label>
-                <input type="date" name="end_date" value="{{ request('end_date') }}" class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
-            </div>
+
+            <!-- Action Buttons -->
             <div class="flex space-x-2">
-                <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Filter</button>
-                <a href="{{ route('admin.medicine-transactions.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Reset</a>
+                <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+                <a href="{{ route('admin.medicine-transactions.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <i class="fas fa-undo mr-2"></i>Reset
+                </a>
             </div>
         </div>
     </form>
@@ -134,12 +135,124 @@
                 </tbody>
             </table>
         </div>
-        @if($transactions->hasPages())
-        <div class="px-6 py-4 border-t border-gray-200">
-            {{ $transactions->links() }}
-        </div>
-        @endif
     </div>
+
+    <!-- Modern Pagination -->
+    @if($transactions->hasPages())
+        <div class="mt-6">
+            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+                <div class="-mt-px flex w-0 flex-1">
+                    @if($transactions->onFirstPage())
+                        <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </span>
+                    @else
+                        <a href="{{ $transactions->appends(request()->except('page'))->previousPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                            Previous
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="hidden md:-mt-px md:flex">
+                    @php
+                        $currentPage = $transactions->currentPage();
+                        $lastPage = $transactions->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
+                    
+                    @if($startPage > 1)
+                        <a href="{{ $transactions->appends(request()->except('page'))->url(1) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            1
+                        </a>
+                        @if($startPage > 2)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                    @endif
+                    
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $transactions->appends(request()->except('page'))->url($page) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endfor
+                    
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                ...
+                            </span>
+                        @endif
+                        <a href="{{ $transactions->appends(request()->except('page'))->url($lastPage) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            {{ $lastPage }}
+                        </a>
+                    @endif
+                </div>
+                
+                <div class="-mt-px flex w-0 flex-1 justify-end">
+                    @if($transactions->hasMorePages())
+                        <a href="{{ $transactions->appends(request()->except('page'))->nextPageUrl() }}" 
+                           class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </a>
+                    @else
+                        <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                            Next
+                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                        </span>
+                    @endif
+                </div>
+            </nav>
+            
+            <!-- Mobile Pagination -->
+            <div class="mt-4 flex justify-between sm:hidden">
+                @if($transactions->onFirstPage())
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Previous
+                    </span>
+                @else
+                    <a href="{{ $transactions->appends(request()->except('page'))->previousPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Previous
+                    </a>
+                @endif
+                
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                    Page {{ $transactions->currentPage() }} of {{ $transactions->lastPage() }}
+                </span>
+                
+                @if($transactions->hasMorePages())
+                    <a href="{{ $transactions->appends(request()->except('page'))->nextPageUrl() }}" 
+                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Next
+                    </a>
+                @else
+                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
+                        Next
+                    </span>
+                @endif
+            </div>
+            
+            <!-- Results Info -->
+            <div class="mt-4 text-center text-sm text-gray-500">
+                Showing {{ $transactions->firstItem() }} to {{ $transactions->lastItem() }} of {{ $transactions->total() }} results
+            </div>
+        </div>
+    @endif
 </div>
 @endsection
 

@@ -78,14 +78,18 @@
                 </select>
             </div>
             <div class="flex space-x-2">
-                <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Filter</button>
-                <a href="{{ route('admin.medicines.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Reset</a>
+                <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+                <a href="{{ route('admin.medicines.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <i class="fas fa-undo mr-2"></i>Reset
+                </a>
             </div>
         </div>
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-3">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -122,19 +126,6 @@
                 <div class="ml-3 md:ml-4">
                     <p class="text-xs md:text-sm font-medium text-gray-500">Expiring Soon</p>
                     <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['expiring_soon'] ?? 0 }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-file-alt text-blue-600 text-sm md:text-base"></i>
-                    </div>
-                </div>
-                <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">Reports</p>
-                    <a href="{{ route('admin.medicines.report') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800">Open Report</a>
                 </div>
             </div>
         </div>

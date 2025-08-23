@@ -136,95 +136,7 @@
             </div>
         </div>
     </div>
-
-    <!-- System Health Status -->
-    <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100">
-        <div class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">System Health</h3>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                        <span class="text-sm font-medium text-green-800">Database</span>
-                    </div>
-                    <span class="text-sm text-green-600">Healthy</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                        <span class="text-sm font-medium text-green-800">Email Service</span>
-                    </div>
-                    <span class="text-sm text-green-600">Active</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-triangle text-yellow-600 mr-3"></i>
-                        <span class="text-sm font-medium text-yellow-800">Storage</span>
-                    </div>
-                    <span class="text-sm text-yellow-600">75% Used</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                        <span class="text-sm font-medium text-green-800">Security</span>
-                    </div>
-                    <span class="text-sm text-green-600">Protected</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions Section -->
-    <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100">
-        <div class="p-6">
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a href="{{ route('admin.barangay-profiles.create') }}" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-user-plus text-blue-600 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-medium text-gray-900">Add Official</p>
-                        <p class="text-sm text-gray-600">Register new barangay official</p>
-                    </div>
-                </a>
-                <a href="{{ route('admin.residents.create') }}" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-home text-green-600 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-medium text-gray-900">Add Resident</p>
-                        <p class="text-sm text-gray-600">Register new resident</p>
-                    </div>
-                </a>
-                <a href="{{ route('admin.blotter-reports.create') }}" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-file-alt text-purple-600 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-medium text-gray-900">Create Report</p>
-                        <p class="text-sm text-gray-600">Add new blotter report</p>
-                    </div>
-                </a>
-                <a href="{{ route('admin.document-requests.create') }}" class="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-file-signature text-orange-600 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-medium text-gray-900">Document Request</p>
-                        <p class="text-sm text-gray-600">Process document request</p>
-                    </div>
-                </a>
-                <a href="{{ route('admin.clustering') }}" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-chart-pie text-purple-600 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-medium text-gray-900">Resident Demographic Analysis</p>
-                        <p class="text-sm text-gray-600">Analyze resident demographics</p>
-                    </div>
-                </a>
-                <a href="{{ route('admin.decision-tree') }}" class="flex items-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-sitemap text-indigo-600 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-medium text-gray-900">Resident Classification & Prediction</p>
-                        <p class="text-sm text-gray-600">Classification & prediction</p>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Floating Action Button -->
     <div class="fixed bottom-6 right-6 z-50">
         <div class="relative" x-data="{ open: false }">
@@ -245,15 +157,19 @@
                 </a>
                 <a href="{{ route('admin.blotter-reports.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                     <i class="fas fa-file-alt text-purple-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">New Report</span>
+                    <span class="text-sm font-medium text-gray-700">Create Blotter Report</span>
+                </a>
+                <a href="{{ route('admin.document-requests.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                    <i class="fas fa-file-alt text-purple-600 mr-2"></i>
+                    <span class="text-sm font-medium text-gray-700">Create Document Request</span>
                 </a>
                 <a href="{{ route('admin.clustering') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                     <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Resident Demographics</span>
+                    <span class="text-sm font-medium text-gray-700">Resident Demographic Analysis</span>
                 </a>
                 <a href="{{ route('admin.decision-tree') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                     <i class="fas fa-sitemap text-indigo-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Resident Classification</span>
+                    <span class="text-sm font-medium text-gray-700">Resident Classification & Prediction</span>
                 </a>
             </div>
         </div>
