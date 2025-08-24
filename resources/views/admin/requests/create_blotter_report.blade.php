@@ -394,9 +394,15 @@
                 if (response.ok && contentType.includes('application/pdf')) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
+                    const disposition = response.headers.get('content-disposition');
+                    let filename = 'blotter_report.pdf';
+                    if (disposition && disposition.indexOf('filename=') !== -1) {
+                        let matches = disposition.match(/filename="?([^";]+)"?/);
+                        if (matches && matches[1]) filename = matches[1];
+                    }
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'blotter_report.pdf';
+                    a.download = filename;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();

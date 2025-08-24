@@ -314,10 +314,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         const contentType = downloadRes.headers.get('content-type') || '';
                         if (downloadRes.ok && contentType.includes('application/pdf')) {
                             const blob = await downloadRes.blob();
+                            
+                            // Extract filename from Content-Disposition header
+                            const disposition = downloadRes.headers.get('content-disposition');
+                            let filename = 'document.pdf';
+                            if (disposition && disposition.indexOf('filename=') !== -1) {
+                                let matches = disposition.match(/filename="?([^";]+)"?/);
+                                if (matches && matches[1]) filename = matches[1];
+                            }
+                            
                             const url = window.URL.createObjectURL(blob);
                             const a = document.createElement('a');
                             a.href = url;
-                            a.download = `document_request_${id}.pdf`;
+                            a.download = filename; // Use backend filename instead of hardcoded one
                             document.body.appendChild(a);
                             a.click();
                             a.remove();

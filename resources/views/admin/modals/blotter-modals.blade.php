@@ -216,6 +216,15 @@ function closeBlotterDetailsModal() {
 
 function openApproveModal(id) {
     document.getElementById('approveBlotterForm').action = `/admin/blotter-reports/${id}/approve`;
+    // Set min to now for hearing_date
+    try {
+        const input = document.querySelector('#approveBlotterForm input[name="hearing_date"]');
+        if (input) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 1); // strictly after now
+            input.min = now.toISOString().slice(0,16);
+        }
+    } catch (_) {}
     document.getElementById('approveBlotterModal').classList.remove('hidden');
 }
 
@@ -225,26 +234,31 @@ function closeApproveModal() {
 }
 
 function openNewSummonModal(id) {
-    // Set the form action and show modal
     document.getElementById('newSummonForm').action = `/admin/blotter-reports/${id}/new-summons`;
-    // Set min to the current summon date + 1 minute if available via DOM row dataset
     try {
         const input = document.querySelector('#newSummonForm input[name="new_summon_date"]');
-        const row = document.querySelector(`tr.blotter-item button[onclick="openNewSummonModal('${id}')"]`)?.closest('tr');
-        const prevSummon = row?.getAttribute('data-summon');
-        const approvedAt = row?.getAttribute('data-approved');
-        const base = prevSummon || approvedAt;
-        if (input && base) {
-            const dt = new Date(base);
-            // add 1 minute to ensure strictly after
-            dt.setMinutes(dt.getMinutes() + 1);
-            const iso = dt.toISOString().slice(0,16);
-            input.min = iso;
-        } else if (input) {
-            // fallback to now
-            const now = new Date();
-            now.setMinutes(now.getMinutes() + 1);
-            input.min = now.toISOString().slice(0,16);
+        let base = null;
+        // Try to find the row in desktop table
+        let row = document.querySelector(`tr.blotter-item button[onclick="openNewSummonModal('${id}')"]`)?.closest('tr');
+        if (!row) {
+            // Try to find the card in mobile view
+            row = document.querySelector(`.blotter-card button[onclick="openNewSummonModal('${id}')"]`)?.closest('.blotter-card');
+        }
+        if (row) {
+            const prevSummon = row.getAttribute('data-summon');
+            const approvedAt = row.getAttribute('data-approved');
+            base = prevSummon || approvedAt;
+        }
+        if (input) {
+            let dt;
+            if (base) {
+                dt = new Date(base);
+            } else {
+                dt = new Date();
+            }
+            dt.setMinutes(dt.getMinutes() + 1); // strictly after last date
+            input.min = dt.toISOString().slice(0,16);
+            input.value = '';
         }
     } catch (_) {}
     document.getElementById('newSummonModal').classList.remove('hidden');
@@ -295,7 +309,14 @@ function approveAndDownload(event) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `blotter_approve_${blotterId}.pdf`;
+            // Extract filename from Content-Disposition header
+            const disposition = response.headers.get('content-disposition');
+            let filename = 'blotter_report.pdf';
+            if (disposition && disposition.indexOf('filename=') !== -1) {
+                let matches = disposition.match(/filename="?([^";]+)"?/);
+                if (matches && matches[1]) filename = matches[1];
+            }
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -308,7 +329,14 @@ function approveAndDownload(event) {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `blotter_approve_${blotterId}.pdf`;
+                // Extract filename from Content-Disposition header
+                const disposition = response.headers.get('content-disposition');
+                let filename = 'blotter_report.pdf';
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    let matches = disposition.match(/filename="?([^";]+)"?/);
+                    if (matches && matches[1]) filename = matches[1];
+                }
+                a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
@@ -402,7 +430,14 @@ function summonAndDownload(event) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `blotter_summon_${blotterId}.pdf`;
+            // Extract filename from Content-Disposition header
+            const disposition = response.headers.get('content-disposition');
+            let filename = 'blotter_report.pdf';
+            if (disposition && disposition.indexOf('filename=') !== -1) {
+                let matches = disposition.match(/filename="?([^";]+)"?/);
+                if (matches && matches[1]) filename = matches[1];
+            }
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();

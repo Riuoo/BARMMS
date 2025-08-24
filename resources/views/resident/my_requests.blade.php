@@ -260,6 +260,24 @@
                                     <div>
                                         <div class="text-sm font-medium text-gray-900">{{ $request->document_type }}</div>
                                         <div class="text-sm text-gray-500">Document Request</div>
+                                        <!-- Progress Tracker -->
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <div class="flex items-center">
+                                                <span class="h-3 w-3 rounded-full {{ $request->status == 'pending' ? 'bg-yellow-400' : 'bg-gray-300' }}"></span>
+                                                <span class="ml-1 text-xs {{ $request->status == 'pending' ? 'text-yellow-700 font-bold' : 'text-gray-500' }}">Pending</span>
+                                            </div>
+                                            <span class="h-0.5 w-4 bg-gray-300"></span>
+                                            <div class="flex items-center">
+                                                <span class="h-3 w-3 rounded-full {{ $request->status == 'approved' ? 'bg-blue-400' : ($request->status == 'completed' ? 'bg-blue-400' : 'bg-gray-300') }}"></span>
+                                                <span class="ml-1 text-xs {{ $request->status == 'approved' ? 'text-blue-700 font-bold' : ($request->status == 'completed' ? 'text-blue-700' : 'text-gray-500') }}">Approved</span>
+                                            </div>
+                                            <span class="h-0.5 w-4 bg-gray-300"></span>
+                                            <div class="flex items-center">
+                                                <span class="h-3 w-3 rounded-full {{ $request->status == 'completed' ? 'bg-green-400' : 'bg-gray-300' }}"></span>
+                                                <span class="ml-1 text-xs {{ $request->status == 'completed' ? 'text-green-700 font-bold' : 'text-gray-500' }}">Completed</span>
+                                            </div>
+                                        </div>
+                                        <!-- End Progress Tracker -->
                                     </div>
                                 </div>
                             </td>
@@ -390,14 +408,24 @@
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-gray-900">{{ $request->document_type }}</h3>
                             <p class="text-sm text-gray-500">Document Request</p>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
-                                @if($request->status === 'pending') bg-yellow-100 text-yellow-800
-                                @elseif($request->status === 'approved') bg-blue-100 text-blue-800
-                                @elseif($request->status === 'completed') bg-green-100 text-green-800
-                                @endif">
-                                <i class="fas fa-tag mr-1"></i>
-                                {{ ucfirst($request->status) }}
-                            </span>
+                            <!-- Progress Tracker -->
+                            <div class="flex items-center space-x-2 mt-1">
+                                <div class="flex items-center">
+                                    <span class="h-3 w-3 rounded-full {{ $request->status == 'pending' ? 'bg-yellow-400' : 'bg-gray-300' }}"></span>
+                                    <span class="ml-1 text-xs {{ $request->status == 'pending' ? 'text-yellow-700 font-bold' : 'text-gray-500' }}">Pending</span>
+                                </div>
+                                <span class="h-0.5 w-4 bg-gray-300"></span>
+                                <div class="flex items-center">
+                                    <span class="h-3 w-3 rounded-full {{ $request->status == 'approved' ? 'bg-blue-400' : ($request->status == 'completed' ? 'bg-blue-400' : 'bg-gray-300') }}"></span>
+                                    <span class="ml-1 text-xs {{ $request->status == 'approved' ? 'text-blue-700 font-bold' : ($request->status == 'completed' ? 'text-blue-700' : 'text-gray-500') }}">Approved</span>
+                                </div>
+                                <span class="h-0.5 w-4 bg-gray-300"></span>
+                                <div class="flex items-center">
+                                    <span class="h-3 w-3 rounded-full {{ $request->status == 'completed' ? 'bg-green-400' : 'bg-gray-300' }}"></span>
+                                    <span class="ml-1 text-xs {{ $request->status == 'completed' ? 'text-green-700 font-bold' : 'text-gray-500' }}">Completed</span>
+                                </div>
+                            </div>
+                            <!-- End Progress Tracker -->
                         </div>
                     </div>
                 </div>

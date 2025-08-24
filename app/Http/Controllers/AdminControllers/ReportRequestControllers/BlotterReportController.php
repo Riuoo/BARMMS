@@ -107,7 +107,7 @@ class BlotterReportController
             $blotter->attempts++;
             $blotter->save();
 
-            Log::info('Blotter report approved successfully', ['blotter_id' => $blotter->id]);
+            notify()->success('Blotter report approved successfully.');
 
             // Get admin user data from session
             $adminUser = null;
@@ -120,7 +120,8 @@ class BlotterReportController
                 'blotter' => $blotter,
                 'adminUser' => $adminUser
             ]);
-            $response = $pdf->download("summon_notice_{$blotter->id}.pdf");
+            $filename = $this->generateFilename($blotter, 'summon_notice');
+            $response = $pdf->download($filename);
 
             DB::commit();
             return $response;
@@ -158,6 +159,8 @@ class BlotterReportController
             $blotter->completed_at = now();
             $blotter->save();
 
+            notify()->success('Blotter report marked as completed.');
+
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
@@ -169,7 +172,7 @@ class BlotterReportController
                 'blotter' => $blotter,
                 'adminUser' => $adminUser
             ]);
-            $filename = "case_resolution_{$blotter->id}.pdf";
+            $filename = $this->generateFilename($blotter, 'case_resolution');
             
             return $pdf->download($filename);
 
@@ -261,7 +264,7 @@ class BlotterReportController
                 'blotter' => $blotter,
                 'adminUser' => $adminUser
             ]);
-            $filename = "summon_notice_{$blotter->id}.pdf";
+            $filename = $this->generateFilename($blotter, 'blotter_report');
             
             return $pdf->download($filename);
         } catch (\Exception $e) {
@@ -301,6 +304,9 @@ class BlotterReportController
         $blotter->attempts++;
         $blotter->summon_date = $request->input('new_summon_date');
         $blotter->save();
+
+        notify()->success('New summon generated successfully.');
+
         // Get admin user data from session
         $adminUser = null;
         if (session()->has('user_role') && session('user_role') === 'barangay') {
@@ -312,8 +318,17 @@ class BlotterReportController
             'blotter' => $blotter,
             'adminUser' => $adminUser
         ]);
-        $filename = "new_summon_notice_{$blotter->id}.pdf";
+        $filename = $this->generateFilename($blotter, 'new_summon_notice');
         return $pdf->download($filename); // Download the new summons PDF
     }
 
+    // Add this method to generate a filename for the PDF
+    protected function generateFilename($blotterRequest, $type = 'blotter_report')
+    {
+        $name = $blotterRequest->resident ? $blotterRequest->resident->name : 'unknown';
+        $name = preg_replace('/[^a-zA-Z0-9\s]/', '', $name); // Remove special chars
+        $name = strtolower(str_replace(' ', '_', $name));
+        $date = date('Y-m-d');
+        return "{$type}_{$name}_{$date}.pdf";
+    }
 }

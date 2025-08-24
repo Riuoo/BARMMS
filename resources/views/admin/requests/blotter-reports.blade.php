@@ -167,50 +167,50 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-user mr-2"></i>
                                     Complainant
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-user-tag mr-2"></i>
                                     Recipient
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-tag mr-2"></i>
                                     Type
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-align-left mr-2"></i>
                                     Description
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-image mr-2"></i>
                                     Media
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-info-circle mr-2"></i>
                                     Status
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-calendar mr-2"></i>
                                     Created
                                 </div>
                             </th>
                             @if($hasThreadActions)
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                                     <div class="flex items-center justify-center">
                                         <i class="fas fa-cogs mr-2"></i>
                                         Actions
@@ -222,7 +222,7 @@
                     <tbody class="bg-white divide-y divide-gray-200" id="blotterTableBody">
                         @foreach($blotterRequests as $request)
                         <tr class="blotter-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}" data-summon="{{ optional($request->summon_date)->format('Y-m-d\TH:i') }}" data-approved="{{ optional($request->approved_at)->format('Y-m-d\TH:i') }}">
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0">
                                     </div>
@@ -231,23 +231,23 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="text-sm text-gray-900">{{ $request->recipient_name }}</div>
                                 <div class="text-sm text-gray-500">
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                     <i class="fas fa-tag mr-1"></i>
                                     Incident Report
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="text-sm text-gray-900 max-w-xs">
                                     <div class="truncate" title="{{ $request->description }}">
-                                        {{ Str::limit($request->description, 50) }}
+                                        {{ Str::limit($request->description, 40) }}
                                     </div>
-                                    @if(strlen($request->description) > 50)
+                                    @if(strlen($request->description) > 40)
                                         <button 
                                             class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 view-full-btn"
                                             data-description="{{ $request->description }}"
@@ -257,7 +257,7 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 @if($request->hasMedia())
                                     <div class="text-sm text-gray-900">{{ $request->media_count }} files</div>
                                     <div class="text-sm text-gray-500">
@@ -292,7 +292,7 @@
                                     <div class="text-sm text-gray-500">No files</div>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 @if($request->status === 'pending')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                         <i class="fas fa-clock mr-1"></i>
@@ -310,32 +310,35 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
                             </td>
                             @if($hasThreadActions)
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center justify-center space-x-2">
+                                <td class="px-3 py-4 text-center">
+                                    <div class="flex flex-col space-y-1">
+                                        
                                         @if($request->status === 'pending')
-                                            <button type="button" onclick="openApproveModal('{{ $request->id }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                            <button type="button" onclick="openApproveModal('{{ $request->id }}')" 
+                                                    class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 transition duration-200 w-full">
                                                 <i class="fas fa-check mr-1"></i>
                                                 Approve
                                             </button>
                                         @elseif($request->status === 'approved')
                                             @if($request->attempts < 3)
-                                                <button type="button" onclick="openNewSummonModal('{{ $request->id }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
+                                                <button type="button" onclick="openNewSummonModal('{{ $request->id }}')" 
+                                                        class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-teal-600 hover:bg-teal-700 transition duration-200 w-full">
                                                     <i class="fas fa-file-alt mr-1"></i>
-                                                    New Summon
+                                                    Summon
                                                 </button>
                                             @else
-                                                <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" disabled>
+                                                <button class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-gray-400 cursor-not-allowed w-full" disabled>
                                                     <i class="fas fa-file-alt mr-1"></i>
-                                                    New Summon (Limit Reached)
+                                                    Limit
                                                 </button>
                                             @endif
-                                            <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
+                                            <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="w-full">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
+                                                <button type="submit" class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 transition duration-200 w-full">
                                                     <i class="fas fa-check-circle mr-1"></i>
                                                     Complete
                                                 </button>
@@ -774,6 +777,7 @@ function completeAndDownload(event, blotterId) {
     event.preventDefault();
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
+    
     fetch(`/admin/blotter-reports/${blotterId}/complete`, {
         method: 'POST',
         headers: {
@@ -787,9 +791,15 @@ function completeAndDownload(event, blotterId) {
             const blob = await response.blob();
             localStorage.setItem('showBlotterCompleteNotify', '1');
             const url = window.URL.createObjectURL(blob);
+            const disposition = response.headers.get('content-disposition');
+            let filename = 'blotter_report.pdf';
+            if (disposition && disposition.indexOf('filename=') !== -1) {
+                let matches = disposition.match(/filename="?([^";]+)"?/);
+                if (matches && matches[1]) filename = matches[1];
+            }
             const a = document.createElement('a');
             a.href = url;
-            a.download = `blotter_report_${blotterId}.pdf`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -821,6 +831,7 @@ function approveAndDownloadBlotter(event, blotterId) {
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
     const hearingDate = form.querySelector('input[name="hearing_date"]').value;
+    
     fetch(`/admin/blotter-reports/${blotterId}/approve`, {
         method: 'POST',
         headers: {
@@ -836,9 +847,15 @@ function approveAndDownloadBlotter(event, blotterId) {
             const blob = await response.blob();
             localStorage.setItem('showBlotterApproveNotify', '1');
             const url = window.URL.createObjectURL(blob);
+            const disposition = response.headers.get('content-disposition');
+            let filename = 'blotter_report.pdf';
+            if (disposition && disposition.indexOf('filename=') !== -1) {
+                let matches = disposition.match(/filename="?([^";]+)"?/);
+                if (matches && matches[1]) filename = matches[1];
+            }
             const a = document.createElement('a');
             a.href = url;
-            a.download = `summon_notice_${blotterId}.pdf`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -870,6 +887,7 @@ function generateNewSummonPdf(event, blotterId) {
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
     const newSummonDate = form.querySelector('input[name="new_summon_date"]').value;
+    
     fetch(`/admin/blotter-reports/${blotterId}/new-summons`, {
         method: 'POST',
         headers: {
@@ -885,9 +903,15 @@ function generateNewSummonPdf(event, blotterId) {
             const blob = await response.blob();
             localStorage.setItem('showBlotterSummonNotify', '1');
             const url = window.URL.createObjectURL(blob);
+            const disposition = response.headers.get('content-disposition');
+            let filename = 'blotter_report.pdf';
+            if (disposition && disposition.indexOf('filename=') !== -1) {
+                let matches = disposition.match(/filename="?([^";]+)"?/);
+                if (matches && matches[1]) filename = matches[1];
+            }
             const a = document.createElement('a');
             a.href = url;
-            a.download = `new_summon_notice_${blotterId}.pdf`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -920,32 +944,24 @@ window.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('showBlotterCompleteNotify');
         if (typeof notify === 'function') {
             notify('success', 'Blotter report completed and PDF downloaded.');
-        } else {
-            alert('Blotter report completed and PDF downloaded.');
         }
     }
     if (localStorage.getItem('showBlotterApproveNotify') === '1') {
         localStorage.removeItem('showBlotterApproveNotify');
         if (typeof notify === 'function') {
             notify('success', 'Blotter report approved and summon PDF downloaded.');
-        } else {
-            alert('Blotter report approved and summon PDF downloaded.');
         }
     }
     if (localStorage.getItem('showBlotterSummonNotify') === '1') {
         localStorage.removeItem('showBlotterSummonNotify');
         if (typeof notify === 'function') {
             notify('success', 'New summon notice generated and downloaded.');
-        } else {
-            alert('New summon notice generated and downloaded.');
         }
     }
     if (localStorage.getItem('showBlotterCreateNotify') === '1') {
         localStorage.removeItem('showBlotterCreateNotify');
         if (typeof notify === 'function') {
             notify('success', 'Blotter report created and PDF downloaded.');
-        } else {
-            alert('Blotter report created and PDF downloaded.');
         }
     }
 });

@@ -171,38 +171,38 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-user mr-2"></i>
                                     Requester
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-file-alt mr-2"></i>
                                     Document Type
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-align-left mr-2"></i>
                                     Description
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-info-circle mr-2"></i>
                                     Status
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-calendar mr-2"></i>
                                     Requested
                                 </div>
                             </th>
                             @if($hasThreadActions)
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                                     <div class="flex items-center justify-center">
                                         <i class="fas fa-cogs mr-2"></i>
                                         Actions
@@ -214,20 +214,20 @@
                     <tbody class="bg-white divide-y divide-gray-200" id="documentTableBody">
                         @foreach($documentRequests as $request)
                         <tr class="document-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-4 py-4 whitespace-nowrap">
                                 <div class="flex flex-row items-center gap-2">
                                      <span class="text-sm font-medium text-gray-900">{{ $request->resident->name ?? 'N/A' }}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="text-sm text-gray-900"><i class="fas fa-file-alt mr-1"></i>{{ $request->document_type }}</div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="text-sm text-gray-900 max-w-xs">
                                     <div class="truncate" title="{{ $request->description }}">
-                                        {{ Str::limit($request->description, 50) }}
+                                        {{ Str::limit($request->description, 40) }}
                                     </div>
-                                    @if(strlen($request->description) > 50)
+                                    @if(strlen($request->description) > 40)
                                         <button data-description="{{ $request->description }}" 
                                                  data-user-name="{{ $request->resident->name ?? 'N/A' }}"
                                                 class="view-full-btn text-xs text-blue-600 hover:text-blue-800 underline mt-1">
@@ -236,7 +236,7 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-6 py-4 justify-center">
+                            <td class="px-4 py-4 justify-center">
                                 @if($request->status === 'pending')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                         <i class="fas fa-clock mr-1"></i>
@@ -254,32 +254,32 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="text-sm text-gray-900"><i class="fas fa-calendar mr-1"></i>{{ $request->created_at->format('M d, Y') }}</div>   
                             </td>
                             @if($hasThreadActions)
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center justify-center space-x-2">
+                                <td class="px-3 py-4 text-center">
+                                    <div class="flex flex-col space-y-1">
                                         @if($request->status === 'pending')
-                                            <form onsubmit="return approveAndDownload(event, '{{ $request->id }}')" class="inline">
+                                            <form onsubmit="return approveAndDownload(event, '{{ $request->id }}')" class="w-full">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                                <button type="submit" class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 transition duration-200 w-full">
                                                     <i class="fas fa-check mr-1"></i>
                                                     Approve
                                                 </button>
                                             </form>
                                         @endif
                                         @if($request->status === 'approved')
-                                            <form onsubmit="return generatePdfAndComplete(event, '{{ $request->id }}')" class="inline">
+                                            <form onsubmit="return generatePdfAndComplete(event, '{{ $request->id }}')" class="w-full">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-blue-500 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                                <button type="submit" class="inline-flex items-center justify-center px-2 py-1 border border-blue-500 text-xs font-medium rounded text-blue-600 bg-white hover:bg-blue-50 transition duration-200 w-full">
                                                     <i class="fas fa-file-pdf mr-1"></i>
                                                     Generate PDF
                                                 </button>
                                             </form>
-                                            <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
+                                            <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="w-full">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                                <button type="submit" class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 transition duration-200 w-full">
                                                     <i class="fas fa-check-circle mr-1"></i>
                                                     Complete
                                                 </button>
@@ -656,9 +656,15 @@ function generatePdfAndComplete(event, requestId) {
             const blob = await response.blob();
             localStorage.setItem('showGeneratePdfNotify', '1');
             const url = window.URL.createObjectURL(blob);
+            const disposition = response.headers.get('content-disposition');
+            let filename = 'document.pdf';
+            if (disposition && disposition.indexOf('filename=') !== -1) {
+                let matches = disposition.match(/filename="?([^";]+)"?/);
+                if (matches && matches[1]) filename = matches[1];
+            }
             const a = document.createElement('a');
             a.href = url;
-            a.download = `document_request_${requestId}.pdf`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -702,9 +708,15 @@ function approveAndDownload(event, requestId) {
             const blob = await response.blob();
             localStorage.setItem('showApproveNotify', '1');
             const url = window.URL.createObjectURL(blob);
+            const disposition = response.headers.get('content-disposition');
+            let filename = 'document.pdf';
+            if (disposition && disposition.indexOf('filename=') !== -1) {
+                let matches = disposition.match(/filename="?([^";]+)"?/);
+                if (matches && matches[1]) filename = matches[1];
+            }
             const a = document.createElement('a');
             a.href = url;
-            a.download = `document_request_${requestId}.pdf`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -737,24 +749,18 @@ window.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('showApproveNotify');
         if (typeof notify === 'function') {
             notify('success', 'Document approved and PDF downloaded.');
-        } else {
-            alert('Document approved and PDF downloaded.');
         }
     }
     if (localStorage.getItem('showGeneratePdfNotify') === '1') {
         localStorage.removeItem('showGeneratePdfNotify');
         if (typeof notify === 'function') {
             notify('success', 'PDF generated and downloaded.');
-        } else {
-            alert('PDF generated and downloaded.');
         }
     }
     if (localStorage.getItem('showDocumentCreateNotify') === '1') {
         localStorage.removeItem('showDocumentCreateNotify');
         if (typeof notify === 'function') {
             notify('success', 'Document request created and PDF downloaded.');
-        } else {
-            alert('Document request created and PDF downloaded.');
         }
     }
 });

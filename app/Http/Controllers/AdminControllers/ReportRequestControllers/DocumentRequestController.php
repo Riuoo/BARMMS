@@ -130,8 +130,18 @@ class DocumentRequestController
             $html = $template->generateHtml($values);
             Log::info('Approve: HTML generated', ['elapsed' => microtime(true) - $start]);
 
-            // Generate the PDF
+            // Generate the PDF with optimized settings
             $pdf = Pdf::loadHTML($html);
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => false,
+                'isFontSubsettingEnabled' => true,
+                'defaultFont' => 'Arial',
+                'dpi' => 150, // Lower DPI for faster generation
+                'debugCss' => false,
+                'debugLayout' => false,
+            ]);
             Log::info('Approve: PDF generated', ['elapsed' => microtime(true) - $start]);
 
             $documentRequest->status = 'approved';
@@ -139,18 +149,20 @@ class DocumentRequestController
             $documentRequest->save();
             Log::info('Approve: Document request saved', ['elapsed' => microtime(true) - $start]);
 
+            // Send email synchronously for now to ensure it works
             if ($user && $user->email) {
                 try {
-                    // Send email synchronously for now to ensure it works
-                    Mail::to($user->email)->send(new DocumentReadyForPickupMail($user->name, $documentRequest->document_type));
-                    Log::info('Approve: Email sent synchronously', ['elapsed' => microtime(true) - $start]);
+                    Mail::to($user->email)->queue(new DocumentReadyForPickupMail($user->name, $documentRequest->document_type));
+                    Log::info('Approve: Email queued for background processing', ['elapsed' => microtime(true) - $start]);
                 } catch (\Exception $e) {
-                    Log::error('Failed sending DocumentReadyForPickupMail: ' . $e->getMessage());
+                    Log::error('Failed to queue DocumentReadyForPickupMail: ' . $e->getMessage());
+                    // Don't fail the approval if email fails
                 }
             }
 
             $filename = $this->generateFilename($documentRequest);
             Log::info('Approve: Returning PDF download', ['elapsed' => microtime(true) - $start]);
+            notify()->success('Document request approved successfully!');
             return $pdf->download($filename);
 
         } catch (\Exception $e) {
@@ -208,7 +220,18 @@ class DocumentRequestController
 
             $html = $template->generateHtml($values);
 
+            // Generate PDF with optimized settings for speed
             $pdf = Pdf::loadHTML($html);
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => false,
+                'isFontSubsettingEnabled' => true,
+                'defaultFont' => 'Arial',
+                'dpi' => 150, // Lower DPI for faster generation
+                'debugCss' => false,
+                'debugLayout' => false,
+            ]);
 
             if ($documentRequest->status === 'approved') {
                 $documentRequest->status = 'completed';
@@ -216,6 +239,7 @@ class DocumentRequestController
             }
 
             $filename = $this->generateFilename($documentRequest);
+            notify()->success('PDF generated successfully!');
             return $pdf->download($filename);
 
         } catch (\Exception $e) {
@@ -446,9 +470,10 @@ class DocumentRequestController
     // Add this method to generate a filename for the PDF
     protected function generateFilename($documentRequest)
     {
-        $type = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($documentRequest->document_type));
-        $user = $documentRequest->resident ? preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($documentRequest->resident->name)) : 'unknown_user';
-        $id = $documentRequest->id;
-        return $type . '_' . $user . '_' . $id . '.pdf';
+        $name = $documentRequest->resident ? $documentRequest->resident->name : 'unknown';
+        $name = preg_replace('/[^a-zA-Z0-9\s]/', '', $name); // Remove special chars
+        $name = strtolower(str_replace(' ', '_', $name));
+        $date = date('Y-m-d');
+        return "document_request_{$name}_{$date}.pdf";
     }
 }

@@ -1,3 +1,79 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Table Responsiveness Improvements */
+.overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Compact table design to prevent overflow */
+.min-w-full {
+    min-width: 100%;
+    max-width: 100%;
+}
+
+/* Actions column optimization */
+.w-32 {
+    width: 8rem;
+    min-width: 8rem;
+    max-width: 8rem;
+}
+
+/* Table cell padding optimization */
+.px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+/* Button optimization for actions column */
+.action-button-compact {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    width: 100%;
+    justify-content: center;
+}
+
+/* Ensure table fits within container */
+.table-container {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 1280px) {
+    .w-32 {
+        width: 7rem;
+        min-width: 7rem;
+        max-width: 7rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .w-32 {
+        width: 6rem;
+        min-width: 6rem;
+        max-width: 6rem;
+    }
+}
+
+/* Prevent text overflow in table cells */
+.table-cell-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+/* Compact status badges */
+.status-badge-compact {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
