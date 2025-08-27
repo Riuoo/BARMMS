@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\ResidentControllers;
 
 use App\Models\DocumentRequest;
+use App\Models\BlotterRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class ResidentNotificationController
@@ -20,6 +22,9 @@ class ResidentNotificationController
         // (Reverted) No auto-mark as read here
 
         $docs = DocumentRequest::where('resident_id', $userId)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+        $blotters = \App\Models\BlotterRequest::where('resident_id', $userId)
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -41,6 +46,28 @@ class ResidentNotificationController
                     'message' => 'Your ' . $doc->document_type . ' request has been completed.',
                     'created_at' => $doc->updated_at,
                     'is_read' => true, // completed items considered read for resident
+                    'link' => route('resident.my-requests'),
+                ]);
+            }
+        }
+        // Add blotter notifications
+        foreach ($blotters as $blotter) {
+            if ($blotter->status === 'approved') {
+                $notifications->push((object) [
+                    'id' => $blotter->id,
+                    'type' => 'blotter_request',
+                    'message' => 'Your blotter report for "' . ($blotter->recipient_name ?? $blotter->type) . '" has been approved. A hearing/summon is scheduled for ' . ($blotter->summon_date ? $blotter->summon_date->format('F d, Y h:i A') : 'N/A') . '.',
+                    'created_at' => $blotter->updated_at,
+                    'is_read' => (bool) ($blotter->resident_is_read ?? true),
+                    'link' => route('resident.my-requests'),
+                ]);
+            } elseif ($blotter->status === 'completed') {
+                $notifications->push((object) [
+                    'id' => $blotter->id,
+                    'type' => 'blotter_request',
+                    'message' => 'Your blotter report for "' . ($blotter->recipient_name ?? $blotter->type) . '" has been completed.',
+                    'created_at' => $blotter->updated_at,
+                    'is_read' => true,
                     'link' => route('resident.my-requests'),
                 ]);
             }
@@ -92,61 +119,72 @@ class ResidentNotificationController
 
     public function count()
     {
-        try {
-            $userId = Session::get('user_id');
-            if (!$userId) {
-                return response()->json(['total' => 0, 'notifications' => []]);
-            }
-
-            // Only get the count for unread notifications
-            $total = \App\Models\DocumentRequest::where('resident_id', $userId)
-                ->where('status', 'approved')
-                ->where(function ($q) {
-                    $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
-                })
-                ->count();
-
-            // Optionally, fetch the latest 5 unread notifications for display
-            $latest = \App\Models\DocumentRequest::where('resident_id', $userId)
-                ->where('status', 'approved')
-                ->where(function ($q) {
-                    $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
-                })
-                ->orderBy('updated_at', 'desc')
-                ->limit(5)
-                ->get()
-                ->map(function ($d) {
-                    return [
-                        'id' => $d->id,
-                        'type' => 'document_request',
-                        'message' => 'Your ' . $d->document_type . ' is ready for pickup.',
-                        'created_at' => \Carbon\Carbon::parse($d->updated_at)->toDateTimeString(),
-                        'link' => route('resident.my-requests'),
-                        'priority' => 'medium',
-                    ];
-                });
-
-            return response()->json([
-                'total' => $total,
-                'notifications' => $latest,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Resident notifications count error: ' . $e->getMessage());
-            return response()->json(['total' => 0, 'notifications' => []], 500);
+        $userId = Session::get('user_id');
+        if (!$userId) {
+            return response()->json(['total' => 0, 'notifications' => []]);
         }
+        
+        // Fetch unread document notifications
+        $docUnread = DocumentRequest::where('resident_id', $userId)
+            ->where('status', 'approved')
+            ->where(function ($q) {
+                $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
+            })->get()->map(function ($doc) {
+                return [
+                    'id' => $doc->id,
+                    'type' => 'document_request',
+                    'title' => 'Document Ready for Pickup',
+                    'message' => 'Your document request for ' . $doc->document_type . ' is ready for pickup.',
+                    'created_at' => $doc->created_at,
+                    'is_read' => (bool) $doc->resident_is_read
+                ];
+            });
+
+        // Fetch unread blotter notifications
+        $blotterUnread = BlotterRequest::where('resident_id', $userId)
+            ->where('status', 'approved')
+            ->where(function ($q) {
+                $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
+            })->get()->map(function ($blotter) {
+                return [
+                    'id' => $blotter->id,
+                    'type' => 'blotter_request',
+                    'title' => 'Blotter Report Approved',
+                    'message' => 'Your blotter report has been approved. A hearing is scheduled for ' . $blotter->summon_date . '.',
+                    'created_at' => $blotter->created_at,
+                    'is_read' => (bool) $blotter->resident_is_read
+                ];
+            });
+
+        // Ensure both are collections before merging
+        $allUnread = collect($docUnread)->merge(collect($blotterUnread))->sortByDesc('created_at')->values()->take(5);
+        $total = collect($docUnread)->count() + collect($blotterUnread)->count();
+        
+        return response()->json(['total' => $total, 'notifications' => $allUnread]);
     }
 
     public function markAsRead($id)
     {
         try {
             $userId = Session::get('user_id');
+            
+            // Try to find document request first
             $doc = DocumentRequest::where('resident_id', $userId)->where('id', $id)->first();
-            if (!$doc) {
-                return response()->json(['message' => 'Not found'], 404);
+            if ($doc) {
+                $doc->resident_is_read = true;
+                $doc->save();
+                return response()->json(['message' => 'Notification marked as read.']);
             }
-            $doc->resident_is_read = true;
-            $doc->save();
-            return response()->json(['message' => 'Notification marked as read.']);
+            
+            // If not found, try blotter request
+            $blotter = BlotterRequest::where('resident_id', $userId)->where('id', $id)->first();
+            if ($blotter) {
+                $blotter->resident_is_read = true;
+                $blotter->save();
+                return response()->json(['message' => 'Notification marked as read.']);
+            }
+            
+            return response()->json(['message' => 'Not found'], 404);
         } catch (\Exception $e) {
             Log::error('Resident markAsRead error: ' . $e->getMessage());
             return response()->json(['message' => 'Failed'], 500);
@@ -157,16 +195,24 @@ class ResidentNotificationController
     {
         try {
             $userId = Session::get('user_id');
+            
+            // Mark all approved document requests as read
             DocumentRequest::where('resident_id', $userId)
                 ->where('status', 'approved')
                 ->update(['resident_is_read' => true]);
+                
+            // Mark all approved blotter requests as read
+            BlotterRequest::where('resident_id', $userId)
+                ->where('status', 'approved')
+                ->update(['resident_is_read' => true]);
+                
             notify()->success('All notifications marked as read.');
             return redirect()->back();
         } catch (\Exception $e) {
             Log::error('Resident markAllAsRead error: ' . $e->getMessage());
             notify()->error('Failed to mark all as read.');
             return redirect()->back();
-            }
+        }
     }
 }
 

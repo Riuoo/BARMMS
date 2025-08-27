@@ -17,6 +17,7 @@ class BlotterRequest extends Model
         'status',
         'media',
         'is_read',
+        'resident_is_read',
     ];
 
     protected $casts = [

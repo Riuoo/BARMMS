@@ -108,8 +108,9 @@
                             </template>
                             <template x-for="n in items" :key="n.id">
                                 <div class="flex items-start p-3 hover:bg-gray-50 notification-item cursor-default select-none">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                                        <i class="fas fa-file-signature text-blue-600 text-sm"></i>
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center mr-2"
+                                         :class="n.type === 'blotter_request' ? 'bg-red-100' : 'bg-blue-100'">
+                                        <i :class="n.type === 'blotter_request' ? 'fas fa-gavel text-red-600 text-sm' : 'fas fa-file-signature text-blue-600 text-sm'"></i>
                                     </div>
                                     <div class="flex-1">
                                         <p class="text-xs text-gray-900" x-text="n.message"></p>

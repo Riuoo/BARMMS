@@ -22,6 +22,14 @@ class ResidentRequestListController
             })
             ->update(['resident_is_read' => true]);
 
+        // Auto-mark all unread approved blotter notifications as read when visiting this page
+        \App\Models\BlotterRequest::where('resident_id', $userId)
+            ->where('status', 'approved')
+            ->where(function ($q) {
+                $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
+            })
+            ->update(['resident_is_read' => true]);
+
         // Get all requests without pagination first
         $documentQuery = DocumentRequest::where('resident_id', $userId);
         $blotterQuery = BlotterRequest::where('resident_id', $userId);

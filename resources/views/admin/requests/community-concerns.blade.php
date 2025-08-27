@@ -465,3 +465,25 @@
 @include('admin.modals.community-concern-modals')
 
 @endsection
+
+@section('scripts')
+<script>
+window.addEventListener('load', function() {
+    try {
+        var shouldNotify = localStorage.getItem('showComplaintUpdateNotify');
+        if (shouldNotify === '1') {
+            setTimeout(function() {
+                if (typeof notify === 'function') {
+                    notify('success', 'Concern status updated successfully.');
+                } else if (window.toast && typeof window.toast.success === 'function') {
+                    window.toast.success('Concern status updated successfully.');
+                }
+            }, 250);
+            localStorage.removeItem('showComplaintUpdateNotify');
+        }
+    } catch (e) {
+        // no-op
+    }
+});
+</script>
+@endsection

@@ -5,28 +5,29 @@ namespace App\Http\Controllers\AdminControllers\ReportRequestControllers;
 use App\Models\CommunityConcern;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class CommunityConcernController
 {
     public function index(Request $request)
     {
         // Statistics from full dataset (cache for 5 min)
-        $total = \Cache::remember('total_community_concerns', 300, function() {
+        $total = Cache::remember('total_community_concerns', 300, function() {
             return CommunityConcern::count();
         });
-        $pending = \Cache::remember('pending_community_concerns', 300, function() {
+        $pending = Cache::remember('pending_community_concerns', 300, function() {
             return CommunityConcern::where('status', 'pending')->count();
         });
-        $under_review = \Cache::remember('under_review_community_concerns', 300, function() {
+        $under_review = Cache::remember('under_review_community_concerns', 300, function() {
             return CommunityConcern::where('status', 'under_review')->count();
         });
-        $in_progress = \Cache::remember('in_progress_community_concerns', 300, function() {
+        $in_progress = Cache::remember('in_progress_community_concerns', 300, function() {
             return CommunityConcern::where('status', 'in_progress')->count();
         });
-        $resolved = \Cache::remember('resolved_community_concerns', 300, function() {
+        $resolved = Cache::remember('resolved_community_concerns', 300, function() {
             return CommunityConcern::where('status', 'resolved')->count();
         });
-        $closed = \Cache::remember('closed_community_concerns', 300, function() {
+        $closed = Cache::remember('closed_community_concerns', 300, function() {
             return CommunityConcern::where('status', 'closed')->count();
         });
 
@@ -131,10 +132,18 @@ class CommunityConcernController
             
             $complaint->save();
 
+            // If the request is AJAX/JSON, return JSON so frontend can handle notify + reload
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
+
             notify()->success('Concern status updated successfully.');
             return redirect()->back();
         } catch (\Exception $e) {
             Log::error("Error updating complaint status: " . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to update concern status'], 500);
+            }
             notify()->error('Failed to update concern status: ' . $e->getMessage());
             return redirect()->back();
         }

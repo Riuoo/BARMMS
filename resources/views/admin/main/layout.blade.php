@@ -159,12 +159,14 @@
             }
         };
 
-        // Override notify function to use our enhanced system
-        if (typeof notify === 'undefined') {
-            window.notify = function(type, message) {
-                window.toast[type](message);
-            };
-        }
+        // Provide a fallback notify only after page load, and only if not provided by a library
+        window.addEventListener('load', function() {
+            if (typeof window.notify !== 'function') {
+                window.notify = function(type, message) {
+                    window.toast[type](message);
+                };
+            }
+        });
     </script>
 
     <!-- Header -->
@@ -1428,4 +1430,5 @@
         });
     </script>
     @yield('scripts')
+    @notifyJs
 </html>

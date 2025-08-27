@@ -9,6 +9,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Residents;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BlotterSummonReadyMail;
 
 class BlotterReportController
 {
@@ -105,7 +107,22 @@ class BlotterReportController
             $blotter->approved_at = now();
             $blotter->summon_date = $validated['hearing_date']; // Save the hearing_date as summon_date
             $blotter->attempts++;
+            $blotter->is_read = false; // Set to false so it appears as unread notification
+            $blotter->resident_is_read = false; // Set to false so resident sees it as unread
             $blotter->save();
+
+            // Send email to resident if email exists
+            if ($user && $user->email) {
+                try {
+                    Mail::to($user->email)->queue(new BlotterSummonReadyMail(
+                        $user->name,
+                        $blotter->recipient_name ?? $blotter->type,
+                        $blotter->summon_date ? $blotter->summon_date->format('F d, Y h:i A') : 'N/A'
+                    ));
+                } catch (\Exception $e) {
+                    Log::error('Failed to queue BlotterSummonReadyMail: ' . $e->getMessage());
+                }
+            }
 
             notify()->success('Blotter report approved successfully.');
 

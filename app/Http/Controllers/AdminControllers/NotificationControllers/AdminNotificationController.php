@@ -159,8 +159,8 @@ class AdminNotificationController
             
             // Only show barangay-related notifications if user is NOT a nurse
             if (!$isNurse) {
-                // Process Blotter Reports
-                BlotterRequest::where('is_read', false)->get()->each(function ($report) use (&$notificationsData) {
+                // Process Blotter Reports - show pending reports that need approval
+                BlotterRequest::where('status', 'pending')->get()->each(function ($report) use (&$notificationsData) {
                     try {
                         $notificationsData[] = [
                             'id' => $report->id,
@@ -176,8 +176,8 @@ class AdminNotificationController
                     }
                 });
                 
-                // Process Document Requests
-                DocumentRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
+                // Process Document Requests - show pending requests that need approval
+                DocumentRequest::where('status', 'pending')->get()->each(function ($request) use (&$notificationsData) {
                     try {
                         $notificationsData[] = [
                             'id' => $request->id,
@@ -193,8 +193,8 @@ class AdminNotificationController
                     }
                 });
 
-                // Process Account Requests
-                AccountRequest::where('is_read', false)->get()->each(function ($request) use (&$notificationsData) {
+                // Process Account Requests - show pending requests that need approval
+                AccountRequest::where('status', 'pending')->get()->each(function ($request) use (&$notificationsData) {
                     try {
                         $notificationsData[] = [
                             'id' => $request->id,
@@ -210,8 +210,8 @@ class AdminNotificationController
                     }
                 });
                 
-                // Process Community Complaints
-                CommunityConcern::where('is_read', false)->get()->each(function ($concern) use (&$notificationsData) {
+                // Process Community Complaints - show pending concerns that need attention
+                CommunityConcern::where('status', 'pending')->get()->each(function ($concern) use (&$notificationsData) {
                     try {
                         $notificationsData[] = [
                             'id' => $concern->id,
@@ -230,29 +230,24 @@ class AdminNotificationController
             
             // Convert to collection and sort by priority and date
             $allUnreadNotifications = collect($notificationsData);
-            
-            // Sort by priority (high first) then by date (latest first)
-            $sortedNotifications = $allUnreadNotifications->sortBy([
-                ['priority', 'desc'],
-                ['created_at', 'desc']
-            ])->values();
-            
+            // Sort strictly by date (latest first), ignoring type/priority
+            $sortedByDate = $allUnreadNotifications->sortByDesc('created_at')->values();
             // Limit to 5 notifications for dropdown
-            $limitedNotifications = $sortedNotifications->take(5);
+            $limitedNotifications = $sortedByDate->take(5);
 
             // Compute totals across models based on user role
             if (!$isNurse) {
                 $unreadCounts = [
-                    'blotter_reports' => BlotterRequest::where('is_read', false)->count(),
-                    'document_requests' => DocumentRequest::where('is_read', false)->count(),
-                    'account_requests' => AccountRequest::where('is_read', false)->count(),
-                    'community_complaints' => CommunityConcern::where('is_read', false)->count(),
+                    'blotter_reports' => BlotterRequest::where('status', 'pending')->count(),
+                    'document_requests' => DocumentRequest::where('status', 'pending')->count(),
+                    'account_requests' => AccountRequest::where('status', 'pending')->count(),
+                    'community_complaints' => CommunityConcern::where('status', 'pending')->count(),
                 ];
                 $readCounts = [
-                    'blotter_reports' => BlotterRequest::where('is_read', true)->count(),
-                    'document_requests' => DocumentRequest::where('is_read', true)->count(),
-                    'account_requests' => AccountRequest::where('is_read', true)->count(),
-                    'community_complaints' => CommunityConcern::where('is_read', true)->count(),
+                    'blotter_reports' => BlotterRequest::whereIn('status', ['approved', 'completed'])->count(),
+                    'document_requests' => DocumentRequest::whereIn('status', ['approved', 'completed'])->count(),
+                    'account_requests' => AccountRequest::whereIn('status', ['approved', 'rejected'])->count(),
+                    'community_complaints' => CommunityConcern::whereIn('status', ['under_review', 'in_progress', 'resolved', 'closed'])->count(),
                 ];
                 $totalCounts = [
                     'blotter_reports' => BlotterRequest::count(),
