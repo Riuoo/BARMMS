@@ -136,7 +136,6 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sort-numeric-up mr-2 text-gray-400"></i>Quantity</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-user-md mr-2 text-gray-400"></i>Approved By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sticky-note mr-2 text-gray-400"></i>Notes</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-info-circle mr-2 text-gray-400"></i>Status</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -154,20 +153,13 @@
                         <td class="px-6 py-4">{{ $req->approvedByUser->name ?? 'Unknown User' }}</td>
                         <td class="px-6 py-4">
                             @if($req->notes)
-                                {{ Str::limit($req->notes, 30) }}
+                                <button type="button" 
+                                        onclick="showNotesModal('{{ addslashes($req->notes) }}', '{{ addslashes($req->medicine->name ?? 'Unknown') }}')"
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <i class="fas fa-eye mr-1"></i>View Notes
+                                </button>
                             @else
                                 <span class="text-gray-400">No notes</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($req->quantity_approved)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <i class="fas fa-check mr-1"></i>Approved
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    <i class="fas fa-clock mr-1"></i>Pending
-                                </span>
                             @endif
                         </td>
                     </tr>
@@ -303,17 +295,6 @@
                     <h3 class="text-sm font-semibold text-gray-900">{{ $req->medicine->name ?? 'Unknown' }}</h3>
                     <p class="text-xs text-gray-500">{{ $req->resident->name ?? 'Unknown' }}</p>
                 </div>
-                <div class="text-right">
-                    @if($req->quantity_approved)
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            <i class="fas fa-check mr-1"></i>Approved
-                        </span>
-                    @else
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            <i class="fas fa-clock mr-1"></i>Pending
-                        </span>
-                    @endif
-                </div>
             </div>
             <div class="text-sm text-gray-600 mb-2">
                 <p><i class="fas fa-calendar-day mr-1 text-gray-400"></i> {{ $req->request_date->format('M d, Y') }}</p>
@@ -323,7 +304,14 @@
                     <p><i class="fas fa-tag mr-1 text-gray-400"></i> {{ $req->medicine->category }}</p>
                 @endif
                 @if($req->notes)
-                    <p><i class="fas fa-sticky-note mr-1 text-gray-400"></i> {{ Str::limit($req->notes, 50) }}</p>
+                    <p class="flex items-center justify-between">
+                        <span><i class="fas fa-sticky-note mr-1 text-gray-400"></i> Notes available</span>
+                        <button type="button" 
+                                onclick="showNotesModal('{{ addslashes($req->notes) }}', '{{ addslashes($req->medicine->name ?? 'Unknown') }}')"
+                                class="ml-2 inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-eye mr-1"></i>View
+                        </button>
+                    </p>
                 @endif
             </div>
         </div>
@@ -345,6 +333,48 @@
             </div>
         </div>
     @endif
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Notes</h3>
+                    <button type="button" onclick="closeNotesModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <p class="text-sm text-gray-600" id="modalNotes"></p>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button type="button" onclick="closeNotesModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Modal -->
+    <script>
+        function showNotesModal(notes, medicineName) {
+            document.getElementById('modalTitle').textContent = `Notes - ${medicineName}`;
+            document.getElementById('modalNotes').textContent = notes;
+            document.getElementById('notesModal').classList.remove('hidden');
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('notesModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeNotesModal();
+            }
+        });
+    </script>
 </div>
 @endsection
 

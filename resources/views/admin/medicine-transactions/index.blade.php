@@ -118,7 +118,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($transactions as $tx)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">{{ $tx->transaction_date->format('M d, Y H:i') }}</td>
+                        <td class="px-6 py-4">{{ $tx->transaction_date->format('M d, Y') }}</td>
                         <td class="px-6 py-4">{{ data_get($tx, 'medicine.name', 'Unknown') }}</td>
                         <td class="px-6 py-4">
                             @php $type = $tx->transaction_type; @endphp

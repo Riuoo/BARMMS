@@ -39,7 +39,11 @@ class MedicineController
         // Only select needed columns for paginated medicines
         $medicines = $query->select([
             'id', 'name', 'generic_name', 'category', 'current_stock', 'minimum_stock', 'expiry_date'
-        ])->orderBy('name')->paginate(10)->withQueryString();
+        ])
+        ->orderBy('current_stock', 'asc')  // Sort by low stock to highest stock
+        ->orderBy('expiry_date', 'asc')    // Sort by shortest expiry to longest expiry
+        ->paginate(10)
+        ->withQueryString();
 
         // Use caching for stats (5 min)
         $stats = [

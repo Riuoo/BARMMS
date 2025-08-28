@@ -19,6 +19,27 @@
         .notification-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         .notification-scroll::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
         .notification-scroll::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        
+        /* Enhanced dropdown styles */
+        .user-dropdown {
+            z-index: 9999 !important;
+        }
+
+        .user-dropdown-menu {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        /* Prevent text selection in dropdown */
+        .user-dropdown-menu * {
+            user-select: none;
+        }
+
+        /* Smooth hover transitions */
+        .user-dropdown-menu a:hover,
+        .user-dropdown-menu button:hover {
+            transform: translateX(2px);
+        }
     </style>
 </head>
 <body x-data="{ sidebarOpen: false }" class="flex flex-col min-h-screen bg-gray-100 font-sans" data-notify-timeout="{{ config('notify.timeout', 5000) }}" data-notifications-url="{{ route('resident.notifications.count') }}">
@@ -140,29 +161,55 @@
             </div>
 
             <!-- User menu -->
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none" aria-haspopup="true" :aria-expanded="open.toString()">
+            <div class="relative user-dropdown" x-data="{ open: false }" @keydown.escape="open = false">
+                <button 
+                    @click="open = !open" 
+                    @click.away="setTimeout(() => open = false, 100)"
+                    class="flex items-center space-x-2 focus:outline-none rounded-md p-1" 
+                    aria-haspopup="true" 
+                    :aria-expanded="open.toString()"
+                    type="button"
+                >
                     <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
                     <span class="font-semibold hidden sm:inline">{{ $currentUser->name ?? 'Resident' }}</span>
                 </button>
                 <div
                     x-show="open"
-                    @click.away="open = false"
-                    x-transition
-                    class="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg transition-opacity z-50 p-4"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="transform opacity-0 scale-95"
+                    x-transition:enter-end="transform opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="transform opacity-100 scale-100"
+                    x-transition:leave-end="transform opacity-0 scale-95"
+                    class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-xl border border-gray-200 transition-all z-50 overflow-hidden user-dropdown-menu"
                     style="display: none;"
-                    role="menu" aria-label="User menu"
+                    role="menu" 
+                    aria-label="User menu"
+                    @click.stop
                 >
-                    <a href="{{ route('resident.profile') }}"
-                    class="block px-4 py-2 hover:bg-gray-200 rounded"
-                    role="menuitem" tabindex="-1">
-                    Profile
-                    </a>
-                    <div class="border-t border-gray-200 my-1"></div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-200 rounded" role="menuitem" tabindex="-1">Logout</button>
-                    </form>
+                    <div class="py-1">
+                        <a href="{{ route('resident.profile') }}"
+                        class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 flex items-center"
+                        role="menuitem" 
+                        tabindex="-1"
+                        @click="open = false">
+                            <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                            Profile
+                        </a>
+                        <div class="border-t border-gray-200 my-1"></div>
+                        <form method="POST" action="{{ route('logout') }}" class="block">
+                            @csrf
+                            <button 
+                                type="submit" 
+                                class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 flex items-center" 
+                                role="menuitem" 
+                                tabindex="-1"
+                                @click="open = false">
+                                <i class="fas fa-sign-out-alt mr-3 text-gray-400"></i>
+                                Logout
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

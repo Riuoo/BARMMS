@@ -79,6 +79,55 @@
         .notification-scroll::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
+
+        /* Enhanced dropdown styles */
+        .user-dropdown {
+            z-index: 9999 !important;
+        }
+
+        .user-dropdown-menu {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        /* Prevent text selection in dropdown */
+        .user-dropdown-menu * {
+            user-select: none;
+        }
+
+        /* Smooth hover transitions */
+        .user-dropdown-menu a:hover,
+        .user-dropdown-menu button:hover {
+            transform: translateX(2px);
+        }
+
+        /* Notification dropdown styles */
+        .notification-dropdown {
+            z-index: 9998 !important;
+        }
+
+        .notification-dropdown .notification-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+
+        .notification-dropdown .notification-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-dropdown .notification-scroll::-webkit-scrollbar-track {
+            background: #f7fafc;
+            border-radius: 3px;
+        }
+
+        .notification-dropdown .notification-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .notification-dropdown .notification-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
     </style>
 </head>
 <body x-data="{ sidebarOpen: false }" class="flex flex-col min-h-screen bg-gray-100 font-sans" data-notifications-url="{{ route('admin.notifications.count') }}" data-notify-timeout="{{ config('notify.timeout', 5000) }}">
@@ -185,26 +234,32 @@
         <div class="flex items-center space-x-4">
             @if(!$isNurse)
             <!-- Notifications -->
-            <div class="relative" x-data="{ open: false }" @click="open = !open">
-                <button class="relative focus:outline-none" title="Notifications">
+            <div class="relative" x-data="{ open: false }" @keydown.escape="open = false">
+                <button 
+                    @click="open = !open" 
+                    class="relative focus:outline-none rounded-md p-1" 
+                    title="Notifications"
+                    type="button"
+                >
                     <i class="fas fa-bell text-gray-900"></i>
                     {{-- Notification count badge --}}
-                    <span id="notification-count-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1" style="display: none;"></span>
+                    <span id="notification-count-badge" class="absolute -top-0.5 -right-1 bg-red-600 text-white text-xs rounded-full px-0.5 min-w-[16px] h-4 flex items-center justify-center" style="display: none;"></span>
                 </button>
 
                 <div x-show="open" 
-                     @click.away="open = false" 
+                     @click.away="setTimeout(() => open = false, 100)" 
                      x-transition:enter="transition ease-out duration-200"
                      x-transition:enter-start="transform opacity-0 scale-95"
                      x-transition:enter-end="transform opacity-100 scale-100"
                      x-transition:leave="transition ease-in duration-150"
                      x-transition:leave-start="transform opacity-100 scale-100"
                      x-transition:leave-end="transform opacity-0 scale-95"
-                     class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden" 
+                     class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden notification-dropdown" 
                      style="display: none;" 
                      role="dialog" 
                      aria-modal="true" 
-                     aria-label="Notifications dropdown">
+                     aria-label="Notifications dropdown"
+                     @click.stop>
                     
                     <!-- Header -->
                     <div class="bg-gradient-to-r from-green-600 to-green-700 px-4 py-3">
@@ -260,8 +315,15 @@
             @endif
 
             <!-- User menu -->
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none" aria-haspopup="true" :aria-expanded="open.toString()">
+            <div class="relative user-dropdown" x-data="{ open: false }" @keydown.escape="open = false">
+                <button 
+                    @click="open = !open" 
+                    @click.away="setTimeout(() => open = false, 100)"
+                    class="flex items-center space-x-2 focus:outline-none rounded-md p-1" 
+                    aria-haspopup="true" 
+                    :aria-expanded="open.toString()"
+                    type="button"
+                >
                     <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
                     <span class="font-semibold hidden sm:inline">
                         @php
@@ -276,25 +338,45 @@
                             Admin
                         @endif
                     </span>
+
                 </button>
                 <div
                     x-show="open"
-                    @click.away="open = false"
-                    x-transition
-                    class="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg transition-opacity z-50 p-4"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="transform opacity-0 scale-95"
+                    x-transition:enter-end="transform opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="transform opacity-100 scale-100"
+                    x-transition:leave-end="transform opacity-0 scale-95"
+                    class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-xl border border-gray-200 transition-all z-50 overflow-hidden user-dropdown-menu"
                     style="display: none;"
-                    role="menu" aria-label="User menu"
+                    role="menu" 
+                    aria-label="User menu"
+                    @click.stop
                 >
-                    <a href="{{ route('admin.profile') }}"
-                    class="block px-4 py-2 hover:bg-gray-200 rounded"
-                    role="menuitem" tabindex="-1">
-                    Profile
-                    </a>
-                    <div class="border-t border-gray-200 my-1"></div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-200 rounded" role="menuitem" tabindex="-1">Logout</button>
-                    </form>
+                    <div class="py-1">
+                        <a href="{{ route('admin.profile') }}"
+                        class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 flex items-center"
+                        role="menuitem" 
+                        tabindex="-1"
+                        @click="open = false">
+                            <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                            Profile
+                        </a>
+                        <div class="border-t border-gray-200 my-1"></div>
+                        <form method="POST" action="{{ route('logout') }}" class="block">
+                            @csrf
+                            <button 
+                                type="submit" 
+                                class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 flex items-center" 
+                                role="menuitem" 
+                                tabindex="-1"
+                                @click="open = false">
+                                <i class="fas fa-sign-out-alt mr-3 text-gray-400"></i>
+                                Logout
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1428,7 +1510,41 @@
                 }
             }
         });
+
+        // Enhanced dropdown management
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prevent dropdown from closing when clicking inside
+            const userDropdown = document.querySelector('[x-data*="open: false"]');
+            if (userDropdown) {
+                const dropdownMenu = userDropdown.querySelector('[role="menu"]');
+                if (dropdownMenu) {
+                    dropdownMenu.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
+                }
+            }
+
+            // Prevent notification dropdown from closing when clicking inside
+            const notificationDropdowns = document.querySelectorAll('.notification-dropdown');
+            notificationDropdowns.forEach(dropdown => {
+                dropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+
+            // Close dropdown when pressing Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const dropdowns = document.querySelectorAll('[x-data*="open: false"]');
+                    dropdowns.forEach(dropdown => {
+                        const alpineData = dropdown._x_dataStack?.[0];
+                        if (alpineData && typeof alpineData.open !== 'undefined') {
+                            alpineData.open = false;
+                        }
+                    });
+                }
+            });
+        });
     </script>
     @yield('scripts')
-    @notifyJs
 </html>

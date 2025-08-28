@@ -19,11 +19,42 @@ class ResidentDashboardController
             return redirect()->route('landing');
         }
 
-        // Fetch the resident's blotter, document requests, and community concerns for dashboard statistics
-        $blotterRequests = BlotterRequest::where('resident_id', $userId)->orderBy('created_at', 'desc')->get();
-        $documentRequests = DocumentRequest::where('resident_id', $userId)->orderBy('created_at', 'desc')->get();
-        $communityConcerns = CommunityConcern::where('resident_id', $userId)->orderBy('created_at', 'desc')->get();
+        // Fetch comprehensive data for dashboard statistics
+        $totalBlotterRequests = BlotterRequest::where('resident_id', $userId)->count();
+        $totalDocumentRequests = DocumentRequest::where('resident_id', $userId)->count();
+        $totalCommunityConcerns = CommunityConcern::where('resident_id', $userId)->count();
+        
+        // Get status-based counts using more efficient queries
+        $pendingCounts = $this->getStatusCounts($userId, 'pending');
+        $completedCounts = $this->getStatusCounts($userId, 'completed');
+        
+        // Fetch recent items for dashboard
+        $recentBlotterRequests = BlotterRequest::where('resident_id', $userId)->orderBy('created_at', 'desc')->take(1)->get();
+        $recentDocumentRequests = DocumentRequest::where('resident_id', $userId)->orderBy('created_at', 'desc')->take(1)->get();
+        $recentCommunityConcerns = CommunityConcern::where('resident_id', $userId)->orderBy('created_at', 'desc')->take(1)->get();
 
-        return view('resident.dashboard', compact('resident', 'blotterRequests', 'documentRequests', 'communityConcerns'));
+        return view('resident.dashboard', compact(
+            'resident',
+            'totalBlotterRequests',
+            'totalDocumentRequests', 
+            'totalCommunityConcerns',
+            'pendingCounts',
+            'completedCounts',
+            'recentBlotterRequests',
+            'recentDocumentRequests',
+            'recentCommunityConcerns'
+        ));
+    }
+
+    /**
+     * Get counts for a specific status across all request types
+     */
+    private function getStatusCounts($userId, $status)
+    {
+        return [
+            'blotter' => BlotterRequest::where('resident_id', $userId)->where('status', $status)->count(),
+            'document' => DocumentRequest::where('resident_id', $userId)->where('status', $status)->count(),
+            'concern' => CommunityConcern::where('resident_id', $userId)->where('status', $status)->count(),
+        ];
     }
 } 

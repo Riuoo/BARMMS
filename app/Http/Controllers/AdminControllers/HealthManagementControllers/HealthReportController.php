@@ -79,10 +79,25 @@ class HealthReportController
             'vaccinations' => VaccinationRecord::whereMonth('created_at', now()->month)->count(),
         ];
 
-        // Medicine analytics (30-day window)
+        // Medicine analytics (30-day window) - Detailed inventory with priority sorting
+        $lowStockMedicines = \App\Models\Medicine::whereColumn('current_stock', '<=', 'minimum_stock')
+            ->orderByRaw('(minimum_stock - current_stock) DESC') // Most critical first
+            ->with('category')
+            ->limit(5)
+            ->get();
+
+        $expiringMedicines = \App\Models\Medicine::whereNotNull('expiry_date')
+            ->where('expiry_date', '<=', now()->addDays(30))
+            ->orderBy('expiry_date', 'asc') // Soonest to expire first
+            ->with('category')
+            ->limit(5)
+            ->get();
+
         $medicineStats = [
-            'low_stock' => \App\Models\Medicine::whereColumn('current_stock', '<=', 'minimum_stock')->count(),
-            'expiring_soon' => \App\Models\Medicine::whereNotNull('expiry_date')->where('expiry_date', '<=', now()->addDays(30))->count(),
+            'low_stock' => $lowStockMedicines->count(),
+            'expiring_soon' => $expiringMedicines->count(),
+            'low_stock_details' => $lowStockMedicines,
+            'expiring_details' => $expiringMedicines,
         ];
 
         $topRequestedMedicines = MedicineRequest::select('medicine_id')
