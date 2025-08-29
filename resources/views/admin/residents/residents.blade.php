@@ -220,23 +220,52 @@
                                 <div class="flex items-center">
                                     <div>
                                         <div class="text-sm font-medium text-gray-900">{{ $resident->name }}</div>
+                                        @if($resident->gender || $resident->birth_date || $resident->marital_status)
+                                            <div class="text-sm text-gray-500">
+                                                @if($resident->gender)
+                                                    <i class="fas fa-{{ $resident->gender == 'Male' ? 'mars' : 'venus' }} mr-1"></i>
+                                                    {{ $resident->gender }}
+                                                @endif
+                                                @if($resident->birth_date)
+                                                    • {{ $resident->birth_date->format('M d, Y') }}
+                                                @endif
+                                            </div>
+                                            @if($resident->marital_status)
+                                                <div class="text-xs text-gray-400">
+                                                    <i class="fas fa-heart mr-1"></i>
+                                                    {{ $resident->marital_status }}
+                                                </div>
+                                            @endif
+                                        @endif
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->email }}</div>
+                                @if($resident->contact_number)
+                                    <div class="text-sm text-gray-500">
+                                        <i class="fas fa-phone mr-1"></i>
+                                        {{ $resident->contact_number }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->address ?: 'No address provided' }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">
-                                    @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
+                                    @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status || $resident->gender || $resident->contact_number || $resident->birth_date || $resident->marital_status || $resident->occupation || $resident->emergency_contact_name)
                                         <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
                                                 class="text-green-600 hover:text-green-800 font-medium cursor-pointer js-show-demographics">
                                             <i class="fas fa-eye mr-1"></i>
                                             View Demographics
                                         </button>
+                                        @if($resident->occupation)
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                <i class="fas fa-briefcase mr-1"></i>
+                                                {{ $resident->occupation }}
+                                            </div>
+                                        @endif
                                     @else
                                         <span class="text-gray-400">No demographic data</span>
                                     @endif
@@ -314,6 +343,44 @@
                     </div>
                 </div>
 
+                <!-- Personal Information -->
+                <div class="mb-3 space-y-2">
+                    @if($resident->gender || $resident->birth_date || $resident->marital_status)
+                        <div class="flex flex-wrap gap-2">
+                            @if($resident->gender)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <i class="fas fa-{{ $resident->gender == 'Male' ? 'mars' : 'venus' }} mr-1"></i>
+                                    {{ $resident->gender }}
+                                </span>
+                            @endif
+                            @if($resident->birth_date)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    <i class="fas fa-birthday-cake mr-1"></i>
+                                    {{ $resident->birth_date->format('M d, Y') }}
+                                </span>
+                            @endif
+                            @if($resident->marital_status)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                                    <i class="fas fa-heart mr-1"></i>
+                                    {{ $resident->marital_status }}
+                                </span>
+                            @endif
+                        </div>
+                    @endif
+                    @if($resident->contact_number)
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-phone mr-1 text-gray-400"></i>
+                            {{ $resident->contact_number }}
+                        </div>
+                    @endif
+                    @if($resident->occupation)
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-briefcase mr-1 text-gray-400"></i>
+                            {{ $resident->occupation }}
+                        </div>
+                    @endif
+                </div>
+
                 <!-- Address section -->
                 @if($resident->address)
                 <div class="mb-3">
@@ -325,7 +392,7 @@
                 @endif
 
                 <!-- Demographics section -->
-                @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status)
+                @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status || $resident->gender || $resident->contact_number || $resident->birth_date || $resident->marital_status || $resident->occupation || $resident->emergency_contact_name)
                 <div class="mb-3">
                     <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
                             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition duration-200 js-show-demographics">
@@ -628,12 +695,20 @@
                     contentHtml += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
                     // Dynamically add fields if they exist and are not null/empty
                     const fields = {
-                        'age': { label: 'Age', icon: 'fas fa-birthday-cake' },
+                        'gender': { label: 'Gender', icon: 'fas fa-{{ $resident->gender == "Male" ? "mars" : "venus" }}' },
+                        'contact_number': { label: 'Contact Number', icon: 'fas fa-phone' },
+                        'birth_date': { label: 'Birth Date', icon: 'fas fa-birthday-cake' },
+                        'marital_status': { label: 'Marital Status', icon: 'fas fa-heart' },
+                        'occupation': { label: 'Occupation', icon: 'fas fa-briefcase' },
+                        'age': { label: 'Age', icon: 'fas fa-user' },
                         'family_size': { label: 'Family Size', icon: 'fas fa-users' },
                         'education_level': { label: 'Education Level', icon: 'fas fa-graduation-cap' },
                         'income_level': { label: 'Income Level', icon: 'fas fa-money-bill-wave' },
                         'employment_status': { label: 'Employment Status', icon: 'fas fa-briefcase' },
-                        'health_status': { label: 'Health Status', icon: 'fas fa-heartbeat' }
+                        'health_status': { label: 'Health Status', icon: 'fas fa-heartbeat' },
+                        'emergency_contact_name': { label: 'Emergency Contact', icon: 'fas fa-exclamation-triangle' },
+                        'emergency_contact_number': { label: 'Emergency Phone', icon: 'fas fa-phone' },
+                        'emergency_contact_relationship': { label: 'Relationship', icon: 'fas fa-user-friends' }
                     };
 
                     let hasData = false;

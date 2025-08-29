@@ -3,7 +3,7 @@
 @section('title', 'Add New Resident')
 
 @section('content')
-    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8">
         <h1 class="text-3xl font-semibold text-gray-800 mb-8 text-center">Add New Resident</h1>
 
         @if(session('success'))
@@ -30,23 +30,68 @@
         <form action="{{ route('admin.residents.store') }}" method="POST" class="space-y-6">
             @csrf
 
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
-                <input type="text" id="name" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+            <!-- Basic Information Section -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
+                <h3 class="text-lg font-semibold mb-4 text-gray-700">Basic Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="name" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <p id="email-warning" class="mt-2 text-sm text-red-600 hidden"></p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
+                        <select id="gender" name="gender" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Male</option>
+                            <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Female</option>
+                            <option value="Other" {{ old('gender') == 'Other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
+                        <input type="number" id="contact_number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., 9191234567" min="0" pattern="[0-9]*" inputmode="numeric" required>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
+                    <input type="text" id="address" name="address" value="{{ old('address') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Full Address (include Purok if applicable)" required>
+                </div>
             </div>
 
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-                <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                <p id="email-warning" class="mt-2 text-sm text-red-600 hidden"></p>
+            <!-- Personal Information Section -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
+                <h3 class="text-lg font-semibold mb-4 text-gray-700">Personal Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-1">Birth Date <span class="text-red-500">*</span></label>
+                        <input type="date" id="birth_date" name="birth_date" value="{{ old('birth_date') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    </div>
+                    <div>
+                        <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-1">Marital Status <span class="text-red-500">*</span></label>
+                        <select id="marital_status" name="marital_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <option value="">Select Marital Status</option>
+                            <option value="Single" {{ old('marital_status') == 'Single' ? 'selected' : '' }}>Single</option>
+                            <option value="Married" {{ old('marital_status') == 'Married' ? 'selected' : '' }}>Married</option>
+                            <option value="Widowed" {{ old('marital_status') == 'Widowed' ? 'selected' : '' }}>Widowed</option>
+                            <option value="Divorced" {{ old('marital_status') == 'Divorced' ? 'selected' : '' }}>Divorced</option>
+                            <option value="Separated" {{ old('marital_status') == 'Separated' ? 'selected' : '' }}>Separated</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label for="occupation" class="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+                    <input type="text" id="occupation" name="occupation" value="{{ old('occupation') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., Teacher, Business Owner, Student">
+                </div>
             </div>
 
-            <div>
-                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
-                <input type="text" id="address" name="address" value="{{ old('address') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
-            </div>
-
-            <!-- Demographic Information -->
+            <!-- Demographic Information Section -->
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
                 <h3 class="text-lg font-semibold mb-4 text-gray-700">Demographic Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -105,14 +150,37 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
-                    <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+            <!-- Emergency Contact Section -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
+                <h3 class="text-lg font-semibold mb-4 text-gray-700">Emergency Contact</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Name</label>
+                        <input type="text" id="emergency_contact_name" name="emergency_contact_name" value="{{ old('emergency_contact_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Full Name">
+                    </div>
+                    <div>
+                        <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Number</label>
+                        <input type="number" id="emergency_contact_number" name="emergency_contact_number" value="{{ old('emergency_contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., 9191234567" min="0" pattern="[0-9]*" inputmode="numeric">
+                    </div>
                 </div>
-                <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password <span class="text-red-500">*</span>    </label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                <div class="mt-4">
+                    <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-700 mb-1">Relationship to Emergency Contact</label>
+                    <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{ old('emergency_contact_relationship') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., Spouse, Parent, Sibling">
+                </div>
+            </div>
+
+            <!-- Security Section -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
+                <h3 class="text-lg font-semibold mb-4 text-gray-700">Security</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+                        <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    </div>
+                    <div>
+                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password <span class="text-red-500">*</span></label>
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    </div>
                 </div>
             </div>
 
@@ -174,6 +242,20 @@
                 if (emailInput.value) {
                     checkEmail(emailInput.value.trim());
                 }
+
+                // Auto-calculate age from birth date
+                document.getElementById('birth_date').addEventListener('change', function() {
+                    const birthDate = new Date(this.value);
+                    const today = new Date();
+                    const age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+                    
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+                    
+                    document.getElementById('age').value = age;
+                });
             })();
         </script>
     </div>

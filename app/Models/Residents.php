@@ -16,12 +16,20 @@ class Residents extends Authenticatable
         'password',
         'role',
         'address',
+        'gender',
+        'contact_number',
+        'birth_date',
+        'marital_status',
+        'occupation',
         'age',
         'family_size',
         'education_level',
         'income_level',
         'employment_status',
         'health_status',
+        'emergency_contact_name',
+        'emergency_contact_number',
+        'emergency_contact_relationship',
         'active',
     ];
 
@@ -34,6 +42,7 @@ class Residents extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'birth_date' => 'date',
             'password' => 'hashed',
             'active' => 'boolean',
         ];
@@ -41,7 +50,7 @@ class Residents extends Authenticatable
 
     public function patientRecord()
     {
-        return $this->hasOne(PatientRecord::class, 'resident_id');
+        return $this->hasOne(MedicalRecord::class, 'resident_id');
     }
 
     public function medicalLogbooks()

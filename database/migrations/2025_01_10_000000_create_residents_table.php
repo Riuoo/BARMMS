@@ -15,6 +15,14 @@ return new class extends Migration
             $table->string('password');
             $table->string('role');
             $table->string('address')->index();
+            
+            // New personal information fields
+            $table->enum('gender', ['Male', 'Female', 'Other']);
+            $table->string('contact_number');
+            $table->date('birth_date');
+            $table->enum('marital_status', ['Single', 'Married', 'Widowed', 'Divorced', 'Separated']);
+            $table->string('occupation')->nullable();
+            
             // Demographic fields
             $table->integer('age');
             $table->integer('family_size');
@@ -22,6 +30,12 @@ return new class extends Migration
             $table->enum('income_level', ['Low', 'Lower Middle', 'Middle', 'Upper Middle', 'High']);
             $table->enum('employment_status', ['Unemployed', 'Part-time', 'Self-employed', 'Full-time'])->default('Unemployed');
             $table->enum('health_status', ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'])->default('Fair');
+            
+            // Emergency contact fields
+            $table->string('emergency_contact_name')->nullable();
+            $table->string('emergency_contact_number')->nullable();
+            $table->string('emergency_contact_relationship')->nullable();
+            
             $table->boolean('active')->default(true)->index();
             $table->rememberToken();
             $table->timestamps();

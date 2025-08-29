@@ -6,6 +6,8 @@ use App\Models\Residents;
 use App\Models\AccountRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class ResidentController
 {
@@ -61,12 +63,20 @@ class ResidentController
     {
         // Return all available demographic fields from the residents table
         return response()->json([
+            'gender' => $resident->gender,
+            'contact_number' => $resident->contact_number,
+            'birth_date' => $resident->birth_date ? $resident->birth_date->format('Y-m-d') : null,
+            'marital_status' => $resident->marital_status,
+            'occupation' => $resident->occupation,
             'age' => $resident->age,
             'family_size' => $resident->family_size,
             'education_level' => $resident->education_level,
             'income_level' => $resident->income_level,
             'employment_status' => $resident->employment_status,
-            'health_status' => $resident->health_status
+            'health_status' => $resident->health_status,
+            'emergency_contact_name' => $resident->emergency_contact_name,
+            'emergency_contact_number' => $resident->emergency_contact_number,
+            'emergency_contact_relationship' => $resident->emergency_contact_relationship
         ]);
     }
 
@@ -115,6 +125,11 @@ class ResidentController
                 },
             ],
             'address' => 'required|string|max:500',
+            'gender' => 'required|in:Male,Female,Other',
+            'contact_number' => 'required|string|max:255',
+            'birth_date' => 'required|date|before:today',
+            'marital_status' => 'required|in:Single,Married,Widowed,Divorced,Separated',
+            'occupation' => 'nullable|string|max:255',
             'password' => 'required|string|min:6|confirmed',
             'age' => 'required|integer|min:1|max:120',
             'family_size' => 'required|integer|min:1|max:20',
@@ -122,6 +137,9 @@ class ResidentController
             'income_level' => 'required|string|in:Low,Lower Middle,Middle,Upper Middle,High',
             'employment_status' => 'required|string|in:Unemployed,Part-time,Self-employed,Full-time',
             'health_status' => 'required|string|in:Critical,Poor,Fair,Good,Excellent',
+            'emergency_contact_name' => 'nullable|string|max:255',
+            'emergency_contact_number' => 'nullable|string|max:255',
+            'emergency_contact_relationship' => 'nullable|string|max:255',
         ]);
         try {
             Residents::create([
@@ -129,6 +147,11 @@ class ResidentController
                 'email' => $validatedData['email'],
                 'role' => 'resident',
                 'address' => $validatedData['address'],
+                'gender' => $validatedData['gender'],
+                'contact_number' => $validatedData['contact_number'],
+                'birth_date' => $validatedData['birth_date'],
+                'marital_status' => $validatedData['marital_status'],
+                'occupation' => $validatedData['occupation'],
                 'password' => Hash::make($validatedData['password']),
                 'age' => $validatedData['age'],
                 'family_size' => $validatedData['family_size'],
@@ -136,6 +159,10 @@ class ResidentController
                 'income_level' => $validatedData['income_level'],
                 'employment_status' => $validatedData['employment_status'],
                 'health_status' => $validatedData['health_status'],
+                'emergency_contact_name' => $validatedData['emergency_contact_name'],
+                'emergency_contact_number' => $validatedData['emergency_contact_number'],
+                'emergency_contact_relationship' => $validatedData['emergency_contact_relationship'],
+                'active' => true,
             ]);
             notify()->success('New resident added successfully.');
             return redirect()->route('admin.residents');
@@ -159,6 +186,12 @@ class ResidentController
             $resident = Residents::findOrFail($id);
 
             $validatedData = $request->validate([
+                'address' => 'required|string|max:500',
+                'gender' => 'required|in:Male,Female,Other',
+                'contact_number' => 'required|string|max:255',
+                'birth_date' => 'required|date|before:today',
+                'marital_status' => 'required|in:Single,Married,Widowed,Divorced,Separated',
+                'occupation' => 'nullable|string|max:255',
                 'password' => 'nullable|string|min:6|confirmed',
                 'age' => 'required|integer|min:1|max:120',
                 'family_size' => 'required|integer|min:1|max:20',
@@ -166,18 +199,30 @@ class ResidentController
                 'income_level' => 'required|string|in:Low,Lower Middle,Middle,Upper Middle,High',
                 'employment_status' => 'required|string|in:Unemployed,Part-time,Self-employed,Full-time',
                 'health_status' => 'required|string|in:Critical,Poor,Fair,Good,Excellent',
+                'emergency_contact_name' => 'nullable|string|max:255',
+                'emergency_contact_number' => 'nullable|string|max:255',
+                'emergency_contact_relationship' => 'nullable|string|max:255',
             ]);
 
             if (!empty($validatedData['password'])) {
                 $resident->password = bcrypt($validatedData['password']);
             }
 
+            $resident->address = $validatedData['address'];
+            $resident->gender = $validatedData['gender'];
+            $resident->contact_number = $validatedData['contact_number'];
+            $resident->birth_date = $validatedData['birth_date'];
+            $resident->marital_status = $validatedData['marital_status'];
+            $resident->occupation = $validatedData['occupation'];
             $resident->age = $validatedData['age'];
             $resident->family_size = $validatedData['family_size'];
             $resident->education_level = $validatedData['education_level'];
             $resident->income_level = $validatedData['income_level'];
             $resident->employment_status = $validatedData['employment_status'];
             $resident->health_status = $validatedData['health_status'];
+            $resident->emergency_contact_name = $validatedData['emergency_contact_name'];
+            $resident->emergency_contact_number = $validatedData['emergency_contact_number'];
+            $resident->emergency_contact_relationship = $validatedData['emergency_contact_relationship'];
             $resident->save();
 
             notify()->success('Resident updated successfully.');

@@ -225,6 +225,8 @@ class ResidentDemographicAnalysisService
         $incomeLevels = ['Low','Lower Middle','Middle','Upper Middle','High'];
         $employmentStatuses = ['Unemployed','Part-time','Self-employed','Full-time'];
         $healthStatuses = ['Critical','Poor','Fair','Good','Excellent'];
+        $genderLevels = ['Male','Female','Other'];
+        $maritalStatuses = ['Single','Married','Widowed','Divorced','Separated'];
 
         foreach ($residents as $i => $resident) {
             $vector = [];
@@ -247,6 +249,21 @@ class ResidentDemographicAnalysisService
             foreach ($healthStatuses as $status) {
                 $vector[] = $this->weightHealth * (($hlth === $status) ? 1.0 : 0.0);
             }
+
+            // One-hot: Gender
+            $gen = $resident->gender ?? 'Male';
+            foreach ($genderLevels as $gender) {
+                $vector[] = (($gen === $gender) ? 1.0 : 0.0);
+            }
+
+            // One-hot: Marital Status
+            $marital = $resident->marital_status ?? 'Single';
+            foreach ($maritalStatuses as $status) {
+                $vector[] = (($marital === $status) ? 1.0 : 0.0);
+            }
+
+            // Contact number availability (binary)
+            $vector[] = $this->normalizeContactNumber($resident->contact_number ?? null);
 
             $samples[] = $vector;
             $indexMap[$i] = $resident;
@@ -290,6 +307,8 @@ class ResidentDemographicAnalysisService
 		$incomeLevels = ['Low','Lower Middle','Middle','Upper Middle','High'];
 		$employmentStatuses = ['Unemployed','Part-time','Self-employed','Full-time'];
 		$healthStatuses = ['Critical','Poor','Fair','Good','Excellent'];
+		$genderLevels = ['Male','Female','Other'];
+		$maritalStatuses = ['Single','Married','Widowed','Divorced','Separated'];
 
 		// Build mapping for Purok token from address (cap dimensions)
 		$purokToIndex = [];
@@ -332,6 +351,21 @@ class ResidentDemographicAnalysisService
 			foreach ($healthStatuses as $status) {
 				$vector[] = $this->weightHealth * (($hlth === $status) ? 1.0 : 0.0);
 			}
+
+			// One-hot: Gender
+			$gen = $resident->gender ?? 'Male';
+			foreach ($genderLevels as $gender) {
+				$vector[] = (($gen === $gender) ? 1.0 : 0.0);
+			}
+
+			// One-hot: Marital Status
+			$marital = $resident->marital_status ?? 'Single';
+			foreach ($maritalStatuses as $status) {
+				$vector[] = (($marital === $status) ? 1.0 : 0.0);
+			}
+
+			// Contact number availability (binary)
+			$vector[] = $this->normalizeContactNumber($resident->contact_number ?? null);
 
 			// One-hot: Purok (capped; overflow -> other)
 			$purokVec = array_fill(0, $MAX_PUROK_DIM, 0.0);
@@ -954,6 +988,36 @@ class ResidentDemographicAnalysisService
         ];
 
         return $levels[$health] ?? 0.5;
+    }
+
+    private function normalizeGender(?string $gender): float
+    {
+        $levels = [
+            'Male' => 0.0,
+            'Female' => 1.0,
+            'Other' => 0.5
+        ];
+
+        return $levels[$gender] ?? 0.5;
+    }
+
+    private function normalizeMaritalStatus(?string $maritalStatus): float
+    {
+        $levels = [
+            'Single' => 0.0,
+            'Married' => 0.5,
+            'Widowed' => 0.75,
+            'Divorced' => 0.25,
+            'Separated' => 0.25
+        ];
+
+        return $levels[$maritalStatus] ?? 0.5;
+    }
+
+    private function normalizeContactNumber(?string $contactNumber): float
+    {
+        // Simple normalization: 1 if has contact number, 0 if not
+        return !empty($contactNumber) ? 1.0 : 0.0;
     }
 
     private function getMostCommon(array $array): string

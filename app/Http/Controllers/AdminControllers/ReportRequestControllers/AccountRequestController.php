@@ -80,15 +80,13 @@ class AccountRequestController
             $registrationLink = route('register.form', ['token' => $accountRequest->token]);
 
             try {
-                // Send the email with the registration link
-                Mail::to($accountRequest->email)->send(new AccountApproved($accountRequest->token));
-                Log::info('Email sent successfully to: ' . $accountRequest->email);
+                // Queue the email with the registration link (non-blocking)
+                Mail::to($accountRequest->email)->queue(new AccountApproved($accountRequest->token));
+                Log::info('Email queued successfully for: ' . $accountRequest->email);
             } catch (\Exception $e) {
-                Log::error('Error sending email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
-                DB::rollBack();
-                notify()->error('Account request approved, but email sending failed. Error: ' . $e->getMessage());
-                return redirect()->route('admin.new-account-requests');
-            
+                Log::error('Error queuing email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
+                // Don't rollback the transaction since email queuing failed, not the approval
+                // The email can be retried later via queue retry mechanisms
             }
 
             DB::commit();
@@ -112,7 +110,7 @@ class AccountRequestController
             }
         }
 
-        notify()->success("Account request approved by {$adminUserName} and email sent.");
+        notify()->success("Account request approved by {$adminUserName} and email queued for delivery.");
         return redirect()->route('admin.requests.new-account-requests');
             
     }
