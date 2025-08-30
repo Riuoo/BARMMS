@@ -1,5 +1,12 @@
 @extends('admin.main.layout')
 
+@php
+    $userRole = session('user_role');
+    $isAdmin = $userRole === 'admin';
+    $isSecretary = $userRole === 'secretary';
+    $canPerformTransactions = $isAdmin || $isSecretary;
+@endphp
+
 @section('title', 'Resident Information')
 
 @section('content')
@@ -12,10 +19,12 @@
                 <p class="text-sm md:text-base text-gray-600">Manage resident profiles and information</p>
             </div>
             <div class="mt-4 sm:mt-0">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.residents.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add New Resident
                 </a>
+                @endif
             </div>
         </div>
     </div>
@@ -150,10 +159,12 @@
             <h3 class="text-lg font-medium text-gray-900 mb-2">No residents found</h3>
             <p class="text-gray-500">Get started by adding the first resident to the system.</p>
             <div class="mt-6">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.residents.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add First Resident
                 </a>
+                @endif
             </div>
         </div>
     @else
@@ -199,12 +210,14 @@
                                     Registered
                                 </div>
                             </th>
+                            @if($canPerformTransactions)
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center justify-center">
                                     <i class="fas fa-cogs mr-2"></i>
                                     Actions
                                 </div>
                             </th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="residentTableBody">
@@ -284,6 +297,7 @@
                                     {{ $resident->created_at->diffForHumans() }}
                                 </div>
                             </td>
+                            @if($canPerformTransactions)
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
@@ -303,6 +317,7 @@
                                     </button>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -404,6 +419,7 @@
 
                 <!-- Action buttons -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                    @if($canPerformTransactions)
                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
                        title="Edit">
@@ -422,6 +438,7 @@
                         <i class="fas fa-trash-alt mr-1"></i>
                         Delete
                     </button>
+                    @endif
                 </div>
             </div>
             @endforeach

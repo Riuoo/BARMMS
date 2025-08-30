@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome (if needed for icons in the form) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="icon" href="{{ asset('lower malinao logo.ico') }}" type="image/x-icon">
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl w-full space-y-8 bg-white p-10 rounded-lg shadow">

@@ -231,8 +231,8 @@ class ResidentSeeder extends Seeder
 
         // Young Adult - Low Income
         Residents::create([
-            'name' => 'Diego Alejandro Morales Vega',
-            'email' => 'diego.morales@email.com',
+            'name' => 'Roderick P. Tajos',
+            'email' => 'rodericktajos02@gmail.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
             'address' => 'Purok 10, Lower Malinao, Padada City',

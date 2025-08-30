@@ -16,10 +16,12 @@
                     <i class="fas fa-file-alt mr-2"></i>
                     Dispense Report
                 </a>
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.medicines.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add Medicine
                 </a>
+                @endif
             </div>
         </div>
     </div>
@@ -139,10 +141,12 @@
             <h3 class="text-lg font-medium text-gray-900 mb-2">No medicines found</h3>
             <p class="text-gray-500">Get started by adding the first medicine.</p>
             <div class="mt-6">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.medicines.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add Medicine
                 </a>
+                @endif
             </div>
         </div>
     @else
@@ -164,9 +168,11 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center"><i class="fas fa-calendar-day mr-2"></i>Expiry</div>
                             </th>
+                            @if($canPerformTransactions)
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center justify-center"><i class="fas fa-cogs mr-2"></i>Actions</div>
                             </th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -193,14 +199,15 @@
                                     {{ $med->expiry_date->format('M d, Y') }}
                                 @endif
                             </td>
+                            @if($canPerformTransactions)
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
                                     <a href="{{ route('admin.medicines.edit', $med) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -233,9 +240,11 @@
                     <p><i class="fas fa-calendar-day mr-1 text-gray-400"></i> Expiry: {{ $med->expiry_date ? $med->expiry_date->format('M d, Y') : 'N/A' }}</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
+                    @if($canPerformTransactions)
                     <a href="{{ route('admin.medicines.edit', $med) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none transition duration-200">
                         <i class="fas fa-edit mr-1"></i> Edit
                     </a>
+                    @endif
                 </div>
             </div>
             @endforeach

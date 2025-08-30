@@ -138,6 +138,16 @@
         $userRole = session('user_role');
         $isNurse = $userRole === 'nurse';
         $isAdmin = $userRole === 'admin';
+        $isTreasurer = $userRole === 'treasurer';
+        $isSecretary = $userRole === 'secretary';
+        $isCaptain = $userRole === 'captain';
+        $isCouncilor = $userRole === 'councilor';
+        
+        // Only admin and secretary can perform transactions (create, edit, delete)
+        $canPerformTransactions = $isAdmin || $isSecretary;
+        
+        // All non-nurse roles can view Reports & Requests sections
+        $canViewReportsRequests = !$isNurse;
     @endphp
 
     <!-- Enhanced Toast Notification System -->
@@ -264,7 +274,13 @@
                     <!-- Header -->
                     <div class="bg-gradient-to-r from-green-600 to-green-700 px-4 py-3">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-white font-semibold text-sm">{{ $isNurse ? 'Health Notifications' : 'Notifications' }}</h3>
+                            <h3 class="text-white font-semibold text-sm">
+                                @if($isNurse)
+                                    Health Notifications
+                                @else
+                                    Notifications
+                                @endif
+                            </h3>
                             <div class="flex items-center space-x-2">
                                 <span id="dropdown-notification-count" class="text-white text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">0</span>
                                 <button @click="open = false" class="text-white hover:text-gray-200 transition duration-200">
@@ -405,13 +421,6 @@
                         function isActiveRoute($pattern) {
                             return request()->routeIs($pattern) ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300';
                         }
-                        
-                        // Get current user role
-                        $userRole = session('user_role');
-                        $isNurse = $userRole === 'nurse';
-                        $isAdmin = $userRole === 'admin';
-                        $isTreasurer = $userRole === 'treasurer';
-                        $isSecretary = in_array($userRole, ['secretary', 'captain', 'councilor']);
                     @endphp
 
                     @if(!$isNurse)
@@ -450,7 +459,7 @@
                     </section>
                     @endif
 
-                    @if($isAdmin || $isSecretary)
+                    @if(!$isNurse)
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
@@ -644,7 +653,7 @@
                     </section>
                     @endif
 
-                    @if($isAdmin || $isSecretary)
+                    @if(!$isNurse)
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
@@ -1184,30 +1193,31 @@
                 const container = document.getElementById('notification-list-dropdown');
                 if (!container) return;
 
-                if (notifications.length === 0) {
-                    const isNurse = JSON.parse(`@json($isNurse)`);
-                    if (isNurse) {
-                        container.innerHTML = `
-                            <div class="flex items-center justify-center py-8">
-                                <div class="text-center">
-                                    <i class="fas fa-heartbeat text-gray-400 text-2xl mb-2"></i>
-                                    <p class="text-gray-500 text-sm">Health notifications only</p>
-                                    <p class="text-gray-400 text-xs mt-1">No new health-related notifications</p>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        container.innerHTML = `
-                            <div class="flex items-center justify-center py-8">
-                                <div class="text-center">
-                                    <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
-                                    <p class="text-gray-500 text-sm">No new notifications</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    return;
-                }
+                                        if (notifications.length === 0) {
+                            const isNurse = JSON.parse(`@json($isNurse)`);
+                            
+                            if (isNurse) {
+                                container.innerHTML = `
+                                    <div class="flex items-center justify-center py-8">
+                                        <div class="text-center">
+                                            <i class="fas fa-heartbeat text-gray-400 text-2xl mb-2"></i>
+                                            <p class="text-gray-500 text-sm">Health notifications only</p>
+                                            <p class="text-gray-400 text-xs mt-1">No new health-related notifications</p>
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                container.innerHTML = `
+                                    <div class="flex items-center justify-center py-8">
+                                        <div class="text-center">
+                                            <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
+                                            <p class="text-gray-500 text-sm">No new notifications</p>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                            return;
+                        }
 
                 let html = '';
                 notifications.forEach(notification => {
@@ -1432,34 +1442,34 @@
                 };
             },
 
-            // Check current page and mark relevant notifications as read
-            checkCurrentPageAndMarkNotifications: function() {
-                // Check if user is a nurse
-                const isNurse = JSON.parse(`@json($isNurse)`);
-                
-                if (isNurse) {
-                    return; // Nurses don't have access to barangay-related notifications
-                }
-                
-                const currentPath = window.location.pathname;
-                let notificationType = null;
-                
-                // Map URL patterns to notification types
-                if (currentPath.includes('/document-requests')) {
-                    notificationType = 'document_request';
-                } else if (currentPath.includes('/blotter-reports')) {
-                    notificationType = 'blotter_report';
-                } else if (currentPath.includes('/new-account-requests')) {
-                    notificationType = 'account_request';
-                } else if (currentPath.includes('/community-concerns')) {
-                    notificationType = 'community_complaint';
-                }
-                
-                // If we're on a relevant page, mark notifications as read
-                if (notificationType) {
-                    this.markNotificationsAsReadByType(notificationType);
-                }
-            },
+                    // Check current page and mark relevant notifications as read
+        checkCurrentPageAndMarkNotifications: function() {
+            // Check if user is a nurse
+            const isNurse = JSON.parse(`@json($isNurse)`);
+            
+            if (isNurse) {
+                return; // Nurses don't have access to barangay-related notifications
+            }
+            
+            const currentPath = window.location.pathname;
+            let notificationType = null;
+            
+            // Map URL patterns to notification types
+            if (currentPath.includes('/document-requests')) {
+                notificationType = 'document_request';
+            } else if (currentPath.includes('/blotter-reports')) {
+                notificationType = 'blotter_report';
+            } else if (currentPath.includes('/new-account-requests')) {
+                notificationType = 'account_request';
+            } else if (currentPath.includes('/community-concerns')) {
+                notificationType = 'community_complaint';
+            }
+            
+            // If we're on a relevant page, mark notifications as read
+            if (notificationType) {
+                this.markNotificationsAsReadByType(notificationType);
+            }
+        },
 
             // Mark all notifications of a specific type as read
             markNotificationsAsReadByType: function(type) {

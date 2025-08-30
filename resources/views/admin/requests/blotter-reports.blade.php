@@ -2,6 +2,13 @@
 
 @extends('admin.main.layout')
 
+@php
+    $userRole = session('user_role');
+    $isAdmin = $userRole === 'admin';
+    $isSecretary = $userRole === 'secretary';
+    $canPerformTransactions = $isAdmin || $isSecretary;
+@endphp
+
 @section('title', 'Blotter Reports')
 
 @section('content')
@@ -14,10 +21,12 @@
                 <p class="text-gray-600">Manage and review incident reports from residents</p>
             </div>
             <div class="mt-4 sm:mt-0 flex space-x-2">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.blotter-reports.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Create New Report
                 </a>
+                @endif
                 <a href="{{ route('clustering.blotter.analysis') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                     <i class="fas fa-chart-line mr-2"></i>
                     Analysis Dashboard
@@ -209,7 +218,7 @@
                                     Created
                                 </div>
                             </th>
-                            @if($hasThreadActions)
+                            @if($hasThreadActions && $canPerformTransactions)
                                 <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                                     <div class="flex items-center justify-center">
                                         <i class="fas fa-cogs mr-2"></i>
@@ -313,16 +322,18 @@
                             <td class="px-4 py-4">
                                 <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
                             </td>
-                            @if($hasThreadActions)
+                            @if($hasThreadActions && $canPerformTransactions)
                                 <td class="px-3 py-4 text-center">
                                     <div class="flex flex-col space-y-1">
                                         
                                         @if($request->status === 'pending')
+                                            @if($canPerformTransactions)
                                             <button type="button" onclick="openApproveModal('{{ $request->id }}')" 
                                                     class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 transition duration-200 w-full">
                                                 <i class="fas fa-check mr-1"></i>
                                                 Approve
                                             </button>
+                                            @endif
                                         @elseif($request->status === 'approved')
                                             @if($request->attempts < 3)
                                                 <button type="button" onclick="openNewSummonModal('{{ $request->id }}')" 
@@ -448,6 +459,7 @@
                     </button>
                     
                     @if($request->status === 'pending')
+                        @if($canPerformTransactions)
                         <form onsubmit="return approveAndDownloadBlotter(event, '{{ $request->id }}')" class="inline">
                             @csrf
                             <input type="date" name="hearing_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
@@ -456,7 +468,9 @@
                                 Approve
                             </button>
                         </form>
+                        @endif
                     @elseif($request->status === 'approved')
+                        @if($canPerformTransactions)
                         @if($request->attempts < 3)
                             <form onsubmit="return generateNewSummonPdf(event, '{{ $request->id }}')" class="inline">
                                 @csrf
@@ -479,6 +493,7 @@
                                 Complete
                             </button>
                         </form>
+                        @endif
                     @endif
                 </div>
             </div>

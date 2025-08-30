@@ -89,12 +89,56 @@ Route::prefix('admin')->group(function () {
         Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
     });
 
-    Route::middleware(['admin.role:admin,secretary,captain,councilor,treasurer'])->group(function () {
+    // Routes that all admin roles can view but only admin/secretary can modify
+    Route::middleware(['admin.role:admin,secretary,captain,treasurer,councilor'])->group(function () {
         // Admin Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-        // Barangay Profiles routes
+        // User Management - View routes (all can access)
         Route::get('/barangay-profiles', [BarangayProfileController::class, 'barangayProfile'])->name('admin.barangay-profiles');
+        Route::get('/residents', [ResidentController::class, 'residentProfile'])->name('admin.residents');
+        Route::get('/residents/check-email', [ResidentController::class, 'checkEmailRequest'])->name('admin.residents.check-email');
+        Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->name('admin.residents.demographics');
+
+        // Reports & Requests - View routes (all can access)
+        Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
+        Route::get('/blotter-reports/{id}/details', [BlotterReportController::class, 'getDetails'])->name('admin.blotter-reports.details');
+        
+        Route::get('/community-concerns', [CommunityConcernController::class, 'index'])->name('admin.community-concerns');
+        Route::get('/community-concerns/{id}/details', [CommunityConcernController::class, 'getDetails'])->name('admin.community-concerns.details');
+        
+        Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
+        Route::get('/document-requests/download/{id}', [DocumentRequestController::class, 'downloadRequest'])->name('document-requests.download');
+        Route::get('/document-requests/{id}/details', [DocumentRequestController::class, 'getDetails'])->name('admin.document-requests.details');
+        Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
+        
+        Route::get('/templates', [DocumentTemplateController::class, 'index'])->name('admin.templates.index');
+        Route::get('/templates/{template}/preview', [DocumentTemplateController::class, 'preview'])->name('admin.templates.preview');
+        
+        Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
+
+        // Analytics - View routes (all can access)
+        Route::get('/clustering', [ClusteringController::class, 'index'])->name('admin.clustering');
+        Route::get('/clustering/optimal-k', [ClusteringController::class, 'getOptimalK'])->name('admin.clustering.optimal-k');
+        Route::get('/clustering/export', [ClusteringController::class, 'export'])->name('admin.clustering.export');
+        Route::get('/clustering/stats', [ClusteringController::class, 'getClusterStats'])->name('admin.clustering.stats');
+
+        Route::get('/decision-tree', [DecisionTreeController::class, 'index'])->name('admin.decision-tree');
+        Route::get('/decision-tree/stats', [DecisionTreeController::class, 'getStatistics'])->name('admin.decision-tree.stats');
+        Route::get('/decision-tree/export', [DecisionTreeController::class, 'exportRules'])->name('admin.decision-tree.export');
+        Route::get('/decision-tree/features', [DecisionTreeController::class, 'getFeatureImportance'])->name('admin.decision-tree.features');
+        Route::get('/decision-tree/visualization', [DecisionTreeController::class, 'getTreeVisualization'])->name('admin.decision-tree.visualization');
+        
+        // Clustering Analysis Routes (all admin roles can access)
+        Route::prefix('clustering')->group(function () {
+            Route::get('blotter/analysis', [ClusteringAnalysisController::class, 'blotterAnalysis'])->name('clustering.blotter.analysis');
+            Route::get('document/analysis', [ClusteringAnalysisController::class, 'documentAnalysis'])->name('clustering.document.analysis');
+        });
+    });
+
+    // Transaction routes - only admin and secretary can access
+    Route::middleware(['admin.secretary'])->group(function () {
+        // User Management transactions
         Route::get('/barangay-profiles/create', [BarangayProfileController::class, 'create'])->name('admin.barangay-profiles.create');
         Route::post('/barangay-profiles', [BarangayProfileController::class, 'store'])->name('admin.barangay-profiles.store');
         Route::get('/barangay-profiles/{id}/edit', [BarangayProfileController::class, 'edit'])->name('admin.barangay-profiles.edit');
@@ -103,69 +147,34 @@ Route::prefix('admin')->group(function () {
         Route::put('/barangay-profiles/{id}/deactivate', [BarangayProfileController::class, 'deactivate'])->name('admin.barangay-profiles.deactivate');
         Route::delete('/barangay-profiles/{id}', [BarangayProfileController::class, 'delete'])->name('admin.barangay-profiles.delete');
 
-        // Residents routes
-        Route::get('/residents', [ResidentController::class, 'residentProfile'])->name('admin.residents');
         Route::get('/residents/create', [ResidentController::class, 'create'])->name('admin.residents.create');
         Route::post('/residents', [ResidentController::class, 'store'])->name('admin.residents.store');
-        Route::get('/residents/check-email', [ResidentController::class, 'checkEmailRequest'])->name('admin.residents.check-email');
-        // moved search route to nurse-accessible group below
         Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('admin.residents.edit');
         Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
         Route::put('/residents/{id}/activate', [ResidentController::class, 'activate'])->name('admin.residents.activate');
         Route::put('/residents/{id}/deactivate', [ResidentController::class, 'deactivate'])->name('admin.residents.deactivate');
         Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
-        Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->name('admin.residents.demographics');
 
-        // Clustering Analysis Routes
-        Route::get('/clustering', [ClusteringController::class, 'index'])->name('admin.clustering');
-        Route::post('/clustering/perform', [ClusteringController::class, 'performClustering'])->name('admin.clustering.perform');
-        Route::get('/clustering/optimal-k', [ClusteringController::class, 'getOptimalK'])->name('admin.clustering.optimal-k');
-        Route::get('/clustering/export', [ClusteringController::class, 'export'])->name('admin.clustering.export');
-        Route::get('/clustering/stats', [ClusteringController::class, 'getClusterStats'])->name('admin.clustering.stats');
-
-        // Decision Tree Analysis Routes
-        Route::get('/decision-tree', [DecisionTreeController::class, 'index'])->name('admin.decision-tree');
-        Route::post('/decision-tree/perform', [DecisionTreeController::class, 'performAnalysis'])->name('admin.decision-tree.perform');
-        Route::post('/decision-tree/predict', [DecisionTreeController::class, 'predictForResident'])->name('admin.decision-tree.predict');
-        Route::get('/decision-tree/stats', [DecisionTreeController::class, 'getStatistics'])->name('admin.decision-tree.stats');
-        Route::get('/decision-tree/export', [DecisionTreeController::class, 'exportRules'])->name('admin.decision-tree.export');
-        Route::get('/decision-tree/features', [DecisionTreeController::class, 'getFeatureImportance'])->name('admin.decision-tree.features');
-        Route::get('/decision-tree/visualization', [DecisionTreeController::class, 'getTreeVisualization'])->name('admin.decision-tree.visualization');
-    });
-
-    Route::middleware(['admin.role:admin,secretary,captain,councilor'])->group(function () {
-
-        // Blotter Reports route
-        Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
+        // Blotter Reports transactions
         Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');
         Route::post('/blotter-reports', [BlotterReportController::class, 'store'])->name('admin.blotter-reports.store');
-        Route::get('/blotter-reports/{id}/details', [BlotterReportController::class, 'getDetails'])->name('admin.blotter-reports.details');
         Route::post('/blotter-reports/{id}/approve', [BlotterReportController::class, 'approve'])->name('admin.blotter-reports.approve');
         Route::post('/blotter-reports/{id}/new-summons', [BlotterReportController::class, 'generateNewSummons'])->name('admin.blotter-reports.new-summons');
         Route::post('/blotter-reports/{id}/complete', [BlotterReportController::class, 'markAsComplete'])->name('admin.blotter-reports.complete');
         
-        // Community Concerns route
-        Route::get('/community-concerns', [CommunityConcernController::class, 'index'])->name('admin.community-concerns');
-        Route::get('/community-concerns/{id}/details', [CommunityConcernController::class, 'getDetails'])->name('admin.community-concerns.details');
+        // Community Concerns transactions
         Route::post('/community-concerns/{id}/update-status', [CommunityConcernController::class, 'updateStatus'])->name('admin.community-concerns.update-status');
         
-        // Document Requests route
-        Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
+        // Document Requests transactions
         Route::get('/document-requests/create', [DocumentRequestController::class, 'create'])->name('admin.document-requests.create');
         Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('admin.document-requests.store');
-        Route::get('/document-requests/download/{id}', [DocumentRequestController::class, 'downloadRequest'])->name('document-requests.download');
-        Route::get('/document-requests/{id}/details', [DocumentRequestController::class, 'getDetails'])->name('admin.document-requests.details');
         Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('admin.document-requests.approve');
-        Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
         Route::post('/document-requests/{id}/complete', [DocumentRequestController::class, 'markAsComplete'])->name('admin.document-requests.complete');
 
-        //TODO
-        // Document Templates Management
-        Route::get('/templates', [DocumentTemplateController::class, 'index'])->name('admin.templates.index');
+        // Document Templates transactions
         Route::get('/templates/create', [DocumentTemplateController::class, 'create'])->name('admin.templates.create');
         Route::post('/templates', [DocumentTemplateController::class, 'store'])->name('admin.templates.store');
         Route::get('/templates/{template}/edit', [DocumentTemplateController::class, 'edit'])->name('admin.templates.edit');
-        Route::get('/templates/{template}/preview', [DocumentTemplateController::class, 'preview'])->name('admin.templates.preview');
         Route::get('/templates/{template}/word-integration', [DocumentTemplateController::class, 'wordIntegration'])->name('admin.templates.word-integration');
         Route::get('/templates/{template}/download-word', [DocumentTemplateController::class, 'downloadWord'])->name('admin.templates.download-word');
         Route::post('/templates/{template}/upload-word', [DocumentTemplateController::class, 'uploadWord'])->name('admin.templates.upload-word');
@@ -175,9 +184,13 @@ Route::prefix('admin')->group(function () {
         Route::post('/templates/{template}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
         Route::delete('/templates/{template}', [DocumentTemplateController::class, 'destroy'])->name('admin.templates.destroy');
         
-        // Account Requests listing and approval
-        Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
+        // Account Requests transactions
         Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');
+
+        // Analytics transactions
+        Route::post('/clustering/perform', [ClusteringController::class, 'performClustering'])->name('admin.clustering.perform');
+        Route::post('/decision-tree/perform', [DecisionTreeController::class, 'performAnalysis'])->name('admin.decision-tree.perform');
+        Route::post('/decision-tree/predict', [DecisionTreeController::class, 'predictForResident'])->name('admin.decision-tree.predict');
     });
 
     // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
@@ -284,12 +297,6 @@ Route::prefix('admin')->group(function () {
         Route::delete('/accomplished-projects/{id}', [AccomplishProjectController::class, 'destroy'])->name('admin.accomplished-projects.destroy');
         Route::post('/accomplished-projects/{id}/toggle-featured', [AccomplishProjectController::class, 'toggleFeatured'])->name('admin.accomplished-projects.toggle-featured');
         
-        // Clustering Analysis Routes
-        Route::prefix('clustering')->group(function () {
-
-            Route::get('blotter/analysis', [ClusteringAnalysisController::class, 'blotterAnalysis'])->name('clustering.blotter.analysis');
-            Route::get('document/analysis', [ClusteringAnalysisController::class, 'documentAnalysis'])->name('clustering.document.analysis');
-        });
     });
 });
 

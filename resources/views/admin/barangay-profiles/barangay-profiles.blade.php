@@ -1,5 +1,12 @@
 @extends('admin.main.layout')
 
+@php
+    $userRole = session('user_role');
+    $isAdmin = $userRole === 'admin';
+    $isSecretary = $userRole === 'secretary';
+    $canPerformTransactions = $isAdmin || $isSecretary;
+@endphp
+
 @section('title', 'Barangay Profiles')
 
 @section('content')
@@ -12,10 +19,12 @@
                 <p class="text-sm md:text-base text-gray-600">Manage barangay officials and their profiles</p>
             </div>
             <div class="hidden md:flex items-center space-x-4">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.barangay-profiles.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add New Official
                 </a>
+                @endif
             </div>
         </div>
     </div>
@@ -155,10 +164,12 @@
             <h3 class="text-lg font-medium text-gray-900 mb-2">No officials found</h3>
             <p class="text-gray-500">Get started by adding the first barangay official.</p>
             <div class="mt-6">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.barangay-profiles.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Add First Official
                 </a>
+                @endif
             </div>
         </div>
     @else
@@ -198,12 +209,14 @@
                                     Status
                                 </div>
                             </th>
+                            @if($canPerformTransactions)
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center justify-center">
                                     <i class="fas fa-cogs mr-2"></i>
                                     Actions
                                 </div>
                             </th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="userTableBody">
@@ -248,6 +261,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
+                                    @if($canPerformTransactions)
                                     <a href="{{ route('admin.barangay-profiles.edit', $user->id) }}" 
                                        class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
                                        title="Edit">
@@ -268,6 +282,7 @@
                                             title="Delete">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -328,6 +343,7 @@
 
                 <!-- Action buttons -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                    @if($canPerformTransactions)
                     <a href="{{ route('admin.barangay-profiles.edit', $user->id) }}" 
                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
                        title="Edit">
@@ -351,6 +367,7 @@
                         <i class="fas fa-trash-alt mr-1"></i>
                         Delete
                     </button>
+                    @endif
                 </div>
             </div>
             @endforeach

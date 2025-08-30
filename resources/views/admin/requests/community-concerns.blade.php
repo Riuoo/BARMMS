@@ -1,5 +1,12 @@
 @extends('admin.main.layout')
 
+@php
+    $userRole = session('user_role');
+    $isAdmin = $userRole === 'admin';
+    $isSecretary = $userRole === 'secretary';
+    $canPerformTransactions = $isAdmin || $isSecretary;
+@endphp
+
 @section('title', 'Community Concerns')
 
 @section('content')
@@ -201,7 +208,7 @@
                                     Date
                                 </div>
                             </th>
-                            @if($hasThreadActions)
+                            @if($hasThreadActions && $canPerformTransactions)
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     <div class="flex items-center justify-center">
                                         <i class="fas fa-cogs mr-2"></i>
@@ -249,7 +256,7 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $concern->created_at->format('M d, Y') }}</div>
                             </td>
-                            @if($hasThreadActions)
+                            @if($hasThreadActions && $canPerformTransactions)
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center justify-center space-x-2">
                                         @if($concern->status !== 'resolved' && $concern->status !== 'closed')

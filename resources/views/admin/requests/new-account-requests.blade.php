@@ -1,6 +1,13 @@
 @extends('admin.main.layout')
 
-@section('title', 'Account Requests')
+@php
+    $userRole = session('user_role');
+    $isAdmin = $userRole === 'admin';
+    $isSecretary = $userRole === 'secretary';
+    $canPerformTransactions = $isAdmin || $isSecretary;
+@endphp
+
+@section('title', 'New Account Requests')
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
@@ -168,7 +175,7 @@
                                         Requested
                                     </div>
                                 </th>
-                                @if($hasThreadActions)
+                                @if($hasThreadActions && $canPerformTransactions)
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <div class="flex items-center justify-center">
                                             <i class="fas fa-cogs mr-2"></i>
@@ -213,7 +220,7 @@
                                         {{ optional($request->created_at)->diffForHumans() ?? 'N/A' }}
                                     </div>
                                 </td>
-                                @if($hasThreadActions)
+                                @if($hasThreadActions && $canPerformTransactions)
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-center justify-center space-x-2">
                                             @if($request->status === 'pending')
@@ -299,14 +306,16 @@
                 <!-- Actions Section -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
                     @if($request->status === 'pending')
-                        <form method="POST" action="{{ route('admin.account-requests.approve', $request->id) }}" class="inline">
-                            @csrf
-                            @method('PUT')
-                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
-                                <i class="fas fa-check mr-1"></i>
-                                Approve Account
-                            </button>
-                        </form>
+                        @if($canPerformTransactions)
+                            <form method="POST" action="{{ route('admin.account-requests.approve', $request->id) }}" class="inline">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
+                                    <i class="fas fa-check mr-1"></i>
+                                    Approve Account
+                                </button>
+                            </form>
+                        @endif
                     @endif
                 </div>
             </div>

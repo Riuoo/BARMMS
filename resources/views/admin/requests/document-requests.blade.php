@@ -1,5 +1,12 @@
 @extends('admin.main.layout')
 
+@php
+    $userRole = session('user_role');
+    $isAdmin = $userRole === 'admin';
+    $isSecretary = $userRole === 'secretary';
+    $canPerformTransactions = $isAdmin || $isSecretary;
+@endphp
+
 @section('title', 'Document Requests')
 
 @section('content')
@@ -11,15 +18,19 @@
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Document Requests</h1>
                 <p class="text-gray-600">Manage and process document requests from residents</p>
             </div>
-            <div class="mt-4 sm:mt-0 flex space-x-2">
+            <div class="mt-4 sm:mt-0">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.document-requests.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Create New Request
                 </a>
+                @endif
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.templates.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                     <i class="fas fa-file-code mr-2"></i>
                     Manage Templates
                 </a>
+                @endif
                 <a href="{{ route('clustering.document.analysis') }}" class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
                     <i class="fas fa-chart-line mr-2"></i>
                     Analysis Dashboard
@@ -154,10 +165,12 @@
             <h3 class="text-lg font-medium text-gray-900 mb-2">No document requests found</h3>
             <p class="text-gray-500">No document requests have been submitted yet.</p>
             <div class="mt-6">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.document-requests.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Create First Request
                 </a>
+                @endif
             </div>
         </div>
     @else
@@ -201,7 +214,7 @@
                                     Requested
                                 </div>
                             </th>
-                            @if($hasThreadActions)
+                            @if($hasThreadActions && $canPerformTransactions)
                                 <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                                     <div class="flex items-center justify-center">
                                         <i class="fas fa-cogs mr-2"></i>
@@ -257,7 +270,7 @@
                             <td class="px-4 py-4">
                                 <div class="text-sm text-gray-900"><i class="fas fa-calendar mr-1"></i>{{ $request->created_at->format('M d, Y') }}</div>   
                             </td>
-                            @if($hasThreadActions)
+                            @if($hasThreadActions && $canPerformTransactions)
                                 <td class="px-3 py-4 text-center">
                                     <div class="flex flex-col space-y-1">
                                         @if($request->status === 'pending')
@@ -361,6 +374,7 @@
                     </button>
                     
                     @if($request->status === 'pending')
+                        @if($canPerformTransactions)
                         <form onsubmit="return approveAndDownload(event, '{{ $request->id }}')" class="inline">
                             @csrf
                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
@@ -368,6 +382,7 @@
                                 Approve
                             </button>
                         </form>
+                        @endif
                     @endif
                     
                     @if($request->status === 'approved')

@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\CheckAdminRole;
 use App\Http\Middleware\CheckResidentRole;
+use App\Http\Middleware\CheckAdminSecretaryAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin.role' => CheckAdminRole::class,
             'resident.role' => CheckResidentRole::class,
+            'admin.secretary' => CheckAdminSecretaryAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

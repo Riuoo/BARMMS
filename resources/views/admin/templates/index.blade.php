@@ -1,5 +1,12 @@
 @extends('admin.main.layout')
 
+@php
+    $userRole = session('user_role');
+    $isAdmin = $userRole === 'admin';
+    $isSecretary = $userRole === 'secretary';
+    $canPerformTransactions = $isAdmin || $isSecretary;
+@endphp
+
 @section('title', 'Document Templates')
 
 @section('content')
@@ -12,10 +19,12 @@
                 <p class="text-gray-600">Manage and customize document templates for residents</p>
             </div>
             <div class="mt-4 sm:mt-0">
+                @if($canPerformTransactions)
                 <a href="{{ route('admin.templates.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Create New Template
                 </a>
+                @endif
             </div>
         </div>
     </div>
@@ -240,10 +249,12 @@
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
                     <p class="text-gray-500 mb-6">Get started by creating your first template using our easy-to-use wizard.</p>
+                    @if($canPerformTransactions)
                     <a href="{{ route('admin.templates.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
                         <i class="fas fa-plus mr-2"></i>
                         Create First Template
                     </a>
+                    @endif
                 </div>
             @endforelse
         </div>
