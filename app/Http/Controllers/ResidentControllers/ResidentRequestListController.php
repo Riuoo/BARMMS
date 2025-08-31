@@ -6,16 +6,17 @@ use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\CommunityConcern;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 
 class ResidentRequestListController
 {
     public function myRequests(Request $request)
     {
-        $userId = Session::get('user_id');
+        $userId = Auth::guard('residents')->id() ?? session('user_id');
+        \Log::info('Resident ID for My Requests:', ['resident_id' => $userId]);
 
         // Auto-mark all unread approved document notifications as read when visiting this page
-        \App\Models\DocumentRequest::where('resident_id', $userId)
+        DocumentRequest::where('resident_id', $userId)
             ->where('status', 'approved')
             ->where(function ($q) {
                 $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
@@ -23,7 +24,7 @@ class ResidentRequestListController
             ->update(['resident_is_read' => true]);
 
         // Auto-mark all unread approved blotter notifications as read when visiting this page
-        \App\Models\BlotterRequest::where('resident_id', $userId)
+        BlotterRequest::where('resident_id', $userId)
             ->where('status', 'approved')
             ->where(function ($q) {
                 $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
@@ -166,12 +167,12 @@ class ResidentRequestListController
             }
         }
 
-        return view('resident.my_requests', compact(
-            'documentRequests',
-            'blotterRequests',
-            'communityConcerns',
-            'residentNotifications',
-            'paginatedRequests'
-        ));
+        return view('resident.my_requests', [
+            'documentRequests' => $allDocumentRequests,
+            'blotterRequests' => $allBlotterRequests,
+            'communityConcerns' => $allCommunityConcerns,
+            'residentNotifications' => $residentNotifications,
+            'paginatedRequests' => $paginatedRequests, // for the unified table if needed
+        ]);
     }
 } 

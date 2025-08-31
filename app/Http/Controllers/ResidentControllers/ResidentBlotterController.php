@@ -4,10 +4,8 @@ namespace App\Http\Controllers\ResidentControllers;
 
 use App\Models\BlotterRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Log;
 
-class ResidentBlotterController
+class ResidentBlotterController extends BaseResidentRequestController
 {
     public function requestBlotter()
     {
@@ -22,12 +20,17 @@ class ResidentBlotterController
             'description' => 'required|string',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240', // 10MB max per file
         ]);
-        $userId = Session::get('user_id');
+
+        $userId = $this->ensureAuthenticated();
         if (!$userId) {
-            Log::warning('Resident user ID not found in session for blotter submission.');
-            notify()->error('You must be logged in to submit a report.');
             return redirect()->route('landing');
         }
+
+        // Prevent multiple ongoing requests
+        if ($this->checkExistingRequests(BlotterRequest::class, $userId, ['pending', 'processing'], 'blotter request')) {
+            return back();
+        }
+
         $blotter = new BlotterRequest();
         $blotter->resident_id = $userId;
         $blotter->recipient_name = $request->recipient_name;
@@ -35,28 +38,14 @@ class ResidentBlotterController
         $blotter->description = $request->description;
         $blotter->status = 'pending';
         $blotter->attempts = 0;
+
         // Handle multiple file uploads
-        if ($request->hasFile('media')) {
-            $mediaFiles = [];
-            foreach ($request->file('media') as $file) {
-                $path = $file->store('blotter_media', 'public');
-                $mediaFiles[] = [
-                    'name' => $file->getClientOriginalName(),
-                    'path' => $path,
-                    'type' => $file->getMimeType(),
-                    'size' => $file->getSize(),
-                ];
-            }
-            $blotter->media = $mediaFiles;
-        }
-        try {
-            $blotter->save();
-            notify()->success('Blotter report submitted successfully.');
-            return redirect()->route('resident.my-requests');
-        } catch (\Exception $e) {
-            Log::error("Error creating blotter report: " . $e->getMessage());
-            notify()->error('Error creating blotter: ' . $e->getMessage());
-            return back();
-        }
+        $blotter->media = $this->handleMediaUploads($request, 'blotter_media');
+
+        return $this->handleRequestCreation(
+            $blotter,
+            'Blotter report submitted successfully.',
+            'resident.my-requests'
+        );
     }
 } 

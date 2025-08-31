@@ -79,4 +79,20 @@ class PublicController
         $activity = HealthCenterActivity::findOrFail($id);
         return view('public.activity', compact('activity'));
     }
+
+    /**
+     * Show the privacy policy page.
+     */
+    public function privacyPolicy()
+    {
+        return view('public.privacy-policy');
+    }
+
+    /**
+     * Show the terms of service page.
+     */
+    public function termsOfService()
+    {
+        return view('public.terms-of-service');
+    }
 } 

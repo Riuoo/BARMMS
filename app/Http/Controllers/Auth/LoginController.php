@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 use App\Models\BarangayProfile;
 use App\Models\Residents;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController
@@ -14,12 +15,9 @@ class LoginController
         return view('login.landing');
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
+        $credentials = $request->validated();
 
         // Check BarangayProfile first
         $user = BarangayProfile::where('email', $credentials['email'])->first();

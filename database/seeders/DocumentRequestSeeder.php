@@ -42,11 +42,10 @@ class DocumentRequestSeeder extends Seeder
         $templates = DocumentTemplate::all();
         if ($residents->isEmpty() || $templates->isEmpty()) return;
 
-        for ($i = 0; $i < 20; $i++) {
-            $resident = $residents->random();
+        foreach ($residents as $resident) {
             $template = $templates->random();
             $status = Arr::random($statuses);
-            $purpose = $purposes[$i % count($purposes)];
+            $purpose = Arr::random($purposes);
             $createdAt = now()->subDays(rand(1, 90))->setTime(rand(8, 18), Arr::random([0, 15, 30, 45]));
             $approvedAt = $status !== 'pending' ? $createdAt->copy()->addDays(rand(1, 3)) : null;
             $completedAt = $status === 'completed' ? $approvedAt?->copy()->addDays(rand(1, 5)) : null;

@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             MedicineTransactionSeeder::class,  // <-- Transactions after
             BlotterRequestSeeder::class,
             DocumentRequestSeeder::class,
+            CommunityConcernSeeder::class,
         ]);
     }
 }

@@ -5,10 +5,8 @@ namespace App\Http\Controllers\ResidentControllers;
 use App\Models\DocumentRequest;
 use App\Models\DocumentTemplate;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Log;
 
-class ResidentDocumentRequestController
+class ResidentDocumentRequestController extends BaseResidentRequestController
 {
     public function requestDocument()
     {
@@ -25,12 +23,17 @@ class ResidentDocumentRequestController
             'description' => 'required|string',
             'document_template_id' => 'nullable|exists:document_templates,id',
         ]);
-        $userId = Session::get('user_id');
+
+        $userId = $this->ensureAuthenticated();
         if (!$userId) {
-            Log::warning('Resident user ID not found in session for document submission.');
-            notify()->error('You must be logged in to submit a document request.');
             return redirect()->route('landing');
         }
+
+        // Prevent multiple ongoing requests
+        if ($this->checkExistingRequests(DocumentRequest::class, $userId, ['pending', 'processing'], 'document request')) {
+            return back();
+        }
+
         // Prefer explicit template id from the request; otherwise resolve by document_type
         $templateId = $validated['document_template_id'] ?? optional(
             DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($validated['document_type']))])->first()
@@ -42,14 +45,11 @@ class ResidentDocumentRequestController
         $documentRequest->document_template_id = $templateId;
         $documentRequest->description = $validated['description'];
         $documentRequest->status = 'pending';
-        try {
-            $documentRequest->save();
-            notify()->success('Document request submitted successfully.');
-            return redirect()->route('resident.my-requests');
-        } catch (\Exception $e) {
-            Log::error("Error creating document request: " . $e->getMessage());
-            notify()->error('Error creating document request: ' . $e->getMessage());
-            return back();
-        }
+
+        return $this->handleRequestCreation(
+            $documentRequest,
+            'Document request submitted successfully.',
+            'resident.my-requests'
+        );
     }
 } 

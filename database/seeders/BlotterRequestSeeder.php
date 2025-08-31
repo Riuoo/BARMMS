@@ -50,11 +50,10 @@ class BlotterRequestSeeder extends Seeder
         $residents = Residents::all();
         if ($residents->isEmpty()) return;
 
-        for ($i = 0; $i < 20; $i++) {
-            $resident = $residents->random();
+        foreach ($residents as $resident) {
             $type = Arr::random($types);
             $status = Arr::random($statuses);
-            $desc = $descriptions[$i % count($descriptions)];
+            $desc = Arr::random($descriptions);
             $recipient = Arr::random($recipients);
             $createdAt = now()->subDays(rand(1, 90))->setTime(rand(7, 20), Arr::random([0, 15, 30, 45]));
             $approvedAt = $status !== 'pending' ? $createdAt->copy()->addDays(rand(1, 5)) : null;

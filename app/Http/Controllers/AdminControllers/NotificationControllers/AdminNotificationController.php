@@ -17,11 +17,18 @@ class AdminNotificationController
     {
         $userRole = session('user_role');
         $isNurse = $userRole === 'nurse';
+        $isTreasurer = $userRole === 'treasurer';
         
         // If user is a nurse, redirect to health dashboard with a notice
         if ($isNurse) {
             notify()->info('Access limited: Nurses can only use health features.');
             return redirect()->route('admin.health-reports');
+        }
+        
+        // If user is a treasurer, redirect to dashboard with a notice
+        if ($isTreasurer) {
+            notify()->info('Access limited: Treasurers can only access project and financial features.');
+            return redirect()->route('admin.dashboard');
         }
         
         // Build query for each notification type
@@ -156,9 +163,10 @@ class AdminNotificationController
             $notificationsData = [];
             $userRole = session('user_role');
             $isNurse = $userRole === 'nurse';
+            $isTreasurer = $userRole === 'treasurer';
             
-            // Only show barangay-related notifications if user is NOT a nurse
-            if (!$isNurse) {
+            // Only show barangay-related notifications if user is NOT a nurse and NOT a treasurer
+            if (!$isNurse && !$isTreasurer) {
                 // Process Blotter Reports - show pending reports that need approval
                 BlotterRequest::where('status', 'pending')->get()->each(function ($report) use (&$notificationsData) {
                     try {
@@ -236,7 +244,7 @@ class AdminNotificationController
             $limitedNotifications = $sortedByDate->take(5);
 
             // Compute totals across models based on user role
-            if (!$isNurse) {
+            if (!$isNurse && !$isTreasurer) {
                 $unreadCounts = [
                     'blotter_reports' => BlotterRequest::where('status', 'pending')->count(),
                     'document_requests' => DocumentRequest::where('status', 'pending')->count(),

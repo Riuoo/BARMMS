@@ -51,25 +51,29 @@ Route::get('/accomplishments', [PublicController::class, 'accomplishments'])->na
 Route::get('/accomplishments/project/{id}', [PublicController::class, 'showProject'])->name('public.accomplishments.project');
 Route::get('/accomplishments/activity/{id}', [PublicController::class, 'showActivity'])->name('public.accomplishments.activity');
 
+// Privacy and Terms pages
+Route::get('/privacy-policy', [PublicController::class, 'privacyPolicy'])->name('public.privacy');
+Route::get('/terms-of-service', [PublicController::class, 'termsOfService'])->name('public.terms');
+
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 
 // Route for guest users to request an account
 Route::get('/admin/contact', [ContactAdminController::class, 'contactAdmin'])->name('admin.contact');
-Route::post('/admin/contact', [ContactAdminController::class, 'store'])->name('admin.contact.store');
+Route::post('/admin/contact', [ContactAdminController::class, 'store'])->name('admin.contact.store')->middleware(['input.sanitize', 'rate.limit:30,1']);
 
 // Forgot Password Routes
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email')->middleware(['input.sanitize', 'rate.limit:10,15']);
 // Reset Password Routes
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update')->middleware(['input.sanitize', 'rate.limit:5,15']);
 
 // Authentication route
-Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware(['input.sanitize', 'login.rate.limit']);
 
 // Registration routes (accessible via token, not directly admin)
 Route::get('/register/{token}', [RegistrationController::class, 'showRegistrationForm'])->name('register.form');
-Route::post('/register', [RegistrationController::class, 'register'])->name('register');
+Route::post('/register', [RegistrationController::class, 'register'])->name('register')->middleware(['input.sanitize', 'rate.limit:10,15']);
 
 Route::prefix('admin')->group(function () {
     // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
@@ -100,23 +104,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/residents/check-email', [ResidentController::class, 'checkEmailRequest'])->name('admin.residents.check-email');
         Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->name('admin.residents.demographics');
 
-        // Reports & Requests - View routes (all can access)
-        Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
-        Route::get('/blotter-reports/{id}/details', [BlotterReportController::class, 'getDetails'])->name('admin.blotter-reports.details');
-        
-        Route::get('/community-concerns', [CommunityConcernController::class, 'index'])->name('admin.community-concerns');
-        Route::get('/community-concerns/{id}/details', [CommunityConcernController::class, 'getDetails'])->name('admin.community-concerns.details');
-        
-        Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
-        Route::get('/document-requests/download/{id}', [DocumentRequestController::class, 'downloadRequest'])->name('document-requests.download');
-        Route::get('/document-requests/{id}/details', [DocumentRequestController::class, 'getDetails'])->name('admin.document-requests.details');
-        Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
-        
-        Route::get('/templates', [DocumentTemplateController::class, 'index'])->name('admin.templates.index');
-        Route::get('/templates/{template}/preview', [DocumentTemplateController::class, 'preview'])->name('admin.templates.preview');
-        
-        Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
-
         // Analytics - View routes (all can access)
         Route::get('/clustering', [ClusteringController::class, 'index'])->name('admin.clustering');
         Route::get('/clustering/optimal-k', [ClusteringController::class, 'getOptimalK'])->name('admin.clustering.optimal-k');
@@ -136,21 +123,40 @@ Route::prefix('admin')->group(function () {
         });
     });
 
+    // Reports & Requests - View routes (exclude treasurer)
+    Route::middleware(['admin.role:admin,secretary,captain,councilor'])->group(function () {
+        Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
+        Route::get('/blotter-reports/{id}/details', [BlotterReportController::class, 'getDetails'])->name('admin.blotter-reports.details');
+        
+        Route::get('/community-concerns', [CommunityConcernController::class, 'index'])->name('admin.community-concerns');
+        Route::get('/community-concerns/{id}/details', [CommunityConcernController::class, 'getDetails'])->name('admin.community-concerns.details');
+        
+        Route::get('/document-requests', [DocumentRequestController::class, 'documentRequest'])->name('admin.document-requests');
+        Route::get('/document-requests/download/{id}', [DocumentRequestController::class, 'downloadRequest'])->name('document-requests.download');
+        Route::get('/document-requests/{id}/details', [DocumentRequestController::class, 'getDetails'])->name('admin.document-requests.details');
+        Route::get('/document-requests/{id}/pdf', [DocumentRequestController::class, 'generatePdf'])->name('admin.document-requests.pdf');
+        
+        Route::get('/templates', [DocumentTemplateController::class, 'index'])->name('admin.templates.index');
+        Route::get('/templates/{template}/preview', [DocumentTemplateController::class, 'preview'])->name('admin.templates.preview');
+        
+        Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
+    });
+
     // Transaction routes - only admin and secretary can access
     Route::middleware(['admin.secretary'])->group(function () {
         // User Management transactions
         Route::get('/barangay-profiles/create', [BarangayProfileController::class, 'create'])->name('admin.barangay-profiles.create');
-        Route::post('/barangay-profiles', [BarangayProfileController::class, 'store'])->name('admin.barangay-profiles.store');
+        Route::post('/barangay-profiles', [BarangayProfileController::class, 'store'])->name('admin.barangay-profiles.store')->middleware(['input.sanitize', 'rate.limit:20,1']);
         Route::get('/barangay-profiles/{id}/edit', [BarangayProfileController::class, 'edit'])->name('admin.barangay-profiles.edit');
-        Route::put('/barangay-profiles/{id}', [BarangayProfileController::class, 'update'])->name('admin.barangay-profiles.update');
+        Route::put('/barangay-profiles/{id}', [BarangayProfileController::class, 'update'])->name('admin.barangay-profiles.update')->middleware(['input.sanitize', 'rate.limit:20,1']);
         Route::put('/barangay-profiles/{id}/activate', [BarangayProfileController::class, 'activate'])->name('admin.barangay-profiles.activate');
         Route::put('/barangay-profiles/{id}/deactivate', [BarangayProfileController::class, 'deactivate'])->name('admin.barangay-profiles.deactivate');
         Route::delete('/barangay-profiles/{id}', [BarangayProfileController::class, 'delete'])->name('admin.barangay-profiles.delete');
 
         Route::get('/residents/create', [ResidentController::class, 'create'])->name('admin.residents.create');
-        Route::post('/residents', [ResidentController::class, 'store'])->name('admin.residents.store');
+        Route::post('/residents', [ResidentController::class, 'store'])->name('admin.residents.store')->middleware(['input.sanitize', 'rate.limit:20,1']);
         Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('admin.residents.edit');
-        Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update');
+        Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update')->middleware(['input.sanitize', 'rate.limit:20,1']);
         Route::put('/residents/{id}/activate', [ResidentController::class, 'activate'])->name('admin.residents.activate');
         Route::put('/residents/{id}/deactivate', [ResidentController::class, 'deactivate'])->name('admin.residents.deactivate');
         Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
@@ -309,15 +315,15 @@ Route::middleware(['resident.role'])->prefix('resident')->group(function () {
 
     // Blotter Requests
     Route::get('/request-blotter', [ResidentBlotterController::class, 'requestBlotter'])->name('resident.request_blotter_report');
-    Route::post('/request-blotter', [ResidentBlotterController::class, 'storeBlotter']);
+    Route::post('/request-blotter', [ResidentBlotterController::class, 'storeBlotter'])->middleware(['input.sanitize', 'rate.limit:10,5']);
 
     // Community Concerns
     Route::get('/request-community-concern', [ResidentCommunityConcernController::class, 'requestCommunityConcern'])->name('resident.request_community_concern');
-    Route::post('/request-community-concern', [ResidentCommunityConcernController::class, 'storeCommunityConcern']);
+    Route::post('/request-community-concern', [ResidentCommunityConcernController::class, 'storeCommunityConcern'])->middleware(['input.sanitize', 'rate.limit:10,5']);
 
     // Document Requests
     Route::get('/request-document', [ResidentDocumentRequestController::class, 'requestDocument'])->name('resident.request_document_request');
-    Route::post('/request-document', [ResidentDocumentRequestController::class, 'storeDocument']);
+    Route::post('/request-document', [ResidentDocumentRequestController::class, 'storeDocument'])->middleware(['input.sanitize', 'rate.limit:10,5']);
 
     // My Requests (Listing & Filtering)
     Route::get('/my-requests', [ResidentRequestListController::class, 'myRequests'])->name('resident.my-requests');

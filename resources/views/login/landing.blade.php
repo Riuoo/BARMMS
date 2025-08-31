@@ -443,6 +443,10 @@
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center">
                 <p class="text-gray-400">&copy; 2024 Lower Malinao Barangay System. All rights reserved.</p>
+                <div class="mt-4 space-x-4">
+                    <a href="{{ route('public.privacy') }}" class="text-gray-400 hover:text-white transition duration-300 text-sm">Privacy Policy</a>
+                    <a href="{{ route('public.terms') }}" class="text-gray-400 hover:text-white transition duration-300 text-sm">Terms of Service</a>
+                </div>
             </div>
         </div>
     </footer>

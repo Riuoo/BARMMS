@@ -459,7 +459,7 @@
                     </section>
                     @endif
 
-                    @if(!$isNurse)
+                    @if(!$isNurse && !$isTreasurer)
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>
@@ -653,7 +653,7 @@
                     </section>
                     @endif
 
-                    @if(!$isNurse)
+                    @if(!$isNurse && !$isTreasurer)
                     <!-- Reports & Requests -->
                     <section class="mb-6" aria-label="Reports & Requests">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Reports & Requests</h3>

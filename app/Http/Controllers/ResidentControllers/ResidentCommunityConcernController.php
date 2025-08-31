@@ -4,10 +4,8 @@ namespace App\Http\Controllers\ResidentControllers;
 
 use App\Models\CommunityConcern;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Log;
 
-class ResidentCommunityConcernController
+class ResidentCommunityConcernController extends BaseResidentRequestController
 {
     public function requestCommunityConcern()
     {
@@ -23,12 +21,17 @@ class ResidentCommunityConcernController
             'location' => 'nullable|string|max:255',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240', // 10MB max per file
         ]);
-        $userId = Session::get('user_id');
+
+        $userId = $this->ensureAuthenticated();
         if (!$userId) {
-            Log::warning('Resident user ID not found in session for concern submission.');
-            notify()->error('You must be logged in to submit a concern.');
             return redirect()->route('landing');
         }
+
+        // Prevent multiple ongoing concerns
+        if ($this->checkExistingRequests(CommunityConcern::class, $userId, ['pending', 'in_progress', 'under_review'], 'community concern')) {
+            return back();
+        }
+
         $concern = new CommunityConcern();
         $concern->resident_id = $userId;
         $concern->title = $request->title;
@@ -36,28 +39,14 @@ class ResidentCommunityConcernController
         $concern->description = $request->description;
         $concern->location = $request->location;
         $concern->status = 'pending';
+
         // Handle multiple file uploads
-        if ($request->hasFile('media')) {
-            $mediaFiles = [];
-            foreach ($request->file('media') as $file) {
-                $path = $file->store('concern_media', 'public');
-                $mediaFiles[] = [
-                    'name' => $file->getClientOriginalName(),
-                    'path' => $path,
-                    'type' => $file->getMimeType(),
-                    'size' => $file->getSize(),
-                ];
-            }
-            $concern->media = $mediaFiles;
-        }
-        try {
-            $concern->save();
-            notify()->success('Community concern submitted successfully.');
-            return redirect()->route('resident.my-requests');
-        } catch (\Exception $e) {
-            Log::error("Error creating community concern: " . $e->getMessage());
-            notify()->error('Error creating concern: ' . $e->getMessage());
-            return back();
-        }
+        $concern->media = $this->handleMediaUploads($request, 'concern_media');
+
+        return $this->handleRequestCreation(
+            $concern,
+            'Community concern submitted successfully.',
+            'resident.my-requests'
+        );
     }
 } 
