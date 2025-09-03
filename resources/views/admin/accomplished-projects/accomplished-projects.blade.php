@@ -4,6 +4,88 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
+    <!-- Header Skeleton -->
+    <div id="accomplishedHeaderSkeleton" class="mb-3 animate-pulse">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-96 bg-gray-100 rounded"></div>
+            </div>
+            <div class="h-9 w-36 bg-gray-200 rounded mt-4 sm:mt-0"></div>
+        </div>
+    </div>
+
+    <!-- Filters Skeleton -->
+    <div id="accomplishedFiltersSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-3 animate-pulse">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="sm:w-48">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="sm:w-48">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="flex space-x-2">
+                <div class="h-10 w-24 bg-gray-200 rounded"></div>
+                <div class="h-10 w-24 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Skeleton -->
+    <div id="accomplishedStatsSkeleton" class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3 animate-pulse">
+        @for ($i = 0; $i < 4; $i++)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                    </div>
+                    <div class="ml-3">
+                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-6 w-16 bg-gray-300 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        @endfor
+    </div>
+
+    <!-- Grid Skeleton -->
+    <div id="accomplishedGridSkeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 animate-pulse">
+        @for ($i = 0; $i < 6; $i++)
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="w-full h-48 bg-gray-200"></div>
+                <div class="p-5">
+                    <div class="h-5 w-3/4 bg-gray-200 rounded mb-3"></div>
+                    <div class="h-4 w-full bg-gray-100 rounded mb-2"></div>
+                    <div class="h-4 w-5/6 bg-gray-100 rounded mb-4"></div>
+                    <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                    </div>
+                    <div class="h-2 w-full bg-gray-200 rounded mb-4"></div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="h-9 bg-gray-200 rounded"></div>
+                        <div class="h-9 bg-gray-200 rounded"></div>
+                        <div class="h-9 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        @endfor
+    </div>
+
+    <!-- Pagination Skeleton -->
+    <div id="accomplishedPaginationSkeleton" class="mt-6 animate-pulse">
+        <div class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+            <div class="h-8 w-24 bg-gray-200 rounded"></div>
+            <div class="h-8 w-32 bg-gray-200 rounded"></div>
+            <div class="h-8 w-24 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="accomplishedContent" style="display: none;">
     <!-- Header Section -->
     <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -446,4 +528,26 @@ document.addEventListener('click', function (event) {
 }
 </style>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const headerSkeleton = document.getElementById('accomplishedHeaderSkeleton');
+        const filtersSkeleton = document.getElementById('accomplishedFiltersSkeleton');
+        const statsSkeleton = document.getElementById('accomplishedStatsSkeleton');
+        const gridSkeleton = document.getElementById('accomplishedGridSkeleton');
+        const paginationSkeleton = document.getElementById('accomplishedPaginationSkeleton');
+        const content = document.getElementById('accomplishedContent');
+
+        if (headerSkeleton) headerSkeleton.style.display = 'none';
+        if (filtersSkeleton) filtersSkeleton.style.display = 'none';
+        if (statsSkeleton) statsSkeleton.style.display = 'none';
+        if (gridSkeleton) gridSkeleton.style.display = 'none';
+        if (paginationSkeleton) paginationSkeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 

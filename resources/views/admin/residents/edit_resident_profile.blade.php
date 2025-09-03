@@ -3,8 +3,127 @@
 @section('title', 'Edit Resident Profile')
 
 @section('content')
-<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Section -->
+<!-- Header Skeleton -->
+<div id="editResidentHeaderSkeleton" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 animate-pulse">
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <div class="h-8 w-56 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-80 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="space-y-6">
+            <!-- Basic Information Section Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Personal Information Section Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-44 bg-gray-200 rounded mb-4"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="h-4 w-28 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="h-4 w-28 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-10 w-full bg-gray-200 rounded"></div>
+                </div>
+            </div>
+            
+            <!-- Demographic Information Section Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-52 bg-gray-200 rounded mb-4"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="h-4 w-20 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div>
+                        <div class="h-4 w-36 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div>
+                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="h-4 w-36 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-10 w-full bg-gray-200 rounded"></div>
+                </div>
+            </div>
+            
+            <!-- Emergency Contact Section Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-44 bg-gray-200 rounded mb-4"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-36 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Actions Skeleton -->
+            <div class="flex justify-end space-x-3">
+                <div class="h-10 w-24 bg-gray-200 rounded"></div>
+                <div class="h-10 w-32 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Real Content (hidden initially) -->
+<div id="editResidentContent" style="display: none;">
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header Section -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -99,55 +218,16 @@
                                readonly>
                         <p class="mt-1 text-sm text-gray-500">Resident's role is fixed</p>
                     </div>
-
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-                            Address <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" 
-                               id="address" 
-                               name="address" 
-                               value="{{ old('address', $resident->address) }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
-                               placeholder="Full Address (include Purok if applicable)"
-                               required>
-                    </div>
                 </div>
             </div>
 
-            <!-- Personal Information Section -->
+                <!-- Personal Information -->
             <div class="border-b border-gray-200 pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">
-                    <i class="fas fa-id-card mr-2 text-green-600"></i>
+                        <i class="fas fa-user-circle mr-2 text-green-600"></i>
                     Personal Information
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">
-                            Gender <span class="text-red-500">*</span>
-                        </label>
-                        <select id="gender" name="gender" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                            <option value="">Select Gender</option>
-                            <option value="Male" {{ old('gender', $resident->gender) == 'Male' ? 'selected' : '' }}>Male</option>
-                            <option value="Female" {{ old('gender', $resident->gender) == 'Female' ? 'selected' : '' }}>Female</option>
-                            <option value="Other" {{ old('gender', $resident->gender) == 'Other' ? 'selected' : '' }}>Other</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-2">
-                            Contact Number <span class="text-red-500">*</span>
-                        </label>
-                        <input type="number" 
-                               id="contact_number" 
-                               name="contact_number" 
-                               value="{{ old('contact_number', $resident->contact_number) }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
-                               placeholder="e.g., 9191234567"
-                               min="0" pattern="[0-9]*" inputmode="numeric"
-                               required>
-                    </div>
-
                     <div>
                         <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-2">
                             Birth Date <span class="text-red-500">*</span>
@@ -156,15 +236,17 @@
                                id="birth_date" 
                                name="birth_date" 
                                value="{{ old('birth_date', $resident->birth_date ? $resident->birth_date->format('Y-m-d') : '') }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                required>
                     </div>
-
                     <div>
                         <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-2">
                             Marital Status <span class="text-red-500">*</span>
                         </label>
-                        <select id="marital_status" name="marital_status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <select id="marital_status" 
+                                    name="marital_status" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                    required>
                             <option value="">Select Marital Status</option>
                             <option value="Single" {{ old('marital_status', $resident->marital_status) == 'Single' ? 'selected' : '' }}>Single</option>
                             <option value="Married" {{ old('marital_status', $resident->marital_status) == 'Married' ? 'selected' : '' }}>Married</option>
@@ -173,22 +255,19 @@
                             <option value="Separated" {{ old('marital_status', $resident->marital_status) == 'Separated' ? 'selected' : '' }}>Separated</option>
                         </select>
                     </div>
-
-                    <div>
-                        <label for="occupation" class="block text-sm font-medium text-gray-700 mb-2">
-                            Occupation
-                        </label>
+                    </div>
+                    <div class="mt-4">
+                        <label for="occupation" class="block text-sm font-medium text-gray-700 mb-2">Occupation</label>
                         <input type="text" 
                                id="occupation" 
                                name="occupation" 
                                value="{{ old('occupation', $resident->occupation) }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                placeholder="e.g., Teacher, Business Owner, Student">
-                    </div>
                 </div>
             </div>
 
-            <!-- Demographic Information Section -->
+                <!-- Demographic Information -->
             <div class="border-b border-gray-200 pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">
                     <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
@@ -205,10 +284,9 @@
                                value="{{ old('age', $resident->age) }}" 
                                min="1" 
                                max="120" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                required>
                     </div>
-
                     <div>
                         <label for="family_size" class="block text-sm font-medium text-gray-700 mb-2">
                             Family Size <span class="text-red-500">*</span>
@@ -219,116 +297,129 @@
                                value="{{ old('family_size', $resident->family_size) }}" 
                                min="1" 
                                max="20" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                required>
+                        </div>
                     </div>
-
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     <div>
                         <label for="education_level" class="block text-sm font-medium text-gray-700 mb-2">
                             Education Level <span class="text-red-500">*</span>
                         </label>
-                        <select id="education_level" name="education_level" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <select id="education_level" 
+                                    name="education_level" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                    required>
                             <option value="">Select Education Level</option>
-                            <option value="No Education" {{ old('education_level', $resident->education_level) == 'No Education' ? 'selected' : '' }}>No Education</option>
                             <option value="Elementary" {{ old('education_level', $resident->education_level) == 'Elementary' ? 'selected' : '' }}>Elementary</option>
                             <option value="High School" {{ old('education_level', $resident->education_level) == 'High School' ? 'selected' : '' }}>High School</option>
-                            <option value="Vocational" {{ old('education_level', $resident->education_level) == 'Vocational' ? 'selected' : '' }}>Vocational</option>
                             <option value="College" {{ old('education_level', $resident->education_level) == 'College' ? 'selected' : '' }}>College</option>
                             <option value="Post Graduate" {{ old('education_level', $resident->education_level) == 'Post Graduate' ? 'selected' : '' }}>Post Graduate</option>
+                                <option value="No Formal Education" {{ old('education_level', $resident->education_level) == 'No Formal Education' ? 'selected' : '' }}>No Formal Education</option>
                         </select>
                     </div>
-
                     <div>
                         <label for="income_level" class="block text-sm font-medium text-gray-700 mb-2">
                             Income Level <span class="text-red-500">*</span>
                         </label>
-                        <select id="income_level" name="income_level" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <select id="income_level" 
+                                    name="income_level" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                    required>
                             <option value="">Select Income Level</option>
-                            <option value="Low" {{ old('income_level', $resident->income_level) == 'Low' ? 'selected' : '' }}>Low</option>
-                            <option value="Lower Middle" {{ old('income_level', $resident->income_level) == 'Lower Middle' ? 'selected' : '' }}>Lower Middle</option>
-                            <option value="Middle" {{ old('income_level', $resident->income_level) == 'Middle' ? 'selected' : '' }}>Middle</option>
-                            <option value="Upper Middle" {{ old('income_level', $resident->income_level) == 'Upper Middle' ? 'selected' : '' }}>Upper Middle</option>
-                            <option value="High" {{ old('income_level', $resident->income_level) == 'High' ? 'selected' : '' }}>High</option>
+                                <option value="Below Poverty Line" {{ old('income_level', $resident->income_level) == 'Below Poverty Line' ? 'selected' : '' }}>Below Poverty Line</option>
+                                <option value="Low Income" {{ old('income_level', $resident->income_level) == 'Low Income' ? 'selected' : '' }}>Low Income</option>
+                                <option value="Middle Income" {{ old('income_level', $resident->income_level) == 'Middle Income' ? 'selected' : '' }}>Middle Income</option>
+                                <option value="Upper Middle Income" {{ old('income_level', $resident->income_level) == 'Upper Middle Income' ? 'selected' : '' }}>Upper Middle Income</option>
+                                <option value="High Income" {{ old('income_level', $resident->income_level) == 'High Income' ? 'selected' : '' }}>High Income</option>
                         </select>
+                        </div>
                     </div>
-
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     <div>
                         <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-2">
                             Employment Status <span class="text-red-500">*</span>
                         </label>
-                        <select id="employment_status" name="employment_status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <select id="employment_status" 
+                                    name="employment_status" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                    required>
                             <option value="">Select Employment Status</option>
+                                <option value="Employed" {{ old('employment_status', $resident->employment_status) == 'Employed' ? 'selected' : '' }}>Employed</option>
                             <option value="Unemployed" {{ old('employment_status', $resident->employment_status) == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
-                            <option value="Part-time" {{ old('employment_status', $resident->employment_status) == 'Part-time' ? 'selected' : '' }}>Part-time</option>
-                            <option value="Self-employed" {{ old('employment_status', $resident->employment_status) == 'Self-employed' ? 'selected' : '' }}>Self-employed</option>
-                            <option value="Full-time" {{ old('employment_status', $resident->employment_status) == 'Full-time' ? 'selected' : '' }}>Full-time</option>
+                                <option value="Self-Employed" {{ old('employment_status', $resident->employment_status) == 'Self-Employed' ? 'selected' : '' }}>Self-Employed</option>
+                                <option value="Student" {{ old('employment_status', $resident->employment_status) == 'Student' ? 'selected' : '' }}>Student</option>
+                                <option value="Retired" {{ old('employment_status', $resident->employment_status) == 'Retired' ? 'selected' : '' }}>Retired</option>
                         </select>
                     </div>
-
                     <div>
                         <label for="health_status" class="block text-sm font-medium text-gray-700 mb-2">
                             Health Status <span class="text-red-500">*</span>
                         </label>
-                        <select id="health_status" name="health_status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <select id="health_status" 
+                                    name="health_status" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                    required>
                             <option value="">Select Health Status</option>
-                            <option value="Critical" {{ old('health_status', $resident->health_status) == 'Critical' ? 'selected' : '' }}>Critical</option>
-                            <option value="Poor" {{ old('health_status', $resident->health_status) == 'Poor' ? 'selected' : '' }}>Poor</option>
-                            <option value="Fair" {{ old('health_status', $resident->health_status) == 'Fair' ? 'selected' : '' }}>Fair</option>
-                            <option value="Good" {{ old('health_status', $resident->health_status) == 'Good' ? 'selected' : '' }}>Good</option>
-                            <option value="Excellent" {{ old('health_status', $resident->health_status) == 'Excellent' ? 'selected' : '' }}>Excellent</option>
+                                <option value="Healthy" {{ old('health_status', $resident->health_status) == 'Healthy' ? 'selected' : '' }}>Healthy</option>
+                                <option value="With Minor Health Issues" {{ old('health_status', $resident->health_status) == 'With Minor Health Issues' ? 'selected' : '' }}>With Minor Health Issues</option>
+                                <option value="With Chronic Conditions" {{ old('health_status', $resident->health_status) == 'With Chronic Conditions' ? 'selected' : '' }}>With Chronic Conditions</option>
+                                <option value="Disabled" {{ old('health_status', $resident->health_status) == 'Disabled' ? 'selected' : '' }}>Disabled</option>
                         </select>
                     </div>
                 </div>
-            </div>
-
-            <!-- Emergency Contact Section -->
-            <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
-                    <i class="fas fa-phone-alt mr-2 text-red-600"></i>
-                    Emergency Contact
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
+                    <div class="mt-4">
                         <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Emergency Contact Name
+                            Emergency Contact Name <span class="text-red-500">*</span>
                         </label>
                         <input type="text" 
                                id="emergency_contact_name" 
                                name="emergency_contact_name" 
                                value="{{ old('emergency_contact_name', $resident->emergency_contact_name) }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
-                               placeholder="Full Name">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                               required>
+                    </div>
                     </div>
 
+                <!-- Emergency Contact Information -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        <i class="fas fa-phone-alt mr-2 text-red-600"></i>
+                        Emergency Contact Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-700 mb-2">
+                                Relationship <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   id="emergency_contact_relationship" 
+                                   name="emergency_contact_relationship" 
+                                   value="{{ old('emergency_contact_relationship', $resident->emergency_contact_relationship) }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                   placeholder="e.g., Spouse, Parent, Sibling" 
+                                   required>
+                        </div>
                     <div>
                         <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">
-                            Emergency Contact Number
+                                Contact Number <span class="text-red-500">*</span>
                         </label>
                         <input type="number" 
                                id="emergency_contact_number" 
                                name="emergency_contact_number" 
                                value="{{ old('emergency_contact_number', $resident->emergency_contact_number) }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                placeholder="e.g., 9191234567"
-                               min="0" pattern="[0-9]*" inputmode="numeric">
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-700 mb-2">
-                            Relationship to Emergency Contact
-                        </label>
-                        <input type="text" 
-                               id="emergency_contact_relationship" 
-                               name="emergency_contact_relationship" 
-                               value="{{ old('emergency_contact_relationship', $resident->emergency_contact_relationship) }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
-                               placeholder="e.g., Spouse, Parent, Sibling">
+                                   min="0" 
+                                   pattern="[0-9]*" 
+                                   inputmode="numeric" 
+                                   required>
                     </div>
                 </div>
             </div>
 
             <!-- Form Actions -->
-            <div class="flex justify-between pt-6">
+                <div class="flex justify-end space-x-3">
                     <a href="{{ route('admin.residents') }}" 
                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                         <i class="fas fa-times mr-2"></i>
@@ -341,22 +432,21 @@
                     </button>
             </div>
         </form>
+        </div>
     </div>
 </div>
 
 <script>
-    // Auto-calculate age from birth date
-    document.getElementById('birth_date').addEventListener('change', function() {
-        const birthDate = new Date(this.value);
-        const today = new Date();
-        const age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        
-        document.getElementById('age').value = age;
+    // Skeleton loading control for edit resident profile page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add 1 second delay to show skeleton effect
+        setTimeout(() => {
+            const headerSkeleton = document.getElementById('editResidentHeaderSkeleton');
+            const content = document.getElementById('editResidentContent');
+            
+            if (headerSkeleton) headerSkeleton.style.display = 'none';
+            if (content) content.style.display = 'block';
+        }, 1000); // 1 second delay to show skeleton effect
     });
 </script>
 @endsection 

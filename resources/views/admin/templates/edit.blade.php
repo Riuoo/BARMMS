@@ -4,8 +4,114 @@
 
 @section('content')
 <div class="h-screen flex flex-col bg-gray-100">
-    <!-- Word-Style Header -->
-    <div class="bg-white border-b border-gray-200 shadow-sm">
+    <!-- Word-Style Header Skeleton -->
+    <div id="editTemplateHeaderSkeleton" class="bg-white border-b border-gray-200 shadow-sm animate-pulse">
+        <!-- Title Bar Skeleton -->
+        <div class="flex items-center justify-between px-4 py-2 bg-blue-600 text-white">
+            <div class="flex items-center space-x-3">
+                <div class="w-6 h-6 bg-gray-200 rounded"></div>
+                <div class="h-5 w-64 bg-gray-200 rounded"></div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="h-8 w-24 bg-gray-200 rounded"></div>
+                <div class="h-8 w-20 bg-gray-200 rounded"></div>
+                <div class="h-8 w-16 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+
+        <!-- Ribbon Toolbar Skeleton -->
+        <div class="bg-white border-b border-gray-200">
+            <!-- Ribbon Tabs Skeleton -->
+            <div class="flex border-b border-gray-200">
+                <div class="px-4 py-2">
+                    <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                </div>
+                <div class="px-4 py-2">
+                    <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                </div>
+                <div class="px-4 py-2">
+                    <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                </div>
+                <div class="px-4 py-2">
+                    <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+
+            <!-- Ribbon Content Skeleton -->
+            <div class="p-4">
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="space-y-2">
+                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                        <div class="flex space-x-1">
+                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                        <div class="grid grid-cols-2 gap-1">
+                            <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                            <div class="h-6 w-12 bg-gray-200 rounded"></div>
+                        </div>
+                        <div class="flex space-x-1">
+                            <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                            <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                            <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                        <div class="flex space-x-1">
+                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                        <div class="flex space-x-1">
+                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editor Skeleton -->
+    <div id="editTemplateEditorSkeleton" class="flex-1 flex animate-pulse">
+        <!-- Sidebar Skeleton -->
+        <div class="w-64 bg-white border-r border-gray-200 p-4">
+            <div class="space-y-4">
+                <div class="h-6 w-32 bg-gray-200 rounded"></div>
+                <div class="space-y-2">
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                </div>
+                <div class="h-6 w-28 bg-gray-200 rounded"></div>
+                <div class="space-y-2">
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-36 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor Skeleton -->
+        <div class="flex-1 bg-white">
+            <div class="h-full p-6">
+                <div class="h-full w-full bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="editTemplateContent" style="display: none;">
+        <!-- Word-Style Header -->
+        <div class="bg-white border-b border-gray-200 shadow-sm">
         <!-- Title Bar -->
         <div class="flex items-center justify-between px-4 py-2 bg-blue-600 text-white">
             <div class="flex items-center space-x-3">
@@ -378,6 +484,7 @@
             <!-- Preview content will be loaded here -->
         </div>
     </div>
+    </div>
 </div>
 
 @endsection 
@@ -431,6 +538,19 @@
 
 @push('scripts')
 <script>
+// Skeleton loading control
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const headerSkeleton = document.getElementById('editTemplateHeaderSkeleton');
+        const editorSkeleton = document.getElementById('editTemplateEditorSkeleton');
+        const content = document.getElementById('editTemplateContent');
+        
+        if (headerSkeleton) headerSkeleton.style.display = 'none';
+        if (editorSkeleton) editorSkeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const editor = document.getElementById('documentEditor');
     const saveBtn = document.getElementById('saveBtn');

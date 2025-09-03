@@ -4,8 +4,117 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Section -->
-    <div class="mb-8">
+    <!-- Header Skeleton -->
+    <div id="createBlotterHeaderSkeleton" class="mb-8 animate-pulse">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-96 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Skeleton -->
+    <div id="createBlotterFormSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
+        <div class="space-y-6">
+            <!-- Complainant Information Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Respondent Information Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incident Details Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-32 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supporting Documents Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-32 w-full bg-gray-200 rounded border-2 border-dashed border-gray-300"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summon Information Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions Skeleton -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
+                <div class="h-4 w-64 bg-gray-200 rounded"></div>
+                <div class="flex space-x-3">
+                    <div class="h-10 w-24 bg-gray-200 rounded"></div>
+                    <div class="h-10 w-32 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Card Skeleton -->
+    <div id="createBlotterInfoSkeleton" class="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4 animate-pulse">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <div class="w-5 h-5 bg-gray-200 rounded-full"></div>
+            </div>
+            <div class="ml-3">
+                <div class="h-4 w-48 bg-gray-200 rounded mb-2"></div>
+                <div class="space-y-2">
+                    <div class="h-3 w-64 bg-gray-200 rounded"></div>
+                    <div class="h-3 w-72 bg-gray-200 rounded"></div>
+                    <div class="h-3 w-68 bg-gray-200 rounded"></div>
+                    <div class="h-3 w-70 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="createBlotterContent" style="display: none;">
+        <!-- Header Section -->
+        <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Blotter Report</h1>
@@ -236,6 +345,7 @@
                         <li>The respondent will be summoned for a hearing on the specified date</li>
                         <li>Reports can be managed and updated from the blotter reports list</li>
                     </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -243,6 +353,21 @@
 </div>
 
 <script>
+    // Skeleton loading control
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            const headerSkeleton = document.getElementById('createBlotterHeaderSkeleton');
+            const formSkeleton = document.getElementById('createBlotterFormSkeleton');
+            const infoSkeleton = document.getElementById('createBlotterInfoSkeleton');
+            const content = document.getElementById('createBlotterContent');
+            
+            if (headerSkeleton) headerSkeleton.style.display = 'none';
+            if (formSkeleton) formSkeleton.style.display = 'none';
+            if (infoSkeleton) infoSkeleton.style.display = 'none';
+            if (content) content.style.display = 'block';
+        }, 1000);
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
         const fileInput = document.getElementById('media');
         const uploadArea = document.getElementById('uploadArea');

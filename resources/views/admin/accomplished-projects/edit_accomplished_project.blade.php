@@ -4,6 +4,68 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+    <!-- Header Skeleton -->
+    <div id="apEditHeaderSkeleton" class="animate-pulse mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="h-8 w-72 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-80 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Skeleton -->
+    <div id="apEditFormSkeleton" class="animate-pulse space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
+                <div class="h-32 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-28 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-28 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-32 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="h-4 w-44 bg-gray-200 rounded mb-3"></div>
+                <div class="h-28 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="h-4 w-40 bg-gray-200 rounded mb-3"></div>
+                <div class="h-24 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="h-4 w-24 bg-gray-200 rounded mb-3"></div>
+                <div class="h-6 w-56 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+            <div class="h-10 w-28 bg-gray-200 rounded"></div>
+            <div class="h-10 w-40 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="apEditContent" style="display: none;">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -243,3 +305,18 @@ function removeSelectedImage() {
 }
 </script>
 @endsection 
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const headerSkeleton = document.getElementById('apEditHeaderSkeleton');
+        const formSkeleton = document.getElementById('apEditFormSkeleton');
+        const content = document.getElementById('apEditContent');
+        if (headerSkeleton) headerSkeleton.style.display = 'none';
+        if (formSkeleton) formSkeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush 

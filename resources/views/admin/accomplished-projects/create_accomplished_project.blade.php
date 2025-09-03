@@ -4,6 +4,68 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+    <!-- Header Skeleton -->
+    <div id="apCreateHeaderSkeleton" class="animate-pulse mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="h-8 w-72 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-96 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Skeleton -->
+    <div id="apCreateFormSkeleton" class="animate-pulse space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+                <div class="h-4 w-40 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="h-4 w-40 bg-gray-200 rounded mb-3"></div>
+                <div class="h-40 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-28 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-28 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-32 bg-gray-200 rounded mb-3"></div>
+                <div class="h-11 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="h-4 w-44 bg-gray-200 rounded mb-3"></div>
+                <div class="h-28 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="h-4 w-40 bg-gray-200 rounded mb-3"></div>
+                <div class="h-24 w-full bg-gray-100 rounded"></div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="h-4 w-24 bg-gray-200 rounded mb-3"></div>
+                <div class="h-6 w-56 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+        <div class="flex justify-between mt-8">
+            <div class="h-10 w-28 bg-gray-200 rounded"></div>
+            <div class="h-10 w-40 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="apCreateContent" style="display: none;">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -124,7 +186,7 @@
 
             <!-- Completion Date -->
             <div>
-                <label for="completion_date" class="block text-sm font-medium text-gray-700 mb-2">Completion Date <span class="text-red-500">*</span></label>
+                <label for="completion_date" class="block text.sm font-medium text-gray-700 mb-2">Completion Date <span class="text-red-500">*</span></label>
                 <input type="date" id="completion_date" name="completion_date" value="{{ old('completion_date') }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('completion_date') border-red-500 @enderror" required />
                 @error('completion_date')
@@ -187,49 +249,33 @@
         </div>
 
         <!-- Form Actions -->
-            <div class="flex justify-between mt-8">
-                <a href="{{ route('admin.accomplished-projects') }}" 
-                   class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
-                    <i class="fas fa-times mr-2"></i>
-                    Cancel
-                </a>
-                <button type="submit" 
-                        class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
-                    <i class="fas fa-save mr-2"></i>
-                    Create Project
-                </button>
-            </div>
+        <div class="flex justify-between mt-8">
+            <a href="{{ route('admin.accomplished-projects') }}" 
+               class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                <i class="fas fa-times mr-2"></i>
+                Cancel
+            </a>
+            <button type="submit" 
+                    class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                <i class="fas fa-save mr-2"></i>
+                Create Project
+            </button>
+        </div>
     </form>
 </div>
 
+@push('scripts')
 <script>
-function previewImage(input) {
-    const file = input.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Show preview
-            const previewImg = document.getElementById('previewImg');
-            const imagePreview = document.getElementById('imagePreview');
-            
-            if (previewImg && imagePreview) {
-                previewImg.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-            }
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function removeSelectedImage() {
-    // Clear the file input
-    document.getElementById('image').value = '';
-    
-    // Hide the preview
-    const imagePreview = document.getElementById('imagePreview');
-    if (imagePreview) {
-        imagePreview.classList.add('hidden');
-    }
-}
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const headerSkeleton = document.getElementById('apCreateHeaderSkeleton');
+        const formSkeleton = document.getElementById('apCreateFormSkeleton');
+        const content = document.getElementById('apCreateContent');
+        if (headerSkeleton) headerSkeleton.style.display = 'none';
+        if (formSkeleton) formSkeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
 </script>
+@endpush
 @endsection 

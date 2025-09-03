@@ -13,613 +13,708 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Section -->
-    <div class="mb-3">
+    <!-- Header Skeleton -->
+    <div id="blotterHeaderSkeleton" class="mb-3 animate-pulse">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Blotter Reports</h1>
-                <p class="text-gray-600">Manage and review incident reports from residents</p>
+                <div class="h-10 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-96 bg-gray-100 rounded"></div>
             </div>
             <div class="mt-4 sm:mt-0 flex space-x-2">
-                @if($canPerformTransactions)
-                <a href="{{ route('admin.blotter-reports.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Create New Report
-                </a>
-                @endif
-                <a href="{{ route('clustering.blotter.analysis') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                    <i class="fas fa-chart-line mr-2"></i>
-                    Analysis Dashboard
-                </a>
+                <div class="h-10 w-44 bg-gray-200 rounded"></div>
+                <div class="h-10 w-56 bg-gray-200 rounded"></div>
             </div>
         </div>
     </div>
-
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-check-circle text-green-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-green-800">{{ session('success') }}</p>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-800">{{ session('error') }}</p>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- Filters and Search -->
-    <form method="GET" action="{{ route('admin.blotter-reports') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <!-- Search Input -->
-            <div class="flex-1">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
+    <!-- Stats Skeleton -->
+    <div id="blotterStatsSkeleton" class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3 animate-pulse">
+        @for ($i = 0; $i < 4; $i++)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
                     </div>
-                    <input type="text" name="search" id="blotterSearchInput" placeholder="Search reports..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
-                </div>
-            </div>
-            <!-- Status Filter -->
-            <div class="sm:w-48">
-                <select name="status" id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                    <option value="">All Status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                </select>
-            </div>
-            <div class="flex space-x-2">
-                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    <i class="fas fa-filter mr-2"></i>Filter
-                </button>
-                <a href="{{ route('admin.blotter-reports') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    <i class="fas fa-undo mr-2"></i>Reset
-                </a>
-            </div>
-        </div>
-    </form>
-
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-file-alt text-red-600 text-sm"></i>
+                    <div class="ml-3">
+                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-6 w-16 bg-gray-300 rounded"></div>
                     </div>
                 </div>
-                <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Reports</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="total-count">{{ $totalReports }}</p>
-                </div>
             </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-clock text-yellow-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="pending-count">{{ $pendingCount }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check text-blue-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Approved</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="approved-count">{{ $approvedCount }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Completed</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900" id="completed-count">{{ $completedCount }}</p>
-                </div>
-            </div>
-        </div>
+        @endfor
     </div>
-
-    <!-- Reports List -->
-    @if($blotterRequests->isEmpty())
-        <div class="text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-file-alt text-gray-400 text-2xl"></i>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No blotter reports found</h3>
-            <p class="text-gray-500">No incident reports have been submitted yet.</p>
-            <div class="mt-6">
-                <a href="{{ route('admin.blotter-reports.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Create First Report
-                </a>
-            </div>
-        </div>
-    @else
-        @php
-            $hasThreadActions = collect($blotterRequests->items())
-                ->contains(function ($r) { return in_array($r->status, ['pending','approved']); });
-        @endphp
-        <!-- Desktop Table (hidden on mobile) -->
-        <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+    <!-- Table Skeleton (Desktop) -->
+    <div id="blotterTableSkeleton" class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse mb-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        @for ($i = 0; $i < 8; $i++)
+                            <th class="px-4 py-3"><div class="h-4 w-20 bg-gray-200 rounded"></div></th>
+                        @endfor
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @for ($i = 0; $i < 6; $i++)
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-user mr-2"></i>
-                                    Complainant
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-user-tag mr-2"></i>
-                                    Recipient
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-tag mr-2"></i>
-                                    Type
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-align-left mr-2"></i>
-                                    Description
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-image mr-2"></i>
-                                    Media
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    Status
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-calendar mr-2"></i>
-                                    Created
-                                </div>
-                            </th>
-                            @if($hasThreadActions && $canPerformTransactions)
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                                    <div class="flex items-center justify-center">
-                                        <i class="fas fa-cogs mr-2"></i>
-                                        Actions
+                            @for ($j = 0; $j < 8; $j++)
+                                <td class="px-4 py-4"><div class="h-4 w-24 bg-gray-100 rounded"></div></td>
+                            @endfor
+                        </tr>
+                    @endfor
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Mobile Cards Skeleton -->
+    <div id="blotterMobileSkeleton" class="block md:hidden space-y-3 animate-pulse mb-6">
+        @for ($i = 0; $i < 4; $i++)
+            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center mb-3">
+                    <div class="w-12 h-12 bg-gray-200 rounded-full mr-3"></div>
+                    <div class="flex-1">
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-4 w-24 bg-gray-100 rounded"></div>
+                    </div>
+                </div>
+                <div class="h-4 w-40 bg-gray-100 rounded mb-2"></div>
+                <div class="h-4 w-24 bg-gray-200 rounded"></div>
+            </div>
+        @endfor
+    </div>
+    <!-- Pagination Skeleton -->
+    <div id="blotterPaginationSkeleton" class="mt-6 animate-pulse">
+        <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+            <div class="-mt-px flex w-0 flex-1">
+                <div class="h-4 w-20 bg-gray-200 rounded"></div>
+            </div>
+            <div class="hidden md:-mt-px md:flex space-x-2">
+                @for ($i = 0; $i < 5; $i++)
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                @endfor
+            </div>
+            <div class="-mt-px flex w-0 flex-1 justify-end">
+                <div class="h-4 w-16 bg-gray-200 rounded"></div>
+            </div>
+        </nav>
+        <div class="mt-4 flex justify-between sm:hidden">
+            <div class="h-8 w-20 bg-gray-200 rounded"></div>
+            <div class="h-8 w-32 bg-gray-200 rounded"></div>
+            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+        </div>
+        <div class="mt-4 text-center">
+            <div class="h-4 w-48 bg-gray-200 rounded mx-auto"></div>
+        </div>
+    </div>
+    <!-- Real Content (hidden initially) -->
+    <div id="blotterHeaderContent" style="display: none;">
+        <!-- Header Section -->
+        <div class="mb-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Blotter Reports</h1>
+                    <p class="text-gray-600">Manage and review incident reports from residents</p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex space-x-2">
+                    @if($canPerformTransactions)
+                    <a href="{{ route('admin.blotter-reports.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create New Report
+                    </a>
+                    @endif
+                    <a href="{{ route('clustering.blotter.analysis') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Analysis Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-800">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Filters and Search -->
+        <form method="GET" action="{{ route('admin.blotter-reports') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <!-- Search Input -->
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" name="search" id="blotterSearchInput" placeholder="Search reports..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+                    </div>
+                </div>
+                <!-- Status Filter -->
+                <div class="sm:w-48">
+                    <select name="status" id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                        <option value="">All Status</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <i class="fas fa-filter mr-2"></i>Filter
+                    </button>
+                    <a href="{{ route('admin.blotter-reports') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <i class="fas fa-undo mr-2"></i>Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-alt text-red-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs lg:text-sm font-medium text-gray-500">Total Reports</p>
+                        <p class="text-lg lg:text-2xl font-bold text-gray-900" id="total-count">{{ $totalReports }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-clock text-yellow-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs lg:text-sm font-medium text-gray-500">Pending</p>
+                        <p class="text-lg lg:text-2xl font-bold text-gray-900" id="pending-count">{{ $pendingCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-blue-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs lg:text-sm font-medium text-gray-500">Approved</p>
+                        <p class="text-lg lg:text-2xl font-bold text-gray-900" id="approved-count">{{ $approvedCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs lg:text-sm font-medium text-gray-500">Completed</p>
+                        <p class="text-lg lg:text-2xl font-bold text-gray-900" id="completed-count">{{ $completedCount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports List -->
+        @if($blotterRequests->isEmpty())
+            <div class="text-center py-12">
+                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-file-alt text-gray-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No blotter reports found</h3>
+                <p class="text-gray-500">No incident reports have been submitted yet.</p>
+                <div class="mt-6">
+                    <a href="{{ route('admin.blotter-reports.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create First Report
+                    </a>
+                </div>
+            </div>
+        @else
+            @php
+                $hasThreadActions = collect($blotterRequests->items())
+                    ->contains(function ($r) { return in_array($r->status, ['pending','approved']); });
+            @endphp
+            <!-- Desktop Table (hidden on mobile) -->
+            <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-user mr-2"></i>
+                                        Complainant
                                     </div>
                                 </th>
-                            @endif
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="blotterTableBody">
-                        @foreach($blotterRequests as $request)
-                        <tr class="blotter-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}" data-summon="{{ optional($request->summon_date)->format('Y-m-d\TH:i') }}" data-approved="{{ optional($request->approved_at)->format('Y-m-d\TH:i') }}">
-                            <td class="px-4 py-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-user-tag mr-2"></i>
+                                        Recipient
                                     </div>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">{{ $request->resident->name ?? 'N/A' }}</div>
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-tag mr-2"></i>
+                                        Type
                                     </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="text-sm text-gray-900">{{ $request->recipient_name }}</div>
-                                <div class="text-sm text-gray-500">
-                                </div>
-                            </td>
-                            <td class="px-4 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    <i class="fas fa-tag mr-1"></i>
-                                    Incident Report
-                                </span>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="text-sm text-gray-900 max-w-xs">
-                                    <div class="truncate" title="{{ $request->description }}">
-                                        {{ Str::limit($request->description, 40) }}
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-align-left mr-2"></i>
+                                        Description
                                     </div>
-                                    @if(strlen($request->description) > 40)
-                                        <button 
-                                            class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 view-full-btn"
-                                            data-description="{{ $request->description }}"
-                                            data-user-name="{{ $request->resident->name ?? 'N/A' }}">
-                                            View Full
-                                        </button>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="px-4 py-4">
-                                @if($request->hasMedia())
-                                    <div class="text-sm text-gray-900">{{ $request->media_count }} files</div>
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-image mr-2"></i>
+                                        Media
+                                    </div>
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Status
+                                    </div>
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar mr-2"></i>
+                                        Created
+                                    </div>
+                                </th>
+                                @if($hasThreadActions && $canPerformTransactions)
+                                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                        <div class="flex items-center justify-center">
+                                            <i class="fas fa-cogs mr-2"></i>
+                                            Actions
+                                        </div>
+                                    </th>
+                                @endif
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="blotterTableBody">
+                            @foreach($blotterRequests as $request)
+                            <tr class="blotter-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}" data-summon="{{ optional($request->summon_date)->format('Y-m-d\TH:i') }}" data-approved="{{ optional($request->approved_at)->format('Y-m-d\TH:i') }}">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">{{ $request->resident->name ?? 'N/A' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="text-sm text-gray-900">{{ $request->recipient_name }}</div>
                                     <div class="text-sm text-gray-500">
-                                        @if($request->media_count <= 2)
-                                            @foreach($request->media_files as $file)
-                                                <div class="flex items-center space-x-2 mb-1">
-                                                    @if(str_contains($file['type'], 'image'))
-                                                        <i class="fas fa-image text-blue-500"></i>
-                                                    @elseif(str_contains($file['type'], 'video'))
-                                                        <i class="fas fa-video text-purple-500"></i>
-                                                    @elseif(str_contains($file['type'], 'pdf'))
-                                                        <i class="fas fa-file-pdf text-red-500"></i>
-                                                    @else
-                                                        <i class="fas fa-file text-gray-500"></i>
-                                                    @endif
-                                                    <a href="{{ asset('storage/' . $file['path']) }}" target="_blank" class="underline text-blue-600 hover:text-blue-800 text-xs">
-                                                        {{ $file['name'] }}
-                                                    </a>
-                                                </div>
-                                            @endforeach
-                                        @else
-                                            <div class="flex items-center space-x-2">
-                                                <i class="fas fa-paperclip text-gray-400"></i>
-                                                <span class="text-xs">{{ $request->media_count }} attachments</span>
-                                                <button onclick="viewAllMedia('{{ $request->id }}')" class="text-xs text-blue-600 hover:text-blue-800 underline">
-                                                    View All
-                                                </button>
-                                            </div>
-                                        @endif
                                     </div>
-                                @else
-                                    <div class="text-sm text-gray-500">No files</div>
-                                @endif
-                            </td>
-                            <td class="px-4 py-4">
-                                @if($request->status === 'pending')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        Pending
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <i class="fas fa-tag mr-1"></i>
+                                        Incident Report
                                     </span>
-                                @elseif($request->status === 'approved')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        <i class="fas fa-check mr-1"></i>
-                                        Approved
-                                    </span>
-                                @elseif($request->status === 'completed')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        Completed
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
-                            </td>
-                            @if($hasThreadActions && $canPerformTransactions)
-                                <td class="px-3 py-4 text-center">
-                                    <div class="flex flex-col space-y-1">
-                                        
-                                        @if($request->status === 'pending')
-                                            @if($canPerformTransactions)
-                                            <button type="button" onclick="openApproveModal('{{ $request->id }}')" 
-                                                    class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 transition duration-200 w-full">
-                                                <i class="fas fa-check mr-1"></i>
-                                                Approve
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="text-sm text-gray-900 max-w-xs">
+                                        <div class="truncate" title="{{ $request->description }}">
+                                            {{ Str::limit($request->description, 40) }}
+                                        </div>
+                                        @if(strlen($request->description) > 40)
+                                            <button 
+                                                class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 view-full-btn"
+                                                data-description="{{ $request->description }}"
+                                                data-user-name="{{ $request->resident->name ?? 'N/A' }}">
+                                                View Full
                                             </button>
-                                            @endif
-                                        @elseif($request->status === 'approved')
-                                            @if($request->attempts < 3)
-                                                <button type="button" onclick="openNewSummonModal('{{ $request->id }}')" 
-                                                        class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-teal-600 hover:bg-teal-700 transition duration-200 w-full">
-                                                    <i class="fas fa-file-alt mr-1"></i>
-                                                    Summon
-                                                </button>
-                                            @else
-                                                <button class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-gray-400 cursor-not-allowed w-full" disabled>
-                                                    <i class="fas fa-file-alt mr-1"></i>
-                                                    Limit
-                                                </button>
-                                            @endif
-                                            <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="w-full">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 transition duration-200 w-full">
-                                                    <i class="fas fa-check-circle mr-1"></i>
-                                                    Complete
-                                                </button>
-                                            </form>
                                         @endif
                                     </div>
                                 </td>
-                            @endif
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                                <td class="px-4 py-4">
+                                    @if($request->hasMedia())
+                                        <div class="text-sm text-gray-900">{{ $request->media_count }} files</div>
+                                        <div class="text-sm text-gray-500">
+                                            @if($request->media_count <= 2)
+                                                @foreach($request->media_files as $file)
+                                                    <div class="flex items-center space-x-2 mb-1">
+                                                        @if(str_contains($file['type'], 'image'))
+                                                            <i class="fas fa-image text-blue-500"></i>
+                                                        @elseif(str_contains($file['type'], 'video'))
+                                                            <i class="fas fa-video text-purple-500"></i>
+                                                        @elseif(str_contains($file['type'], 'pdf'))
+                                                            <i class="fas fa-file-pdf text-red-500"></i>
+                                                        @else
+                                                            <i class="fas fa-file text-gray-500"></i>
+                                                        @endif
+                                                        <a href="{{ asset('storage/' . $file['path']) }}" target="_blank" class="underline text-blue-600 hover:text-blue-800 text-xs">
+                                                            {{ $file['name'] }}
+                                                        </a>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="flex items-center space-x-2">
+                                                    <i class="fas fa-paperclip text-gray-400"></i>
+                                                    <span class="text-xs">{{ $request->media_count }} attachments</span>
+                                                    <button onclick="viewAllMedia('{{ $request->id }}')" class="text-xs text-blue-600 hover:text-blue-800 underline">
+                                                        View All
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="text-sm text-gray-500">No files</div>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-4">
+                                    @if($request->status === 'pending')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Pending
+                                        </span>
+                                    @elseif($request->status === 'approved')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            <i class="fas fa-check mr-1"></i>
+                                            Approved
+                                        </span>
+                                    @elseif($request->status === 'completed')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Completed
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="text-sm text-gray-900">{{ $request->created_at->format('M d, Y') }}</div>
+                                </td>
+                                @if($hasThreadActions && $canPerformTransactions)
+                                    <td class="px-3 py-4 text-center">
+                                        <div class="flex flex-col space-y-1">
+                                            
+                                            @if($request->status === 'pending')
+                                                @if($canPerformTransactions)
+                                                <button type="button" onclick="openApproveModal('{{ $request->id }}')" 
+                                                        class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 transition duration-200 w-full">
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    Approve
+                                                </button>
+                                                @endif
+                                            @elseif($request->status === 'approved')
+                                                @if($request->attempts < 3)
+                                                    <button type="button" onclick="openNewSummonModal('{{ $request->id }}')" 
+                                                            class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-teal-600 hover:bg-teal-700 transition duration-200 w-full">
+                                                        <i class="fas fa-file-alt mr-1"></i>
+                                                        Summon
+                                                    </button>
+                                                @else
+                                                    <button class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-gray-400 cursor-not-allowed w-full" disabled>
+                                                        <i class="fas fa-file-alt mr-1"></i>
+                                                        Limit
+                                                    </button>
+                                                @endif
+                                                <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="w-full">
+                                                    @csrf
+                                                    <button type="submit" class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 transition duration-200 w-full">
+                                                        <i class="fas fa-check-circle mr-1"></i>
+                                                        Complete
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                @endif
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <!-- Mobile Cards (hidden on desktop) -->
-        <div class="md:hidden space-y-4" id="blotterMobileCards">
-            @foreach($blotterRequests as $request)
-            <div class="blotter-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $request->status }}">
-                <!-- Header Section -->
-                <div class="flex items-start justify-between mb-3">
-                    <div class="flex items-center flex-1 min-w-0">
-                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-file-alt text-red-600"></i>
-                        </div>
-                        <div class="ml-3 flex-1 min-w-0">
-                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->resident->name ?? 'N/A' }}</h3>
-                            <p class="text-sm text-gray-500 truncate">vs {{ $request->recipient_name }}</p>
-                            <div class="flex items-center mt-1">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                    @if($request->status === 'pending') bg-yellow-100 text-yellow-800
-                                    @elseif($request->status === 'approved') bg-blue-100 text-blue-800
-                                    @elseif($request->status === 'completed') bg-green-100 text-green-800
-                                    @endif">
-                                    <i class="fas fa-tag mr-1"></i>
-                                    {{ ucfirst($request->status) }}
-                                </span>
-                                <span class="ml-2 text-xs text-gray-500">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    {{ $request->created_at->format('M d, Y') }}
-                                </span>
+            <!-- Mobile Cards (hidden on desktop) -->
+            <div class="md:hidden space-y-4" id="blotterMobileCards">
+                @foreach($blotterRequests as $request)
+                <div class="blotter-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $request->status }}">
+                    <!-- Header Section -->
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center flex-1 min-w-0">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-file-alt text-red-600"></i>
+                            </div>
+                            <div class="ml-3 flex-1 min-w-0">
+                                <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->resident->name ?? 'N/A' }}</h3>
+                                <p class="text-sm text-gray-500 truncate">vs {{ $request->recipient_name }}</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                        @if($request->status === 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif($request->status === 'approved') bg-blue-100 text-blue-800
+                                        @elseif($request->status === 'completed') bg-green-100 text-green-800
+                                        @endif">
+                                        <i class="fas fa-tag mr-1"></i>
+                                        {{ ucfirst($request->status) }}
+                                    </span>
+                                    <span class="ml-2 text-xs text-gray-500">
+                                        <i class="fas fa-calendar mr-1"></i>
+                                        {{ $request->created_at->format('M d, Y') }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Description Section -->
-                <div class="mb-3">
-                    <div class="description-container">
-                        <p class="text-sm text-gray-600 leading-relaxed description-text" id="description-{{ $request->id }}">
-                            <i class="fas fa-align-left mr-1 text-gray-400"></i>
-                            <span class="description-short">{{ Str::limit($request->description, 80) }}</span>
-                            @if(strlen($request->description) > 80)
-                                <span class="description-full hidden">{{ $request->description }}</span>
-                                <button onclick="toggleDescription('{{ $request->id }}')" 
-                                        class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
-                                    Read More
-                                </button>
-                            @endif
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Media Files Section -->
-                @if($request->hasMedia())
-                <div class="mb-3 p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-medium text-gray-700">
-                            <i class="fas fa-paperclip mr-1"></i>
-                            {{ $request->media_count }} attachment{{ $request->media_count > 1 ? 's' : '' }}
-                        </span>
-                        <button onclick="viewAllMedia('{{ $request->id }}')" 
-                                class="text-xs text-blue-600 hover:text-blue-800 underline">
-                            View All
-                        </button>
-                    </div>
-                    @if($request->media_count <= 3)
-                        <div class="space-y-1">
-                            @foreach($request->media_files as $file)
-                                <div class="flex items-center space-x-2">
-                                    @if(str_contains($file['type'], 'image'))
-                                        <i class="fas fa-image text-blue-500 text-xs"></i>
-                                    @elseif(str_contains($file['type'], 'video'))
-                                        <i class="fas fa-video text-purple-500 text-xs"></i>
-                                    @elseif(str_contains($file['type'], 'pdf'))
-                                        <i class="fas fa-file-pdf text-red-500 text-xs"></i>
-                                    @else
-                                        <i class="fas fa-file text-gray-500 text-xs"></i>
-                                    @endif
-                                    <a href="{{ asset('storage/' . $file['path']) }}" target="_blank" 
-                                       class="text-xs text-blue-600 hover:text-blue-800 underline truncate">
-                                        {{ $file['name'] }}
-                                    </a>
-                                </div>
-                            @endforeach
+                    <!-- Description Section -->
+                    <div class="mb-3">
+                        <div class="description-container">
+                            <p class="text-sm text-gray-600 leading-relaxed description-text" id="description-{{ $request->id }}">
+                                <i class="fas fa-align-left mr-1 text-gray-400"></i>
+                                <span class="description-short">{{ Str::limit($request->description, 80) }}</span>
+                                @if(strlen($request->description) > 80)
+                                    <span class="description-full hidden">{{ $request->description }}</span>
+                                    <button onclick="toggleDescription('{{ $request->id }}')" 
+                                            class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
+                                        Read More
+                                    </button>
+                                @endif
+                            </p>
                         </div>
-                    @endif
-                </div>
-                @endif
+                    </div>
 
-                <!-- Actions Section -->
-                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                    <button onclick="viewBlotterDetails('{{ $request->id }}')" 
-                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
-                        <i class="fas fa-eye mr-1"></i>
-                        View Details
-                    </button>
-                    
-                    @if($request->status === 'pending')
-                        @if($canPerformTransactions)
-                        <form onsubmit="return approveAndDownloadBlotter(event, '{{ $request->id }}')" class="inline">
-                            @csrf
-                            <input type="date" name="hearing_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
-                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
-                                <i class="fas fa-check mr-1"></i>
-                                Approve
+                    <!-- Media Files Section -->
+                    @if($request->hasMedia())
+                    <div class="mb-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-medium text-gray-700">
+                                <i class="fas fa-paperclip mr-1"></i>
+                                {{ $request->media_count }} attachment{{ $request->media_count > 1 ? 's' : '' }}
+                            </span>
+                            <button onclick="viewAllMedia('{{ $request->id }}')" 
+                                    class="text-xs text-blue-600 hover:text-blue-800 underline">
+                                View All
                             </button>
-                        </form>
+                        </div>
+                        @if($request->media_count <= 3)
+                            <div class="space-y-1">
+                                @foreach($request->media_files as $file)
+                                    <div class="flex items-center space-x-2">
+                                        @if(str_contains($file['type'], 'image'))
+                                            <i class="fas fa-image text-blue-500 text-xs"></i>
+                                        @elseif(str_contains($file['type'], 'video'))
+                                            <i class="fas fa-video text-purple-500 text-xs"></i>
+                                        @elseif(str_contains($file['type'], 'pdf'))
+                                            <i class="fas fa-file-pdf text-red-500 text-xs"></i>
+                                        @else
+                                            <i class="fas fa-file text-gray-500 text-xs"></i>
+                                        @endif
+                                        <a href="{{ asset('storage/' . $file['path']) }}" target="_blank" 
+                                           class="text-xs text-blue-600 hover:text-blue-800 underline truncate">
+                                            {{ $file['name'] }}
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
                         @endif
-                    @elseif($request->status === 'approved')
-                        @if($canPerformTransactions)
-                        @if($request->attempts < 3)
-                            <form onsubmit="return generateNewSummonPdf(event, '{{ $request->id }}')" class="inline">
+                    </div>
+                    @endif
+
+                    <!-- Actions Section -->
+                    <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                        <button onclick="viewBlotterDetails('{{ $request->id }}')" 
+                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
+                            <i class="fas fa-eye mr-1"></i>
+                            View Details
+                        </button>
+                        
+                        @if($request->status === 'pending')
+                            @if($canPerformTransactions)
+                            <form onsubmit="return approveAndDownloadBlotter(event, '{{ $request->id }}')" class="inline">
                                 @csrf
-                                <input type="date" name="new_summon_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
-                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 transition duration-200">
-                                    <i class="fas fa-file-alt mr-1"></i>
-                                    New Summon
+                                <input type="date" name="hearing_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
+                                    <i class="fas fa-check mr-1"></i>
+                                    Approve
                                 </button>
                             </form>
-                        @else
-                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" disabled>
-                                <i class="fas fa-file-alt mr-1"></i>
-                                New Summon (Limit Reached)
-                            </button>
+                            @endif
+                        @elseif($request->status === 'approved')
+                            @if($canPerformTransactions)
+                            @if($request->attempts < 3)
+                                <form onsubmit="return generateNewSummonPdf(event, '{{ $request->id }}')" class="inline">
+                                    @csrf
+                                    <input type="date" name="new_summon_date" required class="hidden" value="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 transition duration-200">
+                                        <i class="fas fa-file-alt mr-1"></i>
+                                        New Summon
+                                    </button>
+                                </form>
+                            @else
+                                <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-gray-400 cursor-not-allowed" disabled>
+                                    <i class="fas fa-file-alt mr-1"></i>
+                                    New Summon (Limit Reached)
+                                </button>
+                            @endif
+                            <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Complete
+                                </button>
+                            </form>
+                            @endif
                         @endif
-                        <form onsubmit="return completeAndDownload(event, '{{ $request->id }}')" class="inline">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
-                                <i class="fas fa-check-circle mr-1"></i>
-                                Complete
-                            </button>
-                        </form>
-                        @endif
-                    @endif
+                    </div>
                 </div>
+                @endforeach
             </div>
-            @endforeach
-        </div>
-    @endif
-
-    
-    <!-- Modern Pagination -->
-    @if($blotterRequests->hasPages())
-        <div class="mt-6">
-            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-                <div class="-mt-px flex w-0 flex-1">
+        @endif
+        
+        <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
+    </div>
+    <div id="blotterPaginationContent" style="display: none;">
+        <!-- Modern Pagination -->
+        @if($blotterRequests->hasPages())
+            <div class="mt-6">
+                <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+                    <div class="-mt-px flex w-0 flex-1">
+                        @if($blotterRequests->onFirstPage())
+                            <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
+                                <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                                Previous
+                            </span>
+                        @else
+                            <a href="{{ $blotterRequests->appends(request()->except('page'))->previousPageUrl() }}" 
+                               class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                                Previous
+                            </a>
+                        @endif
+                    </div>
+                    
+                    <div class="hidden md:-mt-px md:flex">
+                        @php
+                            $currentPage = $blotterRequests->currentPage();
+                            $lastPage = $blotterRequests->lastPage();
+                            $startPage = max(1, $currentPage - 2);
+                            $endPage = min($lastPage, $currentPage + 2);
+                        @endphp
+                        
+                        @if($startPage > 1)
+                            <a href="{{ $blotterRequests->appends(request()->except('page'))->url(1) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                1
+                            </a>
+                            @if($startPage > 2)
+                                <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                    ...
+                                </span>
+                            @endif
+                        @endif
+                        
+                        @for($page = $startPage; $page <= $endPage; $page++)
+                            @if($page == $currentPage)
+                                <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
+                                    {{ $page }}
+                                </span>
+                            @else
+                                <a href="{{ $blotterRequests->appends(request()->except('page'))->url($page) }}" 
+                                   class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                    {{ $page }}
+                                </a>
+                            @endif
+                        @endfor
+                        
+                        @if($endPage < $lastPage)
+                            @if($endPage < $lastPage - 1)
+                                <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                    ...
+                                </span>
+                            @endif
+                            <a href="{{ $blotterRequests->appends(request()->except('page'))->url($lastPage) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                {{ $lastPage }}
+                            </a>
+                        @endif
+                    </div>
+                    
+                    <div class="-mt-px flex w-0 flex-1 justify-end">
+                        @if($blotterRequests->hasMorePages())
+                            <a href="{{ $blotterRequests->appends(request()->except('page'))->nextPageUrl() }}" 
+                               class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                Next
+                                <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                            </a>
+                        @else
+                            <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                                Next
+                                <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                            </span>
+                        @endif
+                    </div>
+                </nav>
+                
+                <!-- Mobile Pagination -->
+                <div class="mt-4 flex justify-between sm:hidden">
                     @if($blotterRequests->onFirstPage())
-                        <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
-                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                        <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
                             Previous
                         </span>
                     @else
                         <a href="{{ $blotterRequests->appends(request()->except('page'))->previousPageUrl() }}" 
-                           class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                           class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                             Previous
                         </a>
                     @endif
-                </div>
-                
-                <div class="hidden md:-mt-px md:flex">
-                    @php
-                        $currentPage = $blotterRequests->currentPage();
-                        $lastPage = $blotterRequests->lastPage();
-                        $startPage = max(1, $currentPage - 2);
-                        $endPage = min($lastPage, $currentPage + 2);
-                    @endphp
                     
-                    @if($startPage > 1)
-                        <a href="{{ $blotterRequests->appends(request()->except('page'))->url(1) }}" 
-                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            1
-                        </a>
-                        @if($startPage > 2)
-                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
-                                ...
-                            </span>
-                        @endif
-                    @endif
+                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                        Page {{ $blotterRequests->currentPage() }} of {{ $blotterRequests->lastPage() }}
+                    </span>
                     
-                    @for($page = $startPage; $page <= $endPage; $page++)
-                        @if($page == $currentPage)
-                            <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
-                                {{ $page }}
-                            </span>
-                        @else
-                            <a href="{{ $blotterRequests->appends(request()->except('page'))->url($page) }}" 
-                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                                {{ $page }}
-                            </a>
-                        @endif
-                    @endfor
-                    
-                    @if($endPage < $lastPage)
-                        @if($endPage < $lastPage - 1)
-                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
-                                ...
-                            </span>
-                        @endif
-                        <a href="{{ $blotterRequests->appends(request()->except('page'))->url($lastPage) }}" 
-                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            {{ $lastPage }}
-                        </a>
-                    @endif
-                </div>
-                
-                <div class="-mt-px flex w-0 flex-1 justify-end">
                     @if($blotterRequests->hasMorePages())
                         <a href="{{ $blotterRequests->appends(request()->except('page'))->nextPageUrl() }}" 
-                           class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                           class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                             Next
-                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
                         </a>
                     @else
-                        <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                        <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
                             Next
-                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
                         </span>
                     @endif
                 </div>
-            </nav>
-            
-            <!-- Mobile Pagination -->
-            <div class="mt-4 flex justify-between sm:hidden">
-                @if($blotterRequests->onFirstPage())
-                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
-                        Previous
-                    </span>
-                @else
-                    <a href="{{ $blotterRequests->appends(request()->except('page'))->previousPageUrl() }}" 
-                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Previous
-                    </a>
-                @endif
                 
-                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
-                    Page {{ $blotterRequests->currentPage() }} of {{ $blotterRequests->lastPage() }}
-                </span>
-                
-                @if($blotterRequests->hasMorePages())
-                    <a href="{{ $blotterRequests->appends(request()->except('page'))->nextPageUrl() }}" 
-                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Next
-                    </a>
-                @else
-                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
-                        Next
-                    </span>
-                @endif
+                <!-- Results Info -->
+                <div class="mt-4 text-center text-sm text-gray-500">
+                    Showing {{ $blotterRequests->firstItem() }} to {{ $blotterRequests->lastItem() }} of {{ $blotterRequests->total() }} results
+                </div>
             </div>
-            
-            <!-- Results Info -->
-            <div class="mt-4 text-center text-sm text-gray-500">
-                Showing {{ $blotterRequests->firstItem() }} to {{ $blotterRequests->lastItem() }} of {{ $blotterRequests->total() }} results
-            </div>
-        </div>
-    @endif
-    
-    <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
+        @endif
+    </div>
 </div>
 
 <!-- Modals -->
@@ -627,6 +722,31 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const skeletons = [
+            'blotterHeaderSkeleton',
+            'blotterStatsSkeleton',
+            'blotterTableSkeleton',
+            'blotterMobileSkeleton',
+            'blotterPaginationSkeleton'
+        ];
+        skeletons.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        const contents = [
+            'blotterHeaderContent',
+            'blotterStatsContent',
+            'blotterTableContent',
+            'blotterMobileContent',
+            'blotterPaginationContent'
+        ];
+        contents.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'block';
+        });
+    }, 1000);
+
     // Add event listeners for view full buttons
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('view-full-btn')) {

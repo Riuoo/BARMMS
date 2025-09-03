@@ -4,22 +4,84 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Section -->
-    <div class="mb-8">
+    <!-- Header Skeleton -->
+    <div id="createTemplateHeaderSkeleton" class="mb-8 animate-pulse">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Template</h1>
-                <p class="text-gray-600">Use the wizard to create a new document template</p>
+                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-96 bg-gray-100 rounded"></div>
             </div>
             <div class="mt-4 sm:mt-0">
-                <a href="{{ route('admin.templates.index') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Back to Templates
-                </a>
+                <div class="h-10 w-40 bg-gray-200 rounded"></div>
             </div>
         </div>
     </div>
+
+    <!-- Form Skeleton -->
+    <div id="createTemplateFormSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+        <!-- Wizard Progress Skeleton -->
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                        <div class="h-4 w-24 bg-gray-200 rounded ml-2"></div>
+                    </div>
+                    <div class="w-8 h-1 bg-gray-200"></div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                        <div class="h-4 w-32 bg-gray-200 rounded ml-2"></div>
+                    </div>
+                    <div class="w-8 h-1 bg-gray-200"></div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                        <div class="h-4 w-28 bg-gray-200 rounded ml-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Content Skeleton -->
+        <div class="p-6">
+            <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+            <div class="space-y-6">
+                <div>
+                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                </div>
+                <div>
+                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-32 w-full bg-gray-200 rounded"></div>
+                    <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                </div>
+                <div>
+                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="createTemplateContent" style="display: none;">
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Template</h1>
+                    <p class="text-gray-600">Use the wizard to create a new document template</p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <a href="{{ route('admin.templates.index') }}" 
+                       class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Templates
+                    </a>
+                </div>
+            </div>
+        </div>
 
     <!-- Template Creation Wizard -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -295,6 +357,7 @@
             </div>
         </form>
     </div>
+    </div>
 </div>
 
 @endsection 
@@ -302,6 +365,19 @@
 @push('scripts')
 <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
+// Skeleton loading control
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const headerSkeleton = document.getElementById('createTemplateHeaderSkeleton');
+        const formSkeleton = document.getElementById('createTemplateFormSkeleton');
+        const content = document.getElementById('createTemplateContent');
+        
+        if (headerSkeleton) headerSkeleton.style.display = 'none';
+        if (formSkeleton) formSkeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     let currentStep = 1;
     const totalSteps = 3;

@@ -11,163 +11,240 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Section -->
-    <div class="mb-3">
+    <!-- Header Skeleton -->
+    <div id="residentsHeaderSkeleton" class="mb-3 animate-pulse">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Resident Information</h1>
-                <p class="text-sm md:text-base text-gray-600">Manage resident profiles and information</p>
+                <div class="h-10 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-96 bg-gray-100 rounded"></div>
             </div>
             <div class="mt-4 sm:mt-0">
-                @if($canPerformTransactions)
-                <a href="{{ route('admin.residents.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Add New Resident
-                </a>
-                @endif
+                <div class="bg-gray-200 border border-gray-200 rounded-lg px-8 py-4 w-56 h-10"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Header Content (hidden initially) -->
+    <div id="residentsHeaderContent" style="display: none;">
+        <!-- Header Section -->
+        <div class="mb-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div class="mb-4 sm:mb-0">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Resident Information</h1>
+                    <p class="text-sm md:text-base text-gray-600">Manage resident profiles and information</p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    @if($canPerformTransactions)
+                    <a href="{{ route('admin.residents.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add New Resident
+                    </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-800">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Enhanced Filters, Search, and Bulk Actions -->
+        <form method="GET" action="{{ route('admin.residents') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <!-- Search Input -->
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" name="search" id="searchInput" placeholder="Search residents by name, email, or address..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+                    </div>
+                </div>
+                <!-- Status Filter -->
+                <div class="sm:w-48">
+                    <select name="status" id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                        <option value="">All Status</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                </div>
+                <!-- Recent Filter -->
+                <div class="sm:w-48">
+                    <select name="recent" id="recentFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                        <option value="">All Residents</option>
+                        <option value="recent" {{ request('recent') == 'recent' ? 'selected' : '' }}>Recently Added</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <i class="fas fa-filter mr-2"></i>Filter
+                    </button>
+                    <a href="{{ route('admin.residents') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <i class="fas fa-undo mr-2"></i>Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Stats Skeleton -->
+    <div id="residentsStatsSkeleton" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3 animate-pulse">
+        @for ($i = 0; $i < 4; $i++)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col justify-between h-28">
+                <div class="flex items-center mb-2">
+                    <div class="bg-gray-200 rounded-full w-10 h-10 mr-3"></div>
+                    <div>
+                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-6 w-16 bg-gray-300 rounded"></div>
+                    </div>
+                </div>
+                <div class="h-4 w-20 bg-gray-100 rounded"></div>
+            </div>
+        @endfor
+    </div>
+    
+    <!-- Stats Content (hidden initially) -->
+    <div id="residentsStatsContent" style="display: none;">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-home text-green-600 text-sm md:text-base"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3 md:ml-4">
+                        <p class="text-xs md:text-sm font-medium text-gray-500">Total Residents</p>
+                        <p class="text-lg md:text-2xl font-bold text-gray-900" id="total-count">{{ $totalResidents }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-check text-blue-600 text-sm md:text-base"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3 md:ml-4">
+                        <p class="text-xs md:text-sm font-medium text-gray-500">Active Residents</p>
+                        <p class="text-lg md:text-2xl font-bold text-gray-900" id="active-count">{{ $activeResidents }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-calendar-plus text-purple-600 text-sm md:text-base"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3 md:ml-4">
+                        <p class="text-xs md:text-sm font-medium text-gray-500">This Month</p>
+                        <p class="text-lg md:text-2xl font-bold text-gray-900" id="month-count">{{ $recentResidents }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt text-orange-600 text-sm md:text-base"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3 md:ml-4">
+                        <p class="text-xs md:text-sm font-medium text-gray-500">With Address</p>
+                        <p class="text-lg md:text-2xl font-bold text-gray-900" id="address-count">{{ $withAddress }}</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-check-circle text-green-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-green-800">{{ session('success') }}</p>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-800">{{ session('error') }}</p>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- Enhanced Filters, Search, and Bulk Actions -->
-    <form method="GET" action="{{ route('admin.residents') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <!-- Search Input -->
-            <div class="flex-1">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
-                    </div>
-                    <input type="text" name="search" id="searchInput" placeholder="Search residents by name, email, or address..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
-                </div>
-            </div>
-            <!-- Status Filter -->
-            <div class="sm:w-48">
-                <select name="status" id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                    <option value="">All Status</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                </select>
-            </div>
-            <!-- Recent Filter -->
-            <div class="sm:w-48">
-                <select name="recent" id="recentFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                    <option value="">All Residents</option>
-                    <option value="recent" {{ request('recent') == 'recent' ? 'selected' : '' }}>Recently Added</option>
-                </select>
-            </div>
-            <div class="flex space-x-2">
-                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    <i class="fas fa-filter mr-2"></i>Filter
-                </button>
-                <a href="{{ route('admin.residents') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    <i class="fas fa-undo mr-2"></i>Reset
-                </a>
-            </div>
-        </div>
-    </form>
-
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-home text-green-600 text-sm md:text-base"></i>
-                    </div>
-                </div>
-                <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">Total Residents</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="total-count">{{ $totalResidents }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user-check text-blue-600 text-sm md:text-base"></i>
-                    </div>
-                </div>
-                <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">Active Residents</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="active-count">{{ $activeResidents }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-calendar-plus text-purple-600 text-sm md:text-base"></i>
-                    </div>
-                </div>
-                <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">This Month</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="month-count">{{ $recentResidents }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-map-marker-alt text-orange-600 text-sm md:text-base"></i>
-                    </div>
-                </div>
-                <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">With Address</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900" id="address-count">{{ $withAddress }}</p>
-                </div>
-            </div>
+    <!-- List Skeleton (Table) - Desktop Only -->
+    <div id="residentsTableSkeleton" class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse mb-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        @for ($i = 0; $i < 6; $i++)
+                            <th class="px-6 py-3"><div class="h-4 w-20 bg-gray-200 rounded"></div></th>
+                        @endfor
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @for ($i = 0; $i < 6; $i++)
+                        <tr>
+                            @for ($j = 0; $j < 6; $j++)
+                                <td class="px-6 py-4"><div class="h-4 w-24 bg-gray-100 rounded"></div></td>
+                            @endfor
+                        </tr>
+                    @endfor
+                </tbody>
+            </table>
         </div>
     </div>
+    
+    <!-- List Skeleton (Mobile Cards) - Mobile Only -->
+    <div id="residentsMobileSkeleton" class="block md:hidden space-y-3 animate-pulse mb-6">
+        @for ($i = 0; $i < 4; $i++)
+            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center mb-3">
+                    <div class="w-12 h-12 bg-gray-200 rounded-full mr-3"></div>
+                    <div class="flex-1">
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-4 w-24 bg-gray-100 rounded"></div>
+                    </div>
+                </div>
+                <div class="h-4 w-40 bg-gray-100 rounded mb-2"></div>
+                <div class="h-4 w-24 bg-gray-200 rounded"></div>
+            </div>
+        @endfor
+    </div>
 
-    <!-- Residents List -->
-    @if($residents->isEmpty())
-        <div class="text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-home text-gray-400 text-2xl"></i>
+    <!-- Residents List Content (hidden initially) -->
+    <div id="residentsTableContent" style="display: none;">
+        @if($residents->isEmpty())
+            <div class="text-center py-12">
+                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-home text-gray-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No residents found</h3>
+                <p class="text-gray-500">Get started by adding the first resident to the system.</p>
+                <div class="mt-6">
+                    @if($canPerformTransactions)
+                    <a href="{{ route('admin.residents.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add First Resident
+                    </a>
+                    @endif
+                </div>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No residents found</h3>
-            <p class="text-gray-500">Get started by adding the first resident to the system.</p>
-            <div class="mt-6">
-                @if($canPerformTransactions)
-                <a href="{{ route('admin.residents.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Add First Resident
-                </a>
-                @endif
-            </div>
-        </div>
-    @else
+        @else
         <!-- Desktop Table (hidden on mobile) -->
         <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
@@ -194,20 +271,14 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
-                                    <i class="fas fa-user-friends mr-2"></i>
-                                    Demographics
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    Birth Date
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-toggle-on mr-2"></i>
                                     Status
-                                </div>
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <i class="fas fa-calendar mr-2"></i>
-                                    Registered
                                 </div>
                             </th>
                             @if($canPerformTransactions)
@@ -220,7 +291,7 @@
                             @endif
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="residentTableBody">
+                    <tbody class="bg-white divide-y divide-gray-200" id="userTableBody">
                         @foreach ($residents as $resident)
                         @php
                             $statusBadgeClass = $resident->active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600';
@@ -228,61 +299,22 @@
                             $toggleBtnClass = $resident->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
                             $toggleIcon = $resident->active ? 'on' : 'off';
                         @endphp
-                        <tr class="resident-item hover:bg-gray-50 transition duration-150" data-status="{{ $resident->active ? 'active' : 'inactive' }}" data-created="{{ $resident->created_at->format('Y-m-d') }}">
+                        <tr class="resident-item hover:bg-gray-50 transition duration-150" data-status="{{ $resident->active ? 'active' : 'inactive' }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     <div>
                                         <div class="text-sm font-medium text-gray-900">{{ $resident->name }}</div>
-                                        @if($resident->gender || $resident->birth_date || $resident->marital_status)
-                                            <div class="text-sm text-gray-500">
-                                                @if($resident->gender)
-                                                    <i class="fas fa-{{ $resident->gender == 'Male' ? 'mars' : 'venus' }} mr-1"></i>
-                                                    {{ $resident->gender }}
-                                                @endif
-                                                @if($resident->birth_date)
-                                                    • {{ $resident->birth_date->format('M d, Y') }}
-                                                @endif
-                                            </div>
-                                            @if($resident->marital_status)
-                                                <div class="text-xs text-gray-400">
-                                                    <i class="fas fa-heart mr-1"></i>
-                                                    {{ $resident->marital_status }}
-                                                </div>
-                                            @endif
-                                        @endif
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->email }}</div>
-                                @if($resident->contact_number)
-                                    <div class="text-sm text-gray-500">
-                                        <i class="fas fa-phone mr-1"></i>
-                                        {{ $resident->contact_number }}
-                                    </div>
-                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->address ?: 'No address provided' }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">
-                                    @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status || $resident->gender || $resident->contact_number || $resident->birth_date || $resident->marital_status || $resident->occupation || $resident->emergency_contact_name)
-                                        <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
-                                                class="text-green-600 hover:text-green-800 font-medium cursor-pointer js-show-demographics">
-                                            <i class="fas fa-eye mr-1"></i>
-                                            View Demographics
-                                        </button>
-                                        @if($resident->occupation)
-                                            <div class="text-xs text-gray-500 mt-1">
-                                                <i class="fas fa-briefcase mr-1"></i>
-                                                {{ $resident->occupation }}
-                                            </div>
-                                        @endif
-                                    @else
-                                        <span class="text-gray-400">No demographic data</span>
-                                    @endif
-                                </div>
+                                <div class="text-sm text-gray-900">{{ $resident->birth_date ? \Carbon\Carbon::parse($resident->birth_date)->format('M d, Y') : 'Not provided' }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
@@ -290,280 +322,291 @@
                                     {{ $resident->active ? 'Active' : 'Inactive' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $resident->created_at->format('M d, Y') }}</div>
-                                <div class="text-sm text-gray-500">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    {{ $resident->created_at->diffForHumans() }}
-                                </div>
-                            </td>
-                            @if($canPerformTransactions)
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
+                                    @if($canPerformTransactions)
                                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
                                        class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
                                        title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" data-action="{{ $resident->active ? 'deactivate' : 'activate' }}" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}"
+                                    <button type="button"
+                                            data-action="{{ $resident->active ? 'deactivate' : 'activate' }}"
+                                            data-resident-id="{{ $resident->id }}"
+                                            data-resident-name="{{ addslashes($resident->name) }}"
                                             class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-resident" 
                                             title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
                                         <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
                                     </button>
-                                    <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
+                                    <button type="button"
+                                            data-resident-id="{{ $resident->id }}"
+                                            data-resident-name="{{ addslashes($resident->name) }}"
                                             class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-resident"
                                             title="Delete">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
+                                    @endif
                                 </div>
                             </td>
-                            @endif
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- Mobile Cards (hidden on desktop) -->
-        <div class="md:hidden space-y-3" id="mobileResidentCards">
-            @foreach ($residents as $resident)
-            @php
-                $statusBadgeClass = $resident->active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600';
-                $statusIconClass = $resident->active ? 'text-green-500' : 'text-gray-400';
-                $toggleBtnClass = $resident->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
-                $toggleIcon = $resident->active ? 'on' : 'off';
-            @endphp
-            <div class="document-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $resident->active ? 'active' : 'inactive' }}" data-created="{{ $resident->created_at->format('Y-m-d') }}">
-                <!-- Header with avatar and basic info -->
-                <div class="flex items-start justify-between mb-3">
-                    <div class="flex items-center flex-1 min-w-0">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-home text-blue-600"></i>
-                        </div>
-                        <div class="ml-3 flex-1 min-w-0">
-                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $resident->name }}</h3>
-                            <p class="text-sm text-gray-500 truncate">{{ $resident->email }}</p>
-                            <div class="flex items-center mt-1">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
-                                    <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
-                                    {{ $resident->active ? 'Active' : 'Inactive' }}
-                                </span>
-                                <span class="ml-2 text-xs text-gray-500">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    {{ $resident->created_at->format('M d, Y') }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+        @endif
+    </div>
+    
+    <div id="residentsMobileContent" style="display: none;">
+        <!-- Residents List Mobile Cards -->
+        @if($residents->isEmpty())
+            <div class="text-center py-12">
+                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-home text-gray-400 text-2xl"></i>
                 </div>
-
-                <!-- Personal Information -->
-                <div class="mb-3 space-y-2">
-                    @if($resident->gender || $resident->birth_date || $resident->marital_status)
-                        <div class="flex flex-wrap gap-2">
-                            @if($resident->gender)
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    <i class="fas fa-{{ $resident->gender == 'Male' ? 'mars' : 'venus' }} mr-1"></i>
-                                    {{ $resident->gender }}
-                                </span>
-                            @endif
-                            @if($resident->birth_date)
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                    <i class="fas fa-birthday-cake mr-1"></i>
-                                    {{ $resident->birth_date->format('M d, Y') }}
-                                </span>
-                            @endif
-                            @if($resident->marital_status)
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-                                    <i class="fas fa-heart mr-1"></i>
-                                    {{ $resident->marital_status }}
-                                </span>
-                            @endif
-                        </div>
-                    @endif
-                    @if($resident->contact_number)
-                        <div class="text-sm text-gray-600">
-                            <i class="fas fa-phone mr-1 text-gray-400"></i>
-                            {{ $resident->contact_number }}
-                        </div>
-                    @endif
-                    @if($resident->occupation)
-                        <div class="text-sm text-gray-600">
-                            <i class="fas fa-briefcase mr-1 text-gray-400"></i>
-                            {{ $resident->occupation }}
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Address section -->
-                @if($resident->address)
-                <div class="mb-3">
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
-                        {{ $resident->address }}
-                    </p>
-                </div>
-                @endif
-
-                <!-- Demographics section -->
-                @if($resident->age || $resident->family_size || $resident->education_level || $resident->income_level || $resident->employment_status || $resident->health_status || $resident->gender || $resident->contact_number || $resident->birth_date || $resident->marital_status || $resident->occupation || $resident->emergency_contact_name)
-                <div class="mb-3">
-                    <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
-                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition duration-200 js-show-demographics">
-                        <i class="fas fa-user-friends mr-1"></i>
-                        View Demographics
-                    </button>
-                </div>
-                @endif
-
-                <!-- Action buttons -->
-                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No residents found</h3>
+                <p class="text-gray-500">Get started by adding the first resident to the system.</p>
+                <div class="mt-6">
                     @if($canPerformTransactions)
-                    <a href="{{ route('admin.residents.edit', $resident->id) }}" 
-                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
-                       title="Edit">
-                        <i class="fas fa-edit mr-1"></i>
-                        Edit
+                    <a href="{{ route('admin.residents.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add First Resident
                     </a>
-                    <button type="button" data-action="{{ $resident->active ? 'deactivate' : 'activate' }}" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}"
-                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-resident" 
-                            title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
-                        <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
-                        {{ $resident->active ? 'Disable' : 'Enable' }}
-                    </button>
-                    <button type="button" data-resident-id="{{ $resident->id }}" data-resident-name="{{ addslashes($resident->name) }}" 
-                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-resident"
-                            title="Delete">
-                        <i class="fas fa-trash-alt mr-1"></i>
-                        Delete
-                    </button>
                     @endif
                 </div>
             </div>
-            @endforeach
-        </div>
-    @endif
+        @else
+            <!-- Mobile Cards (hidden on desktop) -->
+            <div class="block md:hidden space-y-3" id="mobileUserCards">
+                @foreach ($residents as $resident)
+                @php
+                    $statusBadgeClass = $resident->active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600';
+                    $statusIconClass = $resident->active ? 'text-green-500' : 'text-gray-400';
+                    $toggleBtnClass = $resident->active ? 'text-gray-700 bg-white hover:bg-gray-50' : 'text-white bg-gray-400 hover:bg-gray-500';
+                    $toggleIcon = $resident->active ? 'on' : 'off';
+                @endphp
+                <div class="resident-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $resident->active ? 'active' : 'inactive' }}">
+                    <!-- Header with avatar and basic info -->
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center flex-1 min-w-0">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-green-600"></i>
+                            </div>
+                            <div class="ml-3 flex-1 min-w-0">
+                                <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $resident->name }}</h3>
+                                <p class="text-sm text-gray-500 truncate">{{ $resident->email }}</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
+                                        <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
+                                        {{ $resident->active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
+                    <!-- Address section -->
+                    @if($resident->address)
+                    <div class="mb-3">
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                            {{ $resident->address }}
+                        </p>
+                    </div>
+                    @endif
+
+                    <!-- Birth date section -->
+                    @if($resident->birth_date)
+                    <div class="mb-3">
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            <i class="fas fa-calendar mr-1 text-gray-400"></i>
+                            {{ \Carbon\Carbon::parse($resident->birth_date)->format('M d, Y') }}
+                        </p>
+                    </div>
+                    @endif
+
+                    <!-- Action buttons -->
+                    <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                        @if($canPerformTransactions)
+                        <a href="{{ route('admin.residents.edit', $resident->id) }}" 
+                           class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
+                           title="Edit">
+                            <i class="fas fa-edit mr-1"></i>
+                            Edit
+                        </a>
+                        <button type="button"
+                                data-action="{{ $resident->active ? 'deactivate' : 'activate' }}"
+                                data-resident-id="{{ $resident->id }}"
+                                data-resident-name="{{ addslashes($resident->name) }}"
+                                class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-resident" 
+                                title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
+                            <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
+                            {{ $resident->active ? 'Disable' : 'Enable' }}
+                        </button>
+                        <button type="button"
+                                data-resident-id="{{ $resident->id }}"
+                                data-resident-name="{{ addslashes($resident->name) }}"
+                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-resident"
+                                title="Delete">
+                            <i class="fas fa-trash-alt mr-1"></i>
+                            Delete
+                        </button>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
     
-    <!-- Modern Pagination -->
-    @if($residents->hasPages())
-        <div class="mt-6">
-            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-                <div class="-mt-px flex w-0 flex-1">
+    <!-- Pagination Skeleton -->
+    <div id="residentsPaginationSkeleton" class="mt-6 animate-pulse">
+        <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+            <div class="-mt-px flex w-0 flex-1">
+                <div class="h-4 w-20 bg-gray-200 rounded"></div>
+            </div>
+            <div class="hidden md:-mt-px md:flex space-x-2">
+                @for ($i = 0; $i < 5; $i++)
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                @endfor
+            </div>
+            <div class="-mt-px flex w-0 flex-1 justify-end">
+                <div class="h-4 w-16 bg-gray-200 rounded"></div>
+            </div>
+        </nav>
+        <!-- Mobile Pagination Skeleton -->
+        <div class="mt-4 flex justify-between sm:hidden">
+            <div class="h-8 w-20 bg-gray-200 rounded"></div>
+            <div class="h-8 w-32 bg-gray-200 rounded"></div>
+            <div class="h-8 w-16 bg-gray-200 rounded"></div>
+        </div>
+        <!-- Results Info Skeleton -->
+        <div class="mt-4 text-center">
+            <div class="h-4 w-48 bg-gray-200 rounded mx-auto"></div>
+        </div>
+    </div>
+    
+    <!-- Pagination Content (hidden initially) -->
+    <div id="residentsPaginationContent" style="display: none;">
+        <!-- Modern Pagination -->
+        @if($residents->hasPages())
+            <div class="mt-6">
+                <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+                    <div class="-mt-px flex w-0 flex-1">
+                        @if($residents->onFirstPage())
+                            <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
+                                <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                                Previous
+                            </span>
+                        @else
+                            <a href="{{ $residents->appends(request()->except('page'))->previousPageUrl() }}" 
+                               class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                                Previous
+                            </a>
+                        @endif
+                    </div>
+                    
+                    <div class="hidden md:-mt-px md:flex">
+                        @php
+                            $currentPage = $residents->currentPage();
+                            $lastPage = $residents->lastPage();
+                            $startPage = max(1, $currentPage - 2);
+                            $endPage = min($lastPage, $currentPage + 2);
+                        @endphp
+                        
+                        @if($startPage > 1)
+                            <a href="{{ $residents->appends(request()->except('page'))->url(1) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                1
+                            </a>
+                            @if($startPage > 2)
+                                <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                    ...
+                                </span>
+                            @endif
+                        @endif
+                        
+                        @for($page = $startPage; $page <= $endPage; $page++)
+                            @if($page == $currentPage)
+                                <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
+                                    {{ $page }}
+                                </span>
+                            @else
+                                <a href="{{ $residents->appends(request()->except('page'))->url($page) }}" 
+                                   class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                    {{ $page }}
+                                </a>
+                            @endif
+                        @endfor
+                        
+                        @if($endPage < $lastPage)
+                            @if($endPage < $lastPage - 1)
+                                <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                                    ...
+                                </span>
+                            @endif
+                            <a href="{{ $residents->appends(request()->except('page'))->url($lastPage) }}" 
+                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                {{ $lastPage }}
+                            </a>
+                        @endif
+                    </div>
+                    
+                    <div class="-mt-px flex w-0 flex-1 justify-end">
+                        @if($residents->hasMorePages())
+                            <a href="{{ $residents->appends(request()->except('page'))->nextPageUrl() }}" 
+                               class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                                Next
+                                <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                            </a>
+                        @else
+                            <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                                Next
+                                <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
+                            </span>
+                        @endif
+                    </div>
+                </nav>
+                
+                <!-- Mobile Pagination -->
+                <div class="mt-4 flex justify-between sm:hidden">
                     @if($residents->onFirstPage())
-                        <span class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500">
-                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                        <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
                             Previous
                         </span>
                     @else
                         <a href="{{ $residents->appends(request()->except('page'))->previousPageUrl() }}" 
-                           class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                           class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                             Previous
                         </a>
                     @endif
-                </div>
-                
-                <div class="hidden md:-mt-px md:flex">
-                    @php
-                        $currentPage = $residents->currentPage();
-                        $lastPage = $residents->lastPage();
-                        $startPage = max(1, $currentPage - 2);
-                        $endPage = min($lastPage, $currentPage + 2);
-                    @endphp
                     
-                    @if($startPage > 1)
-                        <a href="{{ $residents->appends(request()->except('page'))->url(1) }}" 
-                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            1
-                        </a>
-                        @if($startPage > 2)
-                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
-                                ...
-                            </span>
-                        @endif
-                    @endif
+                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                        Page {{ $residents->currentPage() }} of {{ $residents->lastPage() }}
+                    </span>
                     
-                    @for($page = $startPage; $page <= $endPage; $page++)
-                        @if($page == $currentPage)
-                            <span class="inline-flex items-center border-t-2 border-green-500 px-4 pt-4 text-sm font-medium text-green-600" aria-current="page">
-                                {{ $page }}
-                            </span>
-                        @else
-                            <a href="{{ $residents->appends(request()->except('page'))->url($page) }}" 
-                               class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                                {{ $page }}
-                            </a>
-                        @endif
-                    @endfor
-                    
-                    @if($endPage < $lastPage)
-                        @if($endPage < $lastPage - 1)
-                            <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
-                                ...
-                            </span>
-                        @endif
-                        <a href="{{ $residents->appends(request()->except('page'))->url($lastPage) }}" 
-                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            {{ $lastPage }}
-                        </a>
-                    @endif
-                </div>
-                
-                <div class="-mt-px flex w-0 flex-1 justify-end">
                     @if($residents->hasMorePages())
                         <a href="{{ $residents->appends(request()->except('page'))->nextPageUrl() }}" 
-                           class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                           class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                             Next
-                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
                         </a>
                     @else
-                        <span class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500">
+                        <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
                             Next
-                            <i class="fas fa-arrow-right ml-3 text-gray-400"></i>
                         </span>
                     @endif
                 </div>
-            </nav>
-            
-            <!-- Mobile Pagination -->
-            <div class="mt-4 flex justify-between sm:hidden">
-                @if($residents->onFirstPage())
-                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
-                        Previous
-                    </span>
-                @else
-                    <a href="{{ $residents->appends(request()->except('page'))->previousPageUrl() }}" 
-                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Previous
-                    </a>
-                @endif
                 
-                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
-                    Page {{ $residents->currentPage() }} of {{ $residents->lastPage() }}
-                </span>
-                
-                @if($residents->hasMorePages())
-                    <a href="{{ $residents->appends(request()->except('page'))->nextPageUrl() }}" 
-                       class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Next
-                    </a>
-                @else
-                    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">
-                        Next
-                    </span>
-                @endif
+                <!-- Results Info -->
+                <div class="mt-4 text-center text-sm text-gray-500">
+                    Showing {{ $residents->firstItem() }} to {{ $residents->lastItem() }} of {{ $residents->total() }} results
+                </div>
             </div>
-            
-            <!-- Results Info -->
-            <div class="mt-4 text-center text-sm text-gray-500">
-                Showing {{ $residents->firstItem() }} to {{ $residents->lastItem() }} of {{ $residents->total() }} results
-            </div>
-        </div>
-    @endif
-    
-    <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
+        @endif
+        
+        <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden"></p>
+    </div>
 </div>
 
 <!-- Demographics Modal - Nicer & Simpler Design Only -->
@@ -826,5 +869,36 @@
 			}
 		});
 	});
+
+    // Skeleton loading control for residents page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add 1 second delay to show skeleton effect
+        setTimeout(() => {
+            const residentsHeaderSkeleton = document.getElementById('residentsHeaderSkeleton');
+            const residentsHeaderContent = document.getElementById('residentsHeaderContent');
+            const residentsStatsSkeleton = document.getElementById('residentsStatsSkeleton');
+            const residentsStatsContent = document.getElementById('residentsStatsContent');
+            const residentsTableSkeleton = document.getElementById('residentsTableSkeleton');
+            const residentsMobileSkeleton = document.getElementById('residentsMobileSkeleton');
+            const residentsTableContent = document.getElementById('residentsTableContent');
+            const residentsMobileContent = document.getElementById('residentsMobileContent');
+            const residentsPaginationSkeleton = document.getElementById('residentsPaginationSkeleton');
+            const residentsPaginationContent = document.getElementById('residentsPaginationContent');
+            
+            if (residentsHeaderSkeleton) residentsHeaderSkeleton.style.display = 'none';
+            if (residentsHeaderContent) residentsHeaderContent.style.display = 'block';
+            if (residentsStatsSkeleton) residentsStatsSkeleton.style.display = 'none';
+            if (residentsStatsContent) residentsStatsContent.style.display = 'block';
+            if (residentsTableSkeleton) residentsTableSkeleton.style.display = 'none';
+            if (residentsMobileSkeleton) residentsMobileSkeleton.style.display = 'none';
+            if (residentsTableContent) residentsTableContent.style.display = 'block';
+            if (residentsMobileContent) residentsMobileContent.style.display = 'block';
+            if (residentsPaginationSkeleton) residentsPaginationSkeleton.style.display = 'none';
+            if (residentsPaginationContent) residentsPaginationContent.style.display = 'block';
+            // Extra safety: forcibly hide skeleton pagination
+            if (residentsPaginationSkeleton) residentsPaginationSkeleton.style.display = 'none';
+            if (residentsPaginationContent) residentsPaginationContent.style.display = 'block';
+        }, 1000); // 1 second delay to show skeleton effect
+    });
 </script>
 @endsection

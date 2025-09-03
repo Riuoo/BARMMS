@@ -157,33 +157,33 @@
     </form>
 
     <!-- Requests List -->
-    @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $communityConcerns->isEmpty())
-        <div class="text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
-            <p class="text-gray-500">You haven't submitted any requests yet.</p>
-            <div class="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
-                <a href="{{ route('resident.request_blotter_report') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Submit Blotter Report
-                </a>
-                <a href="{{ route('resident.request_community_concern') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Community Concern
-                </a>
-                <a href="{{ route('resident.request_document_request') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Request Document
-                </a>
-            </div>
-        </div>
-    @else
-        <!-- Desktop Table (hidden on mobile) -->
-        <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+            @if($blotterRequests->isEmpty() && $documentRequests->isEmpty() && $communityConcerns->isEmpty())
+                <div class="text-center py-12">
+                    <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
+                    <p class="text-gray-500">You haven't submitted any requests yet.</p>
+                    <div class="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+                        <a href="{{ route('resident.request_blotter_report') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Submit Blotter Report
+                        </a>
+                        <a href="{{ route('resident.request_community_concern') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Community Concern
+                        </a>
+                        <a href="{{ route('resident.request_document_request') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Request Document
+                        </a>
+                    </div>
+                </div>
+            @else
+                <!-- Desktop Table (hidden on mobile) -->
+                <div class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -360,12 +360,14 @@
                         @endforeach
                     </tbody>
                 </table>
+                    </div>
+                </div>
             </div>
-        </div>
+                </div>
 
-        <!-- Mobile Cards (hidden on desktop) -->
-        <div class="md:hidden space-y-4" id="requestsMobileCards">
-            @foreach($blotterRequests as $request)
+                <!-- Mobile Cards (hidden on desktop) -->
+                <div class="md:hidden space-y-4" id="requestsMobileCards">
+                    @foreach($blotterRequests as $request)
             <div class="request-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-type="blotter" data-status="{{ $request->status }}">
                 <div class="flex items-start justify-between">
                     <div class="flex items-center">
@@ -440,9 +442,9 @@
                     </p>
                 </div>
             </div>
-            @endforeach
-        </div>
-    @endif
+                    @endforeach
+                </div>
+            @endif
 
     <p id="noResultsMessage" class="text-center text-gray-500 mt-5 hidden">No requests match your search criteria.</p>
 
@@ -645,6 +647,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCounts();
     // Update counts on window resize
     window.addEventListener('resize', updateCounts);
+
+
 });
 </script>
 @endsection

@@ -10,173 +10,268 @@
 @section('title', 'Document Templates')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Section -->
-    <div class="mb-8">
+<div class="max-w-7xl mx-auto pt-2">
+    <!-- Header Skeleton -->
+    <div id="templatesHeaderSkeleton" class="mb-3 animate-pulse">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Document Templates</h1>
-                <p class="text-gray-600">Manage and customize document templates for residents</p>
+                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-96 bg-gray-100 rounded"></div>
             </div>
             <div class="mt-4 sm:mt-0">
-                @if($canPerformTransactions)
-                <a href="{{ route('admin.templates.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Create New Template
-                </a>
-                @endif
+                <div class="h-10 w-40 bg-gray-200 rounded"></div>
             </div>
         </div>
     </div>
 
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-check-circle text-green-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-green-800">{{ session('success') }}</p>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-800">{{ session('error') }}</p>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- Search and Filter Section -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+    <!-- Filters Skeleton -->
+    <div id="templatesFiltersSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-3 animate-pulse">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- Search Input -->
             <div class="md:col-span-2">
-                <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search Templates</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
-                    </div>
-                    <input type="text" id="searchInput" placeholder="Search by document type, description..."
-                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
-                </div>
+                <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
             </div>
-
-            <!-- Category Filter -->
             <div>
-                <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                <select id="categoryFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                    <option value="">All Categories</option>
-                    <option value="certificates">Certificates</option>
-                    <option value="clearances">Clearances</option>
-                    <option value="permits">Permits</option>
-                    <option value="identifications">Identifications</option>
-                    <option value="reports">Reports</option>
-                    <option value="other">Other</option>
-                </select>
+                <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
             </div>
-
-            <!-- Status Filter -->
             <div>
-                <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <select id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
+                <div class="h-4 w-20 bg-gray-200 rounded mb-2"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
             </div>
         </div>
-
-        <!-- Quick Actions -->
         <div class="mt-4 pt-4 border-t border-gray-200">
             <div class="flex flex-wrap gap-2">
-                <button id="showAllBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                    <i class="fas fa-list mr-1"></i>
-                    Show All
-                </button>
-                <button id="showActiveBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                    <i class="fas fa-check-circle mr-1"></i>
-                    Active Only
-                </button>
-                <button id="showRecentBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                    <i class="fas fa-clock mr-1"></i>
-                    Recently Updated
-                </button>
+                <div class="h-8 w-24 bg-gray-200 rounded"></div>
+                <div class="h-8 w-28 bg-gray-200 rounded"></div>
+                <div class="h-8 w-32 bg-gray-200 rounded"></div>
             </div>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-file-alt text-blue-600 text-sm"></i>
+    <!-- Stats Skeleton -->
+    <div id="templatesStatsSkeleton" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3 animate-pulse">
+        @for ($i = 0; $i < 4; $i++)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-6 w-16 bg-gray-300 rounded"></div>
                     </div>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Total Templates</p>
-                    <p class="text-2xl font-semibold text-gray-900" id="totalTemplates">{{ $templates->count() }}</p>
-                </div>
             </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Active Templates</p>
-                    <p class="text-2xl font-semibold text-gray-900" id="activeTemplates">{{ $templates->where('is_active', true)->count() }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-clock text-yellow-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Recently Updated</p>
-                    <p class="text-2xl font-semibold text-gray-900" id="recentTemplates">{{ $templates->where('updated_at', '>=', now()->subDays(7))->count() }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-certificate text-purple-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Most Used</p>
-                    <p class="text-2xl font-semibold text-gray-900" id="mostUsedTemplate">-</p>
-                </div>
-            </div>
-        </div>
+        @endfor
     </div>
 
-    <!-- Templates Grid -->
-    <div id="templatesContainer">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Templates Grid Skeleton -->
+    <div id="templatesGridSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+        @for ($i = 0; $i < 6; $i++)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6">
+                    <!-- Template Header Skeleton -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                            <div>
+                                <div class="h-5 w-32 bg-gray-200 rounded mb-2"></div>
+                                <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Template Info Skeleton -->
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center">
+                            <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="h-4 w-28 bg-gray-200 rounded"></div>
+                        </div>
+                        <div class="h-4 w-48 bg-gray-200 rounded"></div>
+                    </div>
+
+                    <!-- Action Buttons Skeleton -->
+                    <div class="flex flex-wrap gap-2">
+                        <div class="h-8 w-20 bg-gray-200 rounded"></div>
+                        <div class="h-8 w-24 bg-gray-200 rounded"></div>
+                        <div class="h-8 w-20 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        @endfor
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="templatesContent" style="display: none;">
+        <!-- Header Section -->
+        <div class="mb-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Document Templates</h1>
+                    <p class="text-gray-600">Manage and customize document templates for residents</p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    @if($canPerformTransactions)
+                    <a href="{{ route('admin.templates.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create New Template
+                    </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="mb-3 bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-3 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-800">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Search and Filter Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-3">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Search Input -->
+                <div class="md:col-span-2">
+                    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search Templates</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="searchInput" placeholder="Search by document type, description..."
+                               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div>
+                    <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <select id="categoryFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                        <option value="">All Categories</option>
+                        <option value="certificates">Certificates</option>
+                        <option value="clearances">Clearances</option>
+                        <option value="permits">Permits</option>
+                        <option value="identifications">Identifications</option>
+                        <option value="reports">Reports</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex flex-wrap gap-2">
+                    <button id="showAllBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-list mr-1"></i>
+                        Show All
+                    </button>
+                    <button id="showActiveBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        Active Only
+                    </button>
+                    <button id="showRecentBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-clock mr-1"></i>
+                        Recently Updated
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-alt text-blue-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Templates</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="totalTemplates">{{ $templates->count() }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Active Templates</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="activeTemplates">{{ $templates->where('is_active', true)->count() }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-clock text-yellow-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Recently Updated</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="recentTemplates">{{ $templates->where('updated_at', '>=', now()->subDays(7))->count() }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-certificate text-purple-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Most Used</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="mostUsedTemplate">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates Grid -->
+        <div id="templatesContainer">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($templates as $template)
                 <div class="template-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200" 
                      data-template-type="{{ strtolower($template->document_type) }}"
@@ -248,7 +343,7 @@
                         <i class="fas fa-file-alt text-gray-400 text-2xl"></i>
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
-                    <p class="text-gray-500 mb-6">Get started by creating your first template using our easy-to-use wizard.</p>
+                    <p class="text-gray-500 mb-3">Get started by creating your first template using our easy-to-use wizard.</p>
                     @if($canPerformTransactions)
                     <a href="{{ route('admin.templates.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
                         <i class="fas fa-plus mr-2"></i>
@@ -257,20 +352,21 @@
                     @endif
                 </div>
             @endforelse
+            </div>
         </div>
-    </div>
 
-    <!-- No Results Message -->
-    <div id="noResults" class="hidden text-center py-12">
-        <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <i class="fas fa-search text-gray-400 text-2xl"></i>
+        <!-- No Results Message -->
+        <div id="noResults" class="hidden text-center py-12">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-search text-gray-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
+            <p class="text-gray-500">Try adjusting your search criteria or filters.</p>
+            <button id="clearFilters" class="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
+                <i class="fas fa-times mr-2"></i>
+                Clear Filters
+            </button>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
-        <p class="text-gray-500">Try adjusting your search criteria or filters.</p>
-        <button id="clearFilters" class="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
-            <i class="fas fa-times mr-2"></i>
-            Clear Filters
-        </button>
     </div>
 </div>
 
@@ -442,6 +538,22 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('hidden');
         }
     });
+
+    // Skeleton loading control for templates
+    const templatesHeaderSkeleton = document.getElementById('templatesHeaderSkeleton');
+    const templatesFiltersSkeleton = document.getElementById('templatesFiltersSkeleton');
+    const templatesStatsSkeleton = document.getElementById('templatesStatsSkeleton');
+    const templatesGridSkeleton = document.getElementById('templatesGridSkeleton');
+    const templatesContent = document.getElementById('templatesContent');
+    
+    // Hide skeleton and show content after a short delay
+    setTimeout(() => {
+        if (templatesHeaderSkeleton) templatesHeaderSkeleton.style.display = 'none';
+        if (templatesFiltersSkeleton) templatesFiltersSkeleton.style.display = 'none';
+        if (templatesStatsSkeleton) templatesStatsSkeleton.style.display = 'none';
+        if (templatesGridSkeleton) templatesGridSkeleton.style.display = 'none';
+        if (templatesContent) templatesContent.style.display = 'block';
+    }, 1000); // 1 second delay to match other pages
 });
 </script>
 @endpush 

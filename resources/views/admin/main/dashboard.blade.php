@@ -4,8 +4,20 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Enhanced Header Section -->
-    <div class="mb-3">
+    <!-- Header Skeleton -->
+    <div id="dashboardHeaderSkeleton" class="mb-3 animate-pulse">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="mb-4 sm:mb-0">
+                <div class="h-10 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-96 bg-gray-100 rounded"></div>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <div class="bg-green-100 border border-green-200 rounded-lg px-8 py-4 w-56 h-10"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Header Content (hidden initially) -->
+    <div id="dashboardHeaderContent" class="mb-3 hidden">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ $barangay_profile->name ?? 'Admin' }}</h1>
@@ -18,159 +30,203 @@
             </div>
         </div>
     </div>
-
-    <!-- Quick Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-3">
-        <!-- Total Residents Card -->
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
-            <div class="p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-blue-100 text-xs font-medium">Total Residents</p>
-                        <p class="text-white text-2xl font-bold">{{ $totalResidents }}</p>
+    <!-- Stats Cards -->
+    <div id="dashboardStatsContainer">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-3 animate-pulse">
+            @for ($i = 0; $i < 4; $i++)
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-4 flex flex-col justify-between h-32">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-8 w-16 bg-gray-300 rounded"></div>
+                        </div>
+                        <div class="bg-gray-200 rounded-full w-10 h-10"></div>
                     </div>
-                    <div class="bg-blue-400 bg-opacity-30 rounded-full p-2">
-                        <i class="fas fa-users text-white text-lg"></i>
+                    <div class="h-4 w-20 bg-gray-100 rounded"></div>
+                </div>
+            @endfor
+        </div>
+        <div id="dashboardStatsContent" class="hidden">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-3">
+                <!-- Total Residents Card -->
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-blue-100 text-xs font-medium">Total Residents</p>
+                                <p class="text-white text-2xl font-bold">{{ $totalResidents }}</p>
+                            </div>
+                            <div class="bg-blue-400 bg-opacity-30 rounded-full p-2">
+                                <i class="fas fa-users text-white text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ route('admin.residents') }}" class="text-blue-100 hover:text-white text-xs font-medium flex items-center">
+                                View all <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-2">
-                    <a href="{{ route('admin.residents') }}" class="text-blue-100 hover:text-white text-xs font-medium flex items-center">
-                        View all <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                    </a>
+
+                <!-- Total Account Requests Card -->
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-orange-100 text-xs font-medium">Account Requests</p>
+                                <p class="text-white text-2xl font-bold">{{ $totalAccountRequests }}</p>
+                            </div>
+                            <div class="bg-orange-400 bg-opacity-30 rounded-full p-2">
+                                <i class="fas fa-user-plus text-white text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ route('admin.requests.new-account-requests') }}" class="text-orange-100 hover:text-white text-xs font-medium flex items-center">
+                                Manage <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Blotter Reports Card -->
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-purple-100 text-xs font-medium">Blotter Reports</p>
+                                <p class="text-white text-2xl font-bold">{{ $totalBlotterReports }}</p>
+                            </div>
+                            <div class="bg-purple-400 bg-opacity-30 rounded-full p-2">
+                                <i class="fas fa-file-alt text-white text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ route('admin.blotter-reports') }}" class="text-purple-100 hover:text-white text-xs font-medium flex items-center">
+                                View <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Document Requests Card -->
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-green-100 text-xs font-medium">Document Requests</p>
+                                <p class="text-white text-2xl font-bold">{{ $totalDocumentRequests }}</p>
+                            </div>
+                            <div class="bg-green-400 bg-opacity-30 rounded-full p-2">
+                                <i class="fas fa-file-signature text-white text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ route('admin.document-requests') }}" class="text-green-100 hover:text-white text-xs font-medium flex items-center">
+                                Manage <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Total Account Requests Card -->
-        <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
-            <div class="p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-orange-100 text-xs font-medium">Account Requests</p>
-                        <p class="text-white text-2xl font-bold">{{ $totalAccountRequests }}</p>
-                    </div>
-                    <div class="bg-orange-400 bg-opacity-30 rounded-full p-2">
-                        <i class="fas fa-user-plus text-white text-lg"></i>
+    </div>
+    <!-- Charts Section -->
+    <div id="chartsContainer">
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 animate-pulse">
+            @for ($i = 0; $i < 2; $i++)
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4 flex flex-col justify-between h-80">
+                    <div class="h-6 w-2/5 bg-gray-200 rounded mb-6"></div>
+                    <div class="flex items-center justify-center flex-1">
+                        <div class="bg-gray-200 rounded-full w-40 h-40"></div>
                     </div>
                 </div>
-                <div class="mt-2">
-                    <a href="{{ route('admin.requests.new-account-requests') }}" class="text-orange-100 hover:text-white text-xs font-medium flex items-center">
-                        Manage <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                    </a>
-                </div>
-            </div>
+            @endfor
         </div>
-
-        <!-- Total Blotter Reports Card -->
-        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
-            <div class="p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-purple-100 text-xs font-medium">Blotter Reports</p>
-                        <p class="text-white text-2xl font-bold">{{ $totalBlotterReports }}</p>
-                    </div>
-                    <div class="bg-purple-400 bg-opacity-30 rounded-full p-2">
-                        <i class="fas fa-file-alt text-white text-lg"></i>
+        <div id="chartsContent" class="hidden">
+            <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Resident Demographics Chart -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Resident Demographics</h3>
+                        <div class="chart-container" style="position: relative; height:200px; width:100%">
+                            <canvas id="residentDemographicsChart"></canvas>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-2">
-                    <a href="{{ route('admin.blotter-reports') }}" class="text-purple-100 hover:text-white text-xs font-medium flex items-center">
-                        View <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Document Requests Card -->
-        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
-            <div class="p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-green-100 text-xs font-medium">Document Requests</p>
-                        <p class="text-white text-2xl font-bold">{{ $totalDocumentRequests }}</p>
+                <!-- Document Requests Distribution -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Document Requests Distribution</h3>
+                        <div class="chart-container" style="position: relative; height:200px; width:100%">
+                            <canvas id="documentRequestsChart"></canvas>
+                        </div>
                     </div>
-                    <div class="bg-green-400 bg-opacity-30 rounded-full p-2">
-                        <i class="fas fa-file-signature text-white text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <a href="{{ route('admin.document-requests') }}" class="text-green-100 hover:text-white text-xs font-medium flex items-center">
-                        Manage <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                    </a>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Enhanced Data Visualization Section -->
-    <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Resident Demographics Chart -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100">
-            <div class="p-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Resident Demographics</h3>
-                <div class="chart-container" style="position: relative; height:200px; width:100%">
-                    <canvas id="residentDemographicsChart"></canvas>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Document Requests Distribution -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100">
-            <div class="p-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Document Requests Distribution</h3>
-                <div class="chart-container" style="position: relative; height:200px; width:100%">
-                    <canvas id="documentRequestsChart"></canvas>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
     <!-- Trends Section -->
-    <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100">
-        <div class="p-4">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Resident Registration Trends</h3>
-            <div class="chart-container" style="position: relative; height:80px; width:100%">
-                <canvas id="residentTrendsChart"></canvas>
+    <div id="trendsContainer">
+        <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100 p-4 animate-pulse flex flex-col h-56">
+            <div class="h-6 w-2/5 bg-gray-200 rounded mb-6"></div>
+            <div class="h-20 w-full bg-gray-200 rounded flex-1"></div>
+        </div>
+        <div id="trendsContent" class="hidden">
+            <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100">
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Resident Registration Trends</h3>
+                    <div class="chart-container" style="position: relative; height:80px; width:100%">
+                        <canvas id="residentTrendsChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
     <!-- Floating Action Button -->
-    <div class="fixed bottom-6 right-6 z-50">
-        <div class="relative" x-data="{ open: false }">
-            <!-- Main FAB -->
-            <button @click="open = !open" class="bg-green-600 hover:bg-green-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110">
-                <i class="fas fa-plus text-xl"></i>
-            </button>
-            
-            <!-- FAB Menu -->
-            <div x-show="open" @click.away="open = false" x-transition class="absolute bottom-16 right-0 space-y-2">
-                <a href="{{ route('admin.barangay-profiles.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-user-plus text-blue-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Add Official</span>
-                </a>
-                <a href="{{ route('admin.residents.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-home text-green-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Add Resident</span>
-                </a>
-                <a href="{{ route('admin.blotter-reports.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-file-alt text-purple-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Create Blotter Report</span>
-                </a>
-                <a href="{{ route('admin.document-requests.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-file-alt text-purple-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Create Document Request</span>
-                </a>
-                <a href="{{ route('admin.clustering') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Resident Demographic Analysis</span>
-                </a>
-                <a href="{{ route('admin.decision-tree') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-sitemap text-indigo-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Resident Classification & Prediction</span>
-                </a>
+    <div id="fabContainer">
+        <div class="fixed bottom-6 right-6 z-50 animate-pulse flex items-center justify-center">
+            <div class="bg-gray-300 rounded-full w-16 h-16 shadow-lg flex items-center justify-center">
+                <div class="relative w-7 h-7">
+                    <div class="absolute bg-gray-400 rounded w-7 h-1 top-3 left-0"></div>
+                    <div class="absolute bg-gray-400 rounded w-1 h-7 top-0 left-3"></div>
+                </div>
+            </div>
+        </div>
+        <div id="fabContent" class="hidden">
+            <div class="fixed bottom-6 right-6 z-50">
+                <div class="relative" x-data="{ open: false }">
+                    <!-- Main FAB -->
+                    <button @click="open = !open" class="bg-green-600 hover:bg-green-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110">
+                        <i class="fas fa-plus text-xl"></i>
+                    </button>
+                    <!-- FAB Menu -->
+                    <div x-show="open" @click.away="open = false" x-transition class="absolute bottom-16 right-0 space-y-2">
+                        <a href="{{ route('admin.barangay-profiles.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-user-plus text-blue-600 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Add Official</span>
+                        </a>
+                        <a href="{{ route('admin.residents.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-home text-green-600 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Add Resident</span>
+                        </a>
+                        <a href="{{ route('admin.blotter-reports.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-file-alt text-purple-600 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Create Blotter Report</span>
+                        </a>
+                        <a href="{{ route('admin.document-requests.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-file-alt text-purple-600 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Create Document Request</span>
+                        </a>
+                        <a href="{{ route('admin.clustering') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Resident Demographic Analysis</span>
+                        </a>
+                        <a href="{{ route('admin.decision-tree') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-sitemap text-indigo-600 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Resident Classification & Prediction</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -593,6 +649,51 @@
         }, 100);
     });
 
-
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add 1 second delay to show skeleton effect
+    setTimeout(() => {
+        // Header
+        const headerSkeleton = document.getElementById('dashboardHeaderSkeleton');
+        const headerContent = document.getElementById('dashboardHeaderContent');
+        if (headerSkeleton && headerContent) {
+            headerSkeleton.style.display = 'none';
+            headerContent.classList.remove('hidden');
+        }
+        // Stats
+        const statsContainer = document.getElementById('dashboardStatsContainer');
+        const statsContent = document.getElementById('dashboardStatsContent');
+        if (statsContainer && statsContent) {
+            statsContainer.innerHTML = '';
+            statsContainer.appendChild(statsContent);
+            statsContent.classList.remove('hidden');
+        }
+        // Charts
+        const chartsContainer = document.getElementById('chartsContainer');
+        const chartsContent = document.getElementById('chartsContent');
+        if (chartsContainer && chartsContent) {
+            chartsContainer.innerHTML = '';
+            chartsContainer.appendChild(chartsContent);
+            chartsContent.classList.remove('hidden');
+        }
+        // Trends
+        const trendsContainer = document.getElementById('trendsContainer');
+        const trendsContent = document.getElementById('trendsContent');
+        if (trendsContainer && trendsContent) {
+            trendsContainer.innerHTML = '';
+            trendsContainer.appendChild(trendsContent);
+            trendsContent.classList.remove('hidden');
+        }
+        // FAB
+        const fabContainer = document.getElementById('fabContainer');
+        const fabContent = document.getElementById('fabContent');
+        if (fabContainer && fabContent) {
+            fabContainer.innerHTML = '';
+            fabContainer.appendChild(fabContent);
+            fabContent.classList.remove('hidden');
+        }
+    }, 1000); // 1 second delay to show skeleton effect
+});
 </script>
 @endsection

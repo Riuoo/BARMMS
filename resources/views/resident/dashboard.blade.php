@@ -20,7 +20,10 @@
     </div>
 
     <!-- Quick Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-6">
+    <div id="residentStatsContainer">
+        @include('components.loading.skeleton-dashboard-stats')
+        <div id="residentStatsContent" class="hidden">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-6">
         <!-- Total Blotter Reports Card -->
         <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
             <div class="p-4">
@@ -221,4 +224,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Skeleton loading control for resident dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        const residentStatsContainer = document.getElementById('residentStatsContainer');
+        const residentStatsContent = document.getElementById('residentStatsContent');
+        
+        // Hide skeleton and show content after a short delay
+        setTimeout(() => {
+            if (residentStatsContainer && residentStatsContent) {
+                residentStatsContainer.innerHTML = '';
+                residentStatsContainer.appendChild(residentStatsContent);
+                residentStatsContent.classList.remove('hidden');
+            }
+        }, 1000); // 1 second delay to show skeleton effect
+    });
+</script>
 @endsection

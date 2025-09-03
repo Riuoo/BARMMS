@@ -47,9 +47,12 @@
             <p class="text-gray-500">We'll let you know when your requests are updated.</p>
         </div>
     @else
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+        <div id="notificationsContainer">
+            @include('components.loading.skeleton-notification')
+            <div id="notificationsContent" class="hidden">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -108,6 +111,8 @@
                         @endforeach
                     </tbody>
                 </table>
+                    </div>
+                </div>
             </div>
         </div>
     @endif
@@ -230,7 +235,22 @@
     @endif
 </div>
 
-<script></script>
+<script>
+    // Skeleton loading control for notifications
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationsContainer = document.getElementById('notificationsContainer');
+        const notificationsContent = document.getElementById('notificationsContent');
+        
+        // Hide skeleton and show content after a short delay
+        setTimeout(() => {
+            if (notificationsContainer && notificationsContent) {
+                notificationsContainer.innerHTML = '';
+                notificationsContainer.appendChild(notificationsContent);
+                notificationsContent.classList.remove('hidden');
+            }
+        }, 900); // 0.9 second delay to show skeleton effect
+    });
+</script>
 @endsection
 
 

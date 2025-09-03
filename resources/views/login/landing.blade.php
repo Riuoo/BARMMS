@@ -130,7 +130,7 @@
                 </div>
 
                 <!-- Right Side - Enhanced Login Form -->
-                <div class="glass-effect rounded-2xl shadow-2xl p-8 max-w-md mx-auto w-full floating-animation">
+                <div class="glass-effect rounded-2xl shadow-2xl p-8 max-w-md mx-auto w-full">
                     <div class="flex items-center justify-center gap-4 mb-6">
                         <img src="/images/lower-malinao-brgy-logo.png" alt="Lower Malinao Barangay Logo" class="h-16 w-auto" />
                         <div>

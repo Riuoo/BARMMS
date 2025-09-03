@@ -4,15 +4,77 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Section -->
-    <div class="mb-8">
+    <!-- Header Skeleton -->
+    <div id="createDocumentHeaderSkeleton" class="mb-8 animate-pulse">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Document Request</h1>
-                <p class="text-gray-600">Request official documents from the barangay office</p>
+                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-5 w-96 bg-gray-100 rounded"></div>
             </div>
         </div>
     </div>
+
+    <!-- Form Skeleton -->
+    <div id="createDocumentFormSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
+        <div class="space-y-6">
+            <!-- Resident Information Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Information Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purpose and Details Skeleton -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-32 w-full bg-gray-200 rounded"></div>
+                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions Skeleton -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
+                <div class="h-4 w-64 bg-gray-200 rounded"></div>
+                <div class="flex space-x-3">
+                    <div class="h-10 w-24 bg-gray-200 rounded"></div>
+                    <div class="h-10 w-32 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="createDocumentContent" style="display: none;">
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Document Request</h1>
+                    <p class="text-gray-600">Request official documents from the barangay office</p>
+                </div>
+            </div>
+        </div>
 
     <!-- Success/Error Messages -->
     @if(session('success'))
@@ -152,9 +214,23 @@
             </div>
         </form>
     </div>
+    </div>
 </div>
 
 <script>
+// Skeleton loading control
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const headerSkeleton = document.getElementById('createDocumentHeaderSkeleton');
+        const formSkeleton = document.getElementById('createDocumentFormSkeleton');
+        const content = document.getElementById('createDocumentContent');
+        
+        if (headerSkeleton) headerSkeleton.style.display = 'none';
+        if (formSkeleton) formSkeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('residentSearch');
     const searchResults = document.getElementById('searchResults');

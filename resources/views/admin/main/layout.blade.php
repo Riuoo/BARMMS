@@ -1556,5 +1556,5 @@
             });
         });
     </script>
-    @yield('scripts')
+    @stack('scripts')
 </html>
