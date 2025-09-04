@@ -8,6 +8,175 @@
     $demographicService = app(\App\Services\ResidentDemographicAnalysisService::class);
 @endphp
 <div class="max-w-7xl mx-auto pt-2">
+    <!-- Header Skeleton -->
+    <div id="clusteringHeaderSkeleton" class="animate-pulse mb-6">
+        <div class="text-center">
+            <div class="h-8 w-80 bg-gray-200 rounded mx-auto mb-3"></div>
+            <div class="h-5 w-96 bg-gray-100 rounded mx-auto mb-4"></div>
+            <div class="flex flex-wrap justify-center gap-3 mb-4">
+                <div class="h-10 w-24 bg-gray-200 rounded"></div>
+                <div class="h-10 w-32 bg-gray-200 rounded"></div>
+                <div class="h-10 w-28 bg-gray-200 rounded"></div>
+                <div class="h-10 w-20 bg-gray-200 rounded"></div>
+                <div class="h-10 w-20 bg-gray-200 rounded"></div>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2">
+                <div class="h-6 w-32 bg-gray-200 rounded-full"></div>
+                <div class="h-6 w-24 bg-gray-200 rounded-full"></div>
+                <div class="h-6 w-28 bg-gray-200 rounded-full"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode Badges Skeleton -->
+    <div id="clusteringBadgesSkeleton" class="animate-pulse mb-3 flex flex-wrap items-center gap-2">
+        <div class="h-6 w-40 bg-gray-200 rounded-full"></div>
+        <div class="h-6 w-32 bg-gray-200 rounded-full"></div>
+        <div class="h-6 w-36 bg-gray-200 rounded-full"></div>
+    </div>
+
+    <!-- Warning Skeleton -->
+    <div id="clusteringWarningSkeleton" class="animate-pulse mb-3 p-4 bg-gray-50 border-l-4 border-gray-200 rounded flex items-center">
+        <div class="w-6 h-6 bg-gray-200 rounded mr-3"></div>
+        <div class="h-4 w-96 bg-gray-200 rounded"></div>
+    </div>
+
+    <!-- Metrics Cards Skeleton -->
+    <div id="clusteringMetricsSkeleton" class="animate-pulse grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3">
+        @for($i=0;$i<4;$i++)
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
+            <div class="flex items-center">
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full"></div>
+                <div class="ml-3 md:ml-4">
+                    <div class="h-3 w-20 bg-gray-200 rounded mb-1"></div>
+                    <div class="h-6 w-12 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+        @endfor
+    </div>
+
+    <!-- Chart Section Skeleton -->
+    <div id="clusteringChartSkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100 mb-3">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div class="h-6 w-48 bg-gray-200 rounded"></div>
+                <div class="flex space-x-2">
+                    <div class="h-8 w-20 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-24 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+            <div class="h-96 w-full bg-gray-100 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Toggle Button Skeleton -->
+    <div id="clusteringToggleSkeleton" class="animate-pulse flex justify-start mb-2">
+        <div class="h-10 w-32 bg-gray-200 rounded"></div>
+    </div>
+
+    <!-- Detailed Analysis Skeleton -->
+    <div id="clusteringDetailsSkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100 mb-3">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div class="h-6 w-32 bg-gray-200 rounded"></div>
+                <div class="flex flex-wrap gap-2 items-center mb-2">
+                    <div class="h-10 w-48 bg-gray-200 rounded"></div>
+                    <div class="h-10 w-32 bg-gray-200 rounded"></div>
+                    <div class="h-10 w-28 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
+                    <div class="grid grid-cols-12 gap-4">
+                        @for($i=0;$i<12;$i++)
+                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                        @endfor
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    @for($i=0;$i<8;$i++)
+                    <div class="px-6 py-4">
+                        <div class="grid grid-cols-12 gap-4 items-center">
+                            @for($j=0;$j<12;$j++)
+                            <div class="h-4 w-12 bg-gray-100 rounded"></div>
+                            @endfor
+                        </div>
+                    </div>
+                    @endfor
+                </div>
+                <div class="flex flex-wrap justify-between items-center mt-4">
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                    <div class="flex gap-2">
+                        <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                        <div class="h-8 w-12 bg-gray-200 rounded"></div>
+                        <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Summary Skeleton -->
+    <div id="clusteringSummarySkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100">
+        <div class="p-6">
+            <div class="mb-3">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-96 bg-gray-100 rounded"></div>
+            </div>
+            <div class="mb-3 flex flex-wrap gap-4 items-center">
+                <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                <div class="h-6 w-24 bg-gray-200 rounded"></div>
+                <div class="h-6 w-28 bg-gray-200 rounded"></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                @for($i=0;$i<4;$i++)
+                <div class="shadow-lg rounded-xl bg-white border border-gray-100 mb-3 p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="h-8 w-32 bg-gray-200 rounded-full"></div>
+                        <div class="h-6 w-20 bg-gray-200 rounded-full"></div>
+                    </div>
+                    <div class="mb-2 flex flex-wrap gap-2">
+                        <div class="h-5 w-24 bg-gray-200 rounded-full"></div>
+                        <div class="h-5 w-28 bg-gray-200 rounded-full"></div>
+                        <div class="h-5 w-20 bg-gray-200 rounded-full"></div>
+                    </div>
+                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-4 w-80 bg-gray-100 rounded mb-2"></div>
+                    <div class="flex justify-between items-center mt-3">
+                        <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-28 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section Skeleton -->
+    <div id="clusteringChartsSkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100 mb-3">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div class="h-6 w-40 bg-gray-200 rounded"></div>
+                <div class="h-8 w-24 bg-gray-200 rounded"></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                @for($i=0;$i<4;$i++)
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="h-5 w-32 bg-gray-200 rounded mb-3"></div>
+                    <div class="h-72 w-full bg-gray-100 rounded"></div>
+                </div>
+                @endfor
+            </div>
+            <div class="mt-8">
+                <div class="h-5 w-40 bg-gray-200 rounded mb-3"></div>
+                <div class="h-96 w-full bg-gray-100 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="clusteringContent" style="display: none;">
     <!-- Simple Header Section -->
     <div class="mb-6">
         <div class="text-center">
@@ -852,6 +1021,21 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        ['clusteringHeaderSkeleton','clusteringBadgesSkeleton','clusteringWarningSkeleton','clusteringMetricsSkeleton','clusteringChartSkeleton','clusteringToggleSkeleton','clusteringDetailsSkeleton','clusteringSummarySkeleton','clusteringChartsSkeleton'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        const content = document.getElementById('clusteringContent');
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -4,25 +4,123 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Section -->
-    <div class="mb-3">
+    <!-- Header Skeleton -->
+    <div id="hcaHeaderSkeleton" class="animate-pulse mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Health Center Activities</h1>
-                <p class="text-sm md:text-base text-gray-600">Plan, manage, and review health center activities</p>
+                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-96 bg-gray-100 rounded"></div>
             </div>
             <div class="mt-4 sm:mt-0 flex space-x-2">
-                <a href="{{ route('admin.health-center-activities.upcoming') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                    <i class="fas fa-calendar-alt mr-2"></i>
-                    Upcoming
-                </a>
-                <a href="{{ route('admin.health-center-activities.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Add Activity
-                </a>
+                <div class="h-10 w-24 bg-gray-200 rounded"></div>
+                <div class="h-10 w-32 bg-gray-200 rounded"></div>
             </div>
         </div>
     </div>
+
+    <!-- Search Skeleton -->
+    <div id="hcaSearchSkeleton" class="animate-pulse mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="sm:w-48">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="flex space-x-2">
+                <div class="h-10 w-20 bg-gray-200 rounded"></div>
+                <div class="h-10 w-20 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Skeleton -->
+    <div id="hcaStatsSkeleton" class="animate-pulse grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+        @for($i = 0; $i < 4; $i++)
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                <div class="ml-3">
+                    <div class="h-3 w-20 bg-gray-200 rounded mb-1"></div>
+                    <div class="h-6 w-12 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+        @endfor
+    </div>
+
+    <!-- Warning Skeleton -->
+    <div id="hcaWarningSkeleton" class="animate-pulse mb-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <div class="flex items-center">
+            <div class="w-5 h-5 bg-gray-200 rounded mr-3"></div>
+            <div class="flex-1">
+                <div class="h-4 w-80 bg-gray-200 rounded mb-2"></div>
+                <div class="h-3 w-96 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Skeleton -->
+    <div id="hcaGridSkeleton" class="animate-pulse grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        @for($i = 0; $i < 6; $i++)
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="w-full h-48 bg-gray-200"></div>
+            <div class="p-5">
+                <div class="h-6 w-48 bg-gray-200 rounded mb-3"></div>
+                <div class="h-4 w-full bg-gray-100 rounded mb-2"></div>
+                <div class="h-4 w-3/4 bg-gray-100 rounded mb-4"></div>
+                <div class="space-y-2 mb-4">
+                    <div class="h-3 w-32 bg-gray-200 rounded"></div>
+                    <div class="h-3 w-28 bg-gray-200 rounded"></div>
+                </div>
+                <div class="space-y-2 mb-5">
+                    <div class="h-3 w-40 bg-gray-200 rounded"></div>
+                    <div class="h-3 w-36 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex-1 h-8 bg-gray-200 rounded"></div>
+                    <div class="flex-1 h-8 bg-gray-200 rounded"></div>
+                    <div class="flex-1 h-8 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+        @endfor
+    </div>
+
+    <!-- Pagination Skeleton -->
+    <div id="hcaPaginationSkeleton" class="animate-pulse mt-6">
+        <div class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+            <div class="h-10 w-20 bg-gray-200 rounded"></div>
+            <div class="hidden md:flex space-x-2">
+                <div class="h-10 w-8 bg-gray-200 rounded"></div>
+                <div class="h-10 w-8 bg-gray-200 rounded"></div>
+                <div class="h-10 w-8 bg-gray-200 rounded"></div>
+            </div>
+            <div class="h-10 w-16 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="hcaContent" style="display: none;">
+        <!-- Header Section -->
+        <div class="mb-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div class="mb-4 sm:mb-0">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Health Center Activities</h1>
+                    <p class="text-sm md:text-base text-gray-600">Plan, manage, and review health center activities</p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex space-x-2">
+                    <a href="{{ route('admin.health-center-activities.upcoming') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        Upcoming
+                    </a>
+                    <a href="{{ route('admin.health-center-activities.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Activity
+                    </a>
+                </div>
+            </div>
+        </div>
 
     <!-- Success/Error Messages -->
     @if(session('success'))
@@ -373,6 +471,7 @@
         </div>
         @endif
     @endif
+    </div>
 </div>
 
 <style>
@@ -389,4 +488,23 @@
     overflow: hidden;
 }
 </style>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const skeletonElements = [
+            'hcaHeaderSkeleton', 'hcaSearchSkeleton', 'hcaStatsSkeleton',
+            'hcaWarningSkeleton', 'hcaGridSkeleton', 'hcaPaginationSkeleton'
+        ];
+        skeletonElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
+        const content = document.getElementById('hcaContent');
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 @endsection 

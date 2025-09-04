@@ -4,6 +4,108 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
+    <!-- Header Skeleton -->
+    <div id="vaccinationShowHeaderSkeleton" class="animate-pulse mb-6">
+        <div class="flex justify-between items-center">
+            <div class="h-8 w-80 bg-gray-200 rounded"></div>
+            <div class="flex space-x-2">
+                <div class="h-10 w-32 bg-gray-200 rounded"></div>
+                <div class="h-10 w-32 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vaccination Information Header Skeleton -->
+    <div id="vaccinationShowInfoSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-16 h-16 bg-gray-200 rounded-full"></div>
+                <div class="ml-4">
+                    <div class="h-6 w-48 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-4 w-40 bg-gray-100 rounded mb-1"></div>
+                    <div class="h-4 w-56 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+            <div class="h-8 w-24 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Detailed Information Grid Skeleton -->
+    <div id="vaccinationShowGridSkeleton" class="animate-pulse grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Vaccine Details Skeleton -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                <div class="h-6 w-32 bg-gray-200 rounded"></div>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                    <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex justify-between">
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vaccination Details Skeleton -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                <div class="h-6 w-40 bg-gray-200 rounded"></div>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex justify-between">
+                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex justify-between">
+                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
+                    <div class="h-6 w-24 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Information Skeleton -->
+    <div id="vaccinationShowPatientSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+            <div class="h-6 w-40 bg-gray-200 rounded"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <div class="h-4 w-20 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-32 bg-gray-200 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-40 bg-gray-200 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-16 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-48 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Information Skeleton -->
+    <div id="vaccinationShowRecordSkeleton" class="animate-pulse bg-gray-50 rounded-lg p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="h-4 w-32 bg-gray-200 rounded"></div>
+            <div class="h-4 w-36 bg-gray-200 rounded"></div>
+            <div class="h-4 w-20 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="vaccinationShowContent" style="display: none;">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Vaccination Record Details</h1>
         <div class="flex space-x-2">
@@ -158,5 +260,25 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const skeletonElements = [
+            'vaccinationShowHeaderSkeleton', 'vaccinationShowInfoSkeleton', 'vaccinationShowGridSkeleton',
+            'vaccinationShowPatientSkeleton', 'vaccinationShowRecordSkeleton'
+        ];
+        skeletonElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
+        const content = document.getElementById('vaccinationShowContent');
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 @endsection

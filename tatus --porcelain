@@ -1,0 +1,41 @@
+warning: in the working copy of 'resources/views/admin/barangay-profiles/profile.blade.php', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'resources/views/resident/profile.blade.php', CRLF will be replaced by LF the next time Git touches it
+ database/seeders/MedicineTransactionSeeder.php     |  51 [32m++[m[31m-[m
+ .../admin/barangay-profiles/profile.blade.php      | 113 [32m+++++[m
+ resources/views/admin/clustering/index.blade.php   | 184 [32m++++++++[m
+ .../views/admin/decision-tree/index.blade.php      | 170 [32m++++++++[m
+ .../health-center-activities/create.blade.php      | 194 [32m++++++++[m[31m-[m
+ .../admin/health-center-activities/edit.blade.php  | 146 [32m++++++[m[31m-[m
+ .../admin/health-center-activities/index.blade.php | 142 [32m+++++[m[31m-[m
+ .../admin/health-center-activities/show.blade.php  | 126 [32m+++++[m[31m-[m
+ .../views/admin/health/health-reports.blade.php    | 150 [32m+++++++[m
+ .../views/admin/medical-records/create.blade.php   | 107 [32m+++++[m
+ .../views/admin/medical-records/index.blade.php    | 152 [32m+++++++[m
+ .../views/admin/medical-records/show.blade.php     | 228 [32m++++++++++[m
+ .../views/admin/medicine-requests/create.blade.php |  81 [32m++++[m
+ .../views/admin/medicine-requests/index.blade.php  | 125 [32m++++++[m
+ .../admin/medicine-transactions/index.blade.php    | 482 [32m+++++++++++++[m[31m--------[m
+ resources/views/admin/medicines/create.blade.php   | 311 [32m+++++++[m[31m------[m
+ resources/views/admin/medicines/edit.blade.php     | 365 [32m+++++++++[m[31m-------[m
+ resources/views/admin/medicines/index.blade.php    | 152 [32m+++++++[m
+ resources/views/admin/medicines/report.blade.php   | 299 [32m++++++++[m[31m-----[m
+ .../admin/notifications/notifications.blade.php    |  69 [32m+++[m
+ .../vaccination-records/child-profiles.blade.php   |  93 [32m++++[m
+ .../vaccination-records/create-adult.blade.php     |  77 [32m++++[m
+ .../create-child-profile.blade.php                 |  86 [32m++++[m
+ .../vaccination-records/create-child.blade.php     |  78 [32m++++[m
+ .../vaccination-records/create-elderly.blade.php   |  77 [32m++++[m
+ .../admin/vaccination-records/create.blade.php     | 253 [31m-----------[m
+ .../views/admin/vaccination-records/due.blade.php  | 110 [32m+++++[m
+ .../views/admin/vaccination-records/edit.blade.php | 117 [32m+++++[m
+ .../admin/vaccination-records/index.blade.php      | 128 [32m+++++[m[31m-[m
+ .../views/admin/vaccination-records/show.blade.php | 122 [32m++++++[m
+ resources/views/resident/dashboard.blade.php       |  29 [32m++[m
+ resources/views/resident/layout.blade.php          |   2 [32m+[m
+ resources/views/resident/my_requests.blade.php     | 118 [32m+++++[m
+ resources/views/resident/notifications.blade.php   |   2 [32m+[m[31m-[m
+ resources/views/resident/profile.blade.php         |  67 [32m++[m[31m-[m
+ .../resident/request_blotter_report.blade.php      |  48 [32m++[m
+ .../resident/request_community_concern.blade.php   |  55 [32m+++[m
+ .../resident/request_document_request.blade.php    |  51 [32m++[m[31m-[m
+ 38 files changed, 4277 insertions(+), 883 deletions(-)

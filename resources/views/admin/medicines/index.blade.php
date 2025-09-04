@@ -1,9 +1,141 @@
+@php
+    $userRole = session('user_role');
+    $isAdmin = $userRole === 'admin';
+    $isSecretary = $userRole === 'secretary';
+    $canPerformTransactions = $isAdmin || $isSecretary;
+@endphp
 @extends('admin.main.layout')
 
 @section('title', 'Medicine Inventory')
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
+    <!-- Header Skeleton -->
+    <div id="medicineHeaderSkeleton" class="animate-pulse mb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="mb-4 sm:mb-0">
+                <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-80 bg-gray-100 rounded"></div>
+            </div>
+            <div class="mt-4 sm:mt-0 flex space-x-2">
+                <div class="h-10 w-40 bg-gray-200 rounded"></div>
+                <div class="h-10 w-40 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Skeleton -->
+    <div id="medicineFiltersSkeleton" class="animate-pulse mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="w-full sm:w-48">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="w-full sm:w-48">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="flex space-x-2">
+                <div class="h-10 w-20 bg-gray-200 rounded"></div>
+                <div class="h-10 w-20 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Skeleton -->
+    <div id="medicineStatsSkeleton" class="animate-pulse grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-3">
+        @for($i = 0; $i < 3; $i++)
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
+            <div class="flex items-center">
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full"></div>
+                <div class="ml-3 md:ml-4">
+                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
+                    <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+        @endfor
+    </div>
+
+    <!-- Table Skeleton (Desktop) -->
+    <div id="medicineTableSkeleton" class="animate-pulse hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
+            <div class="grid grid-cols-5 gap-4">
+                <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                <div class="h-4 w-16 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+        <div class="divide-y divide-gray-200">
+            @for($i = 0; $i < 5; $i++)
+            <div class="px-6 py-4">
+                <div class="grid grid-cols-5 gap-4">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
+                        <div class="h-3 w-40 bg-gray-100 rounded"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-28 bg-gray-200 rounded mb-1"></div>
+                        <div class="h-3 w-36 bg-gray-100 rounded"></div>
+                    </div>
+                    <div>
+                        <div class="h-4 w-24 bg-gray-200 rounded mb-1"></div>
+                        <div class="h-3 w-20 bg-gray-100 rounded"></div>
+                    </div>
+                    <div>
+                        <div class="h-3 w-20 bg-gray-200 rounded"></div>
+                    </div>
+                    <div class="flex justify-center space-x-2">
+                        <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                        <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            @endfor
+        </div>
+    </div>
+
+    <!-- Mobile Cards Skeleton -->
+    <div id="medicineMobileSkeleton" class="animate-pulse md:hidden space-y-3">
+        @for($i = 0; $i < 3; $i++)
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
+                    <div class="h-3 w-24 bg-gray-100 rounded mb-1"></div>
+                </div>
+                <div class="h-6 w-16 bg-gray-200 rounded"></div>
+            </div>
+            <div class="text-sm text-gray-600 mb-2">
+                <div class="h-3 w-24 bg-gray-200 rounded mb-1"></div>
+                <div class="h-3 w-20 bg-gray-100 rounded mb-1"></div>
+                <div class="h-3 w-28 bg-gray-100 rounded"></div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
+                <div class="h-8 w-16 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+        @endfor
+    </div>
+
+    <!-- Pagination Skeleton -->
+    <div id="medicinePaginationSkeleton" class="animate-pulse mt-6">
+        <div class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
+            <div class="h-10 w-20 bg-gray-200 rounded"></div>
+            <div class="hidden md:flex space-x-2">
+                <div class="h-10 w-8 bg-gray-200 rounded"></div>
+                <div class="h-10 w-8 bg-gray-200 rounded"></div>
+                <div class="h-10 w-8 bg-gray-200 rounded"></div>
+            </div>
+            <div class="h-10 w-16 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="medicineContent" style="display: none;">
     <!-- Header Section -->
     <div class="mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -251,4 +383,24 @@
         </div>
     @endif
 </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const skeletonElements = [
+            'medicineHeaderSkeleton', 'medicineFiltersSkeleton', 'medicineStatsSkeleton',
+            'medicineTableSkeleton', 'medicineMobileSkeleton', 'medicinePaginationSkeleton'
+        ];
+        skeletonElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
+        const content = document.getElementById('medicineContent');
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 @endsection

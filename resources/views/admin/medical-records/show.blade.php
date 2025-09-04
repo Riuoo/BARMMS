@@ -4,6 +4,212 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
+    <!-- Header Skeleton -->
+    <div id="showMedicalHeaderSkeleton" class="animate-pulse mb-6">
+        <div class="flex justify-between items-center">
+            <div class="h-8 w-80 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Patient Information Header Skeleton -->
+    <div id="showMedicalPatientSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-16 h-16 bg-gray-200 rounded-full"></div>
+                <div class="ml-4">
+                    <div class="h-6 w-48 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-4 w-40 bg-gray-100 rounded mb-1"></div>
+                    <div class="h-4 w-56 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+            <div class="h-8 w-24 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Detailed Information Grid Skeleton -->
+    <div id="showMedicalGridSkeleton" class="animate-pulse grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Consultation Details Skeleton -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                <div class="h-6 w-48 bg-gray-200 rounded"></div>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex justify-between">
+                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
+                    <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex justify-between">
+                    <div class="h-4 w-36 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex justify-between">
+                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Information Skeleton -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                <div class="h-6 w-40 bg-gray-200 rounded"></div>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex justify-between">
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-40 bg-gray-200 rounded"></div>
+                </div>
+                <div class="flex justify-between">
+                    <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-48 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chief Complaint Skeleton -->
+    <div id="showMedicalComplaintSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+            <div class="h-6 w-32 bg-gray-200 rounded"></div>
+        </div>
+        <div class="space-y-2">
+            <div class="h-4 w-full bg-gray-200 rounded"></div>
+            <div class="h-4 w-3/4 bg-gray-100 rounded"></div>
+            <div class="h-4 w-1/2 bg-gray-100 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Vital Signs Skeleton -->
+    <div id="showMedicalVitalsSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+            <div class="h-6 w-28 bg-gray-200 rounded"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <div class="h-4 w-24 bg-gray-200 rounded mb-1"></div>
+                <div class="h-6 w-16 bg-gray-200 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-20 bg-gray-200 rounded mb-1"></div>
+                <div class="h-6 w-12 bg-gray-200 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-20 bg-gray-200 rounded mb-1"></div>
+                <div class="h-6 w-12 bg-gray-200 rounded"></div>
+            </div>
+            <div>
+                <div class="h-4 w-28 bg-gray-200 rounded mb-1"></div>
+                <div class="h-6 w-8 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Information Skeleton -->
+    <div id="showMedicalInfoSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+            <div class="h-6 w-40 bg-gray-200 rounded"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="h-4 w-16 bg-gray-200 rounded mb-2"></div>
+                <div class="space-y-2">
+                    <div class="h-4 w-full bg-gray-200 rounded"></div>
+                    <div class="h-4 w-3/4 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Treatment Information Skeleton -->
+    <div id="showMedicalTreatmentSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+            <div class="h-6 w-44 bg-gray-200 rounded"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
+                <div class="space-y-2">
+                    <div class="h-4 w-full bg-gray-200 rounded"></div>
+                    <div class="h-4 w-2/3 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medicine Requests Skeleton -->
+    <div id="showMedicalMedicineSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center">
+                <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                <div class="h-6 w-36 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <div class="min-w-full">
+                <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                    <div class="grid grid-cols-6 gap-4">
+                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-12 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-12 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+                @for($i = 0; $i < 2; $i++)
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="grid grid-cols-6 gap-4">
+                        <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-12 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                        <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Notes Skeleton -->
+    <div id="showMedicalNotesSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+            <div class="h-6 w-32 bg-gray-200 rounded"></div>
+        </div>
+        <div class="space-y-2">
+            <div class="h-4 w-full bg-gray-200 rounded"></div>
+            <div class="h-4 w-4/5 bg-gray-100 rounded"></div>
+            <div class="h-4 w-3/5 bg-gray-100 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Record Information Skeleton -->
+    <div id="showMedicalRecordSkeleton" class="animate-pulse bg-gray-50 rounded-lg p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="h-4 w-32 bg-gray-200 rounded"></div>
+            <div class="h-4 w-36 bg-gray-200 rounded"></div>
+            <div class="h-4 w-20 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="showMedicalContent" style="display: none;">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Medical Record Entry Details</h1>
     </div>
@@ -283,5 +489,27 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const skeletonElements = [
+            'showMedicalHeaderSkeleton', 'showMedicalPatientSkeleton', 'showMedicalGridSkeleton',
+            'showMedicalComplaintSkeleton', 'showMedicalVitalsSkeleton', 'showMedicalInfoSkeleton',
+            'showMedicalTreatmentSkeleton', 'showMedicalMedicineSkeleton', 'showMedicalNotesSkeleton',
+            'showMedicalRecordSkeleton'
+        ];
+        skeletonElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
+        const content = document.getElementById('showMedicalContent');
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 @endsection

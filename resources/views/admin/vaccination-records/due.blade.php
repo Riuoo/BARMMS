@@ -4,6 +4,96 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
+    <!-- Breadcrumb Skeleton -->
+    <div id="dueBreadcrumbSkeleton" class="animate-pulse mb-4">
+        <div class="inline-flex items-center space-x-1 md:space-x-3">
+            <div class="h-4 w-40 bg-gray-200 rounded"></div>
+            <div class="h-4 w-4 bg-gray-200 rounded"></div>
+            <div class="h-4 w-32 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Header Skeleton -->
+    <div id="dueHeaderSkeleton" class="animate-pulse mb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="mb-4 sm:mb-0">
+                <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-80 bg-gray-100 rounded"></div>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <div class="h-9 w-48 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Skeleton -->
+    <div id="dueFilterSkeleton" class="animate-pulse mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+        <div class="flex space-x-2">
+            <div class="h-8 w-20 bg-gray-200 rounded"></div>
+            <div class="h-8 w-24 bg-gray-200 rounded"></div>
+            <div class="h-8 w-28 bg-gray-200 rounded"></div>
+            <div class="h-8 w-24 bg-gray-200 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Table Skeleton -->
+    <div id="dueTableSkeleton" class="animate-pulse hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6">
+            <div class="space-y-4">
+                @for ($i = 0; $i < 5; $i++)
+                <div class="flex items-center space-x-4">
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-40 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
+                    <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                    <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                </div>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Cards Skeleton -->
+    <div id="dueMobileSkeleton" class="animate-pulse md:hidden space-y-3">
+        @for ($i = 0; $i < 3; $i++)
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex-1">
+                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
+                    <div class="h-3 w-24 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-5 w-20 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+            <div class="mb-3 space-y-2">
+                <div class="h-3 w-full bg-gray-200 rounded"></div>
+                <div class="h-3 w-3/4 bg-gray-200 rounded"></div>
+                <div class="h-3 w-1/2 bg-gray-200 rounded"></div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                <div class="h-8 w-16 bg-gray-200 rounded"></div>
+                <div class="h-8 w-20 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+        @endfor
+    </div>
+
+    <!-- Summary Skeleton -->
+    <div id="dueSummarySkeleton" class="animate-pulse mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            @for ($i = 0; $i < 4; $i++)
+            <div class="text-center">
+                <div class="h-8 w-8 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-20 bg-gray-200 rounded"></div>
+            </div>
+            @endfor
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="dueContent" style="display: none;">
     <!-- Breadcrumb Navigation -->
     <nav class="mb-4" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -249,4 +339,24 @@
         </div>
     @endif
 </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const skeletonElements = [
+            'dueBreadcrumbSkeleton', 'dueHeaderSkeleton', 'dueFilterSkeleton',
+            'dueTableSkeleton', 'dueMobileSkeleton', 'dueSummarySkeleton'
+        ];
+        skeletonElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
+        const content = document.getElementById('dueContent');
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 @endsection

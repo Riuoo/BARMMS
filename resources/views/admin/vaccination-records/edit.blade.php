@@ -5,6 +5,107 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header Skeleton -->
+        <div id="editVaccinationHeaderSkeleton" class="animate-pulse mb-6">
+            <div class="flex justify-between items-center">
+                <div class="h-8 w-80 bg-gray-200 rounded"></div>
+                <div class="h-10 w-36 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+
+        <!-- Form Skeleton -->
+        <div id="editVaccinationFormSkeleton" class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <!-- Error Messages Skeleton -->
+            <div class="mb-4 p-3 rounded border border-gray-200 bg-gray-50">
+                <div class="h-4 w-48 bg-gray-200 rounded mb-2"></div>
+                <div class="space-y-1">
+                    <div class="h-3 w-64 bg-gray-100 rounded"></div>
+                    <div class="h-3 w-56 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Patient Information Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                        <div class="h-6 w-40 bg-gray-200 rounded"></div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        </div>
+                        <div>
+                            <div class="h-4 w-16 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vaccine Information Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                        <div class="h-6 w-40 bg-gray-200 rounded"></div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        </div>
+                        <div>
+                            <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dose Information Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                        <div class="h-6 w-32 bg-gray-200 rounded"></div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vaccination Details Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
+                        <div class="h-6 w-40 bg-gray-200 rounded"></div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        </div>
+                        <div>
+                            <div class="h-4 w-28 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-10 w-full bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-between items-center mt-6">
+                    <div class="h-4 w-80 bg-gray-200 rounded"></div>
+                    <div class="flex space-x-4">
+                        <div class="h-10 w-24 bg-gray-200 rounded"></div>
+                        <div class="h-10 w-48 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real Content (hidden initially) -->
+        <div id="editVaccinationContent" style="display: none;">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-900">Edit Vaccination Record</h1>
             <a href="{{ route('admin.vaccination-records.show', $vaccinationRecord->id) }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
@@ -144,6 +245,22 @@
                 </div>
             </form>
         </div>
+        </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const headerSkeleton = document.getElementById('editVaccinationHeaderSkeleton');
+        const formSkeleton = document.getElementById('editVaccinationFormSkeleton');
+        const content = document.getElementById('editVaccinationContent');
+        if (headerSkeleton) headerSkeleton.style.display = 'none';
+        if (formSkeleton) formSkeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 @endsection 

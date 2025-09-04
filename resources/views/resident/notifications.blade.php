@@ -248,7 +248,7 @@
                 notificationsContainer.appendChild(notificationsContent);
                 notificationsContent.classList.remove('hidden');
             }
-        }, 900); // 0.9 second delay to show skeleton effect
+        }, 1000); // 1 second delay to show skeleton effect
     });
 </script>
 @endsection

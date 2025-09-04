@@ -4,6 +4,55 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header Skeleton -->
+    <div id="rpHeaderSkeleton" class="animate-pulse mb-8">
+        <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
+        <div class="h-4 w-96 bg-gray-100 rounded"></div>
+    </div>
+
+    <!-- Cards Skeleton -->
+    <div id="rpCardsSkeleton" class="animate-pulse grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div class="ml-4">
+                    <div class="h-6 w-40 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-4 w-32 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+            <div class="space-y-4">
+                @for($i=0;$i<4;$i++)
+                <div>
+                    <div class="h-4 w-28 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-10 w-full bg-gray-200 rounded"></div>
+                </div>
+                @endfor
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div class="ml-4">
+                    <div class="h-6 w-48 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-4 w-40 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+            <div class="space-y-4">
+                @for($i=0;$i<3;$i++)
+                <div>
+                    <div class="h-4 w-36 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-10 w-full bg-gray-200 rounded"></div>
+                </div>
+                @endfor
+                <div class="pt-4">
+                    <div class="h-10 w-full bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="rpContent" style="display: none;">
     <!-- Header Section -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -257,5 +306,21 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const hs = document.getElementById('rpHeaderSkeleton');
+        const cs = document.getElementById('rpCardsSkeleton');
+        const content = document.getElementById('rpContent');
+        if (hs) hs.style.display = 'none';
+        if (cs) cs.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush

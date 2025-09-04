@@ -4,6 +4,161 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Header Skeleton -->
+    <div id="decisionTreeHeaderSkeleton" class="animate-pulse mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="h-10 w-96 bg-gray-200 rounded mb-2"></div>
+                <div class="h-6 w-80 bg-gray-100 rounded"></div>
+            </div>
+            <div class="hidden md:flex items-center space-x-4">
+                <div class="h-10 w-32 bg-gray-200 rounded"></div>
+                <div class="h-10 w-28 bg-gray-200 rounded"></div>
+                <div class="h-10 w-28 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Cards Skeleton -->
+    <div id="decisionTreeMetricsSkeleton" class="animate-pulse grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        @for($i=0;$i<4;$i++)
+        <div class="bg-gray-200 rounded-xl shadow-lg overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-100 rounded mb-2"></div>
+                        <div class="h-8 w-16 bg-gray-100 rounded"></div>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-100 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+        @endfor
+    </div>
+
+    <!-- Analysis Panels Skeleton -->
+    <div id="decisionTreePanelsSkeleton" class="animate-pulse grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        @for($i=0;$i<2;$i++)
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="h-6 w-48 bg-gray-200 rounded"></div>
+                    <div class="h-6 w-24 bg-gray-200 rounded-full"></div>
+                </div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="h-20 bg-gray-100 rounded-lg"></div>
+                        <div class="h-20 bg-gray-100 rounded-lg"></div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="h-4 w-24 bg-gray-200 rounded"></div>
+                        @for($j=0;$j<3;$j++)
+                        <div class="h-12 bg-gray-100 rounded-lg"></div>
+                        @endfor
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endfor
+    </div>
+
+    <!-- Program Recommendations Skeleton -->
+    <div id="decisionTreeProgramsSkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100 mb-8">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded"></div>
+                <div class="h-6 w-24 bg-gray-200 rounded-full"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @for($i=0;$i<6;$i++)
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                        <div class="h-5 w-20 bg-gray-200 rounded-full"></div>
+                    </div>
+                    <div class="h-3 w-48 bg-gray-100 rounded"></div>
+                </div>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Skeleton -->
+    <div id="decisionTreeTableSkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100 mb-8">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="h-6 w-48 bg-gray-200 rounded"></div>
+                <div class="flex space-x-4">
+                    <div class="h-10 w-48 bg-gray-200 rounded"></div>
+                    <div class="h-10 w-32 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
+                    <div class="grid grid-cols-8 gap-4">
+                        @for($i=0;$i<8;$i++)
+                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
+                        @endfor
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    @for($i=0;$i<8;$i++)
+                    <div class="px-6 py-4">
+                        <div class="grid grid-cols-8 gap-4 items-center">
+                            @for($j=0;$j<8;$j++)
+                            <div class="h-4 w-16 bg-gray-100 rounded"></div>
+                            @endfor
+                        </div>
+                    </div>
+                    @endfor
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Skeleton -->
+    <div id="decisionTreeInsightsSkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100">
+        <div class="p-6">
+            <div class="h-6 w-48 bg-gray-200 rounded mb-6"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <div class="h-5 w-48 bg-gray-200 rounded mb-4"></div>
+                    <div class="space-y-4">
+                        @for($i=0;$i<3;$i++)
+                        <div class="p-4 border-l-4 border-gray-200 bg-gray-50 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="h-4 w-40 bg-gray-200 rounded mb-1"></div>
+                                    <div class="h-3 w-60 bg-gray-100 rounded"></div>
+                                </div>
+                                <div class="h-6 w-12 bg-gray-200 rounded"></div>
+                            </div>
+                        </div>
+                        @endfor
+                    </div>
+                </div>
+                <div>
+                    <div class="h-5 w-48 bg-gray-200 rounded mb-4"></div>
+                    <div class="space-y-4">
+                        @for($i=0;$i<3;$i++)
+                        <div class="p-4 border-l-4 border-gray-200 bg-gray-50 rounded-lg">
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 bg-gray-200 rounded-full mr-4"></div>
+                                <div class="flex-1">
+                                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
+                                    <div class="h-3 w-48 bg-gray-100 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                        @endfor
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="decisionTreeContent" style="display: none;">
     <!-- Enhanced Header Section -->
     <div class="mb-8">
         <div class="flex items-center justify-between">
@@ -502,6 +657,21 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        ['decisionTreeHeaderSkeleton','decisionTreeMetricsSkeleton','decisionTreePanelsSkeleton','decisionTreeProgramsSkeleton','decisionTreeTableSkeleton','decisionTreeInsightsSkeleton'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        const content = document.getElementById('decisionTreeContent');
+        if (content) content.style.display = 'block';
+    }, 1000);
+});
+</script>
+@endpush
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

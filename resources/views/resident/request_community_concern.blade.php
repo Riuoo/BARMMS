@@ -4,6 +4,50 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header Skeleton -->
+    <div id="rcHeaderSkeleton" class="animate-pulse mb-8">
+        <div class="h-8 w-96 bg-gray-200 rounded mb-2"></div>
+        <div class="h-4 w-[28rem] bg-gray-100 rounded"></div>
+    </div>
+
+    <!-- Form Skeleton -->
+    <div id="rcFormSkeleton" class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="space-y-6">
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-56 bg-gray-200 rounded mb-4"></div>
+                <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-56 bg-gray-200 rounded mb-4"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-10 w-full bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-56 bg-gray-200 rounded mb-4"></div>
+                <div class="h-4 w-28 bg-gray-200 rounded mb-2"></div>
+                <div class="h-24 w-full bg-gray-200 rounded"></div>
+            </div>
+            <div class="border-b border-gray-200 pb-6">
+                <div class="h-6 w-56 bg-gray-200 rounded mb-4"></div>
+                <div class="h-32 w-full bg-gray-100 rounded border border-dashed border-gray-300"></div>
+            </div>
+            <div class="flex items-center justify-between pt-2">
+                <div class="h-4 w-72 bg-gray-200 rounded"></div>
+                <div class="flex space-x-3">
+                    <div class="h-10 w-24 bg-gray-200 rounded"></div>
+                    <div class="h-10 w-40 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Content (hidden initially) -->
+    <div id="rcContent" style="display: none;">
     <!-- Header Section -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -224,10 +268,21 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Skeleton transition
+    setTimeout(() => {
+        const hs = document.getElementById('rcHeaderSkeleton');
+        const fs = document.getElementById('rcFormSkeleton');
+        const content = document.getElementById('rcContent');
+        if (hs) hs.style.display = 'none';
+        if (fs) fs.style.display = 'none';
+        if (content) content.style.display = 'block';
+    }, 1000);
+
     // File upload preview
     const fileInput = document.getElementById('media');
     const uploadArea = document.getElementById('uploadArea');

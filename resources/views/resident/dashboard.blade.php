@@ -106,6 +106,27 @@
     </div>
 
     <!-- Recent Activity Section -->
+    <!-- Recent Activity Skeleton -->
+    <div id="residentRecentSkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-4">
+        <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
+        <div class="space-y-3">
+            @for($i = 0; $i < 4; $i++)
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
+                    <div class="ml-4">
+                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-3 w-56 bg-gray-100 rounded"></div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="h-5 w-20 bg-gray-200 rounded-full"></div>
+                    <div class="h-3 w-24 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+            @endfor
+        </div>
+    </div>
     @if($recentBlotterRequests->isNotEmpty() || $recentDocumentRequests->isNotEmpty() || $recentCommunityConcerns->isNotEmpty())
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
@@ -191,6 +212,10 @@
     @endif
     
     <!-- Floating Action Button -->
+    <!-- FAB Skeleton -->
+    <div id="residentFabSkeleton" class="fixed bottom-6 right-6 z-40">
+        <div class="w-14 h-14 bg-gray-200 rounded-full shadow"></div>
+    </div>
     <div class="fixed bottom-6 right-6 z-50">
         <div class="relative" x-data="{ open: false }">
             <!-- Main FAB -->
@@ -230,6 +255,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         const residentStatsContainer = document.getElementById('residentStatsContainer');
         const residentStatsContent = document.getElementById('residentStatsContent');
+        const residentRecentSkeleton = document.getElementById('residentRecentSkeleton');
+        const residentFabSkeleton = document.getElementById('residentFabSkeleton');
         
         // Hide skeleton and show content after a short delay
         setTimeout(() => {
@@ -238,6 +265,8 @@
                 residentStatsContainer.appendChild(residentStatsContent);
                 residentStatsContent.classList.remove('hidden');
             }
+            if (residentRecentSkeleton) residentRecentSkeleton.style.display = 'none';
+            if (residentFabSkeleton) residentFabSkeleton.style.display = 'none';
         }, 1000); // 1 second delay to show skeleton effect
     });
 </script>

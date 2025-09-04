@@ -25,6 +25,10 @@ class MedicineTransactionSeeder extends Seeder
             return;
         }
 
+        // Clear existing medicine transactions
+        MedicineTransaction::truncate();
+        $this->command->info('Cleared existing medicine transactions');
+
         // Seed IN transactions (restocking)
         foreach ($medicines as $medicine) {
             MedicineTransaction::create([
@@ -37,18 +41,41 @@ class MedicineTransactionSeeder extends Seeder
             ]);
         }
 
-        // Seed OUT transactions based on medicine requests
-        foreach ($requests as $request) {
-            MedicineTransaction::create([
-                'medicine_id' => $request->medicine_id,
-                'resident_id' => $request->resident_id,
-                'medical_record_id' => $request->medical_record_id,
-                'transaction_type' => 'OUT',
-                'quantity' => $request->quantity_approved ?? $request->quantity_requested,
-                'transaction_date' => $request->request_date,
-                'prescribed_by' => $request->approved_by,
-                'notes' => 'Dispensed for request ID: ' . $request->id,
-            ]);
+        // Seed OUT transactions - one per resident only
+        $residents = \App\Models\Residents::all();
+        foreach ($residents as $resident) {
+            // Get a random medicine request for this resident (if any exists)
+            $residentRequest = $requests->where('resident_id', $resident->id)->first();
+            
+            if ($residentRequest) {
+                // Use the existing request data
+                MedicineTransaction::create([
+                    'medicine_id' => $residentRequest->medicine_id,
+                    'resident_id' => $resident->id,
+                    'medical_record_id' => $residentRequest->medical_record_id,
+                    'transaction_type' => 'OUT',
+                    'quantity' => $residentRequest->quantity_approved ?? $residentRequest->quantity_requested,
+                    'transaction_date' => $residentRequest->request_date,
+                    'prescribed_by' => $residentRequest->approved_by,
+                    'notes' => 'Dispensed for resident: ' . $resident->name,
+                ]);
+            } else {
+                // If no request exists, create a transaction with random medicine
+                $randomMedicine = $medicines->random();
+                $randomPrescriber = $prescribers->random();
+                $randomMedicalRecord = $medicalRecords->random();
+                
+                MedicineTransaction::create([
+                    'medicine_id' => $randomMedicine->id,
+                    'resident_id' => $resident->id,
+                    'medical_record_id' => $randomMedicalRecord->id,
+                    'transaction_type' => 'OUT',
+                    'quantity' => rand(1, 10),
+                    'transaction_date' => now()->subDays(rand(1, 30)),
+                    'prescribed_by' => $randomPrescriber,
+                    'notes' => 'Dispensed for resident: ' . $resident->name,
+                ]);
+            }
         }
 
         // Seed EXPIRED adjustments for some medicines
