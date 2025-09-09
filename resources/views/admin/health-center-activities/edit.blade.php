@@ -5,131 +5,15 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="max-w-4xl mx-auto">
-        <!-- Header Skeleton -->
-        <div id="hcaEditHeaderSkeleton" class="animate-pulse flex justify-between items-center mb-6">
-            <div class="h-8 w-80 bg-gray-200 rounded"></div>
-            <div class="h-10 w-40 bg-gray-200 rounded"></div>
-        </div>
-
-        <!-- Form Skeleton -->
-        <div id="hcaEditFormSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6">
-            <div class="space-y-6">
-                <!-- Activity Information Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-
-                <!-- Date and Time Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-
-                <!-- Description Section -->
-                <div class="mb-6">
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-20 w-full bg-gray-200 rounded"></div>
-                </div>
-
-                <!-- Image Upload Section -->
-                <div class="mb-6">
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-32 w-32 bg-gray-200 rounded mb-3"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    <div class="h-3 w-80 bg-gray-100 rounded mt-2"></div>
-                </div>
-
-                <!-- Objectives Section -->
-                <div class="mb-6">
-                    <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-16 w-full bg-gray-200 rounded"></div>
-                </div>
-
-                <!-- Target Population Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-
-                <!-- Resources and Staff Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-16 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-16 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-
-                <!-- Status & Organizer Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <div class="h-4 w-20 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <div class="h-4 w-48 bg-gray-200 rounded"></div>
-                </div>
-
-                <!-- Additional Notes Section -->
-                <div class="mb-6">
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-16 w-full bg-gray-200 rounded"></div>
-                </div>
-
-                <!-- Submit Buttons -->
-                <div class="flex justify-end space-x-4">
-                    <div class="h-10 w-20 bg-gray-200 rounded"></div>
-                    <div class="h-10 w-48 bg-gray-200 rounded"></div>
-                </div>
-            </div>
+        <!-- Skeleton Component -->
+        <div id="hcaEditSkeleton">
+            @include('components.loading.skeleton-health-activity-edit')
         </div>
 
         <!-- Real Content (hidden initially) -->
         <div id="hcaEditContent" style="display: none;">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold text-gray-900">Edit Health Center Activity</h1>
-                <a href="{{ route('admin.health-center-activities.show', $activity->id) }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-                    <i class="fas fa-arrow-left mr-2"></i>Back to Details
-                </a>
             </div>
 
         <div class="bg-white rounded-lg shadow p-6">
@@ -316,12 +200,12 @@
                 </div>
 
                 <!-- Submit Button -->
-                <div class="flex justify-end space-x-4">
+                <div class="flex justify-between mt-8">
                     <a href="{{ route('admin.health-center-activities.show', $activity->id) }}" 
-                       class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                         Cancel
                     </a>
-                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                    <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
                         <i class="fas fa-save mr-2"></i>Update Health Center Activity
                     </button>
                 </div>
@@ -335,11 +219,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('hcaEditHeaderSkeleton');
-        const formSkeleton = document.getElementById('hcaEditFormSkeleton');
+        const skeleton = document.getElementById('hcaEditSkeleton');
         const content = document.getElementById('hcaEditContent');
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (formSkeleton) formSkeleton.style.display = 'none';
+        if (skeleton) skeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 });

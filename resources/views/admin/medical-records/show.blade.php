@@ -4,234 +4,45 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
-    <!-- Header Skeleton -->
-    <div id="showMedicalHeaderSkeleton" class="animate-pulse mb-6">
-        <div class="flex justify-between items-center">
-            <div class="h-8 w-80 bg-gray-200 rounded"></div>
-        </div>
-    </div>
-
-    <!-- Patient Information Header Skeleton -->
-    <div id="showMedicalPatientSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center">
-                <div class="w-16 h-16 bg-gray-200 rounded-full"></div>
-                <div class="ml-4">
-                    <div class="h-6 w-48 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-4 w-40 bg-gray-100 rounded mb-1"></div>
-                    <div class="h-4 w-56 bg-gray-100 rounded"></div>
-                </div>
-            </div>
-            <div class="h-8 w-24 bg-gray-200 rounded"></div>
-        </div>
-    </div>
-
-    <!-- Detailed Information Grid Skeleton -->
-    <div id="showMedicalGridSkeleton" class="animate-pulse grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Consultation Details Skeleton -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center mb-4">
-                <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                <div class="h-6 w-48 bg-gray-200 rounded"></div>
-            </div>
-            <div class="space-y-4">
-                <div class="flex justify-between">
-                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                </div>
-                <div class="flex justify-between">
-                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
-                    <div class="h-6 w-20 bg-gray-200 rounded"></div>
-                </div>
-                <div class="flex justify-between">
-                    <div class="h-4 w-36 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
-                </div>
-                <div class="flex justify-between">
-                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Patient Information Skeleton -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center mb-4">
-                <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                <div class="h-6 w-40 bg-gray-200 rounded"></div>
-            </div>
-            <div class="space-y-4">
-                <div class="flex justify-between">
-                    <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
-                </div>
-                <div class="flex justify-between">
-                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-40 bg-gray-200 rounded"></div>
-                </div>
-                <div class="flex justify-between">
-                    <div class="h-4 w-16 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-48 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chief Complaint Skeleton -->
-    <div id="showMedicalComplaintSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex items-center mb-4">
-            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-            <div class="h-6 w-32 bg-gray-200 rounded"></div>
-        </div>
-        <div class="space-y-2">
-            <div class="h-4 w-full bg-gray-200 rounded"></div>
-            <div class="h-4 w-3/4 bg-gray-100 rounded"></div>
-            <div class="h-4 w-1/2 bg-gray-100 rounded"></div>
-        </div>
-    </div>
-
-    <!-- Vital Signs Skeleton -->
-    <div id="showMedicalVitalsSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex items-center mb-4">
-            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-            <div class="h-6 w-28 bg-gray-200 rounded"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-                <div class="h-4 w-24 bg-gray-200 rounded mb-1"></div>
-                <div class="h-6 w-16 bg-gray-200 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-20 bg-gray-200 rounded mb-1"></div>
-                <div class="h-6 w-12 bg-gray-200 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-20 bg-gray-200 rounded mb-1"></div>
-                <div class="h-6 w-12 bg-gray-200 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-28 bg-gray-200 rounded mb-1"></div>
-                <div class="h-6 w-8 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Medical Information Skeleton -->
-    <div id="showMedicalInfoSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex items-center mb-4">
-            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-            <div class="h-6 w-40 bg-gray-200 rounded"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <div class="h-4 w-16 bg-gray-200 rounded mb-2"></div>
-                <div class="space-y-2">
-                    <div class="h-4 w-full bg-gray-200 rounded"></div>
-                    <div class="h-4 w-3/4 bg-gray-100 rounded"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Treatment Information Skeleton -->
-    <div id="showMedicalTreatmentSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex items-center mb-4">
-            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-            <div class="h-6 w-44 bg-gray-200 rounded"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
-                <div class="space-y-2">
-                    <div class="h-4 w-full bg-gray-200 rounded"></div>
-                    <div class="h-4 w-2/3 bg-gray-100 rounded"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Medicine Requests Skeleton -->
-    <div id="showMedicalMedicineSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex justify-between items-center mb-4">
-            <div class="flex items-center">
-                <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                <div class="h-6 w-36 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-        <div class="overflow-x-auto">
-            <div class="min-w-full">
-                <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                    <div class="grid grid-cols-6 gap-4">
-                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-12 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-12 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                @for($i = 0; $i < 2; $i++)
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="grid grid-cols-6 gap-4">
-                        <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-12 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
-                        <div class="h-6 w-20 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                @endfor
-            </div>
-        </div>
-    </div>
-
-    <!-- Additional Notes Skeleton -->
-    <div id="showMedicalNotesSkeleton" class="animate-pulse bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex items-center mb-4">
-            <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-            <div class="h-6 w-32 bg-gray-200 rounded"></div>
-        </div>
-        <div class="space-y-2">
-            <div class="h-4 w-full bg-gray-200 rounded"></div>
-            <div class="h-4 w-4/5 bg-gray-100 rounded"></div>
-            <div class="h-4 w-3/5 bg-gray-100 rounded"></div>
-        </div>
-    </div>
-
-    <!-- Record Information Skeleton -->
-    <div id="showMedicalRecordSkeleton" class="animate-pulse bg-gray-50 rounded-lg p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="h-4 w-32 bg-gray-200 rounded"></div>
-            <div class="h-4 w-36 bg-gray-200 rounded"></div>
-            <div class="h-4 w-20 bg-gray-200 rounded"></div>
-        </div>
+    <!-- Main Skeleton -->
+    <div id="showMedicalSkeleton">
+        @include('components.loading.skeleton-medical-show')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="showMedicalContent" style="display: none;">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Medical Record Entry Details</h1>
+        <div class="flex space-x-2">
+            <a href="{{ route('admin.medical-records.index') }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Records
+            </a>
+            <button type="button" onclick="openDeleteModal({{ $medicalRecord->id }})" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                <i class="fas fa-trash-alt mr-2"></i>Delete
+            </button>
+        </div>
     </div>
 
-    <!-- Patient Information Header -->
+    <!-- Patient Information Header (aligned with vaccination show) -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
         <div class="flex items-center justify-between">
             <div class="flex items-center">
-                <div class="flex-shrink-0 h-16 w-16">
-                    <div class="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
-                        <i class="fas fa-user-md text-blue-600 text-2xl"></i>
-                    </div>
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user-md text-2xl text-blue-600"></i>
                 </div>
                 <div class="ml-4">
-                    <h2 class="text-2xl font-bold text-gray-900">{{ $medicalRecord->resident->name }}</h2>
-                    <p class="text-gray-600">Consultation Date: {{ $medicalRecord->consultation_datetime->format('M d, Y') }}</p>
-                    <p class="text-gray-600">{{ $medicalRecord->resident->email }}</p>
+                    <div class="text-sm text-gray-500">Record ID: #{{ $medicalRecord->id }}</div>
+                    <h2 class="text-xl font-semibold text-gray-900">{{ $medicalRecord->resident?->name ?? 'N/A' }}</h2>
+                    <p class="text-sm text-gray-600">{{ $medicalRecord->resident?->role ?? 'Patient' }}</p>
                 </div>
             </div>
             <div class="text-right">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                    <i class="fas fa-stethoscope mr-2"></i>{{ $medicalRecord->consultation_type }}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                    @if($medicalRecord->status === 'completed') bg-green-100 text-green-800
+                    @elseif($medicalRecord->status === 'pending') bg-yellow-100 text-yellow-800
+                    @else bg-red-100 text-red-800
+                    @endif">
+                    {{ ucfirst($medicalRecord->status) }}
                 </span>
             </div>
         </div>
@@ -241,66 +52,48 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Consultation Details -->
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>Consultation Details
-            </h3>
+            <div class="flex items-center mb-4">
+                <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>
+                <h3 class="text-lg font-semibold text-gray-900">Consultation Details</h3>
+            </div>
             <div class="space-y-4">
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Consultation Date:</span>
-                    <span class="font-medium">{{ $medicalRecord->consultation_datetime->format('M d, Y') }}</span>
+                    <span class="text-gray-600">Date:</span>
+                    <span class="font-medium">{{ optional($medicalRecord->consultation_datetime)->format('M d, Y') ?? 'N/A' }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Consultation Type:</span>
-                    <span class="font-medium">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {{ $medicalRecord->consultation_type }}
-                        </span>
-                    </span>
+                    <span class="text-gray-600">Time:</span>
+                    <span class="font-medium">{{ optional($medicalRecord->consultation_datetime)->format('h:i A') ?? 'N/A' }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Healthcare Provider:</span>
-                    <span class="font-medium">{{ optional($medicalRecord->attendingHealthWorker)->name }}</span>
+                    <span class="text-gray-600">Type:</span>
+                    <span class="font-medium">{{ $medicalRecord->consultation_type ?? 'N/A' }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Follow-up Date:</span>
-                    <span class="font-medium">
-                        @if($medicalRecord->follow_up_date)
-                            @if($medicalRecord->follow_up_date->isPast())
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    OVERDUE - {{ $medicalRecord->follow_up_date->format('M d, Y') }}
-                                </span>
-                            @elseif($medicalRecord->follow_up_date->diffInDays(now()) <= 7)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    Due Soon - {{ $medicalRecord->follow_up_date->format('M d, Y') }}
-                                </span>
-                            @else
-                                {{ $medicalRecord->follow_up_date->format('M d, Y') }}
-                            @endif
-                        @else
-                            <span class="text-gray-400">Not scheduled</span>
-                        @endif
-                    </span>
+                    <span class="text-gray-600">Duration:</span>
+                    <span class="font-medium">N/A</span>
                 </div>
             </div>
         </div>
 
         <!-- Patient Information -->
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-user text-purple-500 mr-2"></i>Patient Information
-            </h3>
+            <div class="flex items-center mb-4">
+                <i class="fas fa-user text-green-600 mr-2"></i>
+                <h3 class="text-lg font-semibold text-gray-900">Patient Information</h3>
+            </div>
             <div class="space-y-4">
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Full Name:</span>
-                    <span class="font-medium">{{ $medicalRecord->resident->name }}</span>
+                    <span class="text-gray-600">Name:</span>
+                    <span class="font-medium">{{ $medicalRecord->resident?->name ?? 'N/A' }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Email Address:</span>
-                    <span class="font-medium">{{ $medicalRecord->resident->email }}</span>
+                    <span class="text-gray-600">Email:</span>
+                    <span class="font-medium">{{ $medicalRecord->resident?->email ?? 'N/A' }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Address:</span>
-                    <span class="font-medium">{{ $medicalRecord->resident->address }}</span>
+                    <span class="text-gray-600">Age:</span>
+                    <span class="font-medium">{{ $medicalRecord->resident?->age ?? 'N/A' }}</span>
                 </div>
             </div>
         </div>
@@ -308,187 +101,124 @@
 
     <!-- Chief Complaint -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>Chief Complaint
-        </h3>
+        <div class="flex items-center mb-4">
+            <i class="fas fa-exclamation-triangle text-orange-600 mr-2"></i>
+            <h3 class="text-lg font-semibold text-gray-900">Chief Complaint</h3>
+        </div>
         <p class="text-gray-700">{{ $medicalRecord->chief_complaint }}</p>
     </div>
 
     <!-- Vital Signs -->
-    @if($medicalRecord->blood_pressure || $medicalRecord->temperature || $medicalRecord->pulse_rate || $medicalRecord->respiratory_rate)
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-heartbeat text-red-500 mr-2"></i>Vital Signs
-        </h3>
+        <div class="flex items-center mb-4">
+            <i class="fas fa-heartbeat text-red-600 mr-2"></i>
+            <h3 class="text-lg font-semibold text-gray-900">Vital Signs</h3>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            @if($medicalRecord->blood_pressure)
             <div>
-                <h4 class="text-sm font-medium text-gray-600 mb-1">Blood Pressure</h4>
-                <p class="text-lg font-semibold text-gray-900">{{ $medicalRecord->blood_pressure }}</p>
+                <div class="text-sm text-gray-600 mb-1">Blood Pressure</div>
+                <div class="text-lg font-semibold">{{ $medicalRecord->blood_pressure ?? 'N/A' }}</div>
             </div>
-            @endif
-            @if($medicalRecord->temperature)
             <div>
-                <h4 class="text-sm font-medium text-gray-600 mb-1">Temperature</h4>
-                <p class="text-lg font-semibold text-gray-900">{{ $medicalRecord->temperature }}°C</p>
+                <div class="text-sm text-gray-600 mb-1">Heart Rate</div>
+                <div class="text-lg font-semibold">{{ $medicalRecord->heart_rate ?? 'N/A' }} bpm</div>
             </div>
-            @endif
-            @if($medicalRecord->pulse_rate)
             <div>
-                <h4 class="text-sm font-medium text-gray-600 mb-1">Pulse Rate</h4>
-                <p class="text-lg font-semibold text-gray-900">{{ $medicalRecord->pulse_rate }} bpm</p>
+                <div class="text-sm text-gray-600 mb-1">Temperature</div>
+                <div class="text-lg font-semibold">{{ $medicalRecord->temperature ?? 'N/A' }}°C</div>
             </div>
-            @endif
-            @if($medicalRecord->respiratory_rate)
             <div>
-                <h4 class="text-sm font-medium text-gray-600 mb-1">Respiratory Rate</h4>
-                <p class="text-lg font-semibold text-gray-900">{{ $medicalRecord->respiratory_rate }}</p>
-            </div>
-            @endif
-        </div>
-    </div>
-    @endif
-
-    <!-- Medical Information -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-stethoscope text-green-500 mr-2"></i>Medical Information
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <h4 class="font-medium text-gray-900 mb-2">Diagnosis</h4>
-                <p class="text-gray-700">
-                    @if($medicalRecord->diagnosis)
-                        {{ $medicalRecord->diagnosis }}
-                    @else
-                        <span class="text-gray-400">No diagnosis recorded</span>
-                    @endif
-                </p>
+                <div class="text-sm text-gray-600 mb-1">Weight</div>
+                <div class="text-lg font-semibold">{{ $medicalRecord->weight ?? 'N/A' }} kg</div>
             </div>
         </div>
     </div>
 
-    <!-- Treatment Information -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-pills text-yellow-500 mr-2"></i>Treatment Information
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <h4 class="font-medium text-gray-900 mb-2">Prescribed Medications</h4>
-                <p class="text-gray-700">
-                    @if($medicalRecord->prescribed_medications)
-                        {{ $medicalRecord->prescribed_medications }}
-                    @else
-                        <span class="text-gray-400">No medications prescribed</span>
-                    @endif
-                </p>
+    <!-- Diagnosis & Treatment -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-stethoscope text-purple-600 mr-2"></i>
+                <h3 class="text-lg font-semibold text-gray-900">Diagnosis</h3>
             </div>
+            <p class="text-gray-700">{{ $medicalRecord->diagnosis }}</p>
+    </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-pills text-green-600 mr-2"></i>
+                <h3 class="text-lg font-semibold text-gray-900">Treatment</h3>
+            </div>
+            <p class="text-gray-700">{{ $medicalRecord->treatment }}</p>
         </div>
     </div>
 
     <!-- Follow-up Information -->
-    @if($medicalRecord->follow_up_notes)
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-calendar-check text-blue-500 mr-2"></i>Follow-up Information
-        </h3>
-        <p class="text-gray-700">{{ $medicalRecord->follow_up_notes }}</p>
-    </div>
-    @endif
-
-    <!-- Medicine Requests -->
-    @if($medicalRecord->medicineRequests->count() > 0)
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                <i class="fas fa-pills text-green-500 mr-2"></i>Medicine Requests
-            </h3>
+        <div class="flex items-center mb-4">
+            <i class="fas fa-calendar-check text-indigo-600 mr-2"></i>
+            <h3 class="text-lg font-semibold text-gray-900">Follow-up Information</h3>
         </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medicine</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved By</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($medicalRecord->medicineRequests as $request)
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $request->medicine->name }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $request->quantity_approved }}/{{ $request->quantity_requested }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $request->request_date->format('M d, Y') }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $request->approvedByUser->name ?? 'Unknown User' }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900">
-                                @if($request->notes)
-                                    {{ Str::limit($request->notes, 50) }}
-                                @else
-                                    <span class="text-gray-400">No notes</span>
-                                @endif
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="text-sm text-gray-600 mb-2">Next Appointment</div>
+                <div class="font-medium">{{ $medicalRecord->follow_up_date ? $medicalRecord->follow_up_date->format('M d, Y') : 'Not scheduled' }}</div>
+            </div>
+            <div>
+                <div class="text-sm text-gray-600 mb-2">Health Worker</div>
+                <div class="font-medium">{{ $medicalRecord->health_worker_name ?? 'N/A' }}</div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($request->quantity_approved > 0)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <i class="fas fa-check mr-1"></i>Dispensed
-                                </span>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
         </div>
     </div>
-    @else
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                <i class="fas fa-pills text-gray-400 mr-2"></i>Medicine Requests
-            </h3>
-        </div>
-        <p class="text-gray-500 text-center py-4">No medicine requests associated with this medical record.</p>
-    </div>
-    @endif
-
-    <!-- Additional Notes -->
-    @if($medicalRecord->notes)
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-sticky-note text-purple-500 mr-2"></i>Additional Notes
-        </h3>
-        <p class="text-gray-700">{{ $medicalRecord->notes }}</p>
-    </div>
-    @endif
 
     <!-- Record Information -->
     <div class="bg-gray-50 rounded-lg p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-            <div>
-                <span class="font-medium">Created:</span> {{ $medicalRecord->created_at->format('M d, Y g:i A') }}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center">
+                <i class="fas fa-calendar-plus text-2xl text-blue-600 mb-2"></i>
+                <p class="text-sm text-gray-600">Created</p>
+                <p class="font-medium">{{ optional($medicalRecord->created_at)->format('M d, Y') ?? 'N/A' }}</p>
             </div>
-            <div>
-                <span class="font-medium">Last Updated:</span> {{ $medicalRecord->updated_at->format('M d, Y g:i A') }}
+            <div class="text-center">
+                <i class="fas fa-edit text-2xl text-green-600 mb-2"></i>
+                <p class="text-sm text-gray-600">Last Updated</p>
+                <p class="font-medium">{{ optional($medicalRecord->updated_at)->format('M d, Y') ?? 'N/A' }}</p>
             </div>
-            <div>
-                <span class="font-medium">Record ID:</span> {{ $medicalRecord->id }}
+            <div class="text-center">
+                <i class="fas fa-user-md text-2xl text-purple-600 mb-2"></i>
+                <p class="text-sm text-gray-600">Health Worker</p>
+                <p class="font-medium">{{ $medicalRecord->health_worker_name ?? 'N/A' }}</p>
             </div>
         </div>
     </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal (match barangay profiles) -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Delete Medical Record</h3>
+                <p class="text-sm text-gray-500">This action cannot be undone.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to delete this medical record? This will permanently remove the record from the system.</p>
+        <form id="deleteForm" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200">
+                    Delete Record
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -496,20 +226,26 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const skeletonElements = [
-            'showMedicalHeaderSkeleton', 'showMedicalPatientSkeleton', 'showMedicalGridSkeleton',
-            'showMedicalComplaintSkeleton', 'showMedicalVitalsSkeleton', 'showMedicalInfoSkeleton',
-            'showMedicalTreatmentSkeleton', 'showMedicalMedicineSkeleton', 'showMedicalNotesSkeleton',
-            'showMedicalRecordSkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.style.display = 'none';
-        });
+        const skeleton = document.getElementById('showMedicalSkeleton');
         const content = document.getElementById('showMedicalContent');
+        if (skeleton) skeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 });
+
+function openDeleteModal(recordId) {
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    form.action = `/admin/medical-records/${recordId}`;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
 </script>
 @endpush
 @endsection

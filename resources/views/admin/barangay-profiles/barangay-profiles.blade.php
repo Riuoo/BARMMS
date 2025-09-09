@@ -12,108 +12,36 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Header Skeleton -->
-    <div id="profilesHeaderSkeleton" class="mb-3 animate-pulse">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <div class="h-10 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-5 w-96 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                <div class="bg-gray-200 border border-gray-200 rounded-lg px-8 py-4 w-56 h-10"></div>
-            </div>
-        </div>
+    <div id="profilesHeaderSkeleton">
+        @include('components.loading.skeleton-header')
     </div>
     
     <!-- Stats Skeleton -->
-    <div id="profilesStatsSkeleton" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3 animate-pulse">
-        @for ($i = 0; $i < 4; $i++)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col justify-between h-28">
-                <div class="flex items-center mb-2">
-                    <div class="bg-gray-200 rounded-full w-10 h-10 mr-3"></div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-6 w-16 bg-gray-300 rounded"></div>
-                    </div>
-                </div>
-                <div class="h-4 w-20 bg-gray-100 rounded"></div>
-            </div>
-        @endfor
+    <div id="profilesStatsSkeleton">
+        @include('components.loading.skeleton-dashboard-stats')
     </div>
     
     <!-- List Skeleton (Table) - Desktop Only -->
-    <div id="profilesTableSkeleton" class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse mb-6">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        @for ($i = 0; $i < 6; $i++)
-                            <th class="px-6 py-3"><div class="h-4 w-20 bg-gray-200 rounded"></div></th>
-                        @endfor
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @for ($i = 0; $i < 6; $i++)
-                        <tr>
-                            @for ($j = 0; $j < 6; $j++)
-                                <td class="px-6 py-4"><div class="h-4 w-24 bg-gray-100 rounded"></div></td>
-                            @endfor
-                        </tr>
-                    @endfor
-                </tbody>
-            </table>
-        </div>
+    <div id="profilesTableSkeleton" class="hidden md:block mb-6">
+        @include('components.loading.skeleton-table')
     </div>
     
     <!-- List Skeleton (Mobile Cards) - Mobile Only -->
-    <div id="profilesMobileSkeleton" class="block md:hidden space-y-3 animate-pulse mb-6">
-        @for ($i = 0; $i < 4; $i++)
-            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                <div class="flex items-center mb-3">
-                    <div class="w-12 h-12 bg-gray-200 rounded-full mr-3"></div>
-                    <div class="flex-1">
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-4 w-24 bg-gray-100 rounded"></div>
-                    </div>
-                </div>
-                <div class="h-4 w-40 bg-gray-100 rounded mb-2"></div>
-                <div class="h-4 w-24 bg-gray-200 rounded"></div>
-            </div>
-        @endfor
+    <div id="profilesMobileSkeleton">
+        @include('components.loading.skeleton-mobile-cards')
     </div>
     
     <!-- Pagination Skeleton -->
-    <div id="profilesPaginationSkeleton" class="mt-6 animate-pulse">
-        <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-            <div class="-mt-px flex w-0 flex-1">
-                <div class="h-4 w-20 bg-gray-200 rounded"></div>
-            </div>
-            <div class="hidden md:-mt-px md:flex space-x-2">
-                @for ($i = 0; $i < 5; $i++)
-                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
-                @endfor
-            </div>
-            <div class="-mt-px flex w-0 flex-1 justify-end">
-                <div class="h-4 w-16 bg-gray-200 rounded"></div>
-            </div>
-        </nav>
-        <!-- Mobile Pagination Skeleton -->
-        <div class="mt-4 flex justify-between sm:hidden">
-            <div class="h-8 w-20 bg-gray-200 rounded"></div>
-            <div class="h-8 w-32 bg-gray-200 rounded"></div>
-            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-        </div>
-        <!-- Results Info Skeleton -->
-        <div class="mt-4 text-center">
-            <div class="h-4 w-48 bg-gray-200 rounded mx-auto"></div>
-        </div>
+    <div id="profilesPaginationSkeleton" class="mt-6">
+        @include('components.loading.skeleton-pagination')
     </div>
     
     <!-- Real Content (hidden initially) -->
     <div id="profilesHeaderContent" style="display: none;">
         <!-- Header Section -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Barangay Officials</h1>
+            <div class="mb-2 sm:mb-0">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Barangay Officials</h1>
                 <p class="text-sm md:text-base text-gray-600">Manage barangay officials and their profiles</p>
             </div>
             <div class="hidden md:flex items-center space-x-4">
@@ -127,7 +55,7 @@
         </div>
         
         <!-- Enhanced Filters, Search, and Bulk Actions -->
-        <form method="GET" action="{{ route('admin.barangay-profiles') }}" class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <form method="GET" action="{{ route('admin.barangay-profiles') }}" class="mt-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
             <div class="flex flex-col sm:flex-row gap-4">
                 <!-- Search Input -->
                 <div class="flex-1">
@@ -172,7 +100,7 @@
     
     <div id="profilesStatsContent" style="display: none;">
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-2">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">

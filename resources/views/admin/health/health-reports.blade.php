@@ -27,144 +27,21 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="healthHeaderSkeleton" class="animate-pulse mb-3">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-96 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                <div class="h-8 w-48 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Cards Skeleton -->
-    <div id="healthStatsSkeleton" class="animate-pulse grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-3">
-        @for ($i = 0; $i < 4; $i++)
-        <div class="bg-gray-200 rounded-lg p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="h-3 w-20 bg-gray-100 rounded mb-2"></div>
-                    <div class="h-6 w-12 bg-gray-100 rounded"></div>
-                </div>
-                <div class="w-8 h-8 bg-gray-100 rounded-full"></div>
-            </div>
-            <div class="mt-2">
-                <div class="h-3 w-16 bg-gray-100 rounded"></div>
-            </div>
-        </div>
-        @endfor
-    </div>
-
-    <!-- Alerts Skeleton -->
-    <div id="healthAlertsSkeleton" class="animate-pulse mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-gray-100 border-l-4 border-gray-300 p-4 rounded-lg">
-                <div class="flex items-center mb-2">
-                    <div class="w-5 h-5 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-4 w-40 bg-gray-200 rounded"></div>
-                </div>
-                <div class="space-y-2 ml-6">
-                    <div class="h-3 w-full bg-gray-200 rounded"></div>
-                    <div class="h-3 w-3/4 bg-gray-200 rounded"></div>
-                    <div class="h-3 w-1/2 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            <div class="bg-gray-100 border-l-4 border-gray-300 p-4 rounded-lg">
-                <div class="flex items-center mb-2">
-                    <div class="w-5 h-5 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-4 w-44 bg-gray-200 rounded"></div>
-                </div>
-                <div class="space-y-2 ml-6">
-                    <div class="h-3 w-full bg-gray-200 rounded"></div>
-                    <div class="h-3 w-2/3 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Skeleton -->
-    <div id="healthChartsSkeleton" class="animate-pulse mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
-            <div class="h-5 w-48 bg-gray-200 rounded mb-2"></div>
-            <div class="w-full h-48 bg-gray-100 rounded"></div>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
-            <div class="h-5 w-56 bg-gray-200 rounded mb-2"></div>
-            <div class="w-full h-48 bg-gray-100 rounded"></div>
-        </div>
-    </div>
-
-    <!-- Medicine Analytics Skeleton -->
-    <div id="healthMedicineSkeleton" class="animate-pulse mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
-            <div class="h-5 w-56 bg-gray-200 rounded mb-4"></div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="text-center p-3 bg-gray-100 rounded-lg">
-                    <div class="h-6 w-8 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-3 w-16 bg-gray-200 rounded"></div>
-                </div>
-                <div class="text-center p-3 bg-gray-100 rounded-lg">
-                    <div class="h-6 w-8 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-3 w-20 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            <div class="space-y-2">
-                @for ($i = 0; $i < 4; $i++)
-                <div class="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
-                    <div class="flex-1">
-                        <div class="h-3 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-3 w-24 bg-gray-200 rounded"></div>
-                    </div>
-                    <div class="h-6 w-12 bg-gray-200 rounded"></div>
-                </div>
-                @endfor
-            </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
-            <div class="h-5 w-64 bg-gray-200 rounded mb-2"></div>
-            <div class="w-full h-48 bg-gray-100 rounded"></div>
-        </div>
-    </div>
-
-    <!-- Recent Activities Skeleton -->
-    <div id="healthActivitiesSkeleton" class="animate-pulse mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        @for ($i = 0; $i < 3; $i++)
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
-            <div class="h-5 w-40 bg-gray-200 rounded mb-4"></div>
-            <div class="space-y-3">
-                @for ($j = 0; $j < 4; $j++)
-                <div class="border-l-4 border-gray-300 pl-4">
-                    <div class="h-3 w-32 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-3 w-full bg-gray-100 rounded mb-1"></div>
-                    <div class="h-3 w-20 bg-gray-100 rounded"></div>
-                </div>
-                @endfor
-            </div>
-            <div class="mt-4">
-                <div class="h-3 w-32 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-        @endfor
-    </div>
-
-    <!-- FAB Skeleton -->
-    <div id="healthFABSkeleton" class="animate-pulse fixed bottom-6 right-6 z-50">
-        <div class="w-14 h-14 bg-gray-200 rounded-full"></div>
+    <!-- Main Skeleton Container -->
+    <div id="healthDashboardSkeleton">
+        @include('components.loading.skeleton-health-dashboard')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="healthContent" style="display: none;">
     <!-- Enhanced Header Section -->
-    <div class="mb-3">
+    <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Health Dashboard</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Health Dashboard</h1>
                 <p class="text-sm md:text-base text-gray-600">Comprehensive health analytics and management overview</p>
             </div>
-            <div class="mt-4 sm:mt-0">
+            <div class="mt-4 sm:mt-0 flex items-center space-x-2">
                 <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
                     <span class="text-green-800 text-sm font-medium">Last updated: {{ now()->format('M d, Y g:i A') }}</span>
                 </div>
@@ -173,7 +50,7 @@
     </div>
 
     <!-- Health Statistics Cards Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-3">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-2">
         <!-- Total Residents Card -->
         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
             <div class="p-4">
@@ -257,7 +134,7 @@
 
     <!-- Health Alerts Section -->
     @if(isset($overdueVaccinations) && count($overdueVaccinations) > 0 || isset($analyticsAlerts) && count($analyticsAlerts) > 0)
-    <div class="mb-6">
+    <div class="mb-2">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @if(isset($overdueVaccinations) && count($overdueVaccinations) > 0)
             <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg shadow">
@@ -297,7 +174,7 @@
     @endif
 
     <!-- Enhanced Data Visualization Section -->
-    <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-2">
         <!-- Health Status Distribution Chart -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-4">
@@ -320,14 +197,14 @@
     </div>
 
     <!-- Medicine Analytics Section -->
-    <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-2">
         <!-- Critical Medicine Inventory -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Critical Medicine Inventory</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Critical Medicine Inventory</h3>
                 
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-2 gap-4 mb-2">
                     <div class="text-center p-3 bg-red-50 rounded-lg border border-red-200">
                         <div class="text-2xl font-bold text-red-600">{{ $medicineStats['low_stock'] ?? 0 }}</div>
                         <div class="text-sm text-red-700">Low Stock</div>
@@ -374,8 +251,8 @@
                 @endphp
 
                 @if($criticalMedicines->count() > 0)
-                <div class="mb-4">
-                    <div class="flex items-center mb-3">
+                <div class="mb-2">
+                    <div class="flex items-center mb-2">
                         <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
                         <span class="text-sm font-semibold text-red-700">Priority Actions Required ({{ $criticalMedicines->count() }})</span>
                     </div>
@@ -432,11 +309,11 @@
     </div>
 
     <!-- Recent Activities Section -->
-    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="mt-2 grid grid-cols-1 lg:grid-cols-3 gap-2">
         <!-- Recent Consultations -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Consultations</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Recent Consultations</h3>
                 <div class="space-y-3">
                     @foreach(safeTake($recentConsultations, 4) as $consultation)
                     <div class="border-l-4 border-blue-500 pl-4">
@@ -457,7 +334,7 @@
         <!-- Upcoming Activities -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Upcoming Activities</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Upcoming Activities</h3>
                 <div class="space-y-3">
                     @foreach(safeTake($upcomingActivities, 4) as $activity)
                     <div class="border-l-4 border-green-500 pl-4">
@@ -478,7 +355,7 @@
         <!-- Due Vaccinations -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Due Vaccinations</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Due Vaccinations</h3>
                 <div class="space-y-3">
                     @foreach(safeTake($dueVaccinations, 4) as $vaccination)
                     <div class="border-l-4 border-yellow-500 pl-4">
@@ -533,14 +410,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const skeletonElements = [
-            'healthHeaderSkeleton', 'healthStatsSkeleton', 'healthAlertsSkeleton',
-            'healthChartsSkeleton', 'healthMedicineSkeleton', 'healthActivitiesSkeleton', 'healthFABSkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.style.display = 'none';
-        });
+        const sk = document.getElementById('healthDashboardSkeleton');
+        if (sk) sk.style.display = 'none';
         const content = document.getElementById('healthContent');
         if (content) content.style.display = 'block';
     }, 1000);

@@ -12,105 +12,32 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Header Skeleton -->
-    <div id="templatesHeaderSkeleton" class="mb-3 animate-pulse">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-5 w-96 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                <div class="h-10 w-40 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="templatesHeaderSkeleton">
+        @include('components.loading.skeleton-header-one-button')
     </div>
 
     <!-- Filters Skeleton -->
-    <div id="templatesFiltersSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-3 animate-pulse">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="md:col-span-2">
-                <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-20 bg-gray-200 rounded mb-2"></div>
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-        </div>
-        <div class="mt-4 pt-4 border-t border-gray-200">
-            <div class="flex flex-wrap gap-2">
-                <div class="h-8 w-24 bg-gray-200 rounded"></div>
-                <div class="h-8 w-28 bg-gray-200 rounded"></div>
-                <div class="h-8 w-32 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="templatesFiltersSkeleton">
+        @include('components.loading.skeleton-filters')
     </div>
 
     <!-- Stats Skeleton -->
-    <div id="templatesStatsSkeleton" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3 animate-pulse">
-        @for ($i = 0; $i < 4; $i++)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    </div>
-                    <div class="ml-4">
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-6 w-16 bg-gray-300 rounded"></div>
-                    </div>
-                </div>
-            </div>
-        @endfor
+    <div id="templatesStatsSkeleton">
+        @include('components.loading.skeleton-stats')
     </div>
 
     <!-- Templates Grid Skeleton -->
-    <div id="templatesGridSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-        @for ($i = 0; $i < 6; $i++)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-6">
-                    <!-- Template Header Skeleton -->
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
-                            <div>
-                                <div class="h-5 w-32 bg-gray-200 rounded mb-2"></div>
-                                <div class="h-6 w-20 bg-gray-200 rounded"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Template Info Skeleton -->
-                    <div class="space-y-3 mb-4">
-                        <div class="flex items-center">
-                            <div class="h-4 w-32 bg-gray-200 rounded"></div>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="h-4 w-28 bg-gray-200 rounded"></div>
-                        </div>
-                        <div class="h-4 w-48 bg-gray-200 rounded"></div>
-                    </div>
-
-                    <!-- Action Buttons Skeleton -->
-                    <div class="flex flex-wrap gap-2">
-                        <div class="h-8 w-20 bg-gray-200 rounded"></div>
-                        <div class="h-8 w-24 bg-gray-200 rounded"></div>
-                        <div class="h-8 w-20 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-        @endfor
+    <div id="templatesGridSkeleton">
+        @include('components.loading.skeleton-template-cards')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="templatesContent" style="display: none;">
         <!-- Header Section -->
-        <div class="mb-3">
+        <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Document Templates</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">Document Templates</h1>
                     <p class="text-gray-600">Manage and customize document templates for residents</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
@@ -152,11 +79,11 @@
         @endif
 
         <!-- Search and Filter Section -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-3">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
                 <!-- Search Input -->
                 <div class="md:col-span-2">
-                    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search Templates</label>
+                    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search Templates</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
@@ -168,7 +95,7 @@
 
                 <!-- Category Filter -->
                 <div>
-                    <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                     <select id="categoryFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                         <option value="">All Categories</option>
                         <option value="certificates">Certificates</option>
@@ -182,7 +109,7 @@
 
                 <!-- Status Filter -->
                 <div>
-                    <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                         <option value="">All Status</option>
                         <option value="active">Active</option>
@@ -192,7 +119,6 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="mt-4 pt-4 border-t border-gray-200">
                 <div class="flex flex-wrap gap-2">
                     <button id="showAllBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                         <i class="fas fa-list mr-1"></i>
@@ -207,11 +133,10 @@
                         Recently Updated
                     </button>
                 </div>
-            </div>
         </div>
 
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -271,7 +196,7 @@
 
         <!-- Templates Grid -->
         <div id="templatesContainer">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             @forelse($templates as $template)
                 <div class="template-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200" 
                      data-template-type="{{ strtolower($template->document_type) }}"
@@ -392,6 +317,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Preview link functionality
     document.addEventListener('click', function(e) {
         const link = e.target.closest('a.preview-link');
         if (link) {
@@ -402,13 +328,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-});
-</script>
-@endpush
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const categoryFilter = document.getElementById('categoryFilter');
     const statusFilter = document.getElementById('statusFilter');
@@ -540,14 +459,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Skeleton loading control for templates
-    const templatesHeaderSkeleton = document.getElementById('templatesHeaderSkeleton');
-    const templatesFiltersSkeleton = document.getElementById('templatesFiltersSkeleton');
-    const templatesStatsSkeleton = document.getElementById('templatesStatsSkeleton');
-    const templatesGridSkeleton = document.getElementById('templatesGridSkeleton');
-    const templatesContent = document.getElementById('templatesContent');
-    
-    // Hide skeleton and show content after a short delay
     setTimeout(() => {
+        const templatesHeaderSkeleton = document.getElementById('templatesHeaderSkeleton');
+        const templatesFiltersSkeleton = document.getElementById('templatesFiltersSkeleton');
+        const templatesStatsSkeleton = document.getElementById('templatesStatsSkeleton');
+        const templatesGridSkeleton = document.getElementById('templatesGridSkeleton');
+        const templatesContent = document.getElementById('templatesContent');
+        
+        // Hide skeleton and show content
         if (templatesHeaderSkeleton) templatesHeaderSkeleton.style.display = 'none';
         if (templatesFiltersSkeleton) templatesFiltersSkeleton.style.display = 'none';
         if (templatesStatsSkeleton) templatesStatsSkeleton.style.display = 'none';

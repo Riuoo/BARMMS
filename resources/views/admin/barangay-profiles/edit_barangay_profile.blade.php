@@ -4,58 +4,11 @@
 
 @section('content')
 <!-- Header Skeleton -->
-<div id="editHeaderSkeleton" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 animate-pulse">
-    <div class="mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
-                <div class="h-5 w-80 bg-gray-100 rounded"></div>
-            </div>
-        </div>
-    </div>
+<div id="editHeaderSkeleton" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    @include('components.loading.skeleton-barangay-profile-edit-header')
     
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="space-y-6">
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex justify-end space-x-3">
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-                <div class="h-10 w-32 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+        @include('components.loading.skeleton-barangay-profile-form')
     </div>
 </div>
 
@@ -63,10 +16,10 @@
 <div id="editContent" style="display: none;">
     <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         <!-- Header Section -->
-        <div class="mb-8">
+        <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit Barangay Profile</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">Edit Barangay Profile</h1>
                     <p class="text-gray-600">Update barangay official information and credentials</p>
                 </div>
             </div>
@@ -114,7 +67,7 @@
 
                 <!-- Basic Information -->
                 <div class="border-b border-gray-200 pb-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
                         <i class="fas fa-user-tie mr-2 text-green-600"></i>
                         Basic Information
                     </h3>
@@ -162,7 +115,7 @@
 
                 <!-- Credentials Section -->
                 <div class="border-b border-gray-200 pb-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
                         <i class="fas fa-key mr-2 text-blue-600"></i>
                         Credentials
                     </h3>
@@ -192,7 +145,7 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex justify-end space-x-3">
+                <div class="flex justify-between mt-8">
                     <a href="{{ route('admin.barangay-profiles') }}" 
                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                         <i class="fas fa-times mr-2"></i>

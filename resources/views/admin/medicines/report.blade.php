@@ -4,76 +4,23 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="medicineReportHeaderSkeleton" class="animate-pulse mb-3">
-        <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
-        <div class="h-4 w-96 bg-gray-100 rounded"></div>
-    </div>
-
-    <!-- Filters Skeleton -->
-    <div id="medicineReportFiltersSkeleton" class="animate-pulse mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-            <div class="h-10 w-full bg-gray-200 rounded"></div>
-            <div class="h-10 w-full bg-gray-200 rounded"></div>
-            <div class="flex space-x-2">
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Skeleton Row 1 -->
-    <div id="medicineReportCharts1Skeleton" class="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div class="h-6 w-56 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 w-24 bg-gray-100 rounded mb-4"></div>
-            <div class="h-64 w-full bg-gray-200 rounded"></div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div class="h-6 w-56 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 w-24 bg-gray-100 rounded mb-4"></div>
-            <div class="h-48 w-full bg-gray-200 rounded"></div>
-        </div>
-    </div>
-
-    <!-- Charts Skeleton Row 2 -->
-    <div id="medicineReportCharts2Skeleton" class="animate-pulse grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        @for($i = 0; $i < 3; $i++)
-        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div class="h-6 w-56 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 w-24 bg-gray-100 rounded mb-4"></div>
-            <div class="h-56 w-full bg-gray-200 rounded"></div>
-        </div>
-        @endfor
-    </div>
-
-    <!-- Category Distribution Skeleton -->
-    <div id="medicineReportCategorySkeleton" class="animate-pulse grid grid-cols-1 gap-4 mb-6">
-        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div class="h-6 w-56 bg-gray-200 rounded mb-2"></div>
-            <div class="h-56 w-full bg-gray-200 rounded"></div>
-        </div>
-    </div>
-
-    <!-- Optimization Summary Skeleton -->
-    <div id="medicineReportSummarySkeleton" class="animate-pulse bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <div class="flex items-start">
-            <div class="w-6 h-6 bg-gray-200 rounded mr-3"></div>
-            <div class="flex-1 space-y-2">
-                <div class="h-4 w-48 bg-gray-200 rounded"></div>
-                <div class="h-3 w-80 bg-gray-100 rounded"></div>
-                <div class="h-3 w-72 bg-gray-100 rounded"></div>
-                <div class="h-3 w-64 bg-gray-100 rounded"></div>
-                <div class="h-3 w-56 bg-gray-100 rounded"></div>
-            </div>
-        </div>
+    <!-- Main Skeleton -->
+    <div id="medicineReportSkeleton">
+        @include('components.loading.skeleton-medicine-report')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="medicineReportContent" style="display: none;">
         <div class="mb-3">
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Medicine Dispense Report</h1>
-            <p class="text-sm md:text-base text-gray-600">Analyze medicine requests and dispensing trends</p>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Medicine Dispense Report</h1>
+                    <p class="text-sm md:text-base text-gray-600">Analyze medicine requests and dispensing trends</p>
+                </div>
+                <a href="{{ route('admin.medicines.index') }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Inventory
+                </a>
+            </div>
         </div>
 
         <!-- Success/Error Messages -->
@@ -216,14 +163,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const skeletonElements = [
-            'medicineReportHeaderSkeleton', 'medicineReportFiltersSkeleton', 'medicineReportCharts1Skeleton',
-            'medicineReportCharts2Skeleton', 'medicineReportCategorySkeleton', 'medicineReportSummarySkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.style.display = 'none';
-        });
+        const sk = document.getElementById('medicineReportSkeleton');
+        if (sk) sk.style.display = 'none';
         const content = document.getElementById('medicineReportContent');
         if (content) content.style.display = 'block';
     }, 1000);

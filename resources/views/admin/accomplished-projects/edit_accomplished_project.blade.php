@@ -4,70 +4,15 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
-    <!-- Header Skeleton -->
-    <div id="apEditHeaderSkeleton" class="animate-pulse mb-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="h-8 w-72 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-80 bg-gray-100 rounded"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- Form Skeleton -->
-    <div id="apEditFormSkeleton" class="animate-pulse space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md:col-span-2">
-                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div class="md:col-span-2">
-                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
-                <div class="h-32 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-28 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-28 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-32 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div class="md:col-span-2">
-                <div class="h-4 w-44 bg-gray-200 rounded mb-3"></div>
-                <div class="h-28 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div class="md:col-span-2">
-                <div class="h-4 w-40 bg-gray-200 rounded mb-3"></div>
-                <div class="h-24 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div class="md:col-span-2">
-                <div class="h-4 w-24 bg-gray-200 rounded mb-3"></div>
-                <div class="h-6 w-56 bg-gray-100 rounded"></div>
-            </div>
-        </div>
-        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-            <div class="h-10 w-28 bg-gray-200 rounded"></div>
-            <div class="h-10 w-40 bg-gray-200 rounded"></div>
-        </div>
+    <div id="apEditFormSkeleton">
+        @include('components.loading.skeleton-accomplished-project-form')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="apEditContent" style="display: none;">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-2">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Edit Accomplished Project</h1>
             <p class="text-gray-600 mt-2">Update project information and details</p>
@@ -97,7 +42,7 @@
                 
                 <!-- Current Image Display -->
                 @if($project->image)
-                <div class="mb-4">
+                <div class="mb-2">
                     <p class="text-sm text-gray-600 mb-2">Current Image:</p>
                     <div class="inline-block">
                         <img src="{{ asset($project->image) }}" alt="Current project image" class="h-32 w-auto rounded-lg border border-gray-200">
@@ -108,7 +53,7 @@
                 <!-- Image Upload Area -->
                 <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
                     <div class="space-y-1 text-center">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
                         <div class="flex text-sm text-gray-600">
                             <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500">
                                 <span>Upload a file</span>
@@ -121,7 +66,7 @@
                 </div>
                 
                 <!-- Image Preview -->
-                <div id="imagePreview" class="mt-4 hidden">
+                <div id="imagePreview" class="mt-2 hidden">
                     <p class="text-sm text-gray-600 mb-2">Selected Image:</p>
                     <div class="relative inline-block">
                         <img id="previewImg" src="" alt="Selected image preview" class="h-32 w-auto rounded-lg border border-gray-200">
@@ -262,11 +207,11 @@
         </div>
 
         <!-- Submit Buttons -->
-        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-            <a href="{{ route('admin.accomplished-projects') }}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-300">
+        <div class="flex justify-between mt-2">
+            <a href="{{ route('admin.accomplished-projects') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                 Cancel
             </a>
-            <button type="submit" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition duration-300 flex items-center">
+            <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                 <i class="fas fa-save mr-2"></i>
                 Update Project
             </button>
@@ -310,10 +255,8 @@ function removeSelectedImage() {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('apEditHeaderSkeleton');
         const formSkeleton = document.getElementById('apEditFormSkeleton');
         const content = document.getElementById('apEditContent');
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);

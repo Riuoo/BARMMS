@@ -5,116 +5,42 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Header Skeleton -->
-    <div id="vaccinationHeaderSkeleton" class="animate-pulse mb-3">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <div class="h-8 w-72 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-96 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0 flex space-x-2">
-                <div class="h-9 w-36 bg-gray-200 rounded"></div>
-                <div class="h-9 w-32 bg-gray-200 rounded"></div>
-                <div class="h-9 w-36 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="vaccinationHeaderSkeleton">
+        @include('components.loading.skeleton-vaccination-header')
     </div>
 
     <!-- Search & Filter Skeleton -->
-    <div id="vaccinationSearchSkeleton" class="animate-pulse mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="w-full sm:w-48">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex space-x-2">
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="vaccinationSearchSkeleton">
+        @include('components.loading.skeleton-filters')
     </div>
 
     <!-- Stats Cards Skeleton -->
-    <div id="vaccinationStatsSkeleton" class="animate-pulse grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-3">
-        @for ($i = 0; $i < 5; $i++)
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full"></div>
-                <div class="ml-3 md:ml-4">
-                    <div class="h-3 w-24 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-6 w-8 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-        @endfor
+    <div id="vaccinationStatsSkeleton">
+        @include('components.loading.skeleton-stats')
     </div>
 
     <!-- Table Skeleton -->
-    <div id="vaccinationTableSkeleton" class="animate-pulse hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="p-6">
-            <div class="space-y-4">
-                @for ($i = 0; $i < 5; $i++)
-                <div class="flex items-center space-x-4">
-                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-40 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
-                    <div class="h-6 w-16 bg-gray-200 rounded"></div>
-                </div>
-                @endfor
-            </div>
-        </div>
+    <div id="vaccinationTableSkeleton" class="hidden md:block">
+        @include('components.loading.skeleton-table')
     </div>
 
     <!-- Mobile Cards Skeleton -->
-    <div id="vaccinationMobileSkeleton" class="animate-pulse md:hidden space-y-3">
-        @for ($i = 0; $i < 3; $i++)
-        <div class="bg-white border border-gray-200 rounded-lg p-4">
-            <div class="flex items-start justify-between mb-3">
-                <div class="flex items-center flex-1 min-w-0">
-                    <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
-                    <div class="ml-3 flex-1 min-w-0">
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-3 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-5 w-20 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="mb-3 space-y-2">
-                <div class="h-3 w-full bg-gray-200 rounded"></div>
-                <div class="h-3 w-3/4 bg-gray-200 rounded"></div>
-                <div class="h-3 w-1/2 bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                <div class="h-8 w-20 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-        @endfor
+    <div id="vaccinationMobileSkeleton" class="md:hidden">
+        @include('components.loading.skeleton-mobile-cards')
     </div>
 
     <!-- Pagination Skeleton -->
-    <div id="vaccinationPaginationSkeleton" class="animate-pulse mt-6">
-        <div class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-            <div class="h-8 w-20 bg-gray-200 rounded"></div>
-            <div class="hidden md:flex space-x-2">
-                @for ($i = 0; $i < 5; $i++)
-                <div class="h-8 w-8 bg-gray-200 rounded"></div>
-                @endfor
-            </div>
-            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-        </div>
+    <div id="vaccinationPaginationSkeleton" class="mt-6">
+        @include('components.loading.skeleton-pagination')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="vaccinationContent" style="display: none;">
     <!-- Header Section -->
-    <div class="mb-3">
+    <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Vaccination Records</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Vaccination Records</h1>
                 <p class="text-sm md:text-base text-gray-600">Manage vaccination records and immunization schedules</p>
             </div>
             <div class="mt-4 sm:mt-0 flex space-x-2">
@@ -162,7 +88,7 @@
     @endif
 
     <!-- Vaccination Search & Filter Form -->
-    <form method="GET" action="{{ route('admin.vaccination-records.index') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.vaccination-records.index') }}" class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -201,7 +127,7 @@
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-3">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-2">
         <!-- Total Vaccinations -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
@@ -281,7 +207,7 @@
     <!-- Vaccination Records List -->
     @if($vaccinationRecords->isEmpty())
         <div class="text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-syringe text-gray-400 text-4xl"></i>
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No vaccination records found</h3>
@@ -380,16 +306,16 @@
                                     <a href="{{ route('admin.vaccination-records.show', $record->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" title="Edit">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.vaccination-records.edit', $record->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" title="Edit">
+                                    <a href="{{ route('admin.vaccination-records.edit', $record->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.vaccination-records.destroy', $record->id) }}" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            data-vaccination-id="{{ $record->id }}"
+                                            data-patient-name="{{ addslashes($record->patient_name) }}"
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-vaccination" 
+                                            title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -405,7 +331,7 @@
             @foreach($vaccinationRecords as $record)
             <div class="document-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200">
                 <!-- Header Section -->
-                <div class="flex items-start justify-between mb-3">
+                <div class="flex items-start justify-between mb-2">
                     <div class="flex items-center flex-1 min-w-0">
                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-user text-green-600"></i>
@@ -448,7 +374,7 @@
                 </div>
 
                 <!-- Additional Details -->
-                <div class="mb-3">
+                <div class="mb-2">
                     <p class="text-sm text-gray-600">
                         <i class="fas fa-syringe mr-1 text-gray-400"></i>
                         Type: <span class="font-medium">{{ $record->vaccine_type }}</span>
@@ -475,14 +401,14 @@
                         <i class="fas fa-edit mr-1"></i>
                         Edit
                     </a>
-                    <form method="POST" action="{{ route('admin.vaccination-records.destroy', $record->id) }}" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
-                            <i class="fas fa-trash-alt mr-1"></i>
-                            Delete
-                        </button>
-                    </form>
+                    <button type="button" 
+                            data-vaccination-id="{{ $record->id }}"
+                            data-patient-name="{{ addslashes($record->patient_name) }}"
+                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-vaccination" 
+                            title="Delete">
+                        <i class="fas fa-trash-alt mr-1"></i>
+                        Delete
+                    </button>
                 </div>
             </div>
             @endforeach
@@ -641,7 +567,36 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Delete Vaccination Record</h3>
+                    <p class="text-sm text-gray-500">This action cannot be undone.</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-6">Are you sure you want to delete the vaccination record for <span id="patientName" class="font-semibold"></span>? This will permanently remove the record from the system.</p>
+            <form id="deleteForm" method="POST" class="inline">
+                @csrf
+                @method('DELETE')
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200">
+                        Delete Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+    // Add Vaccination Modal Functions
     (function() {
         const modal = document.getElementById('addVaccinationModal');
         const overlay = modal ? modal.firstElementChild : null;
@@ -657,6 +612,29 @@
             overlay.addEventListener('click', close);
         }
     })();
+
+    // Delete Vaccination Modal Functions
+    function deleteVaccination(id, name) {
+        document.getElementById('patientName').textContent = name;
+        document.getElementById('deleteForm').action = `/admin/vaccination-records/${id}`;
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+    }
+
+    // Delegated handler for delete buttons
+    document.addEventListener('click', function (event) {
+        const deleteBtn = event.target.closest('.js-delete-vaccination');
+        if (deleteBtn) {
+            const id = deleteBtn.getAttribute('data-vaccination-id');
+            const name = deleteBtn.getAttribute('data-patient-name');
+            if (id) deleteVaccination(id, name);
+        }
+    });
     </script>
 </div>
 

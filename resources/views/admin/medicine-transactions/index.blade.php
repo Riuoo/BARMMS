@@ -5,95 +5,44 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Header Skeleton -->
-    <div id="medTransactionHeaderSkeleton" class="animate-pulse mb-3">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-96 bg-gray-100 rounded"></div>
-            </div>
-        </div>
+    <div id="medTransactionHeaderSkeleton">
+        @include('components.loading.skeleton-header')
     </div>
 
     <!-- Filters Skeleton -->
-    <div id="medTransactionFiltersSkeleton" class="animate-pulse mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="sm:w-48">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex space-x-2">
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="medTransactionFiltersSkeleton">
+        @include('components.loading.skeleton-filters')
     </div>
 
     <!-- Stats Skeleton -->
-    <div id="medTransactionStatsSkeleton" class="animate-pulse grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3">
-        @for($i = 0; $i < 4; $i++)
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full"></div>
-                <div class="ml-3">
-                    <div class="h-3 w-16 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-6 w-12 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-        @endfor
+    <div id="medTransactionStatsSkeleton">
+        @include('components.loading.skeleton-dashboard-stats')
     </div>
 
     <!-- Table Skeleton -->
-    <div id="medTransactionTableSkeleton" class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <div class="grid grid-cols-6 gap-4">
-                @for($i = 0; $i < 6; $i++)
-                <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                @endfor
-            </div>
-        </div>
-        <div class="divide-y divide-gray-200">
-            @for($i = 0; $i < 5; $i++)
-            <div class="px-6 py-4">
-                <div class="grid grid-cols-6 gap-4">
-                    @for($j = 0; $j < 6; $j++)
-                    <div class="h-4 w-full bg-gray-200 rounded mb-1"></div>
-                    @endfor
-                </div>
-            </div>
-            @endfor
-        </div>
+    <div id="medTransactionTableSkeleton">
+        @include('components.loading.skeleton-table')
     </div>
 
     <!-- Pagination Skeleton -->
-    <div id="medTransactionPaginationSkeleton" class="animate-pulse mt-6">
-        <div class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-            <div class="h-10 w-20 bg-gray-200 rounded"></div>
-            <div class="hidden md:flex space-x-2">
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-            </div>
-            <div class="h-10 w-16 bg-gray-200 rounded"></div>
-        </div>
+    <div id="medTransactionPaginationSkeleton" class="mt-6">
+        @include('components.loading.skeleton-pagination')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="medTransactionContent" style="display: none;">
         <!-- Header Section -->
-        <div class="mb-3">
+        <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="mb-4 sm:mb-0">
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Medicine Transactions</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Medicine Transactions</h1>
                     <p class="text-sm md:text-base text-gray-600">Track stock movements and dispensing</p>
                 </div>
             </div>
         </div>
 
         <!-- Filters -->
-        <form method="GET" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <form method="GET" class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div class="flex flex-col sm:flex-row gap-4">
                 <!-- Search Input -->
                 <div class="flex-1">
@@ -131,7 +80,7 @@
 
         @isset($stats)
         <!-- Summary Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-2">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
                 <div class="flex items-center">
                     <div class="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-full flex items-center justify-center">

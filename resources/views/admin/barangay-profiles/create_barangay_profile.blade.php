@@ -4,38 +4,14 @@
 
 @section('content')
     <!-- Header Skeleton -->
-    <div id="createHeaderSkeleton" class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8 animate-pulse">
-        <div class="h-8 w-64 bg-gray-200 rounded mx-auto mb-8"></div>
-        <div class="space-y-6">
-            <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-            <div class="h-10 w-full bg-gray-200 rounded"></div>
-            <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-            <div class="h-10 w-full bg-gray-200 rounded"></div>
-            <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-            <div class="h-10 w-full bg-gray-200 rounded"></div>
-            <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-            <div class="h-10 w-full bg-gray-200 rounded"></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-                <div>
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            <div class="flex justify-between mt-8">
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-                <div class="h-10 w-32 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="createHeaderSkeleton" class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8">
+        @include('components.loading.skeleton-barangay-profile-form')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="createContent" style="display: none;">
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8">
-            <h1 class="text-3xl font-semibold text-gray-800 mb-8 text-center">Add New Barangay Profile</h1>
+            <h1 class="text-3xl font-semibold text-gray-800 mb-2 text-center">Add New Barangay Profile</h1>
 
             @if(session('success'))
                 <div class="mb-6">

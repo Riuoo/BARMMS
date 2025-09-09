@@ -12,105 +12,42 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Header Skeleton -->
-    <div id="accountHeaderSkeleton" class="mb-3 animate-pulse">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-5 w-96 bg-gray-100 rounded"></div>
-            </div>
-        </div>
+    <div id="accountHeaderSkeleton">
+        @include('components.loading.skeleton-header')
     </div>
 
     <!-- Filters Skeleton -->
-    <div id="accountFiltersSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-3 animate-pulse">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="sm:w-48">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex space-x-2">
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="accountFiltersSkeleton">
+        @include('components.loading.skeleton-filters')
     </div>
 
     <!-- Stats Skeleton -->
-    <div id="accountStatsSkeleton" class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3 animate-pulse">
-        @for ($i = 0; $i < 4; $i++)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    </div>
-                    <div class="ml-3">
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-6 w-16 bg-gray-300 rounded"></div>
-                    </div>
-                </div>
-            </div>
-        @endfor
+    <div id="accountStatsSkeleton">
+        @include('components.loading.skeleton-dashboard-stats')
     </div>
 
     <!-- Table Skeleton (Desktop) -->
-    <div id="accountTableSkeleton" class="hidden sm:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse mb-6">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        @for ($i = 0; $i < 4; $i++)
-                            <th class="px-4 py-3"><div class="h-4 w-20 bg-gray-200 rounded"></div></th>
-                        @endfor
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @for ($i = 0; $i < 6; $i++)
-                        <tr>
-                            @for ($j = 0; $j < 4; $j++)
-                                <td class="px-4 py-4"><div class="h-4 w-24 bg-gray-100 rounded"></div></td>
-                            @endfor
-                        </tr>
-                    @endfor
-                </tbody>
-            </table>
-        </div>
+    <div id="accountTableSkeleton" class="hidden sm:block mb-6">
+        @include('components.loading.skeleton-table')
     </div>
 
     <!-- Mobile Cards Skeleton -->
-    <div id="accountMobileSkeleton" class="sm:hidden space-y-4 animate-pulse mb-6">
-        @for ($i = 0; $i < 4; $i++)
-            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                <div class="flex items-center mb-3">
-                    <div class="w-12 h-12 bg-gray-200 rounded-full mr-3"></div>
-                    <div class="flex-1">
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-4 w-24 bg-gray-100 rounded"></div>
-                    </div>
-                </div>
-                <div class="h-4 w-40 bg-gray-100 rounded mb-2"></div>
-                <div class="h-4 w-24 bg-gray-200 rounded"></div>
-            </div>
-        @endfor
+    <div id="accountMobileSkeleton">
+        @include('components.loading.skeleton-mobile-cards')
     </div>
 
     <!-- Pagination Skeleton -->
-    <div id="accountPaginationSkeleton" class="mt-6 animate-pulse">
-        <div class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-            <div class="h-8 w-24 bg-gray-200 rounded"></div>
-            <div class="h-8 w-32 bg-gray-200 rounded"></div>
-            <div class="h-8 w-24 bg-gray-200 rounded"></div>
-        </div>
+    <div id="accountPaginationSkeleton" class="mt-6">
+        @include('components.loading.skeleton-pagination')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="accountRequestsContent" style="display: none;">
     <!-- Header Section -->
-    <div class="mb-3">
+    <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Account Requests</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Account Requests</h1>
                 <p class="text-gray-600">Review and approve new account applications</p>
             </div>
         </div>
@@ -144,7 +81,7 @@
     @endif
 
     <!-- Filters and Search -->
-    <form method="GET" action="{{ route('admin.requests.new-account-requests') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.requests.new-account-requests') }}" class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -178,7 +115,7 @@
     </form>
 
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-2">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">

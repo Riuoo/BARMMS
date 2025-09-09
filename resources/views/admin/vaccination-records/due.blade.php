@@ -5,97 +5,39 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Breadcrumb Skeleton -->
-    <div id="dueBreadcrumbSkeleton" class="animate-pulse mb-4">
-        <div class="inline-flex items-center space-x-1 md:space-x-3">
-            <div class="h-4 w-40 bg-gray-200 rounded"></div>
-            <div class="h-4 w-4 bg-gray-200 rounded"></div>
-            <div class="h-4 w-32 bg-gray-200 rounded"></div>
-        </div>
+    <div id="dueBreadcrumbSkeleton">
+        @include('components.loading.skeleton-breadcrumb')
     </div>
 
     <!-- Header Skeleton -->
-    <div id="dueHeaderSkeleton" class="animate-pulse mb-3">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-80 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                <div class="h-9 w-48 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="dueHeaderSkeleton">
+        @include('components.loading.skeleton-header-one-button')
     </div>
 
     <!-- Filter Skeleton -->
-    <div id="dueFilterSkeleton" class="animate-pulse mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-        <div class="flex space-x-2">
-            <div class="h-8 w-20 bg-gray-200 rounded"></div>
-            <div class="h-8 w-24 bg-gray-200 rounded"></div>
-            <div class="h-8 w-28 bg-gray-200 rounded"></div>
-            <div class="h-8 w-24 bg-gray-200 rounded"></div>
-        </div>
+    <div id="dueFilterSkeleton">
+        @include('components.loading.skeleton-filters')
     </div>
 
     <!-- Table Skeleton -->
-    <div id="dueTableSkeleton" class="animate-pulse hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="p-6">
-            <div class="space-y-4">
-                @for ($i = 0; $i < 5; $i++)
-                <div class="flex items-center space-x-4">
-                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-40 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
-                    <div class="h-6 w-20 bg-gray-200 rounded"></div>
-                    <div class="h-6 w-16 bg-gray-200 rounded"></div>
-                </div>
-                @endfor
-            </div>
-        </div>
+    <div id="dueTableSkeleton" class="hidden md:block">
+        @include('components.loading.skeleton-table')
     </div>
 
     <!-- Mobile Cards Skeleton -->
-    <div id="dueMobileSkeleton" class="animate-pulse md:hidden space-y-3">
-        @for ($i = 0; $i < 3; $i++)
-        <div class="bg-white border border-gray-200 rounded-lg p-4">
-            <div class="flex items-start justify-between mb-3">
-                <div class="flex-1">
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-3 w-24 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-5 w-20 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            <div class="mb-3 space-y-2">
-                <div class="h-3 w-full bg-gray-200 rounded"></div>
-                <div class="h-3 w-3/4 bg-gray-200 rounded"></div>
-                <div class="h-3 w-1/2 bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                <div class="h-8 w-20 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-        @endfor
+    <div id="dueMobileSkeleton" class="md:hidden">
+        @include('components.loading.skeleton-mobile-cards')
     </div>
 
     <!-- Summary Skeleton -->
-    <div id="dueSummarySkeleton" class="animate-pulse mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            @for ($i = 0; $i < 4; $i++)
-            <div class="text-center">
-                <div class="h-8 w-8 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-20 bg-gray-200 rounded"></div>
-            </div>
-            @endfor
-        </div>
+    <div id="dueSummarySkeleton">
+        @include('components.loading.skeleton-due-summary')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="dueContent" style="display: none;">
     <!-- Breadcrumb Navigation -->
-    <nav class="mb-4" aria-label="Breadcrumb">
+    <nav class="mb-2" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3">
             <li class="inline-flex items-center">
                 <a href="{{ route('admin.vaccination-records.index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
@@ -113,14 +55,14 @@
     </nav>
 
     <!-- Header Section -->
-    <div class="mb-3">
+    <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Due Vaccinations</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Due Vaccinations</h1>
                 <p class="text-sm md:text-base text-gray-600">Track vaccinations that are due soon or overdue</p>
             </div>
             <div class="mt-4 sm:mt-0 flex space-x-2">
-                <a href="{{ route('admin.vaccination-records.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
+                <a href="{{ route('admin.vaccination-records.index') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Vaccination Records
                 </a>
@@ -129,21 +71,21 @@
     </div>
 
     <!-- Filter Section -->
-    <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+                <label class="block text-sm font-medium text-gray-700">Filter by Status</label>
                 <div class="flex space-x-2">
-                    <a href="{{ route('admin.vaccination-records.due') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <a href="{{ route('admin.vaccination-records.due') }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                         All ({{ $stats['total_due'] }})
                     </a>
-                    <a href="{{ route('admin.vaccination-records.due') }}?status=overdue" class="inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100">
+                    <a href="{{ route('admin.vaccination-records.due') }}?status=overdue" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                         Overdue ({{ $stats['overdue'] }})
                     </a>
-                    <a href="{{ route('admin.vaccination-records.due') }}?status=due_this_week" class="inline-flex items-center px-3 py-2 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100">
+                    <a href="{{ route('admin.vaccination-records.due') }}?status=due_this_week" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                         Due This Week ({{ $stats['due_this_week'] }})
                     </a>
-                    <a href="{{ route('admin.vaccination-records.due') }}?status=due_soon" class="inline-flex items-center px-3 py-2 border border-yellow-300 text-sm font-medium rounded-md text-yellow-700 bg-yellow-50 hover:bg-yellow-100">
+                    <a href="{{ route('admin.vaccination-records.due') }}?status=due_soon" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                         Due Soon ({{ $stats['due_soon'] }})
                     </a>
                 </div>
@@ -154,7 +96,7 @@
     <!-- Due Vaccinations List -->
     @if($dueVaccinations->isEmpty())
         <div class="text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-check-circle text-green-600 text-4xl"></i>
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">All vaccinations are up to date!</h3>
@@ -260,7 +202,7 @@
         <div class="md:hidden space-y-3">
             @foreach($dueVaccinations as $record)
             <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200">
-                <div class="flex items-start justify-between mb-3">
+                <div class="flex items-start justify-between mb-2">
                     <div class="flex-1">
                         <h3 class="text-sm font-semibold text-gray-900">{{ $record->patient_name ?? 'Unknown Patient' }}</h3>
                         <p class="text-sm text-gray-500">{{ $record->vaccine_name }}</p>
@@ -284,7 +226,7 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-2">
                     <p class="text-sm text-gray-600">Type: {{ $record->vaccine_type }}</p>
                     <p class="text-sm text-gray-600">Dose: {{ $record->dose_number }}</p>
                     <p class="text-sm text-gray-600">Last: {{ $record->vaccination_date->format('M d, Y') }}</p>
@@ -309,7 +251,7 @@
         </div>
 
         <!-- Summary Information -->
-        <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="mt-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="text-center">
                     <div class="text-2xl font-bold text-red-600">

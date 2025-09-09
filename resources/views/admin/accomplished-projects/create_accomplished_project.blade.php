@@ -4,70 +4,15 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
-    <!-- Header Skeleton -->
-    <div id="apCreateHeaderSkeleton" class="animate-pulse mb-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="h-8 w-72 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-96 bg-gray-100 rounded"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- Form Skeleton -->
-    <div id="apCreateFormSkeleton" class="animate-pulse space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md:col-span-2">
-                <div class="h-4 w-40 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div class="md:col-span-2">
-                <div class="h-4 w-40 bg-gray-200 rounded mb-3"></div>
-                <div class="h-40 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-28 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-28 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-36 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div>
-                <div class="h-4 w-32 bg-gray-200 rounded mb-3"></div>
-                <div class="h-11 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div class="md:col-span-2">
-                <div class="h-4 w-44 bg-gray-200 rounded mb-3"></div>
-                <div class="h-28 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div class="md:col-span-2">
-                <div class="h-4 w-40 bg-gray-200 rounded mb-3"></div>
-                <div class="h-24 w-full bg-gray-100 rounded"></div>
-            </div>
-            <div class="md:col-span-2">
-                <div class="h-4 w-24 bg-gray-200 rounded mb-3"></div>
-                <div class="h-6 w-56 bg-gray-100 rounded"></div>
-            </div>
-        </div>
-        <div class="flex justify-between mt-8">
-            <div class="h-10 w-28 bg-gray-200 rounded"></div>
-            <div class="h-10 w-40 bg-gray-200 rounded"></div>
-        </div>
+    <div id="apCreateFormSkeleton">
+        @include('components.loading.skeleton-accomplished-project-form')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="apCreateContent" style="display: none;">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-2">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Add New Accomplished Project</h1>
             <p class="text-gray-600 mt-2">Create a new accomplished project to showcase community achievements</p>
@@ -95,7 +40,7 @@
                 <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Project Image</label>
                 <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
                     <div class="space-y-1 text-center">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
                         <div class="flex text-sm text-gray-600">
                             <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500">
                                 <span>Upload a file</span>
@@ -108,7 +53,7 @@
                 </div>
                 
                 <!-- Image Preview -->
-                <div id="imagePreview" class="mt-4 hidden">
+                <div id="imagePreview" class="mt-2 hidden">
                     <p class="text-sm text-gray-600 mb-2">Selected Image:</p>
                     <div class="relative inline-block">
                         <img id="previewImg" src="" alt="Selected image preview" class="h-32 w-auto rounded-lg border border-gray-200">
@@ -249,7 +194,7 @@
         </div>
 
         <!-- Form Actions -->
-        <div class="flex justify-between mt-8">
+        <div class="flex justify-between mt-2">
             <a href="{{ route('admin.accomplished-projects') }}" 
                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                 <i class="fas fa-times mr-2"></i>
@@ -268,10 +213,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('apCreateHeaderSkeleton');
         const formSkeleton = document.getElementById('apCreateFormSkeleton');
         const content = document.getElementById('apCreateContent');
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);

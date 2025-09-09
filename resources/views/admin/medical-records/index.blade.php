@@ -5,142 +5,42 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Header Skeleton -->
-    <div id="medicalHeaderSkeleton" class="animate-pulse mb-3">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-80 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                <div class="h-10 w-40 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="medicalHeaderSkeleton">
+        @include('components.loading.skeleton-header')
     </div>
 
     <!-- Search & Filters Skeleton -->
-    <div id="medicalSearchSkeleton" class="animate-pulse mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex space-x-2">
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="medicalSearchSkeleton">
+        @include('components.loading.skeleton-filters')
     </div>
 
     <!-- Statistics Skeleton -->
-    <div id="medicalStatsSkeleton" class="animate-pulse grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-4 mb-3">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full"></div>
-                <div class="ml-3 md:ml-4">
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-6 w-16 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
-            <div class="flex items-center">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full"></div>
-                <div class="ml-3 md:ml-4">
-                    <div class="h-4 w-24 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-6 w-12 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
+    <div id="medicalStatsSkeleton">
+        @include('components.loading.skeleton-stats')
     </div>
 
     <!-- Table Skeleton (Desktop) -->
-    <div id="medicalTableSkeleton" class="animate-pulse hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <div class="grid grid-cols-5 gap-4">
-                <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                <div class="h-4 w-32 bg-gray-200 rounded"></div>
-                <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                <div class="h-4 w-16 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-        <div class="divide-y divide-gray-200">
-            @for($i = 0; $i < 5; $i++)
-            <div class="px-6 py-4">
-                <div class="grid grid-cols-5 gap-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-3 w-40 bg-gray-100 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-28 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-3 w-36 bg-gray-100 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-3 w-20 bg-gray-100 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-3 w-20 bg-gray-200 rounded"></div>
-                    </div>
-                    <div class="flex justify-center space-x-2">
-                        <div class="h-8 w-8 bg-gray-200 rounded"></div>
-                        <div class="h-8 w-8 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-            @endfor
-        </div>
+    <div id="medicalTableSkeleton" class="hidden md:block">
+        @include('components.loading.skeleton-table')
     </div>
 
     <!-- Mobile Cards Skeleton -->
-    <div id="medicalMobileSkeleton" class="animate-pulse md:hidden space-y-3">
-        @for($i = 0; $i < 3; $i++)
-        <div class="bg-white border border-gray-200 rounded-lg p-4">
-            <div class="flex items-start justify-between mb-3">
-                <div class="flex items-center flex-1 min-w-0">
-                    <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
-                    <div class="ml-3 flex-1 min-w-0">
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-3 w-24 bg-gray-100 rounded mb-1"></div>
-                        <div class="h-3 w-20 bg-gray-100 rounded"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="mb-3">
-                <div class="h-3 w-full bg-gray-200 rounded mb-1"></div>
-                <div class="h-3 w-3/4 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mb-3">
-                <div class="h-6 w-24 bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex space-x-2 pt-3 border-t border-gray-100">
-                <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                <div class="h-8 w-20 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-        @endfor
+    <div id="medicalMobileSkeleton" class="md:hidden">
+        @include('components.loading.skeleton-mobile-cards')
     </div>
 
     <!-- Pagination Skeleton -->
-    <div id="medicalPaginationSkeleton" class="animate-pulse mt-6">
-        <div class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-            <div class="h-10 w-20 bg-gray-200 rounded"></div>
-            <div class="hidden md:flex space-x-2">
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-            </div>
-            <div class="h-10 w-16 bg-gray-200 rounded"></div>
-        </div>
+    <div id="medicalPaginationSkeleton" class="mt-6">
+        @include('components.loading.skeleton-pagination')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="medicalContent" style="display: none;">
     <!-- Header Section -->
-    <div class="mb-3">
+    <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Medical Records</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Medical Records</h1>
                 <p class="text-sm md:text-base text-gray-600">Manage medical consultations and record entries</p>
             </div>
             <div class="mt-4 sm:mt-0 flex space-x-2">
@@ -180,7 +80,7 @@
     @endif
 
     <!-- Enhanced Search & Filters -->
-    <form method="GET" action="{{ route('admin.medical-records.index') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.medical-records.index') }}" class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -207,7 +107,7 @@
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-4 mb-3">
+    <div class="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-4 mb-2">
         <!-- Total Consultations -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
             <div class="flex items-center">
@@ -242,7 +142,7 @@
     <!-- Medical Records List -->
     @if($medicalRecords->isEmpty())
         <div class="text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-stethoscope text-gray-400 text-4xl"></i>
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No medical consultation records found</h3>
@@ -327,13 +227,9 @@
                                     <a href="{{ route('admin.medical-records.show', $record->id) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.medical-records.destroy', $record->id) }}" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" onclick="openDeleteModal({{ $record->id }})" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
                                 </div>
                             </td>
                             
@@ -354,7 +250,7 @@
             @foreach($medicalRecords as $record)
             <div class="document-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200">
                 <!-- Header Section -->
-                <div class="flex items-start justify-between mb-3">
+                <div class="flex items-start justify-between mb-2">
                     <div class="flex items-center flex-1 min-w-0">
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-user text-blue-600"></i>
@@ -373,7 +269,7 @@
                 </div>
 
                 <!-- Description Section -->
-                <div class="mb-3">
+                <div class="mb-2">
                     <div class="description-container">
                         <p class="text-sm text-gray-600 leading-relaxed description-text" id="medical-description-{{ $record->id }}">
                             <i class="fas fa-align-left mr-1 text-gray-400"></i>
@@ -402,7 +298,7 @@
                 </div>
 
                 <!-- Additional Details -->
-                <div class="mb-3">
+                <div class="mb-2">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                         <i class="fas fa-user-md mr-1"></i>
                         {{ $record->attending_health_worker }}
@@ -415,14 +311,10 @@
                         <i class="fas fa-eye mr-1"></i>
                         View
                     </a>
-                    <form method="POST" action="{{ route('admin.medical-records.destroy', $record->id) }}" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
-                            <i class="fas fa-trash-alt mr-1"></i>
-                            Delete
-                        </button>
-                    </form>
+                    <button type="button" onclick="openDeleteModal({{ $record->id }})" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
+                        <i class="fas fa-trash-alt mr-1"></i>
+                        Delete
+                    </button>
                 </div>
             </div>
             @endforeach
@@ -565,5 +457,50 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 </script>
+
+<!-- Delete Confirmation Modal (shared style) -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Delete Medical Record</h3>
+                <p class="text-sm text-gray-500">This action cannot be undone.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to delete this medical record? This will permanently remove the record from the system.</p>
+        <form id="deleteForm" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200">
+                    Delete Record
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openDeleteModal(recordId) {
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    form.action = `/admin/medical-records/${recordId}`;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+</script>
+
 @endpush
 @endsection

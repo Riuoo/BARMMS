@@ -5,69 +5,19 @@
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
     <!-- Header Skeleton -->
-    <div id="createDocumentHeaderSkeleton" class="mb-8 animate-pulse">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-5 w-96 bg-gray-100 rounded"></div>
-            </div>
-        </div>
+    <div id="createDocumentHeaderSkeleton">
+        @include('components.loading.skeleton-blotter-header')
     </div>
 
     <!-- Form Skeleton -->
-    <div id="createDocumentFormSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
-        <div class="space-y-6">
-            <!-- Resident Information Skeleton -->
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
-                <div class="space-y-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Document Information Skeleton -->
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
-                <div class="space-y-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Purpose and Details Skeleton -->
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
-                <div class="space-y-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-32 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-64 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Actions Skeleton -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
-                <div class="h-4 w-64 bg-gray-200 rounded"></div>
-                <div class="flex space-x-3">
-                    <div class="h-10 w-24 bg-gray-200 rounded"></div>
-                    <div class="h-10 w-32 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
+    <div id="createDocumentFormSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        @include('components.loading.skeleton-document-form')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="createDocumentContent" style="display: none;">
         <!-- Header Section -->
-        <div class="mb-8">
+        <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Document Request</h1>
@@ -91,7 +41,7 @@
     @endif
 
     @if ($errors->any())
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="mb-2 bg-red-50 border border-red-200 rounded-lg p-4">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <i class="fas fa-exclamation-circle text-red-400"></i>
@@ -117,7 +67,7 @@
 
             <!-- Resident Information -->
             <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-user mr-2 text-blue-600"></i>
                     Resident Information
                 </h3>
@@ -144,7 +94,7 @@
 
             <!-- Document Information -->
             <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-file-signature mr-2 text-blue-600"></i>
                     Document Information
                 </h3>
@@ -173,7 +123,7 @@
 
             <!-- Purpose and Details -->
             <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-align-left mr-2 text-blue-600"></i>
                     Purpose and Details
                 </h3>
@@ -225,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formSkeleton = document.getElementById('createDocumentFormSkeleton');
         const content = document.getElementById('createDocumentContent');
         
+        // Hide skeleton and show content
         if (headerSkeleton) headerSkeleton.style.display = 'none';
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';

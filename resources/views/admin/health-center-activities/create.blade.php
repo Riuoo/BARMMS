@@ -4,164 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="hcaCreateHeaderSkeleton" class="animate-pulse mb-3 flex items-center justify-between">
-        <div>
-            <div class="h-8 w-80 bg-gray-200 rounded mb-1"></div>
-            <div class="h-4 w-96 bg-gray-100 rounded"></div>
-        </div>
-        <div class="h-10 w-32 bg-gray-200 rounded"></div>
-    </div>
-
-    <!-- Form Skeleton -->
-    <div id="hcaCreateFormSkeleton" class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-        <div class="space-y-6">
-            <!-- Activity Information Section -->
-            <div>
-                <div class="flex items-center mb-4">
-                    <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-6 w-48 bg-gray-200 rounded"></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Date and Time Section -->
-            <div>
-                <div class="flex items-center mb-4">
-                    <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-6 w-40 bg-gray-200 rounded"></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Details Section -->
-            <div>
-                <div class="flex items-center mb-4">
-                    <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-6 w-24 bg-gray-200 rounded"></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-20 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-20 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Image Upload Section -->
-            <div>
-                <div class="flex items-center mb-4">
-                    <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-6 w-32 bg-gray-200 rounded"></div>
-                </div>
-                <div>
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    <div class="h-3 w-80 bg-gray-100 rounded mt-2"></div>
-                </div>
-            </div>
-
-            <!-- Audience Section -->
-            <div>
-                <div class="flex items-center mb-4">
-                    <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-6 w-24 bg-gray-200 rounded"></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Resources & Team Section -->
-            <div>
-                <div class="flex items-center mb-4">
-                    <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-6 w-40 bg-gray-200 rounded"></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-16 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-16 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Status & Organizer Section -->
-            <div>
-                <div class="flex items-center mb-4">
-                    <div class="w-6 h-6 bg-gray-200 rounded mr-2"></div>
-                    <div class="h-6 w-40 bg-gray-200 rounded"></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="h-4 w-20 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="h-4 w-48 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-
-            <!-- Notes Section -->
-            <div>
-                <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                <div class="h-16 w-full bg-gray-200 rounded"></div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex justify-end gap-3">
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-                <div class="h-10 w-32 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <!-- Skeleton Component -->
+    <div id="hcaCreateSkeleton">
+        @include('components.loading.skeleton-health-activity-create')
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -172,10 +17,6 @@
                 <h1 class="text-3xl font-bold text-gray-900 mb-1">Create Health Center Activity</h1>
                 <p class="text-gray-600">Add a new planned or completed health activity</p>
             </div>
-            <a href="{{ route('admin.health-center-activities.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Back to List
-            </a>
         </div>
 
     <!-- Alerts -->
@@ -377,7 +218,7 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex justify-end gap-3">
+            <div class="flex justify-between mt-8">
                 <a href="{{ route('admin.health-center-activities.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition duration-200">
                     Cancel
                 </a>
@@ -395,11 +236,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('hcaCreateHeaderSkeleton');
-        const formSkeleton = document.getElementById('hcaCreateFormSkeleton');
+        const skeleton = document.getElementById('hcaCreateSkeleton');
         const content = document.getElementById('hcaCreateContent');
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (formSkeleton) formSkeleton.style.display = 'none';
+        if (skeleton) skeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 });

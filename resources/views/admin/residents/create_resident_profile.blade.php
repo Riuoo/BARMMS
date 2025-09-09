@@ -4,123 +4,14 @@
 
 @section('content')
     <!-- Header Skeleton -->
-    <div id="createResidentHeaderSkeleton" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8 animate-pulse">
-        <div class="h-8 w-48 bg-gray-200 rounded mx-auto mb-8"></div>
-        <div class="space-y-6">
-            <!-- Basic Information Section Skeleton -->
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
-                <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-36 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            
-            <!-- Personal Information Section Skeleton -->
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
-                <div class="h-6 w-44 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-28 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="h-4 w-28 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            
-            <!-- Demographic Information Section Skeleton -->
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
-                <div class="h-6 w-52 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-20 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    <div>
-                        <div class="h-4 w-36 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    <div>
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="h-4 w-36 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            
-            <!-- Emergency Contact Section Skeleton -->
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
-                <div class="h-6 w-44 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-36 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Form Actions Skeleton -->
-            <div class="flex justify-between mt-8">
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-                <div class="h-10 w-32 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="createResidentHeaderSkeleton" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8">
+        @include('components.loading.skeleton-resident-form')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="createResidentContent" style="display: none;">
         <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8">
-            <h1 class="text-3xl font-semibold text-gray-800 mb-8 text-center">Add New Resident</h1>
+            <h1 class="text-3xl font-semibold text-gray-800 mb-2 text-center">Add New Resident</h1>
 
             @if(session('success'))
                 <div class="mb-6">
@@ -148,7 +39,7 @@
 
                 <!-- Basic Information Section -->
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700">Basic Information</h3>
+                    <h3 class="text-lg font-semibold mb-2 text-gray-700">Basic Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
@@ -160,7 +51,7 @@
                             <p id="email-warning" class="mt-2 text-sm text-red-600 hidden"></p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                         <div>
                             <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
                             <select id="gender" name="gender" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
@@ -175,7 +66,7 @@
                             <input type="number" id="contact_number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., 9191234567" min="0" pattern="[0-9]*" inputmode="numeric" required>
                         </div>
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-2">
                         <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
                         <input type="text" id="address" name="address" value="{{ old('address') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Full Address (include Purok if applicable)" required>
                     </div>
@@ -183,7 +74,7 @@
 
                 <!-- Personal Information Section -->
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700">Personal Information</h3>
+                    <h3 class="text-lg font-semibold mb-2 text-gray-700">Personal Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-1">Birth Date <span class="text-red-500">*</span></label>
@@ -201,7 +92,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-2">
                         <label for="occupation" class="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
                         <input type="text" id="occupation" name="occupation" value="{{ old('occupation') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., Teacher, Business Owner, Student">
                     </div>
@@ -209,7 +100,7 @@
 
                 <!-- Demographic Information Section -->
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700">Demographic Information</h3>
+                    <h3 class="text-lg font-semibold mb-2 text-gray-700">Demographic Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
@@ -220,7 +111,7 @@
                             <input type="number" id="family_size" name="family_size" value="{{ old('family_size') }}" min="1" max="20" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                         <div>
                             <label for="education_level" class="block text-sm font-medium text-gray-700 mb-1">Education Level <span class="text-red-500">*</span></label>
                             <select id="education_level" name="education_level" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
@@ -244,7 +135,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                         <div>
                             <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-1">Employment Status <span class="text-red-500">*</span></label>
                             <select id="employment_status" name="employment_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
@@ -267,7 +158,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-2">
                         <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Name <span class="text-red-500">*</span></label>
                         <input type="text" id="emergency_contact_name" name="emergency_contact_name" value="{{ old('emergency_contact_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                     </div>
@@ -275,7 +166,7 @@
 
                 <!-- Emergency Contact Section -->
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700">Emergency Contact Information</h3>
+                    <h3 class="text-lg font-semibold mb-2 text-gray-700">Emergency Contact Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-700 mb-1">Relationship <span class="text-red-500">*</span></label>
@@ -289,7 +180,7 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex justify-between mt-8">
+                <div class="flex justify-between mt-2">
                     <a href="{{ route('admin.residents') }}" 
                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                         <i class="fas fa-times mr-2"></i>

@@ -5,108 +5,42 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Header Skeleton -->
-    <div id="hcaHeaderSkeleton" class="animate-pulse mb-3">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-96 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0 flex space-x-2">
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-                <div class="h-10 w-32 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="hcaHeaderSkeleton">
+        @include('components.loading.skeleton-header')
     </div>
 
     <!-- Search Skeleton -->
-    <div id="hcaSearchSkeleton" class="animate-pulse mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="sm:w-48">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex space-x-2">
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-                <div class="h-10 w-20 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="hcaSearchSkeleton">
+        @include('components.loading.skeleton-filters')
     </div>
 
     <!-- Stats Skeleton -->
-    <div id="hcaStatsSkeleton" class="animate-pulse grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
-        @for($i = 0; $i < 4; $i++)
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-            <div class="flex items-center">
-                <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
-                <div class="ml-3">
-                    <div class="h-3 w-20 bg-gray-200 rounded mb-1"></div>
-                    <div class="h-6 w-12 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-        @endfor
+    <div id="hcaStatsSkeleton">
+        @include('components.loading.skeleton-dashboard-stats')
     </div>
 
     <!-- Warning Skeleton -->
-    <div id="hcaWarningSkeleton" class="animate-pulse mb-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <div class="flex items-center">
-            <div class="w-5 h-5 bg-gray-200 rounded mr-3"></div>
-            <div class="flex-1">
-                <div class="h-4 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-3 w-96 bg-gray-100 rounded"></div>
-            </div>
-        </div>
+    <div id="hcaWarningSkeleton">
+        @include('components.loading.skeleton-warning')
     </div>
 
     <!-- Grid Skeleton -->
-    <div id="hcaGridSkeleton" class="animate-pulse grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        @for($i = 0; $i < 6; $i++)
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="w-full h-48 bg-gray-200"></div>
-            <div class="p-5">
-                <div class="h-6 w-48 bg-gray-200 rounded mb-3"></div>
-                <div class="h-4 w-full bg-gray-100 rounded mb-2"></div>
-                <div class="h-4 w-3/4 bg-gray-100 rounded mb-4"></div>
-                <div class="space-y-2 mb-4">
-                    <div class="h-3 w-32 bg-gray-200 rounded"></div>
-                    <div class="h-3 w-28 bg-gray-200 rounded"></div>
-                </div>
-                <div class="space-y-2 mb-5">
-                    <div class="h-3 w-40 bg-gray-200 rounded"></div>
-                    <div class="h-3 w-36 bg-gray-200 rounded"></div>
-                </div>
-                <div class="flex gap-2">
-                    <div class="flex-1 h-8 bg-gray-200 rounded"></div>
-                    <div class="flex-1 h-8 bg-gray-200 rounded"></div>
-                    <div class="flex-1 h-8 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-        @endfor
+    <div id="hcaGridSkeleton">
+        @include('components.loading.skeleton-grid')
     </div>
 
     <!-- Pagination Skeleton -->
-    <div id="hcaPaginationSkeleton" class="animate-pulse mt-6">
-        <div class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-            <div class="h-10 w-20 bg-gray-200 rounded"></div>
-            <div class="hidden md:flex space-x-2">
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-                <div class="h-10 w-8 bg-gray-200 rounded"></div>
-            </div>
-            <div class="h-10 w-16 bg-gray-200 rounded"></div>
-        </div>
+    <div id="hcaPaginationSkeleton" class="mt-6">
+        @include('components.loading.skeleton-pagination')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="hcaContent" style="display: none;">
         <!-- Header Section -->
-        <div class="mb-3">
+        <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="mb-4 sm:mb-0">
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Health Center Activities</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Health Center Activities</h1>
                     <p class="text-sm md:text-base text-gray-600">Plan, manage, and review health center activities</p>
                 </div>
                 <div class="mt-4 sm:mt-0 flex space-x-2">
@@ -149,7 +83,7 @@
     @endif
 
     <!-- Search -->
-    <form action="{{ route('admin.health-center-activities.index') }}" method="GET" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form action="{{ route('admin.health-center-activities.index') }}" method="GET" class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <div class="flex-1">
                 <div class="relative">
@@ -183,7 +117,7 @@
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-2">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -243,7 +177,7 @@
 
     <!-- Featured Items Warning -->
     @if($warningMessage)
-        <div class="mb-4 bg-{{ $warningMessage['color'] }}-50 border border-{{ $warningMessage['color'] }}-200 rounded-lg p-4">
+        <div class="mb-2 bg-{{ $warningMessage['color'] }}-50 border border-{{ $warningMessage['color'] }}-200 rounded-lg p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <i class="fas fa-{{ $warningMessage['icon'] }} text-{{ $warningMessage['color'] }}-400"></i>
@@ -281,7 +215,7 @@
     <!-- Activities Grid (Aligned with Accomplished Projects UI) -->
     @if($activities->isEmpty())
         <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-calendar-alt text-gray-400 text-4xl"></i>
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No health center activities found</h3>
@@ -343,13 +277,13 @@
                 <!-- Card Content -->
                 <div class="p-5">
                     <!-- Title -->
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">{{ $activity->activity_name }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight">{{ $activity->activity_name }}</h3>
                     
                     <!-- Description -->
-                    <p class="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">{{ Str::limit($activity->description, 120) }}</p>
+                    <p class="text-gray-600 text-sm mb-2 leading-relaxed line-clamp-3">{{ Str::limit($activity->description, 120) }}</p>
 
                     <!-- Date and Time Row -->
-                    <div class="space-y-2 mb-4">
+                    <div class="space-y-2 mb-2">
                         <div class="flex items-center text-sm text-gray-500">
                             <i class="fas fa-calendar-alt mr-2 text-gray-400 w-4 text-center"></i>
                             <span>{{ $activity->activity_date->format('M d, Y') }}</span>
@@ -367,7 +301,7 @@
                     </div>
                     
                     <!-- Location and Organizer Row -->
-                    <div class="space-y-2 mb-5">
+                    <div class="space-y-2 mb-2">
                         <div class="flex items-start text-sm text-gray-600">
                             <i class="fas fa-map-marker-alt mr-2 text-gray-400 w-4 text-center mt-0.5"></i>
                             <span class="leading-relaxed">{{ $activity->location }}</span>
@@ -391,13 +325,12 @@
                             <i class="fas fa-edit mr-1"></i>Edit
                         </a>
 
-                        <form action="{{ route('admin.health-center-activities.destroy', $activity) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this activity?')" class="flex-1">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition duration-300">
-                                <i class="fas fa-trash mr-1"></i>Delete
-                            </button>
-                        </form>
+                        <button type="button" 
+                                data-activity-id="{{ $activity->id }}"
+                                data-activity-name="{{ addslashes($activity->activity_name) }}"
+                                class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition duration-300 js-delete-activity">
+                            <i class="fas fa-trash mr-1"></i>Delete
+                        </button>
                     </div>
                 </div>
             </div>
@@ -474,6 +407,34 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteActivityModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Delete Activity</h3>
+                <p class="text-sm text-gray-500">This action cannot be undone.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to delete <span id="activityName" class="font-semibold"></span>? This will permanently remove the activity from the system.</p>
+        <form id="deleteActivityForm" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeleteActivityModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200">
+                    Delete Activity
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
 .line-clamp-2 {
     display: -webkit-box;
@@ -491,7 +452,31 @@
 
 @push('scripts')
 <script>
+function deleteActivity(id, name) {
+    document.getElementById('activityName').textContent = name;
+    document.getElementById('deleteActivityForm').action = `/admin/health-center-activities/${id}`;
+    document.getElementById('deleteActivityModal').classList.remove('hidden');
+    document.getElementById('deleteActivityModal').classList.add('flex');
+}
+
+function closeDeleteActivityModal() {
+    document.getElementById('deleteActivityModal').classList.add('hidden');
+    document.getElementById('deleteActivityModal').classList.remove('flex');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete button clicks
+    document.addEventListener('click', function(event) {
+        const deleteBtn = event.target.closest('.js-delete-activity');
+        if (deleteBtn) {
+            const activityId = deleteBtn.dataset.activityId;
+            const activityName = deleteBtn.dataset.activityName;
+            deleteActivity(activityId, activityName);
+            return;
+        }
+    });
+    
+    // Skeleton loading control
     setTimeout(() => {
         const skeletonElements = [
             'hcaHeaderSkeleton', 'hcaSearchSkeleton', 'hcaStatsSkeleton',

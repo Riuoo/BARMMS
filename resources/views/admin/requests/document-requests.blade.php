@@ -12,126 +12,42 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Header Skeleton -->
-    <div id="documentHeaderSkeleton" class="mb-3 animate-pulse">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-5 w-96 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0 flex space-x-2">
-                <div class="h-10 w-40 bg-gray-200 rounded"></div>
-                <div class="h-10 w-36 bg-gray-200 rounded"></div>
-                <div class="h-10 w-40 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="documentHeaderSkeleton">
+        @include('components.loading.skeleton-header')
     </div>
 
     <!-- Filters Skeleton -->
-    <div id="documentFiltersSkeleton" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4 animate-pulse">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="sm:w-48">
-                <div class="h-10 w-full bg-gray-200 rounded"></div>
-            </div>
-            <div class="flex space-x-2">
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+    <div id="documentFiltersSkeleton">
+        @include('components.loading.skeleton-filters')
     </div>
 
     <!-- Stats Skeleton -->
-    <div id="documentStatsSkeleton" class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3 animate-pulse">
-        @for ($i = 0; $i < 4; $i++)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    </div>
-                    <div class="ml-3">
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-6 w-16 bg-gray-300 rounded"></div>
-                    </div>
-                </div>
-            </div>
-        @endfor
+    <div id="documentStatsSkeleton">
+        @include('components.loading.skeleton-dashboard-stats')
     </div>
 
     <!-- Table Skeleton (Desktop) -->
-    <div id="documentTableSkeleton" class="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse mb-6">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        @for ($i = 0; $i < 6; $i++)
-                            <th class="px-4 py-3"><div class="h-4 w-20 bg-gray-200 rounded"></div></th>
-                        @endfor
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @for ($i = 0; $i < 6; $i++)
-                        <tr>
-                            @for ($j = 0; $j < 6; $j++)
-                                <td class="px-4 py-4"><div class="h-4 w-24 bg-gray-100 rounded"></div></td>
-                            @endfor
-                        </tr>
-                    @endfor
-                </tbody>
-            </table>
-        </div>
+    <div id="documentTableSkeleton" class="hidden md:block mb-6">
+        @include('components.loading.skeleton-table')
     </div>
 
     <!-- Mobile Cards Skeleton -->
-    <div id="documentMobileSkeleton" class="md:hidden space-y-4 animate-pulse mb-6">
-        @for ($i = 0; $i < 4; $i++)
-            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                <div class="flex items-center mb-3">
-                    <div class="w-12 h-12 bg-gray-200 rounded-full mr-3"></div>
-                    <div class="flex-1">
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-4 w-24 bg-gray-100 rounded"></div>
-                    </div>
-                </div>
-                <div class="h-4 w-40 bg-gray-100 rounded mb-2"></div>
-                <div class="h-4 w-24 bg-gray-200 rounded"></div>
-            </div>
-        @endfor
+    <div id="documentMobileSkeleton">
+        @include('components.loading.skeleton-mobile-cards')
     </div>
 
     <!-- Pagination Skeleton -->
-    <div id="documentPaginationSkeleton" class="mt-6 animate-pulse">
-        <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-            <div class="-mt-px flex w-0 flex-1">
-                <div class="h-4 w-20 bg-gray-200 rounded"></div>
-            </div>
-            <div class="hidden md:-mt-px md:flex space-x-2">
-                @for ($i = 0; $i < 5; $i++)
-                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
-                @endfor
-            </div>
-            <div class="-mt-px flex w-0 flex-1 justify-end">
-                <div class="h-4 w-16 bg-gray-200 rounded"></div>
-            </div>
-        </nav>
-        <div class="mt-4 flex justify-between sm:hidden">
-            <div class="h-8 w-20 bg-gray-200 rounded"></div>
-            <div class="h-8 w-32 bg-gray-200 rounded"></div>
-            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-        </div>
-        <div class="mt-4 text-center">
-            <div class="h-4 w-48 bg-gray-200 rounded mx-auto"></div>
-        </div>
+    <div id="documentPaginationSkeleton" class="mt-6">
+        @include('components.loading.skeleton-pagination')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="documentContent" style="display: none;">
         <!-- Header Section -->
-        <div class="mb-3">
+        <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Document Requests</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">Document Requests</h1>
                     <p class="text-gray-600">Manage and process document requests from residents</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
@@ -183,7 +99,7 @@
     @endif
 
     <!-- Filters and Search -->
-    <form method="GET" action="{{ route('admin.document-requests') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.document-requests') }}" class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -217,7 +133,7 @@
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-2">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">

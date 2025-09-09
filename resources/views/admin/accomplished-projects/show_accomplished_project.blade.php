@@ -5,65 +5,13 @@
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
     <!-- Header Skeleton -->
-    <div id="apShowHeaderSkeleton" class="animate-pulse mb-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
-                <div class="h-4 w-96 bg-gray-100 rounded"></div>
-            </div>
-            <div class="h-9 w-36 bg-gray-200 rounded"></div>
-        </div>
+    <div id="apShowHeaderSkeleton">
+        @include('components.loading.skeleton-accomplished-project-header')
     </div>
 
-    <!-- Content Skeleton -->
-    <div id="apShowBodySkeleton" class="animate-pulse">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-6">
-                <div class="w-full h-64 bg-gray-200 rounded-xl"></div>
-                <div class="bg-gray-50 rounded-xl p-6">
-                    <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
-                    <div class="h-4 w-24 bg-gray-200 rounded mb-4"></div>
-                    <div class="h-4 w-full bg-gray-100 rounded mb-2"></div>
-                    <div class="h-4 w-5/6 bg-gray-100 rounded"></div>
-                </div>
-                <div class="bg-white border border-gray-200 rounded-xl p-6">
-                    <div class="h-5 w-40 bg-gray-200 rounded mb-4"></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @for ($i = 0; $i < 6; $i++)
-                        <div>
-                            <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                            <div class="h-4 w-40 bg-gray-100 rounded"></div>
-                        </div>
-                        @endfor
-                    </div>
-                </div>
-                <div class="bg-white border border-gray-200 rounded-xl p-6">
-                    <div class="h-5 w-56 bg-gray-200 rounded mb-4"></div>
-                    <div class="space-y-3">
-                        <div class="h-4 w-full bg-gray-100 rounded"></div>
-                        <div class="h-4 w-5/6 bg-gray-100 rounded"></div>
-                        <div class="h-4 w-2/3 bg-gray-100 rounded"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="space-y-6">
-                <div class="bg-white border border-gray-200 rounded-xl p-6">
-                    <div class="h-5 w-40 bg-gray-200 rounded mb-4"></div>
-                    <div class="space-y-3">
-                        <div class="h-4 w-48 bg-gray-100 rounded"></div>
-                        <div class="h-4 w-40 bg-gray-100 rounded"></div>
-                    </div>
-                </div>
-                <div class="bg-white border border-gray-200 rounded-xl p-6">
-                    <div class="h-5 w-28 bg-gray-200 rounded mb-4"></div>
-                    <div class="space-y-3">
-                        <div class="h-9 w-full bg-gray-200 rounded"></div>
-                        <div class="h-9 w-full bg-gray-200 rounded"></div>
-                        <div class="h-9 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Body Skeleton -->
+    <div id="apShowBodySkeleton">
+        @include('components.loading.skeleton-accomplished-project-show-body')
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -74,7 +22,7 @@
             <h1 class="text-3xl font-bold text-gray-900">Project Details</h1>
             <p class="text-gray-600 mt-2">View detailed information about this accomplished project</p>
         </div>
-        <a href="{{ route('admin.accomplished-projects') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center">
+        <a href="{{ route('admin.accomplished-projects') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
             Back to Projects
         </a>

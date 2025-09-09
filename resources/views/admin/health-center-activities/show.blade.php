@@ -4,96 +4,9 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
-    <!-- Header Skeleton -->
-    <div id="hcaShowHeaderSkeleton" class="animate-pulse flex items-center justify-between mb-6">
-        <div>
-            <div class="h-8 w-80 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 w-96 bg-gray-100 rounded"></div>
-        </div>
-        <div class="h-10 w-40 bg-gray-200 rounded"></div>
-    </div>
-
-    <!-- Main Content Skeleton -->
-    <div id="hcaShowContentSkeleton" class="animate-pulse grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main Content -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Image Skeleton -->
-            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                <div class="w-full h-64 bg-gray-200"></div>
-            </div>
-
-            <!-- Title and Status Skeleton -->
-            <div class="bg-gray-50 rounded-xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="h-8 w-64 bg-gray-200 rounded"></div>
-                    <div class="flex items-center space-x-3">
-                        <div class="h-6 w-32 bg-gray-200 rounded"></div>
-                        <div class="h-6 w-20 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <div class="h-4 w-full bg-gray-200 rounded"></div>
-                    <div class="h-4 w-3/4 bg-gray-100 rounded"></div>
-                    <div class="h-4 w-1/2 bg-gray-100 rounded"></div>
-                </div>
-            </div>
-
-            <!-- Details Skeleton -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @for($i = 0; $i < 6; $i++)
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-4 w-32 bg-gray-100 rounded"></div>
-                    </div>
-                    @endfor
-                </div>
-            </div>
-
-            <!-- Objectives and Resources Skeleton -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
-                <div class="space-y-4">
-                    <div>
-                        <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-4 w-full bg-gray-100 rounded"></div>
-                        <div class="h-4 w-3/4 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-4 w-full bg-gray-100 rounded"></div>
-                        <div class="h-4 w-2/3 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Staff Involved Skeleton -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <div class="h-6 w-32 bg-gray-200 rounded mb-4"></div>
-                <div class="h-4 w-full bg-gray-100 rounded"></div>
-                <div class="h-4 w-3/4 bg-gray-100 rounded mt-1"></div>
-            </div>
-
-            <!-- Notes Skeleton -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
-                <div class="h-4 w-full bg-gray-100 rounded"></div>
-                <div class="h-4 w-2/3 bg-gray-100 rounded mt-1"></div>
-            </div>
-        </div>
-
-        <!-- Sidebar Actions Skeleton -->
-        <div class="space-y-6">
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <div class="h-6 w-20 bg-gray-200 rounded mb-4"></div>
-                <div class="space-y-3">
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
+    <!-- Skeleton Component -->
+    <div id="hcaShowSkeleton">
+        @include('components.loading.skeleton-health-activity-show')
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -104,7 +17,7 @@
                 <h1 class="text-3xl font-bold text-gray-900">Health Activity Details</h1>
                 <p class="text-gray-600 mt-2">View detailed information about this health center activity</p>
             </div>
-            <a href="{{ route('admin.health-center-activities.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center">
+            <a href="{{ route('admin.health-center-activities.index') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to Activities
             </a>
@@ -244,25 +157,24 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
                 <div class="space-y-3">
                     <a href="{{ route('admin.health-center-activities.edit', $activity->id) }}" 
-                       class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center justify-center">
+                       class="w-full inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 flex items-center justify-center">
                         <i class="fas fa-edit mr-2"></i>
                         Edit Activity
                     </a>
                     <form action="{{ route('admin.health-center-activities.toggle-featured', $activity->id) }}" method="POST" class="w-full">
                         @csrf
-                        <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center justify-center">
+                        <button type="submit" class="w-full inline-flex items-center px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-200 flex items-center justify-center">
                             <i class="fas fa-star mr-2"></i>
                             {{ $activity->is_featured ? 'Unfeature' : 'Feature' }} Activity
                         </button>
                     </form>
-                    <form action="{{ route('admin.health-center-activities.destroy', $activity->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this activity? This action cannot be undone.')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center justify-center">
-                            <i class="fas fa-trash mr-2"></i>
-                            Delete Activity
-                        </button>
-                    </form>
+                    <button type="button" 
+                            data-activity-id="{{ $activity->id }}"
+                            data-activity-name="{{ addslashes($activity->activity_name) }}"
+                            class="w-full inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 flex items-center justify-center js-delete-activity">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Activity
+                    </button>
                 </div>
             </div>
         </div>
@@ -270,15 +182,65 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteActivityModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Delete Activity</h3>
+                <p class="text-sm text-gray-500">This action cannot be undone.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to delete <span id="activityName" class="font-semibold"></span>? This will permanently remove the activity from the system.</p>
+        <form id="deleteActivityForm" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeleteActivityModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200">
+                    Delete Activity
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 <script>
+function deleteActivity(id, name) {
+    document.getElementById('activityName').textContent = name;
+    document.getElementById('deleteActivityForm').action = `/admin/health-center-activities/${id}`;
+    document.getElementById('deleteActivityModal').classList.remove('hidden');
+    document.getElementById('deleteActivityModal').classList.add('flex');
+}
+
+function closeDeleteActivityModal() {
+    document.getElementById('deleteActivityModal').classList.add('hidden');
+    document.getElementById('deleteActivityModal').classList.remove('flex');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete button clicks
+    document.addEventListener('click', function(event) {
+        const deleteBtn = event.target.closest('.js-delete-activity');
+        if (deleteBtn) {
+            const activityId = deleteBtn.dataset.activityId;
+            const activityName = deleteBtn.dataset.activityName;
+            deleteActivity(activityId, activityName);
+            return;
+        }
+    });
+    
+    // Skeleton loading control
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('hcaShowHeaderSkeleton');
-        const contentSkeleton = document.getElementById('hcaShowContentSkeleton');
+        const skeleton = document.getElementById('hcaShowSkeleton');
         const content = document.getElementById('hcaShowContent');
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (contentSkeleton) contentSkeleton.style.display = 'none';
+        if (skeleton) skeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 });

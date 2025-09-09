@@ -4,119 +4,11 @@
 
 @section('content')
 <!-- Header Skeleton -->
-<div id="editResidentHeaderSkeleton" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 animate-pulse">
-    <div class="mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <div class="h-8 w-56 bg-gray-200 rounded mb-2"></div>
-                <div class="h-5 w-80 bg-gray-100 rounded"></div>
-            </div>
-        </div>
-    </div>
+<div id="editResidentHeaderSkeleton" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    @include('components.loading.skeleton-resident-edit-header')
     
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="space-y-6">
-            <!-- Basic Information Section Skeleton -->
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                        <div class="h-4 w-48 bg-gray-100 rounded mt-1"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Personal Information Section Skeleton -->
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-44 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-28 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="h-4 w-28 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            
-            <!-- Demographic Information Section Skeleton -->
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-52 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-20 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    <div>
-                        <div class="h-4 w-36 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    <div>
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="h-4 w-36 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-            </div>
-            
-            <!-- Emergency Contact Section Skeleton -->
-            <div class="border-b border-gray-200 pb-6">
-                <div class="h-6 w-44 bg-gray-200 rounded mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                    <div>
-                        <div class="h-4 w-36 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-10 w-full bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Form Actions Skeleton -->
-            <div class="flex justify-end space-x-3">
-                <div class="h-10 w-24 bg-gray-200 rounded"></div>
-                <div class="h-10 w-32 bg-gray-200 rounded"></div>
-            </div>
-        </div>
+        @include('components.loading.skeleton-resident-form')
     </div>
 </div>
 
@@ -124,10 +16,10 @@
 <div id="editResidentContent" style="display: none;">
     <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         <!-- Header Section -->
-    <div class="mb-8">
+    <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit Resident Profile</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Edit Resident Profile</h1>
                 <p class="text-gray-600">Update resident information and demographic data</p>
             </div>
         </div>
@@ -175,7 +67,7 @@
 
             <!-- Basic Information (Read Only) -->
             <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-user mr-2 text-blue-600"></i>
                     Basic Information
                 </h3>
@@ -223,7 +115,7 @@
 
                 <!-- Personal Information -->
             <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
                         <i class="fas fa-user-circle mr-2 text-green-600"></i>
                     Personal Information
                 </h3>
@@ -256,7 +148,7 @@
                         </select>
                     </div>
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-2">
                         <label for="occupation" class="block text-sm font-medium text-gray-700 mb-2">Occupation</label>
                         <input type="text" 
                                id="occupation" 
@@ -269,7 +161,7 @@
 
                 <!-- Demographic Information -->
             <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
                     Demographic Information
                 </h3>
@@ -301,7 +193,7 @@
                                required>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                     <div>
                         <label for="education_level" class="block text-sm font-medium text-gray-700 mb-2">
                             Education Level <span class="text-red-500">*</span>
@@ -335,7 +227,7 @@
                         </select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                     <div>
                         <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-2">
                             Employment Status <span class="text-red-500">*</span>
@@ -368,7 +260,7 @@
                         </select>
                     </div>
                 </div>
-                    <div class="mt-4">
+                    <div class="mt-2">
                         <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
                             Emergency Contact Name <span class="text-red-500">*</span>
                         </label>
@@ -383,7 +275,7 @@
 
                 <!-- Emergency Contact Information -->
                 <div class="border-b border-gray-200 pb-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
                         <i class="fas fa-phone-alt mr-2 text-red-600"></i>
                         Emergency Contact Information
                     </h3>
@@ -419,7 +311,7 @@
             </div>
 
             <!-- Form Actions -->
-                <div class="flex justify-end space-x-3">
+                <div class="flex justify-between mt-2">
                     <a href="{{ route('admin.residents') }}" 
                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                         <i class="fas fa-times mr-2"></i>
