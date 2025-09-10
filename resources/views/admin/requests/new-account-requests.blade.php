@@ -11,34 +11,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="accountHeaderSkeleton">
-        @include('components.loading.skeleton-header')
-    </div>
-
-    <!-- Filters Skeleton -->
-    <div id="accountFiltersSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Stats Skeleton -->
-    <div id="accountStatsSkeleton">
-        @include('components.loading.skeleton-dashboard-stats')
-    </div>
-
-    <!-- Table Skeleton (Desktop) -->
-    <div id="accountTableSkeleton" class="hidden sm:block mb-6">
-        @include('components.loading.skeleton-table')
-    </div>
-
-    <!-- Mobile Cards Skeleton -->
-    <div id="accountMobileSkeleton">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="accountPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Consolidated Table Dashboard Skeleton -->
+    <div id="accountSkeleton">
+        @include('components.loading.table-dashboard-skeleton', ['showButton' => false])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -475,20 +450,12 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('accountHeaderSkeleton');
-        const filtersSkeleton = document.getElementById('accountFiltersSkeleton');
-        const statsSkeleton = document.getElementById('accountStatsSkeleton');
-        const tableSkeleton = document.getElementById('accountTableSkeleton');
-        const mobileSkeleton = document.getElementById('accountMobileSkeleton');
-        const paginationSkeleton = document.getElementById('accountPaginationSkeleton');
-        const content = document.getElementById('accountRequestsContent');
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('accountSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
 
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (filtersSkeleton) filtersSkeleton.style.display = 'none';
-        if (statsSkeleton) statsSkeleton.style.display = 'none';
-        if (tableSkeleton) tableSkeleton.style.display = 'none';
-        if (mobileSkeleton) mobileSkeleton.style.display = 'none';
-        if (paginationSkeleton) paginationSkeleton.style.display = 'none';
+        // Show content
+        const content = document.getElementById('accountRequestsContent');
         if (content) content.style.display = 'block';
     }, 1000);
 });

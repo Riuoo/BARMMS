@@ -5,11 +5,8 @@
 @section('content')
 <!-- Header Skeleton -->
 <div id="editHeaderSkeleton" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    @include('components.loading.skeleton-barangay-profile-edit-header')
-    
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        @include('components.loading.skeleton-barangay-profile-form')
-    </div>
+    @include('components.loading.edit-form-skeleton', ['type' => 'header', 'showButton' => false])
+    @include('components.loading.edit-form-skeleton', ['type' => 'barangay-profile'])
 </div>
 
 <!-- Real Content (hidden initially) -->

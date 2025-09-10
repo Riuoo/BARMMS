@@ -4,14 +4,9 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
-    <!-- Header Skeleton -->
-    <div id="apShowHeaderSkeleton">
-        @include('components.loading.skeleton-accomplished-project-header')
-    </div>
-
-    <!-- Body Skeleton -->
-    <div id="apShowBodySkeleton">
-        @include('components.loading.skeleton-accomplished-project-show-body')
+    <!-- Unified Show Skeleton -->
+    <div id="apShowSkeleton">
+        @include('components.loading.show-entity-skeleton', ['type' => 'accomplished-project', 'buttonCount' => 1])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -165,11 +160,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('apShowHeaderSkeleton');
-        const bodySkeleton = document.getElementById('apShowBodySkeleton');
+        const skeleton = document.getElementById('apShowSkeleton');
         const content = document.getElementById('apShowContent');
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (bodySkeleton) bodySkeleton.style.display = 'none';
+        if (skeleton) skeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 });

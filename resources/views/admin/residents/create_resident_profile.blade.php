@@ -5,7 +5,7 @@
 @section('content')
     <!-- Header Skeleton -->
     <div id="createResidentHeaderSkeleton" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mt-8">
-        @include('components.loading.skeleton-resident-form')
+        @include('components.loading.create-form-skeleton', ['type' => 'resident'])
     </div>
 
     <!-- Real Content (hidden initially) -->

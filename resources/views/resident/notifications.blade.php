@@ -4,10 +4,10 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <div class="mb-3">
+    <div id="residentNotifHeader" class="mb-2" style="display: none;">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Notifications</h1>
                 <p class="text-gray-600">Updates regarding your requests</p>
             </div>
             <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
@@ -40,7 +40,7 @@
 
     @if($notifications->isEmpty())
         <div class="text-center py-12">
-            <div class="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <div class="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-bell text-gray-400 text-xl"></i>
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
@@ -248,6 +248,8 @@
                 notificationsContainer.appendChild(notificationsContent);
                 notificationsContent.classList.remove('hidden');
             }
+            const header = document.getElementById('residentNotifHeader');
+            if (header) header.style.display = 'block';
         }, 1000); // 1 second delay to show skeleton effect
     });
 </script>

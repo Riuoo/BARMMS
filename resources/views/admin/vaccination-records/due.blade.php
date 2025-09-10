@@ -4,34 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Breadcrumb Skeleton -->
-    <div id="dueBreadcrumbSkeleton">
-        @include('components.loading.skeleton-breadcrumb')
-    </div>
-
-    <!-- Header Skeleton -->
-    <div id="dueHeaderSkeleton">
-        @include('components.loading.skeleton-header-one-button')
-    </div>
-
-    <!-- Filter Skeleton -->
-    <div id="dueFilterSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Table Skeleton -->
-    <div id="dueTableSkeleton" class="hidden md:block">
-        @include('components.loading.skeleton-table')
-    </div>
-
-    <!-- Mobile Cards Skeleton -->
-    <div id="dueMobileSkeleton" class="md:hidden">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-
-    <!-- Summary Skeleton -->
-    <div id="dueSummarySkeleton">
-        @include('components.loading.skeleton-due-summary')
+    <!-- Consolidated Dashboard Skeleton (Due variant) -->
+    <div id="dueSkeleton">
+        @include('components.loading.table-dashboard-skeleton', ['buttonCount' => 1, 'showStats' => false, 'variant' => 'due', 'showSummary' => true, 'showBreadcrumb' => true])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -287,14 +262,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const skeletonElements = [
-            'dueBreadcrumbSkeleton', 'dueHeaderSkeleton', 'dueFilterSkeleton',
-            'dueTableSkeleton', 'dueMobileSkeleton', 'dueSummarySkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.style.display = 'none';
-        });
+        const consolidated = document.getElementById('tableDashboardSkeleton');
+        if (consolidated) consolidated.style.display = 'none';
         const content = document.getElementById('dueContent');
         if (content) content.style.display = 'block';
     }, 1000);

@@ -1,10 +1,9 @@
-{{-- Blotter Analysis Dashboard Skeleton Component --}}
+{{-- Analytics Dashboard Skeleton Component --}}
 <div class="animate-pulse space-y-6">
     <!-- Header Skeleton -->
     <div class="text-center">
         <div class="h-8 w-80 bg-gray-200 rounded mb-3 mx-auto"></div>
         <div class="h-5 w-96 bg-gray-100 rounded mb-4 mx-auto"></div>
-        
         <!-- Controls Skeleton -->
         <div class="flex flex-wrap justify-center gap-3 mb-4">
             <div class="h-10 w-32 bg-gray-200 rounded"></div>
@@ -13,7 +12,6 @@
             <div class="h-10 w-24 bg-gray-200 rounded"></div>
             <div class="h-10 w-24 bg-gray-200 rounded"></div>
         </div>
-        
         <!-- Settings Skeleton -->
         <div class="flex flex-wrap justify-center gap-2 text-sm">
             <div class="h-6 w-32 bg-gray-200 rounded"></div>
@@ -41,7 +39,7 @@
 
     <!-- Charts Skeleton -->
     <div class="space-y-6 mb-3">
-        <!-- Purok Chart Skeleton -->
+        <!-- Chart 1 Skeleton -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-3">
@@ -51,8 +49,7 @@
                 <div class="h-96 w-full bg-gray-200 rounded"></div>
             </div>
         </div>
-
-        <!-- Cluster Chart Skeleton -->
+        <!-- Chart 2 Skeleton -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-3">
@@ -62,10 +59,9 @@
                 <div class="h-96 w-full bg-gray-200 rounded"></div>
             </div>
         </div>
-
         <!-- Analysis Tables Skeleton -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Purok Analysis Skeleton -->
+            <!-- Table 1 Skeleton -->
             <div class="bg-white rounded-xl shadow-lg border border-gray-100">
                 <div class="p-6">
                     <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
@@ -80,8 +76,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Cluster Analysis Skeleton -->
+            <!-- Table 2 Skeleton -->
             <div class="bg-white rounded-xl shadow-lg border border-gray-100">
                 <div class="p-6">
                     <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
@@ -99,7 +94,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Insights Skeleton -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-6">

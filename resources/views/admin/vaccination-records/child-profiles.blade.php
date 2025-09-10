@@ -4,29 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
+    <!-- Form Skeleton -->
     <div id="childHeaderSkeleton">
-        @include('components.loading.skeleton-child-profiles-header')
-    </div>
-
-    <!-- Search Skeleton -->
-    <div id="childSearchSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Table Skeleton -->
-    <div id="childTableSkeleton" class="hidden md:block">
-        @include('components.loading.skeleton-table')
-    </div>
-
-    <!-- Mobile Cards Skeleton -->
-    <div id="childMobileSkeleton" class="md:hidden">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="childPaginationSkeleton">
-        @include('components.loading.skeleton-pagination')
+        @include('components.loading.table-dashboard-skeleton', ['showStats' => false, 'buttonCount' => 2])
     </div>
 
     <!-- Real Content (hidden initially) -->

@@ -6,7 +6,8 @@
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
     <!-- Form Skeleton -->
     <div id="apEditFormSkeleton">
-        @include('components.loading.skeleton-accomplished-project-form')
+        @include('components.loading.edit-form-skeleton', ['type' => 'header', 'showButton' => false])
+        @include('components.loading.edit-form-skeleton', ['type' => 'accomplished-project'])
     </div>
 
     <!-- Real Content (hidden initially) -->

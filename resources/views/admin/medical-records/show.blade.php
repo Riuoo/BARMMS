@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-6">
     <!-- Main Skeleton -->
     <div id="showMedicalSkeleton">
-        @include('components.loading.skeleton-medical-show')
+        @include('components.loading.show-entity-skeleton', ['type' => 'medical-record', 'buttonCount' => 2])
     </div>
 
     <!-- Real Content (hidden initially) -->

@@ -11,43 +11,38 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="concernsHeaderSkeleton">
-        @include('components.loading.skeleton-header')
+    <!-- Consolidated Table Dashboard Skeleton -->
+    <div id="concernsSkeleton">
+        @include('components.loading.table-dashboard-skeleton', ['showButton' => false])
     </div>
-
-    <!-- Filters Skeleton -->
-    <div id="concernsFiltersSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Stats Skeleton -->
-    <div id="concernsStatsSkeleton">
-        @include('components.loading.skeleton-stats')
-    </div>
-
-    <!-- Table Skeleton (Desktop) -->
-    <div id="concernsTableSkeleton" class="hidden md:block mb-6">
-        @include('components.loading.skeleton-table')
-    </div>
-
-    <!-- Mobile Cards Skeleton -->
-    <div id="concernsMobileSkeleton">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="concernsPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
-    </div>
+    <script>
+    // Defensive hide in case other scripts fail
+    (function(){
+        function revealConcerns(){
+            var w = document.getElementById('concernsSkeleton');
+            if (w) w.style.display = 'none';
+            var inner = document.getElementById('tableDashboardSkeleton');
+            if (inner) inner.style.display = 'none';
+            var c = document.getElementById('concernsContent');
+            if (c) c.style.display = 'block';
+        }
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(revealConcerns, 1000);
+        } else {
+            document.addEventListener('DOMContentLoaded', function(){ setTimeout(revealConcerns, 1000); });
+        }
+        // Absolute fallback after 3s
+        setTimeout(revealConcerns, 3000);
+    })();
+    </script>
 
     <!-- Real Content (hidden initially) -->
     <div id="concernsContent" style="display: none;">
         <!-- Header Section -->
-        <div class="mb-3">
+        <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Community Concerns</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Community Concerns</h1>
                 <p class="text-gray-600">Manage and track community concerns from residents</p>
             </div>
         </div>
@@ -81,7 +76,7 @@
     @endif
 
     <!-- Filters and Search -->
-    <form method="GET" action="{{ route('admin.community-concerns') }}" class="mb-3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <form method="GET" action="{{ route('admin.community-concerns') }}" class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
@@ -116,7 +111,7 @@
     </form>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 lg:gap-4 mb-3">
+    <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 lg:gap-4 mb-2">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -313,7 +308,7 @@
             @foreach($concerns as $concern)
             <div class="concern-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200" data-status="{{ $concern->status }}">
                 <!-- Header Section -->
-                <div class="flex items-start justify-between mb-3">
+                <div class="flex items-start justify-between mb-2">
                     <div class="flex items-center flex-1 min-w-0">
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-clipboard-list text-blue-600"></i>
@@ -345,7 +340,7 @@
                 </div>
 
                 <!-- Category Section -->
-                <div class="mb-3 flex flex-wrap gap-2">
+                <div class="mb-2 flex flex-wrap gap-2">
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                         <i class="fas fa-tag mr-1"></i>
                         {{ $concern->category }}
@@ -372,7 +367,7 @@
         </div>
     @else
         <div class="text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No concerns found</h3>
@@ -511,21 +506,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Skeleton loading control
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('concernsHeaderSkeleton');
-        const filtersSkeleton = document.getElementById('concernsFiltersSkeleton');
-        const statsSkeleton = document.getElementById('concernsStatsSkeleton');
-        const tableSkeleton = document.getElementById('concernsTableSkeleton');
-        const mobileSkeleton = document.getElementById('concernsMobileSkeleton');
-        const paginationSkeleton = document.getElementById('concernsPaginationSkeleton');
+        // Hide consolidated skeleton (wrapper and inner component id)
+        const wrapperSkel = document.getElementById('concernsSkeleton');
+        if (wrapperSkel) wrapperSkel.style.display = 'none';
+        const innerSkel = document.getElementById('tableDashboardSkeleton');
+        if (innerSkel) innerSkel.style.display = 'none';
+
+        // Show content
         const content = document.getElementById('concernsContent');
-        
-        // Hide skeleton and show content
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (filtersSkeleton) filtersSkeleton.style.display = 'none';
-        if (statsSkeleton) statsSkeleton.style.display = 'none';
-        if (tableSkeleton) tableSkeleton.style.display = 'none';
-        if (mobileSkeleton) mobileSkeleton.style.display = 'none';
-        if (paginationSkeleton) paginationSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 

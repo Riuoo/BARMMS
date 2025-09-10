@@ -4,34 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="medicalHeaderSkeleton">
-        @include('components.loading.skeleton-header')
-    </div>
-
-    <!-- Search & Filters Skeleton -->
-    <div id="medicalSearchSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Statistics Skeleton -->
-    <div id="medicalStatsSkeleton">
-        @include('components.loading.skeleton-stats')
-    </div>
-
-    <!-- Table Skeleton (Desktop) -->
-    <div id="medicalTableSkeleton" class="hidden md:block">
-        @include('components.loading.skeleton-table')
-    </div>
-
-    <!-- Mobile Cards Skeleton -->
-    <div id="medicalMobileSkeleton" class="md:hidden">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="medicalPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Consolidated Table Dashboard Skeleton -->
+    <div id="medicalSkeleton">
+        @include('components.loading.table-dashboard-skeleton')
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -444,14 +419,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const skeletonElements = [
-            'medicalHeaderSkeleton', 'medicalSearchSkeleton', 'medicalStatsSkeleton',
-            'medicalTableSkeleton', 'medicalMobileSkeleton', 'medicalPaginationSkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.style.display = 'none';
-        });
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('medicalSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
+        // Show content
         const content = document.getElementById('medicalContent');
         if (content) content.style.display = 'block';
     }, 1000);

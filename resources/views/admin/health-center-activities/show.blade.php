@@ -6,7 +6,7 @@
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
     <!-- Skeleton Component -->
     <div id="hcaShowSkeleton">
-        @include('components.loading.skeleton-health-activity-show')
+        @include('components.loading.show-entity-skeleton', ['type' => 'health-activity', 'buttonCount' => 1])
     </div>
 
     <!-- Real Content (hidden initially) -->

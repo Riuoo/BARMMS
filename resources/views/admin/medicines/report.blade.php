@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Main Skeleton -->
     <div id="medicineReportSkeleton">
-        @include('components.loading.skeleton-medicine-report')
+        @include('components.loading.medicine-skeleton', ['type' => 'report'])
     </div>
 
     <!-- Real Content (hidden initially) -->

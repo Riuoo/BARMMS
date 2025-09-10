@@ -6,18 +6,19 @@
 <div class="max-w-4xl mx-auto p-4">
     <!-- Form Skeleton -->
     <div id="createChildProfileFormSkeleton">
-        @include('components.loading.skeleton-child-profile-form')
+        @include('components.loading.create-form-skeleton', ['type' => 'header', 'showButton' => false])
+        @include('components.loading.create-form-skeleton', ['type' => 'child-profile'])
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="createChildProfileContent" style="display: none;">
-    <h1 class="text-3xl font-bold mb-2">Create Child Profile</h1>
+    <h1 class="text-3xl font-bold mb-8">Create Child Profile</h1>
     
     <div class="bg-white rounded-lg shadow p-6">
         <form action="{{ route('admin.vaccination-records.store-child-profile') }}" method="POST">
             @csrf
             @if ($errors->any())
-                <div class="mb-4 p-3 rounded border border-red-300 bg-red-50 text-red-700">
+                <div class="mb-2 p-3 rounded border border-red-300 bg-red-50 text-red-700">
                     <div class="font-semibold mb-1">Please fix the following:</div>
                     <ul class="list-disc pl-5">
                         @foreach ($errors->all() as $error)

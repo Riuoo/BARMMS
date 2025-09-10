@@ -4,14 +4,15 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+
     <!-- Header Skeleton -->
     <div id="medRequestCreateHeaderSkeleton">
-        @include('components.loading.skeleton-vaccination-create-header')
+        @include('components.loading.create-form-skeleton', ['type' => 'header', 'buttonCount' => 1])
     </div>
 
     <!-- Form Skeleton -->
     <div id="medRequestCreateFormSkeleton">
-        @include('components.loading.skeleton-medicine-request-form')
+        @include('components.loading.create-form-skeleton', ['type' => 'medicine-request'])
     </div>
 
     <!-- Real Content (hidden initially) -->

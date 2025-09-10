@@ -4,60 +4,18 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Skeleton -->
-    <div id="rpHeaderSkeleton" class="animate-pulse mb-8">
-        <div class="h-8 w-64 bg-gray-200 rounded mb-2"></div>
-        <div class="h-4 w-96 bg-gray-100 rounded"></div>
-    </div>
-
-    <!-- Cards Skeleton -->
-    <div id="rpCardsSkeleton" class="animate-pulse grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
-                <div class="ml-4">
-                    <div class="h-6 w-40 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-4 w-32 bg-gray-100 rounded"></div>
-                </div>
-            </div>
-            <div class="space-y-4">
-                @for($i=0;$i<4;$i++)
-                <div>
-                    <div class="h-4 w-28 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-                @endfor
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
-                <div class="ml-4">
-                    <div class="h-6 w-48 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-4 w-40 bg-gray-100 rounded"></div>
-                </div>
-            </div>
-            <div class="space-y-4">
-                @for($i=0;$i<3;$i++)
-                <div>
-                    <div class="h-4 w-36 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-                @endfor
-                <div class="pt-4">
-                    <div class="h-10 w-full bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
+    <!-- Consolidated Skeleton -->
+    <div id="rpSkeleton">
+        @include('components.loading.resident-profile-skeleton')
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="rpContent" style="display: none;">
     <!-- Header Section -->
-    <div class="mb-8">
+    <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
+                <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
                 <p class="text-gray-600">Manage your personal information and account settings</p>
             </div>
             <div class="mt-4 sm:mt-0">
@@ -99,7 +57,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Personal Information Card -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center mb-6">
+            <div class="flex items-center mb-2">
                 <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                     <i class="fas fa-user text-green-600 text-xl"></i>
                 </div>
@@ -162,7 +120,7 @@
 
         <!-- Change Password Card -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center mb-6">
+            <div class="flex items-center mb-2">
                 <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <i class="fas fa-lock text-blue-600 text-xl"></i>
                 </div>
@@ -237,7 +195,7 @@
 
     <!-- Account Information Card -->
     <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center mb-6">
+        <div class="flex items-center mb-2">
             <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                 <i class="fas fa-info-circle text-purple-600 text-xl"></i>
             </div>
@@ -314,11 +272,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const hs = document.getElementById('rpHeaderSkeleton');
-        const cs = document.getElementById('rpCardsSkeleton');
+        const sk = document.getElementById('residentProfileSkeleton');
         const content = document.getElementById('rpContent');
-        if (hs) hs.style.display = 'none';
-        if (cs) cs.style.display = 'none';
+        if (sk) sk.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 });

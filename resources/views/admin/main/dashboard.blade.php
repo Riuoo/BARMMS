@@ -4,17 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="dashboardHeaderSkeleton" class="mb-3 animate-pulse">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="mb-4 sm:mb-0">
-                <div class="h-10 w-80 bg-gray-200 rounded mb-2"></div>
-                <div class="h-5 w-96 bg-gray-100 rounded"></div>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                <div class="bg-green-100 border border-green-200 rounded-lg px-8 py-4 w-56 h-10"></div>
-            </div>
-        </div>
+    <!-- Consolidated Dashboard Skeleton -->
+    <div id="adminDashboardSkeletonWrapper">
+        @include('components.loading.dashboard-skeleton', ['variant' => 'admin'])
     </div>
     <!-- Header Content (hidden initially) -->
     <div id="dashboardHeaderContent" class="mb-3 hidden">
@@ -32,20 +24,6 @@
     </div>
     <!-- Stats Cards -->
     <div id="dashboardStatsContainer">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-3 animate-pulse">
-            @for ($i = 0; $i < 4; $i++)
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-4 flex flex-col justify-between h-32">
-                    <div class="flex items-center justify-between mb-2">
-                        <div>
-                            <div class="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                            <div class="h-8 w-16 bg-gray-300 rounded"></div>
-                        </div>
-                        <div class="bg-gray-200 rounded-full w-10 h-10"></div>
-                    </div>
-                    <div class="h-4 w-20 bg-gray-100 rounded"></div>
-                </div>
-            @endfor
-        </div>
         <div id="dashboardStatsContent" class="hidden">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-3">
                 <!-- Total Residents Card -->
@@ -132,16 +110,6 @@
     </div>
     <!-- Charts Section -->
     <div id="chartsContainer">
-        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 animate-pulse">
-            @for ($i = 0; $i < 2; $i++)
-                <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4 flex flex-col justify-between h-80">
-                    <div class="h-6 w-2/5 bg-gray-200 rounded mb-6"></div>
-                    <div class="flex items-center justify-center flex-1">
-                        <div class="bg-gray-200 rounded-full w-40 h-40"></div>
-                    </div>
-                </div>
-            @endfor
-        </div>
         <div id="chartsContent" class="hidden">
             <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Resident Demographics Chart -->
@@ -167,10 +135,6 @@
     </div>
     <!-- Trends Section -->
     <div id="trendsContainer">
-        <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100 p-4 animate-pulse flex flex-col h-56">
-            <div class="h-6 w-2/5 bg-gray-200 rounded mb-6"></div>
-            <div class="h-20 w-full bg-gray-200 rounded flex-1"></div>
-        </div>
         <div id="trendsContent" class="hidden">
             <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100">
                 <div class="p-4">
@@ -184,14 +148,6 @@
     </div>
     <!-- Floating Action Button -->
     <div id="fabContainer">
-        <div class="fixed bottom-6 right-6 z-50 animate-pulse flex items-center justify-center">
-            <div class="bg-gray-300 rounded-full w-16 h-16 shadow-lg flex items-center justify-center">
-                <div class="relative w-7 h-7">
-                    <div class="absolute bg-gray-400 rounded w-7 h-1 top-3 left-0"></div>
-                    <div class="absolute bg-gray-400 rounded w-1 h-7 top-0 left-3"></div>
-                </div>
-            </div>
-        </div>
         <div id="fabContent" class="hidden">
             <div class="fixed bottom-6 right-6 z-50">
                 <div class="relative" x-data="{ open: false }">
@@ -654,13 +610,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Add 1 second delay to show skeleton effect
     setTimeout(() => {
-        // Header
-        const headerSkeleton = document.getElementById('dashboardHeaderSkeleton');
+        // Hide consolidated skeleton
+        const adminSkel = document.getElementById('adminDashboardSkeleton');
+        if (adminSkel) adminSkel.style.display = 'none';
+
+        // Show header content
         const headerContent = document.getElementById('dashboardHeaderContent');
-        if (headerSkeleton && headerContent) {
-            headerSkeleton.style.display = 'none';
-            headerContent.classList.remove('hidden');
-        }
+        if (headerContent) headerContent.classList.remove('hidden');
+
         // Stats
         const statsContainer = document.getElementById('dashboardStatsContainer');
         const statsContent = document.getElementById('dashboardStatsContent');

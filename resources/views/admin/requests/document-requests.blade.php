@@ -11,34 +11,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="documentHeaderSkeleton">
-        @include('components.loading.skeleton-header')
-    </div>
-
-    <!-- Filters Skeleton -->
-    <div id="documentFiltersSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Stats Skeleton -->
-    <div id="documentStatsSkeleton">
-        @include('components.loading.skeleton-dashboard-stats')
-    </div>
-
-    <!-- Table Skeleton (Desktop) -->
-    <div id="documentTableSkeleton" class="hidden md:block mb-6">
-        @include('components.loading.skeleton-table')
-    </div>
-
-    <!-- Mobile Cards Skeleton -->
-    <div id="documentMobileSkeleton">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="documentPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Consolidated Table Dashboard Skeleton -->
+    <div id="documentSkeleton">
+        @include('components.loading.table-dashboard-skeleton', ['buttonCount' => 3])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -567,20 +542,12 @@
 // Skeleton loading control
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('documentHeaderSkeleton');
-        const filtersSkeleton = document.getElementById('documentFiltersSkeleton');
-        const statsSkeleton = document.getElementById('documentStatsSkeleton');
-        const tableSkeleton = document.getElementById('documentTableSkeleton');
-        const mobileSkeleton = document.getElementById('documentMobileSkeleton');
-        const paginationSkeleton = document.getElementById('documentPaginationSkeleton');
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('documentSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
+        // Show content
         const content = document.getElementById('documentContent');
-        
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (filtersSkeleton) filtersSkeleton.style.display = 'none';
-        if (statsSkeleton) statsSkeleton.style.display = 'none';
-        if (tableSkeleton) tableSkeleton.style.display = 'none';
-        if (mobileSkeleton) mobileSkeleton.style.display = 'none';
-        if (paginationSkeleton) paginationSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 });

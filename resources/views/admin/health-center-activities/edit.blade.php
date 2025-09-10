@@ -7,7 +7,8 @@
     <div class="max-w-4xl mx-auto">
         <!-- Skeleton Component -->
         <div id="hcaEditSkeleton">
-            @include('components.loading.skeleton-health-activity-edit')
+            @include('components.loading.edit-form-skeleton', ['type' => 'header', 'showButton' => false])
+            @include('components.loading.edit-form-skeleton', ['type' => 'health-activity'])
         </div>
 
         <!-- Real Content (hidden initially) -->

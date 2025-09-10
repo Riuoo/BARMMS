@@ -4,14 +4,10 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Skeleton -->
-    <div id="createDocumentHeaderSkeleton">
-        @include('components.loading.skeleton-blotter-header')
-    </div>
-
     <!-- Form Skeleton -->
-    <div id="createDocumentFormSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        @include('components.loading.skeleton-document-form')
+    <div id="createDocumentHeaderSkeleton">
+        @include('components.loading.create-form-skeleton', ['type' => 'header', 'showButton' => false])
+        @include('components.loading.create-form-skeleton', ['type' => 'document-request'])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -20,7 +16,7 @@
         <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Document Request</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">Create New Document Request</h1>
                     <p class="text-gray-600">Request official documents from the barangay office</p>
                 </div>
             </div>
@@ -61,7 +57,7 @@
     @endif
 
     <!-- Form Card -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl mx-auto">
         <form id="createDocumentRequestForm" action="{{ route('admin.document-requests.store') }}" method="POST" class="space-y-6">
             @csrf
 

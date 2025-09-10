@@ -11,29 +11,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="profilesHeaderSkeleton">
-        @include('components.loading.skeleton-header')
-    </div>
-    
-    <!-- Stats Skeleton -->
-    <div id="profilesStatsSkeleton">
-        @include('components.loading.skeleton-dashboard-stats')
-    </div>
-    
-    <!-- List Skeleton (Table) - Desktop Only -->
-    <div id="profilesTableSkeleton" class="hidden md:block mb-6">
-        @include('components.loading.skeleton-table')
-    </div>
-    
-    <!-- List Skeleton (Mobile Cards) - Mobile Only -->
-    <div id="profilesMobileSkeleton">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-    
-    <!-- Pagination Skeleton -->
-    <div id="profilesPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Shared User Management Skeleton -->
+    <div id="userManagementSkeleton">
+        @include('components.loading.user-management-skeleton')
     </div>
     
     <!-- Real Content (hidden initially) -->
@@ -663,18 +643,10 @@ document.addEventListener('click', function (event) {
 // Hide skeletons and show real content when page loads
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        // Hide all skeleton elements
-        const skeletonElements = [
-            'profilesHeaderSkeleton',
-            'profilesStatsSkeleton',
-            'profilesTableSkeleton',
-            'profilesMobileSkeleton',
-            'profilesPaginationSkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
+        // Hide the shared skeleton
+        const skeleton = document.getElementById('userManagementSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
         // Show all real content elements
         const contentElements = [
             'profilesHeaderContent',
@@ -687,11 +659,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const el = document.getElementById(id);
             if (el) el.style.display = 'block';
         });
-        // Extra safety: forcibly hide skeleton pagination
-        const pagSkel = document.getElementById('profilesPaginationSkeleton');
-        if (pagSkel) pagSkel.style.display = 'none';
-        const pagCont = document.getElementById('profilesPaginationContent');
-        if (pagCont) pagCont.style.display = 'block';
     }, 1000);
 });
 </script>

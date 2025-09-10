@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-6">
     <!-- Main Skeleton -->
     <div id="vaccinationShowSkeleton">
-        @include('components.loading.skeleton-vaccination-show')
+        @include('components.loading.show-entity-skeleton', ['type' => 'vaccination', 'buttonCount' => 3])
     </div>
 
     <!-- Real Content (hidden initially) -->

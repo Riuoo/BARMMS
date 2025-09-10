@@ -11,24 +11,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="templatesHeaderSkeleton">
-        @include('components.loading.skeleton-header-one-button')
-    </div>
-
-    <!-- Filters Skeleton -->
-    <div id="templatesFiltersSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Stats Skeleton -->
-    <div id="templatesStatsSkeleton">
-        @include('components.loading.skeleton-stats')
-    </div>
-
-    <!-- Templates Grid Skeleton -->
-    <div id="templatesGridSkeleton">
-        @include('components.loading.skeleton-template-cards')
+    <!-- Consolidated Grid Dashboard Skeleton -->
+    <div id="templatesSkeleton">
+        @include('components.loading.grid-dashboard-skeleton', ['gridType' => 'templates'])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -460,17 +445,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Skeleton loading control for templates
     setTimeout(() => {
-        const templatesHeaderSkeleton = document.getElementById('templatesHeaderSkeleton');
-        const templatesFiltersSkeleton = document.getElementById('templatesFiltersSkeleton');
-        const templatesStatsSkeleton = document.getElementById('templatesStatsSkeleton');
-        const templatesGridSkeleton = document.getElementById('templatesGridSkeleton');
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('templatesSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
+        // Show content
         const templatesContent = document.getElementById('templatesContent');
-        
-        // Hide skeleton and show content
-        if (templatesHeaderSkeleton) templatesHeaderSkeleton.style.display = 'none';
-        if (templatesFiltersSkeleton) templatesFiltersSkeleton.style.display = 'none';
-        if (templatesStatsSkeleton) templatesStatsSkeleton.style.display = 'none';
-        if (templatesGridSkeleton) templatesGridSkeleton.style.display = 'none';
         if (templatesContent) templatesContent.style.display = 'block';
     }, 1000); // 1 second delay to match other pages
 });

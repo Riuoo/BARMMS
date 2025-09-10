@@ -4,11 +4,16 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
+    <!-- Consolidated Skeleton -->
+    <div id="residentSkeleton">
+        @include('components.loading.resident-dashboard-skeleton')
+    </div>
+
     <!-- Enhanced Header Section -->
-    <div class="mb-3">
+    <div id="residentHeaderContent" class="mb-2" style="display: none;">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ $resident->name }}</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Welcome back, {{ $resident->name }}</h1>
                 <p class="text-sm md:text-base text-gray-600">Here's what's happening with your requests today</p>
             </div>
             <div class="mt-4 sm:mt-0">
@@ -21,9 +26,8 @@
 
     <!-- Quick Stats Row -->
     <div id="residentStatsContainer">
-        @include('components.loading.skeleton-dashboard-stats')
         <div id="residentStatsContent" class="hidden">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 mb-2">
         <!-- Total Blotter Reports Card -->
         <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
             <div class="p-4">
@@ -106,30 +110,9 @@
     </div>
 
     <!-- Recent Activity Section -->
-    <!-- Recent Activity Skeleton -->
-    <div id="residentRecentSkeleton" class="animate-pulse bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-4">
-        <div class="h-6 w-40 bg-gray-200 rounded mb-4"></div>
-        <div class="space-y-3">
-            @for($i = 0; $i < 4; $i++)
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
-                    <div class="ml-4">
-                        <div class="h-4 w-40 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-3 w-56 bg-gray-100 rounded"></div>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <div class="h-5 w-20 bg-gray-200 rounded-full"></div>
-                    <div class="h-3 w-24 bg-gray-100 rounded"></div>
-                </div>
-            </div>
-            @endfor
-        </div>
-    </div>
     @if($recentBlotterRequests->isNotEmpty() || $recentDocumentRequests->isNotEmpty() || $recentCommunityConcerns->isNotEmpty())
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">Recent Activity</h2>
         <div class="space-y-4">
             @foreach($recentBlotterRequests as $request)
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
@@ -212,10 +195,7 @@
     @endif
     
     <!-- Floating Action Button -->
-    <!-- FAB Skeleton -->
-    <div id="residentFabSkeleton" class="fixed bottom-6 right-6 z-40">
-        <div class="w-14 h-14 bg-gray-200 rounded-full shadow"></div>
-    </div>
+    <!-- FAB Skeleton is part of consolidated skeleton -->
     <div class="fixed bottom-6 right-6 z-50">
         <div class="relative" x-data="{ open: false }">
             <!-- Main FAB -->
@@ -255,8 +235,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const residentStatsContainer = document.getElementById('residentStatsContainer');
         const residentStatsContent = document.getElementById('residentStatsContent');
-        const residentRecentSkeleton = document.getElementById('residentRecentSkeleton');
-        const residentFabSkeleton = document.getElementById('residentFabSkeleton');
+        const residentSkel = document.getElementById('residentDashboardSkeleton');
         
         // Hide skeleton and show content after a short delay
         setTimeout(() => {
@@ -265,8 +244,9 @@
                 residentStatsContainer.appendChild(residentStatsContent);
                 residentStatsContent.classList.remove('hidden');
             }
-            if (residentRecentSkeleton) residentRecentSkeleton.style.display = 'none';
-            if (residentFabSkeleton) residentFabSkeleton.style.display = 'none';
+            const header = document.getElementById('residentHeaderContent');
+            if (header) header.style.display = 'block';
+            if (residentSkel) residentSkel.style.display = 'none';
         }, 1000); // 1 second delay to show skeleton effect
     });
 </script>

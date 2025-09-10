@@ -13,25 +13,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="blotterHeaderSkeleton">
-        @include('components.loading.skeleton-header')
-    </div>
-    <!-- Stats Skeleton -->
-    <div id="blotterStatsSkeleton">
-        @include('components.loading.skeleton-dashboard-stats')
-    </div>
-    <!-- Table Skeleton (Desktop) -->
-    <div id="blotterTableSkeleton" class="hidden md:block mb-6">
-        @include('components.loading.skeleton-table')
-    </div>
-    <!-- Mobile Cards Skeleton -->
-    <div id="blotterMobileSkeleton">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-    <!-- Pagination Skeleton -->
-    <div id="blotterPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Consolidated Table Dashboard Skeleton -->
+    <div id="blotterSkeleton">
+        @include('components.loading.table-dashboard-skeleton', ['buttonCount' => 2])
     </div>
     <!-- Real Content (hidden initially) -->
     <div id="blotterHeaderContent" style="display: none;">
@@ -651,23 +635,13 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const skeletons = [
-            'blotterHeaderSkeleton',
-            'blotterHeaderButtonSkeleton',
-            'blotterStatsSkeleton',
-            'blotterTableSkeleton',
-            'blotterMobileSkeleton',
-            'blotterPaginationSkeleton'
-        ];
-        skeletons.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('blotterSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
+        // Show all real content elements
         const contents = [
             'blotterHeaderContent',
-            'blotterStatsContent',
-            'blotterTableContent',
-            'blotterMobileContent',
             'blotterPaginationContent'
         ];
         contents.forEach(id => {

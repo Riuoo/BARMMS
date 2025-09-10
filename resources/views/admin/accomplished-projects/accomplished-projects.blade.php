@@ -4,29 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="accomplishedHeaderSkeleton">
-        @include('components.loading.skeleton-header-one-button')
-    </div>
-
-    <!-- Filters Skeleton -->
-    <div id="accomplishedFiltersSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Stats Skeleton -->
-    <div id="accomplishedStatsSkeleton">
-        @include('components.loading.skeleton-dashboard-stats')
-    </div>
-
-    <!-- Grid Skeleton -->
-    <div id="accomplishedGridSkeleton">
-        @include('components.loading.skeleton-grid')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="accomplishedPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Consolidated Grid Dashboard Skeleton -->
+    <div id="accomplishedSkeleton">
+        @include('components.loading.grid-dashboard-skeleton', ['gridType' => 'activities'])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -478,18 +458,12 @@ document.addEventListener('click', function (event) {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('accomplishedHeaderSkeleton');
-        const filtersSkeleton = document.getElementById('accomplishedFiltersSkeleton');
-        const statsSkeleton = document.getElementById('accomplishedStatsSkeleton');
-        const gridSkeleton = document.getElementById('accomplishedGridSkeleton');
-        const paginationSkeleton = document.getElementById('accomplishedPaginationSkeleton');
-        const content = document.getElementById('accomplishedContent');
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('accomplishedSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
 
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (filtersSkeleton) filtersSkeleton.style.display = 'none';
-        if (statsSkeleton) statsSkeleton.style.display = 'none';
-        if (gridSkeleton) gridSkeleton.style.display = 'none';
-        if (paginationSkeleton) paginationSkeleton.style.display = 'none';
+        // Show content
+        const content = document.getElementById('accomplishedContent');
         if (content) content.style.display = 'block';
     }, 1000);
 });

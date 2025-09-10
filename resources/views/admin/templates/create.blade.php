@@ -4,14 +4,9 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Skeleton -->
-    <div id="createTemplateHeaderSkeleton">
-        @include('components.loading.skeleton-header')
-    </div>
-
-    <!-- Form Skeleton -->
-    <div id="createTemplateFormSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        @include('components.loading.skeleton-template-form')
+    <!-- Page Skeleton (Header + Form) -->
+    <div id="createTemplateSkeleton" class="mb-2">
+        @include('components.loading.create-form-skeleton', ['type' => 'template'])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -318,12 +313,10 @@
 // Skeleton loading control
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const headerSkeleton = document.getElementById('createTemplateHeaderSkeleton');
-        const formSkeleton = document.getElementById('createTemplateFormSkeleton');
+        const pageSkeleton = document.getElementById('createTemplateSkeleton');
         const content = document.getElementById('createTemplateContent');
         
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (formSkeleton) formSkeleton.style.display = 'none';
+        if (pageSkeleton) pageSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
 });

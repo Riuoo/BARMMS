@@ -10,7 +10,7 @@
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Document Analysis Dashboard Skeleton -->
     <div id="documentAnalysisSkeleton">
-        @include('components.loading.skeleton-document-analysis')
+        @include('components.loading.analytics-dashboard-skeleton')
     </div>
 
     <!-- Real Content (hidden initially) -->

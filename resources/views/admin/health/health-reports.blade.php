@@ -29,7 +29,7 @@
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Main Skeleton Container -->
     <div id="healthDashboardSkeleton">
-        @include('components.loading.skeleton-health-dashboard')
+        @include('components.loading.dashboard-skeleton', ['variant' => 'health'])
     </div>
 
     <!-- Real Content (hidden initially) -->

@@ -6,19 +6,18 @@
 <div class="max-w-4xl mx-auto pt-2">
     <!-- Header Skeleton -->
     <div id="medicineEditHeaderSkeleton">
-        @include('components.loading.skeleton-vaccination-create-header')
+        @include('components.loading.edit-form-skeleton', ['type' => 'header', 'showButton' => false])
     </div>
 
     <!-- Form Skeleton -->
     <div id="medicineEditFormSkeleton">
-        @include('components.loading.skeleton-medicine-form')
-        @include('components.loading.skeleton-medicine-restock')
+        @include('components.loading.edit-form-skeleton', ['type' => 'medicine'])
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="medicineEditContent" style="display: none;">
-        <div class="mb-3">
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Edit Medicine</h1>
+        <div class="mb-2">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Edit Medicine</h1>
             <p class="text-sm md:text-base text-gray-600">Update medicine details and stock</p>
         </div>
         
@@ -28,7 +27,7 @@
             
             <!-- Medicine Information Section -->
             <div class="border-b border-gray-200 pb-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
                     <i class="fas fa-pills mr-2 text-green-600"></i>
                     Medicine Information
                 </h2>
@@ -88,7 +87,7 @@
             
             <!-- Stock Information Section -->
             <div class="border-b border-gray-200 pb-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
                     <i class="fas fa-boxes mr-2 text-blue-600"></i>
                     Stock Information
                 </h2>
@@ -122,7 +121,7 @@
             
             <!-- Additional Information Section -->
             <div>
-                <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
                     <i class="fas fa-info-circle mr-2 text-purple-600"></i>
                     Additional Information
                 </h2>
@@ -158,11 +157,11 @@
 
         <!-- Restock section (separate form to avoid nesting) -->
         <div class="bg-white p-6 mt-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
                 <i class="fas fa-plus-circle mr-2 text-orange-600"></i>
                 Add Stock
             </h2>
-            <p class="text-sm text-gray-600 mb-4">Add more stock to this medicine inventory</p>
+            <p class="text-sm text-gray-600 mb-2">Add more stock to this medicine inventory</p>
             <form method="POST" action="{{ route('admin.medicines.restock', $medicine) }}" class="flex flex-wrap items-center gap-4">
                 @csrf
                 <div>

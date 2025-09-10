@@ -11,9 +11,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="residentsHeaderSkeleton">
-        @include('components.loading.skeleton-header')
+    <!-- Shared User Management Skeleton -->
+    <div id="userManagementSkeleton">
+        @include('components.loading.user-management-skeleton')
     </div>
     
     <!-- Header Content (hidden initially) -->
@@ -102,11 +102,6 @@
         </form>
     </div>
 
-    <!-- Stats Skeleton -->
-    <div id="residentsStatsSkeleton">
-        @include('components.loading.skeleton-dashboard-stats')
-    </div>
-    
     <!-- Stats Content (hidden initially) -->
     <div id="residentsStatsContent" style="display: none;">
         <!-- Statistics Cards -->
@@ -164,16 +159,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- List Skeleton (Table) - Desktop Only -->
-    <div id="residentsTableSkeleton" class="hidden md:block mb-6">
-        @include('components.loading.skeleton-table')
-    </div>
-    
-    <!-- List Skeleton (Mobile Cards) - Mobile Only -->
-    <div id="residentsMobileSkeleton">
-        @include('components.loading.skeleton-mobile-cards')
     </div>
 
     <!-- Residents List Content (hidden initially) -->
@@ -407,11 +392,6 @@
                 @endforeach
             </div>
         @endif
-    </div>
-    
-    <!-- Pagination Skeleton -->
-    <div id="residentsPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
     </div>
     
     <!-- Pagination Content (hidden initially) -->
@@ -800,33 +780,22 @@
 
     // Skeleton loading control for residents page
     document.addEventListener('DOMContentLoaded', function() {
-        // Add 1 second delay to show skeleton effect
         setTimeout(() => {
-            const residentsHeaderSkeleton = document.getElementById('residentsHeaderSkeleton');
-            const residentsHeaderContent = document.getElementById('residentsHeaderContent');
-            const residentsStatsSkeleton = document.getElementById('residentsStatsSkeleton');
-            const residentsStatsContent = document.getElementById('residentsStatsContent');
-            const residentsTableSkeleton = document.getElementById('residentsTableSkeleton');
-            const residentsMobileSkeleton = document.getElementById('residentsMobileSkeleton');
-            const residentsTableContent = document.getElementById('residentsTableContent');
-            const residentsMobileContent = document.getElementById('residentsMobileContent');
-            const residentsPaginationSkeleton = document.getElementById('residentsPaginationSkeleton');
-            const residentsPaginationContent = document.getElementById('residentsPaginationContent');
-            
-            if (residentsHeaderSkeleton) residentsHeaderSkeleton.style.display = 'none';
-            if (residentsHeaderContent) residentsHeaderContent.style.display = 'block';
-            if (residentsStatsSkeleton) residentsStatsSkeleton.style.display = 'none';
-            if (residentsStatsContent) residentsStatsContent.style.display = 'block';
-            if (residentsTableSkeleton) residentsTableSkeleton.style.display = 'none';
-            if (residentsMobileSkeleton) residentsMobileSkeleton.style.display = 'none';
-            if (residentsTableContent) residentsTableContent.style.display = 'block';
-            if (residentsMobileContent) residentsMobileContent.style.display = 'block';
-            if (residentsPaginationSkeleton) residentsPaginationSkeleton.style.display = 'none';
-            if (residentsPaginationContent) residentsPaginationContent.style.display = 'block';
-            // Extra safety: forcibly hide skeleton pagination
-            if (residentsPaginationSkeleton) residentsPaginationSkeleton.style.display = 'none';
-            if (residentsPaginationContent) residentsPaginationContent.style.display = 'block';
-        }, 1000); // 1 second delay to show skeleton effect
+            const skeleton = document.getElementById('userManagementSkeleton');
+            if (skeleton) skeleton.style.display = 'none';
+
+            const contentElements = [
+                'residentsHeaderContent',
+                'residentsStatsContent',
+                'residentsTableContent',
+                'residentsMobileContent',
+                'residentsPaginationContent'
+            ];
+            contentElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'block';
+            });
+        }, 1000);
     });
 </script>
 @endsection

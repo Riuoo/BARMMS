@@ -4,32 +4,23 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <!-- Header Skeleton -->
-    <div id="createBlotterHeaderSkeleton">
-        @include('components.loading.skeleton-blotter-header')
-    </div>
-
-    <!-- Form Skeleton -->
-    <div id="createBlotterFormSkeleton" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        @include('components.loading.skeleton-blotter-form')
-    </div>
-
-    <!-- Information Card Skeleton -->
-    <div id="createBlotterInfoSkeleton" class="mt-2">
-        @include('components.loading.skeleton-warning')
+    <!-- Page Skeleton (Header + Warning + Form) -->
+    <div id="createBlotterSkeleton" class="mb-2">
+        @include('components.loading.create-form-skeleton', ['type' => 'header', 'showButton' => false])
+        @include('components.loading.create-form-skeleton', ['type' => 'blotter-report'])
     </div>
 
     <!-- Real Content (hidden initially) -->
     <div id="createBlotterContent" style="display: none;">
         <!-- Header Section -->
         <div class="mb-2">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">Create New Blotter Report</h1>
-                <p class="text-gray-600">Submit an incident report for barangay resolution</p>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Blotter Report</h1>
+                    <p class="text-gray-600">Submit an incident report for barangay resolution</p>
+                </div>
             </div>
         </div>
-    </div>
 
     <!-- Success/Error Messages -->
     @if(session('success'))
@@ -66,7 +57,7 @@
     @endif
 
     <!-- Form Card -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6"> 
         <form id="createBlotterForm" action="{{ route('admin.blotter-reports.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
@@ -238,40 +229,18 @@
         </form>
     </div>
 
-    <!-- Information Card -->
-    <div class="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <i class="fas fa-info-circle text-blue-400"></i>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-blue-800">Important Information</h3>
-                <div class="mt-2 text-sm text-blue-700">
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li>All reports are confidential and will be handled by Administrator</li>
-                        <li>Please ensure all information provided is accurate and complete</li>
-                        <li>The respondent will be summoned for a hearing on the specified date</li>
-                        <li>Reports can be managed and updated from the blotter reports list</li>
-                    </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- End Real Content -->
     </div>
+
 </div>
 
 <script>
     // Skeleton loading control
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
-            const headerSkeleton = document.getElementById('createBlotterHeaderSkeleton');
-            const formSkeleton = document.getElementById('createBlotterFormSkeleton');
-            const infoSkeleton = document.getElementById('createBlotterInfoSkeleton');
+            const pageSkeleton = document.getElementById('createBlotterSkeleton');
             const content = document.getElementById('createBlotterContent');
-            
-            if (headerSkeleton) headerSkeleton.style.display = 'none';
-            if (formSkeleton) formSkeleton.style.display = 'none';
-            if (infoSkeleton) infoSkeleton.style.display = 'none';
+            if (pageSkeleton) pageSkeleton.style.display = 'none';
             if (content) content.style.display = 'block';
         }, 1000);
     });

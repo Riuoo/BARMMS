@@ -4,34 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="hcaHeaderSkeleton">
-        @include('components.loading.skeleton-header')
-    </div>
-
-    <!-- Search Skeleton -->
-    <div id="hcaSearchSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Stats Skeleton -->
-    <div id="hcaStatsSkeleton">
-        @include('components.loading.skeleton-dashboard-stats')
-    </div>
-
-    <!-- Warning Skeleton -->
-    <div id="hcaWarningSkeleton">
-        @include('components.loading.skeleton-warning')
-    </div>
-
-    <!-- Grid Skeleton -->
-    <div id="hcaGridSkeleton">
-        @include('components.loading.skeleton-grid')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="hcaPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Consolidated Grid Dashboard Skeleton -->
+    <div id="hcaSkeleton">
+        @include('components.loading.grid-dashboard-skeleton', ['showWarning' => true, 'gridType' => 'activities', 'buttonCount' => 2])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -478,14 +453,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Skeleton loading control
     setTimeout(() => {
-        const skeletonElements = [
-            'hcaHeaderSkeleton', 'hcaSearchSkeleton', 'hcaStatsSkeleton',
-            'hcaWarningSkeleton', 'hcaGridSkeleton', 'hcaPaginationSkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.style.display = 'none';
-        });
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('hcaSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
+        // Show content
         const content = document.getElementById('hcaContent');
         if (content) content.style.display = 'block';
     }, 1000);

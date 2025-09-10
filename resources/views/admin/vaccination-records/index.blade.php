@@ -4,34 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="vaccinationHeaderSkeleton">
-        @include('components.loading.skeleton-vaccination-header')
-    </div>
-
-    <!-- Search & Filter Skeleton -->
-    <div id="vaccinationSearchSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Stats Cards Skeleton -->
-    <div id="vaccinationStatsSkeleton">
-        @include('components.loading.skeleton-stats')
-    </div>
-
-    <!-- Table Skeleton -->
-    <div id="vaccinationTableSkeleton" class="hidden md:block">
-        @include('components.loading.skeleton-table')
-    </div>
-
-    <!-- Mobile Cards Skeleton -->
-    <div id="vaccinationMobileSkeleton" class="md:hidden">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="vaccinationPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Consolidated Table Dashboard Skeleton -->
+    <div id="vaccinationSkeleton">
+        @include('components.loading.table-dashboard-skeleton', ['buttonCount' => 3])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -642,14 +617,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const skeletonElements = [
-            'vaccinationHeaderSkeleton', 'vaccinationSearchSkeleton', 'vaccinationStatsSkeleton',
-            'vaccinationTableSkeleton', 'vaccinationMobileSkeleton', 'vaccinationPaginationSkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.style.display = 'none';
-        });
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('vaccinationSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
+        // Show content
         const content = document.getElementById('vaccinationContent');
         if (content) content.style.display = 'block';
     }, 1000);

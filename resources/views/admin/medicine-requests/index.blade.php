@@ -4,34 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
-    <!-- Header Skeleton -->
-    <div id="medRequestHeaderSkeleton">
-        @include('components.loading.skeleton-header')
-    </div>
-
-    <!-- Stats Skeleton -->
-    <div id="medRequestStatsSkeleton">
-        @include('components.loading.skeleton-dashboard-stats')
-    </div>
-
-    <!-- Filters Skeleton -->
-    <div id="medRequestFiltersSkeleton">
-        @include('components.loading.skeleton-filters')
-    </div>
-
-    <!-- Table Skeleton (Desktop) -->
-    <div id="medRequestTableSkeleton" class="hidden md:block">
-        @include('components.loading.skeleton-table')
-    </div>
-
-    <!-- Mobile Cards Skeleton -->
-    <div id="medRequestMobileSkeleton" class="md:hidden">
-        @include('components.loading.skeleton-mobile-cards')
-    </div>
-
-    <!-- Pagination Skeleton -->
-    <div id="medRequestPaginationSkeleton" class="mt-6">
-        @include('components.loading.skeleton-pagination')
+    <!-- Consolidated Table Dashboard Skeleton -->
+    <div id="medRequestSkeleton">
+        @include('components.loading.table-dashboard-skeleton')
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -414,14 +389,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const skeletonElements = [
-            'medRequestHeaderSkeleton', 'medRequestStatsSkeleton', 'medRequestFiltersSkeleton',
-            'medRequestTableSkeleton', 'medRequestMobileSkeleton', 'medRequestPaginationSkeleton'
-        ];
-        skeletonElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.style.display = 'none';
-        });
+        // Hide consolidated skeleton
+        const skeleton = document.getElementById('medRequestSkeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
+        // Show content
         const content = document.getElementById('medRequestContent');
         if (content) content.style.display = 'block';
     }, 1000);

@@ -6,7 +6,8 @@
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
     <!-- Form Skeleton -->
     <div id="apCreateFormSkeleton">
-        @include('components.loading.skeleton-accomplished-project-form')
+        @include('components.loading.create-form-skeleton', ['type' => 'header', 'buttonCount' => false])
+        @include('components.loading.create-form-skeleton', ['type' => 'accomplished-project'])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -213,8 +214,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
+        const headerSkeleton = document.getElementById('apCreateHeaderSkeleton');
         const formSkeleton = document.getElementById('apCreateFormSkeleton');
         const content = document.getElementById('apCreateContent');
+        if (headerSkeleton) headerSkeleton.style.display = 'none';
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
