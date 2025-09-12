@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Consolidated Dashboard Skeleton -->
-    <div id="adminDashboardSkeletonWrapper">
+    <div id="adminDashboardSkeletonWrapper" data-skeleton>
         @include('components.loading.dashboard-skeleton', ['variant' => 'admin'])
     </div>
     <!-- Header Content (hidden initially) -->
@@ -608,17 +608,13 @@
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Add 1 second delay to show skeleton effect
-    setTimeout(() => {
-        // Hide consolidated skeleton
-        const adminSkel = document.getElementById('adminDashboardSkeleton');
+    function reveal() {
+        const adminSkel = document.getElementById('adminDashboardSkeleton') || document.getElementById('adminDashboardSkeletonWrapper');
         if (adminSkel) adminSkel.style.display = 'none';
 
-        // Show header content
         const headerContent = document.getElementById('dashboardHeaderContent');
         if (headerContent) headerContent.classList.remove('hidden');
 
-        // Stats
         const statsContainer = document.getElementById('dashboardStatsContainer');
         const statsContent = document.getElementById('dashboardStatsContent');
         if (statsContainer && statsContent) {
@@ -626,7 +622,6 @@ document.addEventListener('DOMContentLoaded', function() {
             statsContainer.appendChild(statsContent);
             statsContent.classList.remove('hidden');
         }
-        // Charts
         const chartsContainer = document.getElementById('chartsContainer');
         const chartsContent = document.getElementById('chartsContent');
         if (chartsContainer && chartsContent) {
@@ -634,7 +629,6 @@ document.addEventListener('DOMContentLoaded', function() {
             chartsContainer.appendChild(chartsContent);
             chartsContent.classList.remove('hidden');
         }
-        // Trends
         const trendsContainer = document.getElementById('trendsContainer');
         const trendsContent = document.getElementById('trendsContent');
         if (trendsContainer && trendsContent) {
@@ -642,7 +636,6 @@ document.addEventListener('DOMContentLoaded', function() {
             trendsContainer.appendChild(trendsContent);
             trendsContent.classList.remove('hidden');
         }
-        // FAB
         const fabContainer = document.getElementById('fabContainer');
         const fabContent = document.getElementById('fabContent');
         if (fabContainer && fabContent) {
@@ -650,7 +643,17 @@ document.addEventListener('DOMContentLoaded', function() {
             fabContainer.appendChild(fabContent);
             fabContent.classList.remove('hidden');
         }
-    }, 1000); // 1 second delay to show skeleton effect
+    }
+
+    var path = window.location && window.location.pathname ? window.location.pathname : 'root';
+    var key = 'skeletonSeen:' + path;
+    var seen = false;
+    try { seen = sessionStorage.getItem(key) === '1'; } catch(e) { seen = false; }
+    if (seen) {
+        reveal();
+    } else {
+        setTimeout(reveal, 1000);
+    }
 });
 </script>
 @endsection

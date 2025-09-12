@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', 'Resident Page')</title>
+    <script>
+        (function(){
+            try {
+                var path = window.location && window.location.pathname ? window.location.pathname : 'root';
+                var key = 'skeletonSeen:' + path;
+                if (sessionStorage.getItem(key) === '1') {
+                    document.documentElement.classList.add('skeleton-hide');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <style>
+        .skeleton-hide [data-skeleton],
+        .skeleton-hide [id$="Skeleton"] { display: none !important; }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="icon" href="{{ asset('lower malinao logo.ico') }}" type="image/x-icon">
@@ -148,9 +163,9 @@
                                 <i class="fas fa-external-link-alt mr-1"></i>
                                 View All Notifications
                             </a>
-                            <form method="POST" action="{{ route('resident.notifications.mark-all') }}">
+                            <form id="residentMarkAllForm" method="POST" action="{{ route('resident.notifications.mark-all') }}">
                                 @csrf
-                                <button type="submit" class="text-gray-600 hover:text-gray-800 text-sm transition duration-200">
+                                <button type="button" onclick="openResidentMarkAllReadModal()" class="text-gray-600 hover:text-gray-800 text-sm transition duration-200">
                                     <i class="fas fa-check-double mr-1"></i>
                                     Mark All Read
                                 </button>
@@ -405,5 +420,147 @@
     </script>
 
     @stack('scripts')
+    <script>
+        (function() {
+            try {
+                var path = window.location && window.location.pathname ? window.location.pathname : 'root';
+                var key = 'skeletonSeen:' + path;
+                var skeletons = document.querySelectorAll('[data-skeleton], [id$="Skeleton"]');
+                if (skeletons && skeletons.length > 0) {
+                    var seen = sessionStorage.getItem(key) === '1';
+                    if (seen) {
+                        skeletons.forEach(function(el) { el.style.display = 'none'; });
+                        // Instant reveal for content wrappers
+                        try {
+                            var contentNodes = document.querySelectorAll('[id$="Content"], [data-content]');
+                            contentNodes.forEach(function(n){ n.style.display = ''; });
+                        } catch(e) {}
+                    } else {
+                        sessionStorage.setItem(key, '1');
+                    }
+                }
+            } catch (e) {}
+
+            // expose helper
+            window.clearSkeletonFlags = function() {
+                try {
+                    var keysToRemove = [];
+                    for (var i = 0; i < sessionStorage.length; i++) {
+                        var k = sessionStorage.key(i);
+                        if (!k) continue;
+                        if (k.indexOf('skeletonSeen:') === 0 || k.indexOf('GETCACHE:') === 0) keysToRemove.push(k);
+                    }
+                    keysToRemove.forEach(function(k){ sessionStorage.removeItem(k); });
+                } catch(e) {}
+            };
+
+            // clear on logout submit
+            document.addEventListener('DOMContentLoaded', function() {
+                var logoutForms = document.querySelectorAll('form[action*="logout"]');
+                logoutForms.forEach(function(f){
+                    f.addEventListener('submit', function(){
+                        if (typeof window.clearSkeletonFlags === 'function') window.clearSkeletonFlags();
+                    }, { capture: true });
+                });
+            });
+        })();
+    </script>
+    <script>
+        // Lightweight client-side GET cache with TTL and stale-while-revalidate
+        (function(){
+            function cacheKey(url){ return 'GETCACHE:' + url; }
+            function now(){ return Date.now(); }
+            function parse(data){ try { return JSON.parse(data); } catch(e){ return null; } }
+            async function fetchAndStore(url, opts){
+                const res = await fetch(url, Object.assign({ method: 'GET', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } }, opts && opts.fetch));
+                const text = await res.text();
+                try { sessionStorage.setItem(cacheKey(url), JSON.stringify({ ts: now(), status: res.status, text: text })); } catch(e) {}
+                return { status: res.status, text: text };
+            }
+            window.cachedGet = async function(url, options){
+                const ttlMs = (options && options.ttlMs) || 60000;
+                const preferFresh = !!(options && options.preferFresh);
+                const onUpdate = options && options.onUpdate;
+                const key = cacheKey(url);
+                const raw = sessionStorage.getItem(key);
+                const cached = raw ? parse(raw) : null;
+
+                const isFresh = cached && (now() - (cached.ts||0) < ttlMs);
+                if (preferFresh || !cached) {
+                    if (cached && onUpdate) { setTimeout(() => onUpdate({ status: cached.status, text: cached.text }), 0); }
+                    const fresh = await fetchAndStore(url, options);
+                    return fresh;
+                } else {
+                    if (onUpdate) {
+                        setTimeout(async () => {
+                            try { const fresh = await fetchAndStore(url, options); onUpdate(fresh); } catch(e) {}
+                        }, 0);
+                    } else {
+                        fetchAndStore(url, options).catch(function(){});
+                    }
+                    return { status: cached.status, text: cached.text };
+                }
+            };
+            window.cachedGetJson = async function(url, options){
+                const res = await window.cachedGet(url, options);
+                try { return { status: res.status, data: JSON.parse(res.text) }; } catch(e) { return { status: res.status, data: null }; }
+            };
+        })();
+    </script>
+    <!-- Resident Mark All Read Confirmation Modal -->
+    <div id="residentMarkAllReadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[9999]">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Mark all notifications as read?</h3>
+                    <p class="text-sm text-gray-500">This will mark every unread notification as read.</p>
+                </div>
+            </div>
+            <div class="text-gray-700 mb-6">This action cannot be undone.</div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeResidentMarkAllReadModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">Cancel</button>
+                <button type="button" onclick="confirmResidentMarkAllRead()" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition duration-200">Mark All Read</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openResidentMarkAllReadModal() {
+            var m = document.getElementById('residentMarkAllReadModal');
+            if (!m) return;
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+        function closeResidentMarkAllReadModal() {
+            var m = document.getElementById('residentMarkAllReadModal');
+            if (!m) return;
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+        function confirmResidentMarkAllRead() {
+            closeResidentMarkAllReadModal();
+            var f = document.getElementById('residentMarkAllForm');
+            try { localStorage.setItem('residentMarkAllReadNotify', '1'); } catch(e) {}
+            if (f) f.submit();
+        }
+    </script>
+    <script>
+        // Show toast after redirect when resident mark-all succeeds
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                if (localStorage.getItem('residentMarkAllReadNotify') === '1') {
+                    if (typeof notify === 'function') {
+                        notify('success', 'All notifications marked as read.');
+                    } else if (window.toast && typeof window.toast.success === 'function') {
+                        window.toast.success('All notifications marked as read.');
+                    }
+                    localStorage.removeItem('residentMarkAllReadNotify');
+                }
+            } catch(e) {}
+        });
+    </script>
 </body>
 </html>

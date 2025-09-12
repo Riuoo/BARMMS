@@ -48,7 +48,9 @@
         </div>
     @else
         <div id="notificationsContainer">
-            @include('components.loading.skeleton-notification')
+            <div id="residentNotificationsSkeleton" data-skeleton>
+                @include('components.loading.skeleton-notification')
+            </div>
             <div id="notificationsContent" class="hidden">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto">
@@ -240,17 +242,29 @@
     document.addEventListener('DOMContentLoaded', function() {
         const notificationsContainer = document.getElementById('notificationsContainer');
         const notificationsContent = document.getElementById('notificationsContent');
-        
-        // Hide skeleton and show content after a short delay
-        setTimeout(() => {
+        const skel = document.getElementById('residentNotificationsSkeleton');
+        const header = document.getElementById('residentNotifHeader');
+
+        function reveal() {
             if (notificationsContainer && notificationsContent) {
                 notificationsContainer.innerHTML = '';
                 notificationsContainer.appendChild(notificationsContent);
                 notificationsContent.classList.remove('hidden');
             }
-            const header = document.getElementById('residentNotifHeader');
             if (header) header.style.display = 'block';
-        }, 1000); // 1 second delay to show skeleton effect
+        }
+
+        var path = window.location && window.location.pathname ? window.location.pathname : 'root';
+        var key = 'skeletonSeen:' + path;
+        var seen = false;
+        try { seen = sessionStorage.getItem(key) === '1'; } catch(e) { seen = false; }
+
+        if (seen) {
+            if (skel) skel.style.display = 'none';
+            reveal();
+        } else {
+            setTimeout(function(){ if (skel) skel.style.display = 'none'; reveal(); }, 1000);
+        }
     });
 </script>
 @endsection

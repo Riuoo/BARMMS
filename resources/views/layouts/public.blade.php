@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'BARMMS - Lower Malinao Barangay System')</title>
+    <script>
+        (function(){
+            try {
+                var path = window.location && window.location.pathname ? window.location.pathname : 'root';
+                var key = 'skeletonSeen:' + path;
+                if (sessionStorage.getItem(key) === '1') {
+                    document.documentElement.classList.add('skeleton-hide');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <style>
+        .skeleton-hide [data-skeleton],
+        .skeleton-hide [id$="Skeleton"] { display: none !important; }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     <link rel="icon" href="{{ asset('lower malinao logo.ico') }}" type="image/x-icon">
@@ -52,5 +67,37 @@
             </div>
         </div>
     </footer>
+    <script>
+        (function() {
+            try {
+                var path = window.location && window.location.pathname ? window.location.pathname : 'root';
+                var key = 'skeletonSeen:' + path;
+                var skeletons = document.querySelectorAll('[data-skeleton], [id$="Skeleton"]');
+                if (!skeletons || skeletons.length === 0) return;
+                var seen = sessionStorage.getItem(key) === '1';
+                if (seen) {
+                    skeletons.forEach(function(el) { el.style.display = 'none'; });
+                    // Instant reveal for primary content containers if present
+                    try {
+                        var contentNodes = document.querySelectorAll('[id$="Content"], [data-content]');
+                        contentNodes.forEach(function(n){ n.style.display = ''; });
+                    } catch(e) {}
+                } else {
+                    sessionStorage.setItem(key, '1');
+                }
+            } catch (e) {}
+            // expose helper to clear flags
+            window.clearSkeletonFlags = function() {
+                try {
+                    var keysToRemove = [];
+                    for (var i = 0; i < sessionStorage.length; i++) {
+                        var k = sessionStorage.key(i);
+                        if (k && k.indexOf('skeletonSeen:') === 0) keysToRemove.push(k);
+                    }
+                    keysToRemove.forEach(function(k){ sessionStorage.removeItem(k); });
+                } catch(e) {}
+            };
+        })();
+    </script>
 </body>
 </html>

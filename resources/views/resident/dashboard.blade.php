@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Consolidated Skeleton -->
-    <div id="residentSkeleton">
+    <div id="residentSkeleton" data-skeleton>
         @include('components.loading.resident-dashboard-skeleton')
     </div>
 
@@ -235,19 +235,30 @@
     document.addEventListener('DOMContentLoaded', function() {
         const residentStatsContainer = document.getElementById('residentStatsContainer');
         const residentStatsContent = document.getElementById('residentStatsContent');
-        const residentSkel = document.getElementById('residentDashboardSkeleton');
-        
-        // Hide skeleton and show content after a short delay
-        setTimeout(() => {
+        const residentSkel = document.getElementById('residentDashboardSkeleton') || document.getElementById('residentSkeleton');
+        const header = document.getElementById('residentHeaderContent');
+
+        function reveal() {
             if (residentStatsContainer && residentStatsContent) {
                 residentStatsContainer.innerHTML = '';
                 residentStatsContainer.appendChild(residentStatsContent);
                 residentStatsContent.classList.remove('hidden');
             }
-            const header = document.getElementById('residentHeaderContent');
             if (header) header.style.display = 'block';
             if (residentSkel) residentSkel.style.display = 'none';
-        }, 1000); // 1 second delay to show skeleton effect
+        }
+
+        // Instant reveal on repeat visit; keep 1s delay only on first visit
+        var path = window.location && window.location.pathname ? window.location.pathname : 'root';
+        var key = 'skeletonSeen:' + path;
+        var seen = false;
+        try { seen = sessionStorage.getItem(key) === '1'; } catch(e) { seen = false; }
+
+        if (seen) {
+            reveal();
+        } else {
+            setTimeout(reveal, 1000);
+        }
     });
-</script>
+    </script>
 @endsection
