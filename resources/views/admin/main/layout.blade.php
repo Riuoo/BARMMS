@@ -1197,6 +1197,10 @@
 
     <!-- Notification System JavaScript -->
     <script>
+        // Helper to check if user is a nurse
+        function isNurseUser() {
+            return JSON.parse(`@json($isNurse)`);
+        }
         // Global notification system
         window.notificationSystem = {
             // Initialize notification system
@@ -1214,9 +1218,6 @@
                     console.error('Notification URL not found');
                     return;
                 }
-
-                console.log('Loading notifications from:', url);
-
                 fetch(url, {
                     method: 'GET',
                     headers: {
@@ -1225,12 +1226,8 @@
                     },
                     credentials: 'same-origin'
                 })
-                .then(response => {
-                    console.log('Notification response status:', response.status);
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Notification data received:', data);
                     this.updateNotificationBadge(data.total);
                     this.updateNotificationDropdown(data.notifications);
                     this.updateNotificationCount(data.total);
@@ -1257,38 +1254,33 @@
             updateNotificationDropdown: function(notifications) {
                 const container = document.getElementById('notification-list-dropdown');
                 if (!container) return;
-
-                                        if (notifications.length === 0) {
-                            const isNurse = JSON.parse(`@json($isNurse)`);
-                            
-                            if (isNurse) {
-                                container.innerHTML = `
-                                    <div class="flex items-center justify-center py-8">
-                                        <div class="text-center">
-                                            <i class="fas fa-heartbeat text-gray-400 text-2xl mb-2"></i>
-                                            <p class="text-gray-500 text-sm">Health notifications only</p>
-                                            <p class="text-gray-400 text-xs mt-1">No new health-related notifications</p>
-                                        </div>
-                                    </div>
-                                `;
-                            } else {
-                                container.innerHTML = `
-                                    <div class="flex items-center justify-center py-8">
-                                        <div class="text-center">
-                                            <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
-                                            <p class="text-gray-500 text-sm">No new notifications</p>
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                            return;
-                        }
-
+                if (notifications.length === 0) {
+                    if (isNurseUser()) {
+                        container.innerHTML = `
+                            <div class="flex items-center justify-center py-8">
+                                <div class="text-center">
+                                    <i class="fas fa-heartbeat text-gray-400 text-2xl mb-2"></i>
+                                    <p class="text-gray-500 text-sm">Health notifications only</p>
+                                    <p class="text-gray-400 text-xs mt-1">No new health-related notifications</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div class="flex items-center justify-center py-8">
+                                <div class="text-center">
+                                    <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
+                                    <p class="text-gray-500 text-sm">No new notifications</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    return;
+                }
                 let html = '';
                 notifications.forEach(notification => {
                     const timeAgo = this.getTimeAgo(notification.created_at);
                     const priorityClass = notification.priority === 'high' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
-                    
                     html += `
                         <div class="flex items-center justify-center p-3 hover:bg-gray-50 notification-item cursor-default select-none ${priorityClass}" data-id="${notification.id}" data-type="${notification.type}" onclick="notificationSystem.markAsViewed(${notification.id}, '${notification.type}')">
                             <div class="flex items-start justify-between">
@@ -1302,7 +1294,6 @@
                         </div>
                     `;
                 });
-
                 container.innerHTML = html;
             },
 
@@ -1316,14 +1307,11 @@
 
             // Mark notification as read
             markAsRead: function(type, id) {
-                // Check if user is a nurse
-                const isNurse = JSON.parse(`@json($isNurse)`);
-                
-                if (isNurse) {
-                    toast.info('Nurses can only access health-related notifications');
+                if (isNurseUser()) {
+                    this.showInfo('Nurses can only access health-related notifications');
                     return;
                 }
-                
+                const notificationElement = document.querySelector(`[data-id="${id}"][data-type="${type}"]`);
                 fetch(`/admin/notifications/mark-as-read/${type}/${id}`, {
                     method: 'POST',
                     headers: {
@@ -1335,7 +1323,6 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Remove the notification from the dropdown
                     if (notificationElement) {
                         notificationElement.style.opacity = '0.5';
                         setTimeout(() => {
@@ -1343,66 +1330,51 @@
                             this.loadNotifications(); // Reload to update counts
                         }, 300);
                     }
-                    toast.success('Notification marked as read');
+                    this.showSuccess('Notification marked as read');
                 })
                 .catch(error => {
                     console.error('Error marking notification as read:', error);
-                    toast.error('Failed to mark notification as read');
+                    this.showError('Failed to mark notification as read');
                 });
             },
 
-            // Mark all notifications as read
-            markAllAsRead: function() {
-                // Check if user is a nurse
-                const isNurse = JSON.parse(`@json($isNurse)`);
-                
-                if (isNurse) {
-                    toast.info('Nurses can only access health-related notifications');
+            // Mark all notifications as read (async/await version)
+            markAllAsRead: async function() {
+                if (isNurseUser()) {
+                    this.showInfo('Nurses can only access health-related notifications');
                     return;
                 }
-                
-                fetch('/admin/notifications/mark-all-as-read-ajax', {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                    },
-                    credentials: 'same-origin'
-                })
-                .then(response => response.json())
-                .then(data => {
+                try {
+                    const response = await fetch('/admin/notifications/mark-all-as-read-ajax', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        },
+                        credentials: 'same-origin'
+                    });
+                    const data = await response.json();
                     if (data.success) {
                         this.updateNotificationBadge(0);
                         this.updateNotificationCount(0);
                         this.updateNotificationDropdown([]);
-                        if (typeof notify === 'function') {
-                            notify('success', data.message || 'All notifications marked as read.');
-                        } else if (window.toast && typeof window.toast.success === 'function') {
-                            window.toast.success(data.message || 'All notifications marked as read.');
-                        }
+                        this.showSuccess(data.message || 'All notifications marked as read.');
                     } else {
-                        if (typeof notify === 'function') {
-                            notify('error', data.message || 'Failed to mark all as read.');
-                        } else if (window.toast && typeof window.toast.error === 'function') {
-                            window.toast.error(data.message || 'Failed to mark all as read.');
-                        }
+                        this.showError(data.message || 'Failed to mark all as read.');
                     }
-                })
-                .catch(error => {
+                } catch (error) {
                     console.error('Error marking all notifications as read:', error);
-                    toast.error('Failed to mark all notifications as read');
-                });
+                    this.showError('Failed to mark all notifications as read');
+                }
             },
 
             // Mark notification as viewed (but not read)
             markAsViewed: function(id, type) {
-                // Add a subtle visual indicator that this notification has been viewed
                 const notificationElement = document.querySelector(`[data-id="${id}"][data-type="${type}"]`);
                 if (notificationElement) {
                     notificationElement.classList.add('viewed');
                     notificationElement.style.opacity = '0.8';
-                    // Add a small indicator
                     const indicator = document.createElement('div');
                     indicator.className = 'absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full';
                     notificationElement.style.position = 'relative';
@@ -1412,14 +1384,10 @@
 
             // View notification details
             viewDetails: function(type, id) {
-                // Check if user is a nurse
-                const isNurse = JSON.parse(`@json($isNurse)`);
-                
-                if (isNurse) {
-                    toast.info('Nurses can only access health-related notifications');
+                if (isNurseUser()) {
+                    this.showInfo('Nurses can only access health-related notifications');
                     return;
                 }
-                
                 let url = '';
                 switch (type) {
                     case 'blotter_report':
@@ -1435,11 +1403,9 @@
                         url = '/admin/community-concerns';
                         break;
                     default:
-                        toast.error('Unknown notification type');
+                        this.showError('Unknown notification type');
                         return;
                 }
-
-                // Mark as read before redirecting
                 fetch(`/admin/notifications/mark-as-read/${type}/${id}`, {
                     method: 'POST',
                     headers: {
@@ -1451,12 +1417,10 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Optionally update UI here
                     window.location.href = url;
                 })
                 .catch(error => {
                     console.error('Error marking notification as read:', error);
-                    // Still redirect even if marking as read fails
                     window.location.href = url;
                 });
             },
@@ -1466,7 +1430,6 @@
                 const date = new Date(dateString);
                 const now = new Date();
                 const diffInSeconds = Math.floor((now - date) / 1000);
-
                 if (diffInSeconds < 60) {
                     return 'Just now';
                 } else if (diffInSeconds < 3600) {
@@ -1481,9 +1444,33 @@
                 }
             },
 
+            // Show success message
+            showSuccess: function(message) {
+                if (typeof notify === 'function') {
+                    notify('success', message);
+                } else if (window.toast && typeof window.toast.success === 'function') {
+                    window.toast.success(message);
+                }
+            },
+            // Show error message
+            showError: function(message) {
+                if (typeof notify === 'function') {
+                    notify('error', message);
+                } else if (window.toast && typeof window.toast.error === 'function') {
+                    window.toast.error(message);
+                }
+            },
+            // Show info message
+            showInfo: function(message) {
+                if (typeof notify === 'function') {
+                    notify('info', message);
+                } else if (window.toast && typeof window.toast.info === 'function') {
+                    window.toast.info(message);
+                }
+            },
+
             // Start polling for new notifications
             startPolling: function() {
-                // Poll every 30 seconds
                 setInterval(() => {
                     this.loadNotifications();
                 }, 30000);
@@ -1491,50 +1478,37 @@
 
             // Bind event listeners
             bindEvents: function() {
-                // Bind mark all as read button
                 window.markAllAsRead = () => {
                     this.markAllAsRead();
                 };
             },
 
-                    // Check current page and mark relevant notifications as read
-        checkCurrentPageAndMarkNotifications: function() {
-            // Check if user is a nurse
-            const isNurse = JSON.parse(`@json($isNurse)`);
-            
-            if (isNurse) {
-                return; // Nurses don't have access to barangay-related notifications
-            }
-            
-            const currentPath = window.location.pathname;
-            let notificationType = null;
-            
-            // Map URL patterns to notification types
-            if (currentPath.includes('/document-requests')) {
-                notificationType = 'document_request';
-            } else if (currentPath.includes('/blotter-reports')) {
-                notificationType = 'blotter_report';
-            } else if (currentPath.includes('/new-account-requests')) {
-                notificationType = 'account_request';
-            } else if (currentPath.includes('/community-concerns')) {
-                notificationType = 'community_complaint';
-            }
-            
-            // If we're on a relevant page, mark notifications as read
-            if (notificationType) {
-                this.markNotificationsAsReadByType(notificationType);
-            }
-        },
+            // Check current page and mark relevant notifications as read
+            checkCurrentPageAndMarkNotifications: function() {
+                if (isNurseUser()) {
+                    return;
+                }
+                const currentPath = window.location.pathname;
+                let notificationType = null;
+                if (currentPath.includes('/document-requests')) {
+                    notificationType = 'document_request';
+                } else if (currentPath.includes('/blotter-reports')) {
+                    notificationType = 'blotter_report';
+                } else if (currentPath.includes('/new-account-requests')) {
+                    notificationType = 'account_request';
+                } else if (currentPath.includes('/community-concerns')) {
+                    notificationType = 'community_complaint';
+                }
+                if (notificationType) {
+                    this.markNotificationsAsReadByType(notificationType);
+                }
+            },
 
             // Mark all notifications of a specific type as read
             markNotificationsAsReadByType: function(type) {
-                // Check if user is a nurse
-                const isNurse = JSON.parse(`@json($isNurse)`);
-                
-                if (isNurse) {
-                    return; // Nurses don't have access to barangay-related notifications
+                if (isNurseUser()) {
+                    return;
                 }
-                
                 fetch(`/admin/notifications/mark-as-read-by-type/${type}`, {
                     method: 'POST',
                     headers: {
@@ -1547,8 +1521,6 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        console.log('Automatically marked notifications as read for:', type);
-                        // Reload notifications to update the count
                         this.loadNotifications();
                     }
                 })
