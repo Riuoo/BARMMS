@@ -28,8 +28,8 @@
 
     <div class="box">
         <h2>Parties</h2>
-        <div class="row"><strong>Complainant:</strong> {{ optional($blotter->resident)->name ?? 'N/A' }}</div>
-        <div class="row"><strong>Respondent:</strong> {{ $blotter->recipient_name }}</div>
+        <div class="row"><strong>Complainant:</strong> Anonymous</div>
+        <div class="row"><strong>Respondent:</strong> {{ optional($blotter->resident)->name ?? $blotter->recipient_name }}</div>
     </div>
 
     <h2>Incident Description</h2>

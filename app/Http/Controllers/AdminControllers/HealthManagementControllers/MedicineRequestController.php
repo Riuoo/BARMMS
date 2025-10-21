@@ -114,6 +114,14 @@ class MedicineRequestController
 
         $medicine = Medicine::findOrFail($validated['medicine_id']);
 
+        // Prevent multiple ongoing medicine requests (quantity_approved is null or 0)
+        if (MedicineRequest::where('resident_id', $validated['resident_id'])
+                ->where(function($q){ $q->whereNull('quantity_approved')->orWhere('quantity_approved', 0); })
+                ->exists()) {
+            notify()->error('Resident already has a pending or unapproved medicine request. Complete it before creating a new one.');
+            return back();
+        }
+
         // Ensure sufficient stock
         if ($medicine->current_stock < (int) $validated['quantity_requested']) {
             notify()->error('Insufficient stock to fulfill this request.');

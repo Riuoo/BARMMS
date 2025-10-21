@@ -155,11 +155,11 @@ function viewBlotterDetails(id) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <h4 class="font-medium text-gray-900 mb-2">Complainant</h4>
-                        <p class="text-gray-600">${data.user_name || 'N/A'}</p>
+                        <p class="text-gray-600">Anonymous</p>
                     </div>
                     <div>
                         <h4 class="font-medium text-gray-900 mb-2">Respondent</h4>
-                        <p class="text-gray-600">${data.recipient_name || 'N/A'}</p>
+                        <p class="text-gray-600">${data.respondent_name || 'N/A'}</p>
                     </div>
                 </div>
                 

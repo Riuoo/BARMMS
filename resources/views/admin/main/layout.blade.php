@@ -612,6 +612,20 @@
                     </section>
                     @endif
                     
+                    @if(!$isNurse)
+                    <!-- Settings / Content -->
+                    <section class="mb-6" aria-label="Settings">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Settings & Content</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li>
+                                <a href="{{ route('admin.faqs.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.faqs.*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.faqs.*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-question-circle fa-fw mr-3 {{ request()->routeIs('admin.faqs.*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>FAQ Management</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    @endif
                 </nav>
                 <div class="flex-shrink-0 h-12"></div>
             </aside>
@@ -800,6 +814,21 @@
                                 <a href="{{ route('admin.decision-tree') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.decision-tree*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-sitemap fa-fw mr-3 {{ request()->routeIs('admin.decision-tree*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Resident Classification & Prediction</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    @endif
+
+                    @if(!$isNurse)
+                    <!-- Settings / Content MOBILE -->
+                    <section class="mb-6" aria-label="Settings">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Settings & Content</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li>
+                                <a href="{{ route('admin.faqs.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.faqs.*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base" aria-current="{{ request()->routeIs('admin.faqs.*') ? 'page' : '' }}">
+                                    <i class="fas fa-question-circle fa-fw mr-3 {{ request()->routeIs('admin.faqs.*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>FAQ Management</span>
                                 </a>
                             </li>
                         </ul>

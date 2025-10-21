@@ -663,7 +663,7 @@
                     contentHtml += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
                     // Dynamically add fields if they exist and are not null/empty
                     const fields = {
-                        'gender': { label: 'Gender', icon: 'fas fa-{{ $resident->gender == "Male" ? "mars" : "venus" }}' },
+                        'gender': { label: 'Gender', icon: 'fas fa-venus-mars' },
                         'contact_number': { label: 'Contact Number', icon: 'fas fa-phone' },
                         'birth_date': { label: 'Birth Date', icon: 'fas fa-birthday-cake' },
                         'marital_status': { label: 'Marital Status', icon: 'fas fa-heart' },

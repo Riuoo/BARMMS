@@ -39,6 +39,7 @@ use App\Http\Controllers\ResidentControllers\ResidentRequestListController;
 use App\Http\Controllers\ResidentControllers\ResidentAnnouncementController;
 use App\Http\Controllers\ResidentControllers\ResidentNotificationController;
 use App\Http\Controllers\ResidentControllers\ResidentProfileController;
+use App\Http\Controllers\ResidentControllers\ResidentFaqController;
 use App\Http\Controllers\PublicController;
 
 // Landing page route
@@ -306,7 +307,16 @@ Route::prefix('admin')->group(function () {
     });
 });
 
-
+Route::middleware(['admin.role'])->prefix('admin/faqs')->name('admin.faqs.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'create'])->name('create');
+    Route::post('/', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'store'])->name('store');
+    Route::get('/{faq}/edit', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'edit'])->name('edit');
+    Route::put('/{faq}', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'update'])->name('update');
+    Route::delete('/{faq}', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'destroy'])->name('destroy');
+    Route::post('/reorder', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'reorder'])->name('reorder');
+    Route::patch('/{faq}/toggle', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'toggle'])->name('toggle');
+});
 
 
 Route::middleware(['resident.role'])->prefix('resident')->group(function () {
@@ -336,7 +346,15 @@ Route::middleware(['resident.role'])->prefix('resident')->group(function () {
 
     // Profile
     Route::get('/profile', [ResidentProfileController::class, 'profile'])->name('resident.profile');
+
+    // Community Bulletin Board
+    Route::get('/announcements', [ResidentAnnouncementController::class, 'announcements'])->name('resident.announcements');
+    Route::get('/announcements/project/{id}', [ResidentAnnouncementController::class, 'showProject'])->name('resident.announcements.project');
+    Route::get('/announcements/activity/{id}', [ResidentAnnouncementController::class, 'showActivity'])->name('resident.announcements.activity');
     Route::put('/profile/update', [ResidentProfileController::class, 'updateProfile'])->name('resident.profile.update');
+
+    // Resident FAQs
+    Route::get('/faqs', [ResidentFaqController::class, 'index'])->name('resident.faqs');
 });
 
 // Logout route

@@ -63,7 +63,7 @@ class BlotterReportController
             
             return response()->json([
                 'user_name' => $blotterRequest->resident->name ?? 'N/A',
-                'recipient_name' => $blotterRequest->recipient_name,
+                'respondent_name' => $blotterRequest->resident ? $blotterRequest->resident->name : $blotterRequest->recipient_name,
                 'description' => $blotterRequest->description,
                 'status' => $blotterRequest->status,
                 'created_at' => $blotterRequest->created_at->format('M d, Y \a\t g:i A'),
@@ -230,21 +230,33 @@ class BlotterReportController
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'resident_id' => 'required|exists:residents,id',
+            'complainant_name' => 'required|string|max:255',
+            'resident_id' => 'nullable|exists:residents,id',
             'recipient_name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'description' => 'required|string',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240',
             'summon_date' => 'required|date|after:today'
         ]);
-        $user = Residents::find($validated['resident_id']);
-        if (!$user || !$user->active) {
-            notify()->error('This user account is inactive and cannot make transactions.');
-            return back()->withInput();
+        // Only validate user if resident_id is provided
+        if ($validated['resident_id']) {
+            $user = Residents::find($validated['resident_id']);
+            if (!$user || !$user->active) {
+                notify()->error('This user account is inactive and cannot make transactions.');
+                return back()->withInput();
+            }
+            // Prevent multiple ongoing blotter requests
+            if (BlotterRequest::where('resident_id', $validated['resident_id'])
+                    ->whereIn('status', ['pending', 'processing', 'approved'])
+                    ->exists()) {
+                notify()->error('Resident already has an ongoing blotter request. Complete it before creating a new one.');
+                return back()->withInput();
+            }
         }
         try {
             $blotter = new BlotterRequest();
-            $blotter->resident_id = $validated['resident_id'];
+            $blotter->complainant_name = $validated['complainant_name'];
+            $blotter->resident_id = $validated['resident_id']; // This is now the respondent
             $blotter->recipient_name = $validated['recipient_name'];
             $blotter->type = $validated['type'];
             $blotter->description = $validated['description'];

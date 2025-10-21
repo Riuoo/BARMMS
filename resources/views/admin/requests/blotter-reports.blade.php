@@ -242,13 +242,18 @@
                                         <div class="flex-shrink-0">
                                         </div>
                                         <div>
-                                            <div class="text-sm font-medium text-gray-900">{{ $request->resident->name ?? 'N/A' }}</div>
+                                            <div class="text-sm font-medium text-gray-900">Anonymous</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <div class="text-sm text-gray-900">{{ $request->recipient_name }}</div>
+                                    <div class="text-sm text-gray-900">{{ $request->resident->name ?? $request->recipient_name }}</div>
                                     <div class="text-sm text-gray-500">
+                                        @if($request->resident)
+                                            <span class="text-green-600">Registered Resident</span>
+                                        @else
+                                            <span class="text-orange-600">Non-Registered</span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
@@ -382,8 +387,8 @@
                                 <i class="fas fa-file-alt text-red-600"></i>
                             </div>
                             <div class="ml-3 flex-1 min-w-0">
-                                <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->resident->name ?? 'N/A' }}</h3>
-                                <p class="text-sm text-gray-500 truncate">vs {{ $request->recipient_name }}</p>
+                                <h3 class="text-sm font-medium text-gray-900 truncate">Anonymous</h3>
+                                <p class="text-sm text-gray-500 truncate">vs {{ $request->resident->name ?? $request->recipient_name }}</p>
                                 <div class="flex items-center mt-1">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                         @if($request->status === 'pending') bg-yellow-100 text-yellow-800

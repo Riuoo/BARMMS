@@ -68,22 +68,18 @@
                     Complainant Information
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
-                    <div class="relative">
-                        <label for="complainantSearch" class="block text-sm font-medium text-gray-700 mb-2">
-                            Complainant <span class="text-red-500">*</span>
+                    <div>
+                        <label for="complainant_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Complainant Name <span class="text-red-500">*</span>
                         </label>
-                        <input
-                            type="text"
-                            id="complainantSearch"
-                            placeholder="Type to search for a resident..."
-                            autocomplete="off"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
-                            aria-label="Search for a resident"
-                            required
-                        />
-                        <input type="hidden" id="resident_id" name="resident_id" required>
-                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
-                        <p class="mt-1 text-sm text-gray-500">Search and select the resident filing the complaint</p>
+                        <input type="text" 
+                               id="complainant_name" 
+                               name="complainant_name" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200" 
+                               placeholder="Enter complainant name (will be shown as Anonymous)"
+                               value="{{ old('complainant_name') }}"
+                               required>
+                        <p class="mt-1 text-sm text-gray-500">Complainant name will be displayed as "Anonymous" in reports</p>
                     </div>
                 </div>
             </div>
@@ -95,6 +91,22 @@
                     Respondent Information
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
+                    <div class="relative">
+                        <label for="respondentSearch" class="block text-sm font-medium text-gray-700 mb-2">
+                            Respondent (Registered Resident)
+                        </label>
+                        <input
+                            type="text"
+                            id="respondentSearch"
+                            placeholder="Type to search for a resident..."
+                            autocomplete="off"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200"
+                            aria-label="Search for a resident"
+                        />
+                        <input type="hidden" id="resident_id" name="resident_id">
+                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
+                        <p class="mt-1 text-sm text-gray-500">Search and select if the respondent is a registered resident</p>
+                    </div>
                     <div>
                         <label for="recipient_name" class="block text-sm font-medium text-gray-700 mb-2">
                             Respondent Name <span class="text-red-500">*</span>
@@ -103,10 +115,10 @@
                                id="recipient_name" 
                                name="recipient_name" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200" 
-                               placeholder="Enter the name of the person involved"
+                               placeholder="Enter the name of the person being reported"
                                value="{{ old('recipient_name') }}"
                                required>
-                        <p class="mt-1 text-sm text-gray-500">Enter the full name of the person being reported</p>
+                        <p class="mt-1 text-sm text-gray-500">Enter the full name of the person being reported (required)</p>
                     </div>
                 </div>
             </div>
@@ -442,8 +454,8 @@
         };
     }
 
-    // Resident AJAX search for complainant
-    const searchInput = document.getElementById('complainantSearch');
+    // Resident AJAX search for respondent
+    const searchInput = document.getElementById('respondentSearch');
     const searchResults = document.getElementById('searchResults');
     const residentIdInput = document.getElementById('resident_id');
 
@@ -510,8 +522,18 @@
         if (target && target.dataset.id) {
             residentIdInput.value = target.dataset.id;
             searchInput.value = target.dataset.name;
+            // Auto-fill recipient name when resident is selected
+            document.getElementById('recipient_name').value = target.dataset.name;
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
+        }
+    });
+
+    // Clear resident selection when recipient name is manually entered
+    document.getElementById('recipient_name').addEventListener('input', function() {
+        if (this.value.trim() !== searchInput.value.trim()) {
+            residentIdInput.value = '';
+            searchInput.value = '';
         }
     });
 

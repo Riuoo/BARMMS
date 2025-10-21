@@ -305,6 +305,14 @@ class DocumentRequestController
                 'error' => 'This user account is inactive and cannot make transactions.'
             ], 422);
         }
+        // Prevent multiple ongoing requests (pending/processing/approved)
+        if (DocumentRequest::where('resident_id', $validated['resident_id'])
+                ->whereIn('status', ['pending', 'processing', 'approved'])
+                ->exists()) {
+            return response()->json([
+                'error' => 'Resident already has an ongoing document request. Complete it before creating a new one.'
+            ], 422);
+        }
 
         try {
             $template = null;

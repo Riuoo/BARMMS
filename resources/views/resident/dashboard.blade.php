@@ -221,6 +221,10 @@
                     <i class="fas fa-clipboard-list text-green-600 mr-2"></i>
                     <span class="text-sm font-medium text-gray-700">My Requests</span>
                 </a>
+                <a href="{{ route('resident.announcements') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                    <i class="fas fa-bullhorn text-purple-600 mr-2"></i>
+                    <span class="text-sm font-medium text-gray-700">Bulletin Board</span>
+                </a>
                 <a href="{{ route('resident.profile') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                     <i class="fas fa-user-circle text-gray-600 mr-2"></i>
                     <span class="text-sm font-medium text-gray-700">My Profile</span>

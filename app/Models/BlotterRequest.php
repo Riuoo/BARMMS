@@ -10,6 +10,7 @@ class BlotterRequest extends Model
     use HasFactory;
 
     protected $fillable = [
+        'complainant_name',
         'resident_id',
         'recipient_name',
         'type',
