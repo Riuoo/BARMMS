@@ -431,4 +431,73 @@ document.addEventListener('click', function(e){
     if (!m || m.classList.contains('hidden')) return;
     if (e.target === m) m.classList.add('hidden');
 });
+
+// Handle status update form submission
+document.getElementById('updateStatusForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    
+    // Set button to processing
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Updating...';
+    
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            // Close modal
+            closeUpdateModal();
+            
+            // Show success toast
+            if (typeof notify === 'function') {
+                notify('success', 'Concern status updated successfully.');
+            } else if (window.toast && typeof window.toast.success === 'function') {
+                window.toast.success('Concern status updated successfully.');
+            } else {
+                alert('Concern status updated successfully.');
+            }
+            
+            // Reload page to show updated status
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            // Show error toast
+            const errorMsg = data.message || 'Failed to update concern status.';
+            if (typeof notify === 'function') {
+                notify('error', errorMsg);
+            } else if (window.toast && typeof window.toast.error === 'function') {
+                window.toast.error(errorMsg);
+            } else {
+                alert(errorMsg);
+            }
+        }
+    } catch (error) {
+        console.error('Error updating status:', error);
+        if (typeof notify === 'function') {
+            notify('error', 'Network error while updating status.');
+        } else if (window.toast && typeof window.toast.error === 'function') {
+            window.toast.error('Network error while updating status.');
+        } else {
+            alert('Network error while updating status.');
+        }
+    } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    }
+});
 </script>

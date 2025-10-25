@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             BlotterRequestSeeder::class,
             DocumentRequestSeeder::class,
             CommunityConcernSeeder::class,
+            FaqSeeder::class,
         ]);
     }
 }

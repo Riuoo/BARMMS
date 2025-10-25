@@ -77,30 +77,26 @@ class BlotterReportController
 
     public function approve(Request $request, $id)
     {
-        Log::info('Approve method called for blotter ID: ' . $id);
-
-        // Accept the form field 'hearing_date' and save as 'summon_date'
+        $blotter = BlotterRequest::findOrFail($id);
+        $user = $blotter->resident;
+        if (!$user) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'This resident record no longer exists.'], 422);
+            }
+            notify()->error('This resident record no longer exists.');
+            return redirect()->back();
+        }
+        if ($user->active === false) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'This user account is inactive and cannot make transactions.'], 422);
+            }
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return redirect()->back();
+        }
         $validated = $request->validate([
             'hearing_date' => 'required|date|after:today'
         ]);
-
         try {
-            $blotter = BlotterRequest::findOrFail($id);
-            $user = $blotter->resident;
-            if (!$user) {
-                notify()->error('This resident record no longer exists.');
-                return redirect()->back();
-            }
-            if ($user->active === false) {
-                notify()->error('This user account is inactive and cannot make transactions.');
-                return redirect()->back();
-            }
-
-            if ($blotter->status === 'approved') {
-                notify()->error('This blotter report has already been approved.');
-                return redirect()->back();
-            }
-
             DB::beginTransaction();
 
             $blotter->status = 'approved';
@@ -349,6 +345,13 @@ class BlotterReportController
         ]);
         $filename = $this->generateFilename($blotter, 'new_summon_notice');
         return $pdf->download($filename); // Download the new summons PDF
+    }
+
+    public function checkActive($id)
+    {
+        $blotter = BlotterRequest::findOrFail($id);
+        $user = $blotter->resident;
+        return response()->json(['active' => $user && $user->active ? true : false]);
     }
 
     // Add this method to generate a filename for the PDF

@@ -220,12 +220,19 @@
                             @endif
                         </div>
 
-                        <!-- Action Buttons: Preview, Toggle, Delete -->
+                        <!-- Action Buttons: Preview, Edit, Toggle, Delete -->
                         <div class="flex flex-wrap gap-2">
                             <a href="#" class="preview-link inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" data-template-id="{{ $template->id }}">
                                 <i class="fas fa-eye mr-1"></i>
                                 Preview
                             </a>
+
+                            @if($canPerformTransactions)
+                            <a href="{{ route('admin.templates.edit', $template) }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                                <i class="fas fa-edit mr-1"></i>
+                                Edit
+                            </a>
+                            @endif
 
                             <form action="{{ route('admin.templates.toggle-status', $template) }}" method="POST" class="inline">
                                 @csrf

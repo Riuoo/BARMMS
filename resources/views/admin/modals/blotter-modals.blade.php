@@ -286,12 +286,47 @@ function refreshToBlotterReports() {
     location.reload();
 }
 
-function approveAndDownload(event) {
+async function approveAndDownload(event) {
     event.preventDefault();
     const form = event.target;
     const action = form.action;
+    const approveBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = approveBtn.innerHTML;
+    // Show spinner
+    approveBtn.disabled = true;
+    approveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
     const blotterIdMatch = action.match(/blotter-reports\/(\d+)\/approve/);
     const blotterId = blotterIdMatch ? blotterIdMatch[1] : '';
+    if (!blotterId) {
+        notify('error', 'Invalid report ID!');
+        approveBtn.disabled = false;
+        approveBtn.innerHTML = originalBtnText;
+        return false;
+    }
+    // Check if resident is active
+    try {
+        const res = await fetch(`/admin/blotter-reports/${blotterId}/check-active`, { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.active === false) {
+                notify('error', 'This user account is inactive and cannot make transactions.');
+                approveBtn.disabled = false;
+                approveBtn.innerHTML = originalBtnText;
+                return false;
+            }
+        } else {
+            notify('error', 'Failed to check user status.');
+            approveBtn.disabled = false;
+            approveBtn.innerHTML = originalBtnText;
+            return false;
+        }
+    } catch (error) {
+        notify('error', 'Network error while verifying user status.');
+        approveBtn.disabled = false;
+        approveBtn.innerHTML = originalBtnText;
+        return false;
+    }
+    // Only if active, run the rest of your fetch approve logic here (old code)...
     const formData = new FormData(form);
     fetch(action, {
         method: 'POST',
@@ -366,7 +401,10 @@ function approveAndDownload(event) {
                     // Remove scripts then check visible text
                     doc.querySelectorAll('script').forEach(s => s.remove());
                     const bodyText = (doc.body && doc.body.textContent) ? doc.body.textContent : raw;
-                    if (bodyText.includes('This user account is inactive')) {
+                    // Check for specific error messages in order of priority
+                    if (bodyText.includes('Resident already has an ongoing blotter request')) {
+                        errorMsg = 'Resident already has an ongoing blotter request. Complete it before creating a new one.';
+                    } else if (bodyText.includes('This user account is inactive and cannot make transactions')) {
                         errorMsg = 'This user account is inactive and cannot make transactions.';
                     }
                 }
@@ -393,7 +431,10 @@ function approveAndDownload(event) {
                 } else {
                     doc.querySelectorAll('script').forEach(s => s.remove());
                     const bodyText = (doc.body && doc.body.textContent) ? doc.body.textContent : raw;
-                    if (bodyText.includes('This user account is inactive')) {
+                    // Check for specific error messages in order of priority
+                    if (bodyText.includes('Resident already has an ongoing blotter request')) {
+                        errorMsg = 'Resident already has an ongoing blotter request. Complete it before creating a new one.';
+                    } else if (bodyText.includes('This user account is inactive and cannot make transactions')) {
                         errorMsg = 'This user account is inactive and cannot make transactions.';
                     }
                 }
@@ -408,12 +449,52 @@ function approveAndDownload(event) {
     return false;
 }
 
-function summonAndDownload(event) {
+async function summonAndDownload(event) {
     event.preventDefault();
     const form = event.target;
     const action = form.action;
     const blotterIdMatch = action.match(/blotter-reports\/(\d+)\/new-summons/);
     const blotterId = blotterIdMatch ? blotterIdMatch[1] : '';
+    
+    if (!blotterId) {
+        if (typeof notify === 'function') {
+            notify('error', 'Invalid report ID!');
+        } else {
+            alert('Invalid report ID!');
+        }
+        return false;
+    }
+
+    // Check if resident is active first
+    try {
+        const res = await fetch(`/admin/blotter-reports/${blotterId}/check-active`, { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.active === false) {
+                if (typeof notify === 'function') {
+                    notify('error', 'This user account is inactive and cannot make transactions.');
+                } else {
+                    alert('This user account is inactive and cannot make transactions.');
+                }
+                return false;
+            }
+        } else {
+            if (typeof notify === 'function') {
+                notify('error', 'Failed to check user status.');
+            } else {
+                alert('Failed to check user status.');
+            }
+            return false;
+        }
+    } catch (error) {
+        if (typeof notify === 'function') {
+            notify('error', 'Network error while verifying user status.');
+        } else {
+            alert('Network error while verifying user status.');
+        }
+        return false;
+    }
+    
     const formData = new FormData(form);
     fetch(action, {
         method: 'POST',
@@ -448,18 +529,29 @@ function summonAndDownload(event) {
             let errorMsg = 'Error generating summon and downloading PDF.';
             try {
                 const text = await response.text();
-                if (text.includes('This user account is inactive')) {
+                // Check for specific error messages in order of priority
+                if (text.includes('This user account is inactive and cannot make transactions')) {
                     errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('Resident already has an ongoing blotter request')) {
+                    errorMsg = 'Resident already has an ongoing blotter request. Complete it before creating a new one.';
                 } else if (text.includes('<ul class="list-disc')) {
                     const match = text.match(/<li>(.*?)<\/li>/);
                     if (match) errorMsg = match[1];
                 }
             } catch (e) {}
-            alert(errorMsg);
+            if (typeof notify === 'function') {
+                notify('error', errorMsg);
+            } else {
+                alert(errorMsg);
+            }
         }
     })
     .catch(error => {
-        alert('Error generating summon and downloading PDF.');
+        if (typeof notify === 'function') {
+            notify('error', 'Error generating summon and downloading PDF.');
+        } else {
+            alert('Error generating summon and downloading PDF.');
+        }
         console.error(error);
     });
     return false;

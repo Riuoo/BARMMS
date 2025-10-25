@@ -560,7 +560,6 @@ class DocumentTemplate extends Model
                 }
                 .content {
                     margin: 30px 0;
-                    text-align: justify;
                     line-height: 2;
                 }
                 .signature-section {
@@ -580,6 +579,15 @@ class DocumentTemplate extends Model
                 .official-title {
                     font-size: 14px;
                     color: #666;
+                }
+                /* Preserve original formatting from uploaded content */
+                p, div, span, h1, h2, h3, h4, h5, h6 {
+                    margin: 0;
+                    padding: 0;
+                }
+                /* Allow inline styles to override default styles */
+                *[style] {
+                    /* Inline styles take precedence */
                 }
                 ' . ($this->custom_css ?? '') . '
             </style>

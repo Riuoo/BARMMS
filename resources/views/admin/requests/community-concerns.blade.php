@@ -50,29 +50,31 @@
 
     <!-- Success/Error Messages -->
     @if(session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-check-circle text-green-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-green-800">{{ session('success') }}</p>
-                </div>
-            </div>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof notify === 'function') {
+                    notify('success', '{{ session('success') }}');
+                } else if (window.toast && typeof window.toast.success === 'function') {
+                    window.toast.success('{{ session('success') }}');
+                } else {
+                    alert('{{ session('success') }}');
+                }
+            });
+        </script>
     @endif
 
     @if(session('error'))
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-800">{{ session('error') }}</p>
-                </div>
-            </div>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof notify === 'function') {
+                    notify('error', '{{ session('error') }}');
+                } else if (window.toast && typeof window.toast.error === 'function') {
+                    window.toast.error('{{ session('error') }}');
+                } else {
+                    alert('{{ session('error') }}');
+                }
+            });
+        </script>
     @endif
 
     <!-- Filters and Search -->

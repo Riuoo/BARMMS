@@ -56,16 +56,17 @@
         @endif
 
         @if(session('error'))
-            <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-circle text-red-400"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-800">{{ session('error') }}</p>
-                    </div>
-                </div>
-            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (typeof notify === 'function') {
+                        notify('error', '{{ session('error') }}');
+                    } else if (window.toast && typeof window.toast.error === 'function') {
+                        window.toast.error('{{ session('error') }}');
+                    } else {
+                        alert('{{ session('error') }}');
+                    }
+                });
+            </script>
         @endif
 
         <!-- Filters and Search -->
@@ -816,10 +817,40 @@ function formatFileSize(bytes) {
 
 // Modal functions are defined in the partial file (admin.modals.blotter-modals)
 
-function completeAndDownload(event, blotterId) {
+async function completeAndDownload(event, blotterId) {
     event.preventDefault();
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
+    
+    // Check if resident is active first
+    try {
+        const res = await fetch(`/admin/blotter-reports/${blotterId}/check-active`, { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.active === false) {
+                if (typeof notify === 'function') {
+                    notify('error', 'This user account is inactive and cannot make transactions.');
+                } else {
+                    alert('This user account is inactive and cannot make transactions.');
+                }
+                return false;
+            }
+        } else {
+            if (typeof notify === 'function') {
+                notify('error', 'Failed to check user status.');
+            } else {
+                alert('Failed to check user status.');
+            }
+            return false;
+        }
+    } catch (error) {
+        if (typeof notify === 'function') {
+            notify('error', 'Network error while verifying user status.');
+        } else {
+            alert('Network error while verifying user status.');
+        }
+        return false;
+    }
     
     fetch(`/admin/blotter-reports/${blotterId}/complete`, {
         method: 'POST',
@@ -852,28 +883,69 @@ function completeAndDownload(event, blotterId) {
             let errorMsg = 'Error completing and downloading PDF.';
             try {
                 const text = await response.text();
-                if (text.includes('This user account is inactive')) {
+                // Prioritize user inactive before ongoing request!
+                if (text.includes('This user account is inactive and cannot make transactions')) {
                     errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('Resident already has an ongoing blotter request')) {
+                    errorMsg = 'Resident already has an ongoing blotter request. Complete it before creating a new one.';
                 } else if (text.includes('<ul class="list-disc')) {
                     const match = text.match(/<li>(.*?)<\/li>/);
                     if (match) errorMsg = match[1];
                 }
             } catch (e) {}
-            alert(errorMsg);
+            if (typeof notify === 'function') {
+                notify('error', errorMsg);
+            } else {
+                alert(errorMsg);
+            }
         }
     })
     .catch(error => {
-        alert('Error completing and downloading PDF.');
+        if (typeof notify === 'function') {
+            notify('error', 'Error completing and downloading PDF.');
+        } else {
+            alert('Error completing and downloading PDF.');
+        }
         console.error(error);
     });
     return false;
 }
 
-function approveAndDownloadBlotter(event, blotterId) {
+async function approveAndDownloadBlotter(event, blotterId) {
     event.preventDefault();
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
     const hearingDate = form.querySelector('input[name="hearing_date"]').value;
+    
+    // Check if resident is active first
+    try {
+        const res = await fetch(`/admin/blotter-reports/${blotterId}/check-active`, { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.active === false) {
+                if (typeof notify === 'function') {
+                    notify('error', 'This user account is inactive and cannot make transactions.');
+                } else {
+                    alert('This user account is inactive and cannot make transactions.');
+                }
+                return false;
+            }
+        } else {
+            if (typeof notify === 'function') {
+                notify('error', 'Failed to check user status.');
+            } else {
+                alert('Failed to check user status.');
+            }
+            return false;
+        }
+    } catch (error) {
+        if (typeof notify === 'function') {
+            notify('error', 'Network error while verifying user status.');
+        } else {
+            alert('Network error while verifying user status.');
+        }
+        return false;
+    }
     
     fetch(`/admin/blotter-reports/${blotterId}/approve`, {
         method: 'POST',
@@ -908,18 +980,29 @@ function approveAndDownloadBlotter(event, blotterId) {
             let errorMsg = 'Error approving and downloading PDF.';
             try {
                 const text = await response.text();
-                if (text.includes('This user account is inactive')) {
+                // Prioritize user inactive before ongoing request!
+                if (text.includes('This user account is inactive and cannot make transactions')) {
                     errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('Resident already has an ongoing blotter request')) {
+                    errorMsg = 'Resident already has an ongoing blotter request. Complete it before creating a new one.';
                 } else if (text.includes('<ul class="list-disc')) {
                     const match = text.match(/<li>(.*?)<\/li>/);
                     if (match) errorMsg = match[1];
                 }
             } catch (e) {}
-            alert(errorMsg);
+            if (typeof notify === 'function') {
+                notify('error', errorMsg);
+            } else {
+                alert(errorMsg);
+            }
         }
     })
     .catch(error => {
-        alert('Error approving and downloading PDF.');
+        if (typeof notify === 'function') {
+            notify('error', 'Error approving and downloading PDF.');
+        } else {
+            alert('Error approving and downloading PDF.');
+        }
         console.error(error);
     });
     return false;
@@ -964,8 +1047,11 @@ function generateNewSummonPdf(event, blotterId) {
             let errorMsg = 'Error generating new summon PDF.';
             try {
                 const text = await response.text();
-                if (text.includes('This user account is inactive')) {
+                // Prioritize user inactive before ongoing request!
+                if (text.includes('This user account is inactive and cannot make transactions')) {
                     errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('Resident already has an ongoing blotter request')) {
+                    errorMsg = 'Resident already has an ongoing blotter request. Complete it before creating a new one.';
                 } else if (text.includes('<ul class="list-disc')) {
                     const match = text.match(/<li>(.*?)<\/li>/);
                     if (match) errorMsg = match[1];

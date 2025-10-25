@@ -249,29 +249,45 @@ class DocumentRequestController
         }
     }
 
-    public function markAsComplete($id)
+    public function markAsComplete(Request $request, $id)
     {
         try {
             $documentRequest = DocumentRequest::findOrFail($id);
             $user = $documentRequest->resident;
             if (!$user) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'This resident record no longer exists.'], 422);
+                }
                 notify()->error('This resident record no longer exists.');
                 return back();
             }
             if ($user->active === false) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'This user account is inactive and cannot make transactions.'], 422);
+                }
                 notify()->error('This user account is inactive and cannot make transactions.');
                 return back();
             }
             if ($documentRequest->status !== 'approved') {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Only approved requests can be marked as completed.'], 422);
+                }
                 notify()->error('Only approved requests can be marked as completed.');
                 return back();
             }
             $documentRequest->status = 'completed';
             $documentRequest->save();
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
             notify()->success('Document request marked as completed.');
             return back();
         } catch (\Exception $e) {
             Log::error('Error marking document request as completed: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to mark as completed: ' . $e->getMessage()], 500);
+            }
             notify()->error('Failed to mark as completed: ' . $e->getMessage());
             return back();
         }
@@ -483,5 +499,12 @@ class DocumentRequestController
         $name = strtolower(str_replace(' ', '_', $name));
         $date = date('Y-m-d');
         return "document_request_{$name}_{$date}.pdf";
+    }
+
+    public function checkActive($id)
+    {
+        $documentRequest = DocumentRequest::findOrFail($id);
+        $user = $documentRequest->resident;
+        return response()->json(['active' => $user && $user->active ? true : false]);
     }
 }

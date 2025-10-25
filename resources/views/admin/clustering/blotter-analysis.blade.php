@@ -119,12 +119,12 @@
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-trophy text-yellow-600 text-sm"></i>
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-orange-600 text-sm"></i>
                             </div>
                         </div>
                         <div class="ml-3">
-                            <p class="text-xs lg:text-sm font-medium text-gray-500">Most Active Purok</p>
+                            <p class="text-xs lg:text-sm font-medium text-gray-500">Highest Incident Purok</p>
                             <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $analysis['mostActivePurok'] ?? 'N/A' }}</p>
                         </div>
                     </div>
@@ -181,7 +181,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {{ $purok }}
                                                 @if($loop->index < 3)
-                                                    <i class="fas fa-trophy text-yellow-500 ml-1"></i>
+                                                    <i class="fas fa-exclamation-triangle text-orange-500 ml-1"></i>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $count }}</td>
@@ -200,8 +200,8 @@
                     <div class="bg-white rounded-xl shadow-lg border border-gray-100">
                         <div class="p-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                <i class="fas fa-trophy text-yellow-600 mr-2"></i>
-                                Top Performing Puroks
+                                <i class="fas fa-chart-line text-red-600 mr-2"></i>
+                                Highest Incident Puroks
                             </h3>
                             <div class="space-y-4">
                                 @foreach(array_slice($purokCounts, 0, 5) as $purok => $count)

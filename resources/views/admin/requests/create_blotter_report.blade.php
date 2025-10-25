@@ -24,36 +24,33 @@
 
     <!-- Success/Error Messages -->
     @if(session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-check-circle text-green-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-green-800">{{ session('success') }}</p>
-                </div>
-            </div>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof notify === 'function') {
+                    notify('success', '{{ session('success') }}');
+                } else if (window.toast && typeof window.toast.success === 'function') {
+                    window.toast.success('{{ session('success') }}');
+                } else {
+                    alert('{{ session('success') }}');
+                }
+            });
+        </script>
     @endif
 
     @if ($errors->any())
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                </div>
-                <div class="ml-3">
-                    <h3 class="text-sm font-medium text-red-800">There were some errors with your submission</h3>
-                    <div class="mt-2 text-sm text-red-700">
-                        <ul class="list-disc pl-5 space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                @foreach ($errors->all() as $error)
+                    if (typeof notify === 'function') {
+                        notify('error', '{{ $error }}');
+                    } else if (window.toast && typeof window.toast.error === 'function') {
+                        window.toast.error('{{ $error }}');
+                    } else {
+                        alert('{{ $error }}');
+                    }
+                @endforeach
+            });
+        </script>
     @endif
 
     <!-- Form Card -->
@@ -430,17 +427,32 @@
                     let errorMsg = 'Error creating blotter report.';
                     try {
                         const text = await response.text();
-                        if (text.includes('This user account is inactive')) {
+                        // Check for specific error messages in order of priority
+                        if (text.includes('Resident already has an ongoing blotter request')) {
+                            errorMsg = 'Resident already has an ongoing blotter request. Complete it before creating a new one.';
+                        } else if (text.includes('This user account is inactive and cannot make transactions')) {
                             errorMsg = 'This user account is inactive and cannot make transactions.';
                         } else if (text.includes('<ul class="list-disc')) {
                             const match = text.match(/<li>(.*?)<\/li>/);
                             if (match) errorMsg = match[1];
                         }
                     } catch (e) {}
-                    alert(errorMsg);
+                    if (typeof notify === 'function') {
+                        notify('error', errorMsg);
+                    } else if (window.toast && typeof window.toast.error === 'function') {
+                        window.toast.error(errorMsg);
+                    } else {
+                        alert(errorMsg);
+                    }
                 }
             } catch (err) {
-                alert('Error creating blotter report.');
+                if (typeof notify === 'function') {
+                    notify('error', 'Error creating blotter report.');
+                } else if (window.toast && typeof window.toast.error === 'function') {
+                    window.toast.error('Error creating blotter report.');
+                } else {
+                    alert('Error creating blotter report.');
+                }
                 console.error(err);
             }
         });

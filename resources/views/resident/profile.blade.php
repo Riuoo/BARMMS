@@ -104,6 +104,52 @@
                     <p class="mt-1 text-xs text-gray-500">Your registered address</p>
                 </div>
 
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-venus-mars mr-2 text-gray-400"></i>
+                            Gender
+                        </label>
+                        <input type="text" 
+                               value="{{ $resident->gender ?? 'Not provided' }}" 
+                               disabled
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-phone mr-2 text-gray-400"></i>
+                            Contact Number
+                        </label>
+                        <input type="text" 
+                               value="{{ $resident->contact_number ?? 'Not provided' }}" 
+                               disabled
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-birthday-cake mr-2 text-gray-400"></i>
+                            Birth Date
+                        </label>
+                        <input type="text" 
+                               value="{{ $resident->birth_date ? $resident->birth_date->format('M d, Y') : 'Not provided' }}" 
+                               disabled
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-calendar mr-2 text-gray-400"></i>
+                            Age
+                        </label>
+                        <input type="text" 
+                               value="{{ $resident->age ? $resident->age . ' years old' : 'Not provided' }}" 
+                               disabled
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-calendar mr-2 text-gray-400"></i>
@@ -193,6 +239,117 @@
         </div>
     </div>
 
+    <!-- Professional Information Card -->
+    <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center mb-2">
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-briefcase text-orange-600 text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <h2 class="text-xl font-semibold text-gray-900">Professional Information</h2>
+                <p class="text-sm text-gray-500">Your work and education details</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-briefcase mr-2 text-gray-400"></i>
+                        Occupation
+                    </label>
+                    <input type="text" 
+                           value="{{ $resident->occupation ?? 'Not provided' }}" 
+                           disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user-tie mr-2 text-gray-400"></i>
+                        Employment Status
+                    </label>
+                    <input type="text" 
+                           value="{{ $resident->employment_status ?? 'Not provided' }}" 
+                           disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-graduation-cap mr-2 text-gray-400"></i>
+                        Education Level
+                    </label>
+                    <input type="text" 
+                           value="{{ $resident->education_level ?? 'Not provided' }}" 
+                           disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-dollar-sign mr-2 text-gray-400"></i>
+                        Income Level
+                    </label>
+                    <input type="text" 
+                           value="{{ $resident->income_level ?? 'Not provided' }}" 
+                           disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Contact Card -->
+    <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center mb-2">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-phone-alt text-red-600 text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <h2 class="text-xl font-semibold text-gray-900">Emergency Contact</h2>
+                <p class="text-sm text-gray-500">Your emergency contact information</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user mr-2 text-gray-400"></i>
+                    Contact Name
+                </label>
+                <input type="text" 
+                       value="{{ $resident->emergency_contact_name ?? 'Not provided' }}" 
+                       disabled
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-phone mr-2 text-gray-400"></i>
+                    Contact Number
+                </label>
+                <input type="text" 
+                       value="{{ $resident->emergency_contact_number ?? 'Not provided' }}" 
+                       disabled
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-heart mr-2 text-gray-400"></i>
+                    Relationship
+                </label>
+                <input type="text" 
+                       value="{{ $resident->emergency_contact_relationship ?? 'Not provided' }}" 
+                       disabled
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
+            </div>
+        </div>
+    </div>
+
     <!-- Account Information Card -->
     <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div class="flex items-center mb-2">
@@ -209,37 +366,37 @@
             <div class="bg-gray-50 rounded-lg p-4">
                 <h3 class="text-sm font-medium text-gray-900 mb-2">Account Status</h3>
                 <div class="flex items-center">
-                    <div class="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
-                    <span class="text-sm text-gray-600">Active</span>
+                    <div class="w-3 h-3 {{ $resident->active ? 'bg-green-400' : 'bg-red-400' }} rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">{{ $resident->active ? 'Active' : 'Inactive' }}</span>
                 </div>
-                <p class="mt-1 text-xs text-gray-500">Your account is currently active and in good standing</p>
+                <p class="mt-1 text-xs text-gray-500">Your account status in the system</p>
             </div>
 
             <div class="bg-gray-50 rounded-lg p-4">
-                <h3 class="text-sm font-medium text-gray-900 mb-2">Last Login</h3>
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Email Verified</h3>
                 <div class="flex items-center">
-                    <i class="fas fa-clock text-gray-400 mr-2"></i>
-                    <span class="text-sm text-gray-600">{{ now()->format('M d, Y H:i') }}</span>
+                    <i class="fas {{ $resident->email_verified_at ? 'fa-check-circle text-green-400' : 'fa-times-circle text-red-400' }} mr-2"></i>
+                    <span class="text-sm text-gray-600">{{ $resident->email_verified_at ? 'Verified' : 'Not Verified' }}</span>
                 </div>
-                <p class="mt-1 text-xs text-gray-500">Your most recent login activity</p>
-            </div>
-
-            <div class="bg-gray-50 rounded-lg p-4">
-                <h3 class="text-sm font-medium text-gray-900 mb-2">Password Last Changed</h3>
-                <div class="flex items-center">
-                    <i class="fas fa-calendar text-gray-400 mr-2"></i>
-                    <span class="text-sm text-gray-600">Not available</span>
-                </div>
-                <p class="mt-1 text-xs text-gray-500">When you last updated your password</p>
+                <p class="mt-1 text-xs text-gray-500">{{ $resident->email_verified_at ? 'Email verified on ' . $resident->email_verified_at->format('M d, Y') : 'Please verify your email address' }}</p>
             </div>
 
             <div class="bg-gray-50 rounded-lg p-4">
                 <h3 class="text-sm font-medium text-gray-900 mb-2">Account Type</h3>
                 <div class="flex items-center">
                     <i class="fas fa-user-tag text-gray-400 mr-2"></i>
-                    <span class="text-sm text-gray-600">Resident</span>
+                    <span class="text-sm text-gray-600">{{ ucfirst($resident->role ?? 'Resident') }}</span>
                 </div>
                 <p class="mt-1 text-xs text-gray-500">Your role in the barangay system</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Family Size</h3>
+                <div class="flex items-center">
+                    <i class="fas fa-users text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-600">{{ $resident->family_size ?? 'Not specified' }}</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Number of family members</p>
             </div>
         </div>
     </div>

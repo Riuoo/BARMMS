@@ -7,20 +7,22 @@ use App\Models\BlotterRequest;
 class BlotterAnalysisService
 {
     /**
-     * Get blotter analysis by purok only
+     * Get blotter analysis by purok and respondent type
      */
     public function getAnalysis(): array
     {
         $blotters = BlotterRequest::with('resident')->get();
         
         $purokCounts = $this->countByPurok($blotters);
+        $respondentTypeCounts = $this->countByRespondentType($blotters);
         $totalReports = array_sum($purokCounts);
         
         return [
             'purokCounts' => $purokCounts,
+            'respondentTypeCounts' => $respondentTypeCounts,
             'totalReports' => $totalReports,
             'totalPuroks' => count($purokCounts),
-            'analysis' => $this->generateInsights($purokCounts, $totalReports)
+            'analysis' => $this->generateInsights($purokCounts, $totalReports, $respondentTypeCounts)
         ];
     }
 
@@ -31,10 +33,37 @@ class BlotterAnalysisService
     {
         $counts = [];
         foreach ($blotters as $blotter) {
-            $purok = $this->extractPurok(optional($blotter->resident)->address ?? '');
+            if ($blotter->resident_id) {
+                // Registered respondent - use their address
+                $purok = $this->extractPurok($blotter->resident->address ?? '');
+            } else {
+                // Unregistered respondent - categorize as "Unregistered"
+                $purok = 'Unregistered';
+            }
             $counts[$purok] = ($counts[$purok] ?? 0) + 1;
         }
         arsort($counts);
+        return $counts;
+    }
+
+    /**
+     * Count blotters by respondent type (registered vs unregistered)
+     */
+    private function countByRespondentType($blotters): array
+    {
+        $counts = [
+            'registered' => 0,
+            'unregistered' => 0
+        ];
+        
+        foreach ($blotters as $blotter) {
+            if ($blotter->resident_id) {
+                $counts['registered']++;
+            } else {
+                $counts['unregistered']++;
+            }
+        }
+        
         return $counts;
     }
 
@@ -52,7 +81,7 @@ class BlotterAnalysisService
     /**
      * Generate insights from purok data
      */
-    private function generateInsights($purokCounts, $totalReports): array
+    private function generateInsights($purokCounts, $totalReports, $respondentTypeCounts): array
     {
         $top3Puroks = array_slice($purokCounts, 0, 3, true);
         $top3Total = array_sum($top3Puroks);
@@ -61,12 +90,26 @@ class BlotterAnalysisService
         $averagePerPurok = count($purokCounts) > 0 ? round($totalReports / count($purokCounts), 1) : 0;
         $mostActivePurok = !empty($purokCounts) ? array_key_first($purokCounts) : 'N/A';
         
+        // Calculate respondent type percentages
+        $registeredPercentage = $totalReports > 0 ? round(($respondentTypeCounts['registered'] / $totalReports) * 100, 1) : 0;
+        $unregisteredPercentage = $totalReports > 0 ? round(($respondentTypeCounts['unregistered'] / $totalReports) * 100, 1) : 0;
+        
         return [
             'top3Puroks' => $top3Puroks,
             'top3Percentage' => $top3Percentage,
             'averagePerPurok' => $averagePerPurok,
             'mostActivePurok' => $mostActivePurok,
-            'distribution' => $this->calculateDistribution($purokCounts, $totalReports)
+            'distribution' => $this->calculateDistribution($purokCounts, $totalReports),
+            'respondentTypeAnalysis' => [
+                'registered' => [
+                    'count' => $respondentTypeCounts['registered'],
+                    'percentage' => $registeredPercentage
+                ],
+                'unregistered' => [
+                    'count' => $respondentTypeCounts['unregistered'],
+                    'percentage' => $unregisteredPercentage
+                ]
+            ]
         ];
     }
 
@@ -84,6 +127,29 @@ class BlotterAnalysisService
             ];
         }
         return $distribution;
+    }
+
+    /**
+     * Get unregistered respondent names for analysis
+     */
+    public function getUnregisteredRespondents(): array
+    {
+        $unregisteredBlotters = BlotterRequest::whereNull('resident_id')
+            ->select('recipient_name', 'type', 'description', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $respondentNames = [];
+        foreach ($unregisteredBlotters as $blotter) {
+            $respondentNames[] = [
+                'name' => $blotter->recipient_name,
+                'type' => $blotter->type,
+                'description' => $blotter->description,
+                'date' => $blotter->created_at->format('M d, Y')
+            ];
+        }
+
+        return $respondentNames;
     }
 }
 

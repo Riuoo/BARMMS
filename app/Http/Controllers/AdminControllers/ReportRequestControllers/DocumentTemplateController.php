@@ -78,6 +78,184 @@ class DocumentTemplateController
         exit;
     }
 
+    /**
+     * Download template as DOCX file for editing in Microsoft Word
+     */
+    public function downloadDocx($id)
+    {
+        $template = DocumentTemplate::findOrFail($id);
+        
+        try {
+            $phpWord = new \PhpOffice\PhpWord\PhpWord();
+            $section = $phpWord->addSection([
+                'marginTop' => 1134, // 0.8 inch
+                'marginRight' => 1134,
+                'marginBottom' => 1134,
+                'marginLeft' => 1134,
+            ]);
+            
+            // Add header content
+            if ($template->header_content) {
+                $this->addHtmlToSection($section, $template->header_content);
+            }
+            
+            // Add body content
+            if ($template->body_content) {
+                $this->addHtmlToSection($section, $template->body_content);
+            }
+            
+            // Add footer content
+            if ($template->footer_content) {
+                $this->addHtmlToSection($section, $template->footer_content);
+            }
+            
+            // Generate filename
+            $filename = str_replace(' ', '_', $template->document_type) . '_template.docx';
+            
+            // Create temporary file
+            $tempFile = tempnam(sys_get_temp_dir(), 'template_') . '.docx';
+            
+            // Save as DOCX
+            $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+            $writer->save($tempFile);
+            
+            // Return file download
+            return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+            
+        } catch (\Exception $e) {
+            Log::error('Error creating DOCX: ' . $e->getMessage());
+            notify()->error('Failed to create DOCX file: ' . $e->getMessage());
+            return back();
+        }
+    }
+
+    /**
+     * Helper method to add HTML content to a PhpWord section
+     */
+    private function addHtmlToSection($section, $htmlContent)
+    {
+        // Clean and parse HTML
+        $dom = new \DOMDocument();
+        @$dom->loadHTML('<div>' . $htmlContent . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        
+        $this->processDomNode($dom->documentElement, $section);
+    }
+
+    /**
+     * Recursively process DOM nodes and add them to PhpWord section
+     */
+    private function processDomNode($node, $section)
+    {
+        foreach ($node->childNodes as $child) {
+            if ($child->nodeType === XML_TEXT_NODE) {
+                $text = trim($child->textContent);
+                if (!empty($text)) {
+                    $section->addText($text);
+                }
+            } elseif ($child->nodeType === XML_ELEMENT_NODE) {
+                $tagName = strtolower($child->nodeName);
+                
+                switch ($tagName) {
+                    case 'p':
+                        $this->processDomNode($child, $section);
+                        $section->addTextBreak();
+                        break;
+                    case 'br':
+                        $section->addTextBreak();
+                        break;
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                    case 'h4':
+                    case 'h5':
+                    case 'h6':
+                        $text = trim($child->textContent);
+                        if (!empty($text)) {
+                            $section->addText($text, ['bold' => true, 'size' => 16]);
+                            $section->addTextBreak();
+                        }
+                        break;
+                    case 'b':
+                    case 'strong':
+                        $text = trim($child->textContent);
+                        if (!empty($text)) {
+                            $section->addText($text, ['bold' => true]);
+                        }
+                        break;
+                    case 'i':
+                    case 'em':
+                        $text = trim($child->textContent);
+                        if (!empty($text)) {
+                            $section->addText($text, ['italic' => true]);
+                        }
+                        break;
+                    case 'u':
+                        $text = trim($child->textContent);
+                        if (!empty($text)) {
+                            $section->addText($text, ['underline' => 'single']);
+                        }
+                        break;
+                    case 'ul':
+                    case 'ol':
+                        $this->processList($child, $section, $tagName === 'ol');
+                        break;
+                    case 'table':
+                        $this->processTable($child, $section);
+                        break;
+                    default:
+                        $this->processDomNode($child, $section);
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Process list elements
+     */
+    private function processList($listNode, $section, $isOrdered = false)
+    {
+        $listItems = $listNode->getElementsByTagName('li');
+        foreach ($listItems as $index => $item) {
+            $text = trim($item->textContent);
+            if (!empty($text)) {
+                $prefix = $isOrdered ? ($index + 1) . '. ' : '• ';
+                $section->addText($prefix . $text);
+                $section->addTextBreak();
+            }
+        }
+    }
+
+    /**
+     * Process table elements
+     */
+    private function processTable($tableNode, $section)
+    {
+        $table = $section->addTable(['borderSize' => 6, 'borderColor' => '000000']);
+        
+        $rows = $tableNode->getElementsByTagName('tr');
+        foreach ($rows as $row) {
+            $cells = $row->getElementsByTagName('td');
+            $headers = $row->getElementsByTagName('th');
+            
+            if ($cells->length > 0 || $headers->length > 0) {
+                $table->addRow();
+                
+                // Process td elements
+                foreach ($cells as $cell) {
+                    $text = trim($cell->textContent);
+                    $table->addCell()->addText($text);
+                }
+                
+                // Process th elements
+                foreach ($headers as $header) {
+                    $text = trim($header->textContent);
+                    $table->addCell()->addText($text, ['bold' => true]);
+                }
+            }
+        }
+    }
+
     public function uploadWord(Request $request, $id)
     {
         $template = DocumentTemplate::findOrFail($id);
@@ -173,13 +351,67 @@ class DocumentTemplateController
     }
 
     /**
+     * Upload DOCX file and update template
+     */
+    public function uploadDocx(Request $request, $id)
+    {
+        $template = DocumentTemplate::findOrFail($id);
+        
+        $request->validate([
+            'docx_file' => 'required|file|mimes:docx|max:10240' // 10MB max
+        ]);
+        
+        try {
+            $file = $request->file('docx_file');
+            
+            // Convert DOCX to HTML using PhpWord
+            $phpWord = \PhpOffice\PhpWord\IOFactory::load($file->getPathname());
+            $htmlWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
+            
+            ob_start();
+            $htmlWriter->save('php://output');
+            $rawHtml = ob_get_clean();
+            
+            // Clean the HTML
+            $content = $this->sanitizeWordHtml($rawHtml);
+            
+            // Extract placeholders from content
+            preg_match_all('/\[([^\]]+)\]/', $content, $matches);
+            $placeholders = array_values(array_unique($matches[1] ?? []));
+            
+            // Update template
+            $template->update([
+                'body_content' => $content,
+                'placeholders' => $placeholders
+            ]);
+            
+            notify()->success('DOCX file uploaded and template updated successfully.');
+            return redirect()->route('admin.templates.index');
+            
+        } catch (\Throwable $e) {
+            Log::error('Error uploading DOCX: ' . $e->getMessage());
+            notify()->error('Failed to upload DOCX file: ' . $e->getMessage());
+            return back()->withInput();
+        }
+    }
+
+    /**
      * Sanitize Microsoft Word HTML while preserving basic structure and placeholders.
      */
     private function sanitizeWordHtml(string $rawHtml): string
     {
         // Remove MSO conditional comments and Office-specific XML blocks fast
         $clean = preg_replace('/<!--\s*\[if.*?endif\]\s*-->/is', '', $rawHtml) ?? $rawHtml;
-        $clean = preg_replace('/<\/?(meta|link|script|style|xml)[^>]*>/is', '', $clean) ?? $clean;
+        
+        // Remove style blocks completely - they're causing the raw CSS to show in content
+        $clean = preg_replace('/<style[^>]*>.*?<\/style>/is', '', $clean) ?? $clean;
+        $clean = preg_replace('/<\/?(meta|link|script|xml)[^>]*>/is', '', $clean) ?? $clean;
+        
+        // Remove PHPWord watermark/label
+        $clean = preg_replace('/<!--\s*Generated by PHPWord\s*-->/i', '', $clean) ?? $clean;
+        $clean = preg_replace('/<span[^>]*>PHPWord<\/span>/i', '', $clean) ?? $clean;
+        $clean = preg_replace('/<div[^>]*>PHPWord<\/div>/i', '', $clean) ?? $clean;
+        $clean = preg_replace('/PHPWord/i', '', $clean) ?? $clean;
 
         $dom = new \DOMDocument();
         // Suppress warnings for malformed Word HTML
@@ -192,14 +424,14 @@ class DocumentTemplateController
             $node->parentNode->removeChild($node);
         }
 
-        // Keep inline styles; style blocks can remain minimal. Remove <script> for safety
+        // Remove any remaining script tags for safety
         foreach ($dom->getElementsByTagName('script') as $script) {
             $script->parentNode->removeChild($script);
         }
 
-        // Allowed tags and attributes
-        $allowedTags = ['h1','h2','h3','p','div','span','b','strong','i','em','u','br','hr','ul','ol','li','table','thead','tbody','tr','td','th'];
-        $allowedAttrs = ['style','class','align','valign','width','height','border','cellpadding','cellspacing','colspan','rowspan'];
+        // Allowed tags and attributes - expanded to preserve formatting
+        $allowedTags = ['h1','h2','h3','h4','h5','h6','p','div','span','b','strong','i','em','u','br','hr','ul','ol','li','table','thead','tbody','tr','td','th','center'];
+        $allowedAttrs = ['style','class','align','valign','width','height','border','cellpadding','cellspacing','colspan','rowspan','dir'];
 
         // Walk all elements
         $all = $dom->getElementsByTagName('*');
@@ -218,12 +450,23 @@ class DocumentTemplateController
                 continue;
             }
 
-            // Drop all attributes except allowed ones and keep placeholders intact
-            $attrs = [];
+            // Preserve important formatting attributes
             if ($el instanceof \DOMElement && $el->hasAttributes()) {
                 foreach (iterator_to_array($el->attributes) as $attr) {
-                    if (!in_array(strtolower($attr->name), $allowedAttrs, true)) {
+                    $attrName = strtolower($attr->name);
+                    if (!in_array($attrName, $allowedAttrs, true)) {
                         $el->removeAttribute($attr->name);
+                    }
+                }
+                
+                // Enhance alignment preservation
+                if ($el->hasAttribute('align')) {
+                    $align = $el->getAttribute('align');
+                    if (in_array($align, ['left', 'center', 'right', 'justify'])) {
+                        // Convert align attribute to inline style for better preservation
+                        $currentStyle = $el->getAttribute('style') ?: '';
+                        $currentStyle .= 'text-align: ' . $align . '; ';
+                        $el->setAttribute('style', $currentStyle);
                     }
                 }
             }
@@ -232,9 +475,16 @@ class DocumentTemplateController
         // Convert multiple empty paragraphs into single break
         $html = $dom->saveHTML();
         $html = preg_replace('/(\s*<p>\s*<\/p>\s*){2,}/i', '<br>', $html) ?? $html;
-        // Compress excessive whitespace and remove MSO inline artifacts
-        $html = preg_replace('/\s{2,}/', ' ', $html) ?? $html;
-        $html = str_replace(['&nbsp;'], ' ', $html);
+        
+        // Preserve important whitespace and formatting
+        $html = preg_replace('/\s{3,}/', '  ', $html) ?? $html; // Allow double spaces but not excessive
+        $html = str_replace(['&nbsp;&nbsp;&nbsp;&nbsp;'], '&nbsp;&nbsp;', $html); // Reduce excessive non-breaking spaces
+        
+        // Preserve paragraph spacing
+        $html = preg_replace('/<p([^>]*)>\s*<\/p>/i', '<br>', $html) ?? $html;
+        
+        // Ensure proper line breaks after headings
+        $html = preg_replace('/<\/h([1-6])>/i', '</h$1><br>', $html) ?? $html;
 
         return trim($html);
     }
@@ -336,6 +586,70 @@ class DocumentTemplateController
         } catch (\Throwable $e) {
             Log::error('Error creating template from file: ' . $e->getMessage());
             notify()->error('Failed to create template: ' . $e->getMessage());
+            return back()->withInput();
+        }
+    }
+
+    /**
+     * Create template from DOCX upload
+     */
+    public function storeFromDocx(Request $request)
+    {
+        $request->validate([
+            'document_type' => 'required|string',
+            'docx_file' => 'required|file|mimes:docx|max:10240'
+        ]);
+
+        try {
+            $docType = trim($request->input('document_type'));
+            $file = $request->file('docx_file');
+            
+            // Convert DOCX to HTML using PhpWord
+            $phpWord = \PhpOffice\PhpWord\IOFactory::load($file->getPathname());
+            $htmlWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
+            
+            ob_start();
+            $htmlWriter->save('php://output');
+            $rawHtml = ob_get_clean();
+            
+            // Clean the HTML
+            $content = $this->sanitizeWordHtml($rawHtml);
+            
+            // Extract placeholders from content
+            preg_match_all('/\[([^\]]+)\]/', $content, $matches);
+            $placeholders = array_values(array_unique($matches[1] ?? []));
+            
+            // Check if template already exists
+            $existingTemplate = DocumentTemplate::where('document_type', $docType)->first();
+            
+            if ($existingTemplate) {
+                // Update existing template - preserve header and footer, update body
+                $existingTemplate->update([
+                    'body_content' => $content,
+                    'placeholders' => $placeholders,
+                    'is_active' => true
+                ]);
+                
+                notify()->success('Template updated successfully from DOCX file.');
+            } else {
+                // Create new template
+                $template = DocumentTemplate::create([
+                    'document_type' => $docType,
+                    'header_content' => '',
+                    'body_content' => $content,
+                    'footer_content' => '',
+                    'placeholders' => $placeholders,
+                    'is_active' => true
+                ]);
+                
+                notify()->success('Template created successfully from DOCX file.');
+            }
+            
+            return redirect()->route('admin.templates.index');
+            
+        } catch (\Throwable $e) {
+            Log::error('Error creating template from DOCX: ' . $e->getMessage());
+            notify()->error('Failed to create template from DOCX: ' . $e->getMessage());
             return back()->withInput();
         }
     }

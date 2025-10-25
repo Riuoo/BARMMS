@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;
 
 use App\Http\Middleware\CheckAdminRole;
 use App\Http\Middleware\CheckResidentRole;
@@ -186,6 +187,12 @@ Route::prefix('admin')->group(function () {
         Route::get('/templates/{template}/download-word', [DocumentTemplateController::class, 'downloadWord'])->name('admin.templates.download-word');
         Route::post('/templates/{template}/upload-word', [DocumentTemplateController::class, 'uploadWord'])->name('admin.templates.upload-word');
         Route::post('/templates/upload-word', [DocumentTemplateController::class, 'storeFromWord'])->name('admin.templates.store-from-word');
+        
+        // New DOCX routes
+        Route::get('/templates/{template}/download-docx', [DocumentTemplateController::class, 'downloadDocx'])->name('admin.templates.download-docx');
+        Route::post('/templates/{template}/upload-docx', [DocumentTemplateController::class, 'uploadDocx'])->name('admin.templates.upload-docx');
+        Route::post('/templates/upload-docx', [DocumentTemplateController::class, 'storeFromDocx'])->name('admin.templates.store-from-docx');
+        
         Route::put('/templates/{template}', [DocumentTemplateController::class, 'update'])->name('admin.templates.update');
         Route::post('/templates/{template}/reset', [DocumentTemplateController::class, 'reset'])->name('admin.templates.reset');
         Route::post('/templates/{template}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
@@ -318,6 +325,9 @@ Route::middleware(['admin.role'])->prefix('admin/faqs')->name('admin.faqs.')->gr
     Route::patch('/{faq}/toggle', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'toggle'])->name('toggle');
 });
 
+Route::get('/admin/blotter-reports/{id}/check-active', [App\Http\Controllers\AdminControllers\ReportRequestControllers\BlotterReportController::class, 'checkActive'])->name('admin.blotter-reports.check-active');
+Route::get('/admin/document-requests/{id}/check-active', [App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentRequestController::class, 'checkActive'])->name('admin.document-requests.check-active');
+
 
 Route::middleware(['resident.role'])->prefix('resident')->group(function () {
     // Resident Dashboard
@@ -362,3 +372,30 @@ Route::post('/logout', function () {
     Session::flush();
     return redirect()->route('landing');
 })->name('logout');
+
+Route::match(['get', 'post'], '/test-docx-upload', function(Request $request) {
+    $output = '';
+    if ($request->isMethod('post')) {
+        if ($request->hasFile('test_docx')) {
+            $file = $request->file('test_docx');
+            $output .= '<p style="color:green;">File Uploaded! Name: '.$file->getClientOriginalName().' Size: '.$file->getSize().'</p>';
+            // Try to move to storage for confirmation
+            $saveDir = storage_path('app/test_uploads');
+            if (!file_exists($saveDir)) mkdir($saveDir, 0777, true);
+            $saved = $file->move($saveDir, $file->getClientOriginalName());
+            $output .= '<p>Saved to: '.$saved->getPathname().'</p>';
+        } else {
+            $output .= '<p style="color:red;">NO FILE RECEIVED</p>';
+        }
+    }
+    $csrf = $request->session()->token();
+    return <<<HTML
+    <h2 style="margin-top:40px;">Test DOCX Upload (Raw PHP/Laravel)</h2>
+    <form method="POST" enctype="multipart/form-data" style="margin-top:20px;">
+        <input type="hidden" name="_token" value="$csrf">
+        <label>Choose DOCX file: <input type="file" name="test_docx" /></label>
+        <button type="submit">Upload</button>
+    </form>
+    $output
+HTML;
+});

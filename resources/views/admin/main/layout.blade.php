@@ -175,11 +175,18 @@
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
                 
-                const colors = {
-                    success: 'bg-green-500 border-green-600',
-                    error: 'bg-red-500 border-red-600',
-                    warning: 'bg-yellow-500 border-yellow-600',
-                    info: 'bg-blue-500 border-blue-600'
+                const borderColors = {
+                    success: 'border-l-green-500',
+                    error: 'border-l-red-500',
+                    warning: 'border-l-yellow-500',
+                    info: 'border-l-blue-500'
+                };
+                
+                const iconColors = {
+                    success: 'text-green-500',
+                    error: 'text-red-500',
+                    warning: 'text-yellow-500',
+                    info: 'text-blue-500'
                 };
                 
                 const icons = {
@@ -189,13 +196,29 @@
                     info: 'fas fa-info-circle'
                 };
                 
-                toast.className = `flex items-center p-4 rounded-lg shadow-lg border-l-4 text-white transform translate-x-full transition-all duration-300 ${colors[type] || colors.info}`;
+                const titles = {
+                    success: 'Success',
+                    error: 'Error',
+                    warning: 'Warning',
+                    info: 'Info'
+                };
+                
+                toast.className = `bg-white border-l-4 ${borderColors[type] || borderColors.info} rounded-lg shadow-lg p-4 transform translate-x-full transition-all duration-300 mb-2`;
                 toast.innerHTML = `
-                    <i class="${icons[type] || icons.info} mr-3"></i>
-                    <span class="flex-1">${message}</span>
-                    <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="${icons[type] || icons.info} ${iconColors[type] || iconColors.info} text-lg"></i>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h3 class="text-sm font-medium text-gray-900">${titles[type] || titles.info}</h3>
+                            <p class="text-sm text-gray-600 mt-1">${message}</p>
+                        </div>
+                        <div class="ml-4 flex-shrink-0">
+                            <button onclick="this.closest('.bg-white').remove()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
                 `;
                 
                 container.appendChild(toast);

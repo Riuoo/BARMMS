@@ -111,10 +111,16 @@ class CommunityConcernController
             $complaint = CommunityConcern::findOrFail($id);
             $user = $complaint->resident;
             if (!$user) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'This resident record no longer exists.'], 422);
+                }
                 notify()->error('This resident record no longer exists.');
                 return redirect()->back();
             }
             if ($user->active === false) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'This user account is inactive and cannot make transactions.'], 422);
+                }
                 notify()->error('This user account is inactive and cannot make transactions.');
                 return redirect()->back();
             }
@@ -142,7 +148,7 @@ class CommunityConcernController
         } catch (\Exception $e) {
             Log::error("Error updating complaint status: " . $e->getMessage());
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Failed to update concern status'], 500);
+                return response()->json(['success' => false, 'message' => 'Failed to update concern status: ' . $e->getMessage()], 500);
             }
             notify()->error('Failed to update concern status: ' . $e->getMessage());
             return redirect()->back();

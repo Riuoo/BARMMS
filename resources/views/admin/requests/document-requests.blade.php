@@ -61,16 +61,17 @@
     @endif
 
     @if(session('error'))
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-800">{{ session('error') }}</p>
-                </div>
-            </div>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof notify === 'function') {
+                    notify('error', '{{ session('error') }}');
+                } else if (window.toast && typeof window.toast.error === 'function') {
+                    window.toast.error('{{ session('error') }}');
+                } else {
+                    alert('{{ session('error') }}');
+                }
+            });
+        </script>
     @endif
 
     <!-- Filters and Search -->
@@ -297,7 +298,7 @@
                                                     Generate PDF
                                                 </button>
                                             </form>
-                                            <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="w-full">
+                                            <form onsubmit="return completeDocumentRequest(event, '{{ $request->id }}')" class="w-full">
                                                 @csrf
                                                 <button type="submit" class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 transition duration-200 w-full">
                                                     <i class="fas fa-check-circle mr-1"></i>
@@ -400,7 +401,7 @@
                                 Generate PDF
                             </button>
                         </form>
-                        <form action="{{ route('admin.document-requests.complete', $request->id) }}" method="POST" class="inline">
+                        <form onsubmit="return completeDocumentRequest(event, '{{ $request->id }}')" class="inline">
                             @csrf
                             <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
                                 <i class="fas fa-check-circle mr-1"></i>
@@ -675,10 +676,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Document functions are defined in the partial file (admin.modals.document-modals)
 
-function generatePdfAndComplete(event, requestId) {
+async function generatePdfAndComplete(event, requestId) {
     event.preventDefault();
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
+    
+    // Check if resident is active first
+    try {
+        const res = await fetch(`/admin/document-requests/${requestId}/check-active`, { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.active === false) {
+                if (typeof notify === 'function') {
+                    notify('error', 'This user account is inactive and cannot make transactions.');
+                } else {
+                    alert('This user account is inactive and cannot make transactions.');
+                }
+                return false;
+            }
+        } else {
+            if (typeof notify === 'function') {
+                notify('error', 'Failed to check user status.');
+            } else {
+                alert('Failed to check user status.');
+            }
+            return false;
+        }
+    } catch (error) {
+        if (typeof notify === 'function') {
+            notify('error', 'Network error while verifying user status.');
+        } else {
+            alert('Network error while verifying user status.');
+        }
+        return false;
+    }
+    
     fetch(`/admin/document-requests/${requestId}/pdf`, {
         method: 'GET',
         headers: {
@@ -710,27 +742,153 @@ function generatePdfAndComplete(event, requestId) {
             let errorMsg = 'Error generating and downloading PDF.';
             try {
                 const text = await response.text();
-                if (text.includes('This user account is inactive')) {
+                // Check for specific error messages in order of priority
+                if (text.includes('This user account is inactive and cannot make transactions')) {
                     errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('Resident already has an ongoing document request')) {
+                    errorMsg = 'Resident already has an ongoing document request. Complete it before creating a new one.';
                 } else if (text.includes('<ul class="list-disc')) {
                     const match = text.match(/<li>(.*?)<\/li>/);
                     if (match) errorMsg = match[1];
                 }
             } catch (e) {}
-            alert(errorMsg);
+            if (typeof notify === 'function') {
+                notify('error', errorMsg);
+            } else {
+                alert(errorMsg);
+            }
         }
     })
     .catch(error => {
-        alert('Error generating and downloading PDF.');
+        if (typeof notify === 'function') {
+            notify('error', 'Error generating and downloading PDF.');
+        } else {
+            alert('Error generating and downloading PDF.');
+        }
         console.error(error);
     });
     return false;
 }
 
-function approveAndDownload(event, requestId) {
+async function completeDocumentRequest(event, requestId) {
     event.preventDefault();
     const form = event.target;
     const csrfToken = form.querySelector('input[name="_token"]').value;
+    
+    // Check if resident is active first
+    try {
+        const res = await fetch(`/admin/document-requests/${requestId}/check-active`, { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.active === false) {
+                if (typeof notify === 'function') {
+                    notify('error', 'This user account is inactive and cannot make transactions.');
+                } else {
+                    alert('This user account is inactive and cannot make transactions.');
+                }
+                return false;
+            }
+        } else {
+            if (typeof notify === 'function') {
+                notify('error', 'Failed to check user status.');
+            } else {
+                alert('Failed to check user status.');
+            }
+            return false;
+        }
+    } catch (error) {
+        if (typeof notify === 'function') {
+            notify('error', 'Network error while verifying user status.');
+        } else {
+            alert('Network error while verifying user status.');
+        }
+        return false;
+    }
+    
+    // If user is active, proceed with completion
+    try {
+        const response = await fetch(`/admin/document-requests/${requestId}/complete`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        if (response.ok) {
+            if (typeof notify === 'function') {
+                notify('success', 'Document request completed successfully.');
+            } else if (window.toast && typeof window.toast.success === 'function') {
+                window.toast.success('Document request completed successfully.');
+            } else {
+                alert('Document request completed successfully.');
+            }
+            
+            // Reload page to show updated status
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            const data = await response.json();
+            const errorMsg = data.message || 'Failed to complete document request.';
+            if (typeof notify === 'function') {
+                notify('error', errorMsg);
+            } else if (window.toast && typeof window.toast.error === 'function') {
+                window.toast.error(errorMsg);
+            } else {
+                alert(errorMsg);
+            }
+        }
+    } catch (error) {
+        console.error('Error completing document request:', error);
+        if (typeof notify === 'function') {
+            notify('error', 'Network error while completing document request.');
+        } else if (window.toast && typeof window.toast.error === 'function') {
+            window.toast.error('Network error while completing document request.');
+        } else {
+            alert('Network error while completing document request.');
+        }
+    }
+    
+    return false;
+}
+
+async function approveAndDownload(event, requestId) {
+    event.preventDefault();
+    const form = event.target;
+    const csrfToken = form.querySelector('input[name="_token"]').value;
+    
+    // Check if resident is active first
+    try {
+        const res = await fetch(`/admin/document-requests/${requestId}/check-active`, { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.active === false) {
+                if (typeof notify === 'function') {
+                    notify('error', 'This user account is inactive and cannot make transactions.');
+                } else {
+                    alert('This user account is inactive and cannot make transactions.');
+                }
+                return false;
+            }
+        } else {
+            if (typeof notify === 'function') {
+                notify('error', 'Failed to check user status.');
+            } else {
+                alert('Failed to check user status.');
+            }
+            return false;
+        }
+    } catch (error) {
+        if (typeof notify === 'function') {
+            notify('error', 'Network error while verifying user status.');
+        } else {
+            alert('Network error while verifying user status.');
+        }
+        return false;
+    }
+    
     fetch(`/admin/document-requests/${requestId}/approve`, {
         method: 'POST',
         headers: {
@@ -762,18 +920,29 @@ function approveAndDownload(event, requestId) {
             let errorMsg = 'Error approving and downloading PDF.';
             try {
                 const text = await response.text();
-                if (text.includes('This user account is inactive')) {
+                // Check for specific error messages in order of priority
+                if (text.includes('This user account is inactive and cannot make transactions')) {
                     errorMsg = 'This user account is inactive and cannot make transactions.';
+                } else if (text.includes('Resident already has an ongoing document request')) {
+                    errorMsg = 'Resident already has an ongoing document request. Complete it before creating a new one.';
                 } else if (text.includes('<ul class="list-disc')) {
                     const match = text.match(/<li>(.*?)<\/li>/);
                     if (match) errorMsg = match[1];
                 }
             } catch (e) {}
-            alert(errorMsg);
+            if (typeof notify === 'function') {
+                notify('error', errorMsg);
+            } else {
+                alert(errorMsg);
+            }
         }
     })
     .catch(error => {
-        alert('Error approving and downloading PDF.');
+        if (typeof notify === 'function') {
+            notify('error', 'Error approving and downloading PDF.');
+        } else {
+            alert('Error approving and downloading PDF.');
+        }
         console.error(error);
     });
     return false;

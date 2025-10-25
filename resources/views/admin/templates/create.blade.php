@@ -16,7 +16,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Template</h1>
-                    <p class="text-gray-600">Use the wizard to create a new document template</p>
+                    <p class="text-gray-600">Upload a Microsoft Word document to create your template</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
                     <a href="{{ route('admin.templates.index') }}" 
@@ -28,36 +28,28 @@
             </div>
         </div>
 
-    <!-- Template Creation Wizard -->
+    <!-- DOCX Upload Form -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <!-- Wizard Progress -->
-        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-medium" id="step1-indicator">1</div>
-                        <span class="ml-2 text-sm font-medium text-gray-900">Basic Info</span>
-                    </div>
-                    <div class="w-8 h-1 bg-gray-300"></div>
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium" id="step2-indicator">2</div>
-                        <span class="ml-2 text-sm font-medium text-gray-500">Template Content</span>
-                    </div>
-                    <div class="w-8 h-1 bg-gray-300"></div>
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium" id="step3-indicator">3</div>
-                        <span class="ml-2 text-sm font-medium text-gray-500">Review & Save</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <form action="{{ route('admin.templates.store') }}" method="POST" id="templateWizardForm">
-            @csrf
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Upload Document Template</h2>
             
-            <!-- Step 1: Basic Information -->
-            <div id="step1" class="p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Step 1: Basic Information</h2>
+            <!-- Validation/Error Feedback -->
+            @if(session('error') || (isset(
+                $errors) && $errors->any()))
+                <div class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">
+                    <ul class="list-disc pl-5 text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    @if(session('error'))
+                        <div>{{ session('error') }}</div>
+                    @endif
+                </div>
+            @endif
+
+            <form action="{{ route('admin.templates.store-from-docx') }}" method="POST" enctype="multipart/form-data" id="docxUploadForm">
+            @csrf
                 
                 <div class="space-y-6">
                     <!-- Document Type -->
@@ -103,464 +95,40 @@
                         <p class="mt-1 text-sm text-gray-500">Enter the name of your custom document type</p>
             </div>
 
-                    <!-- Description -->
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                    Description
-                </label>
-                        <textarea id="description" name="description" rows="3"
-                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                                  placeholder="Brief description of what this document is used for"></textarea>
-                        <p class="mt-1 text-sm text-gray-500">Optional: Describe the purpose and use of this document</p>
+                    <!-- DOCX File Upload -->
+                    <div>
+                        <label for="docx_file" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-file-word mr-2"></i>Upload DOCX File *
+                        </label>
+                        <input id="docx_file" name="docx_file" type="file" accept=".docx" required>
+                        <p class="mt-1 text-sm text-gray-500">Upload your Microsoft Word document (.docx) to create the template</p>
+                        <p class="text-xs text-gray-500">DOCX files only, up to 10MB</p>
                     </div>
 
-                    <!-- Template Category -->
-                    <div>
-                        <label for="template_category" class="block text-sm font-medium text-gray-700 mb-2">
-                            Category
-                        </label>
-                        <select id="template_category" name="template_category" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            <option value="certificates">Certificates</option>
-                            <option value="clearances">Clearances</option>
-                            <option value="permits">Permits</option>
-                            <option value="identifications">Identifications</option>
-                            <option value="reports">Reports</option>
-                            <option value="other">Other</option>
-                        </select>
-                        <p class="mt-1 text-sm text-gray-500">Categorize your template for better organization</p>
+                    <!-- Instructions -->
+                        <div class="bg-blue-50 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-blue-900 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>Instructions
+                            </h3>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li>• Create your document in Microsoft Word</li>
+                            <li>• Use placeholders like <code class="bg-blue-100 px-1 rounded">[resident_name]</code> for dynamic content</li>
+                            <li>• Save as .docx format (not .doc)</li>
+                            <li>• The system will convert it to HTML for web display</li>
+                        </ul>
                     </div>
                 </div>
 
                 <div class="mt-8 flex justify-end">
-                    <button type="button" id="nextStep1" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        Next Step
-                        <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 2: Template Content -->
-            <div id="step2" class="p-6 hidden">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Step 2: Template Content</h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Left Panel: Content Editor -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <!-- Template Preset -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Quick Start Template
-                            </label>
-                            <select id="template_preset" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                                <option value="">Choose a template preset...</option>
-                                <option value="official_letter">Official Letter Format</option>
-                                <option value="certificate">Certificate Format</option>
-                                <option value="clearance">Clearance Format</option>
-                                <option value="permit">Permit Format</option>
-                                <option value="blank">Start from scratch</option>
-                            </select>
-                            <p class="mt-1 text-sm text-gray-500">Select a preset to get started quickly</p>
-                        </div>
-
-                        <!-- Header Content -->
-                        <div>
-                            <label for="header_content" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-heading mr-2"></i>Header Content
-                            </label>
-                            <textarea id="header_content" name="header_content" class="tinymce-basic"></textarea>
-                            <p class="mt-1 text-sm text-gray-500">This appears at the top of the document (e.g., official letterhead, title)</p>
-                        </div>
-
-                        <!-- Body Content -->
-                        <div>
-                            <label for="body_content" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-align-left mr-2"></i>Body Content
-                            </label>
-                            <textarea id="body_content" name="body_content" class="tinymce-basic"></textarea>
-                            <p class="mt-1 text-sm text-gray-500">This is the main content of the document</p>
-                        </div>
-
-                        <!-- Footer Content -->
-                        <div>
-                            <label for="footer_content" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-signature mr-2"></i>Footer Content
-                            </label>
-                            <textarea id="footer_content" name="footer_content" class="tinymce-basic"></textarea>
-                            <p class="mt-1 text-sm text-gray-500">This appears at the bottom (e.g., signature line, official details)</p>
-                        </div>
-                    </div>
-
-                    <!-- Right Panel: Tools -->
-                    <div class="space-y-6">
-                        <!-- Placeholder Toolbox -->
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h3 class="text-sm font-medium text-gray-900 mb-3">
-                                <i class="fas fa-tags mr-2"></i>Insert Placeholders
-                            </h3>
-                            <div class="space-y-2">
-                                <button type="button" class="placeholder-btn w-full text-left p-2 rounded border border-gray-200 hover:bg-white transition-colors" data-placeholder="resident_name">
-                                    <code class="text-sm font-mono text-green-600">[resident_name]</code>
-                                    <p class="text-xs text-gray-600">Resident's full name</p>
-                                </button>
-                                <button type="button" class="placeholder-btn w-full text-left p-2 rounded border border-gray-200 hover:bg-white transition-colors" data-placeholder="resident_address">
-                                    <code class="text-sm font-mono text-green-600">[resident_address]</code>
-                                    <p class="text-xs text-gray-600">Resident's address</p>
-                                </button>
-                                <button type="button" class="placeholder-btn w-full text-left p-2 rounded border border-gray-200 hover:bg-white transition-colors" data-placeholder="current_date">
-                                    <code class="text-sm font-mono text-green-600">[current_date]</code>
-                                    <p class="text-xs text-gray-600">Current date</p>
-                                </button>
-                                <button type="button" class="placeholder-btn w-full text-left p-2 rounded border border-gray-200 hover:bg-white transition-colors" data-placeholder="barangay_name">
-                                    <code class="text-sm font-mono text-green-600">[barangay_name]</code>
-                                    <p class="text-xs text-gray-600">Barangay name</p>
-                                </button>
-                                <button type="button" class="placeholder-btn w-full text-left p-2 rounded border border-gray-200 hover:bg-white transition-colors" data-placeholder="official_name">
-                                    <code class="text-sm font-mono text-green-600">[official_name]</code>
-                                    <p class="text-xs text-gray-600">Official's name</p>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Quick Actions -->
-                        <div class="bg-blue-50 rounded-lg p-4">
-                            <h3 class="text-sm font-medium text-blue-900 mb-3">
-                                <i class="fas fa-magic mr-2"></i>Quick Actions
-                            </h3>
-                            <div class="space-y-2">
-                                <button type="button" id="insertHeaderBtn" class="w-full text-left p-2 rounded border border-blue-200 hover:bg-blue-100 transition-colors">
-                                    <i class="fas fa-heading mr-2 text-blue-600"></i>
-                                    <span class="text-sm font-medium">Insert Header</span>
-                                </button>
-                                <button type="button" id="insertSignatureBtn" class="w-full text-left p-2 rounded border border-blue-200 hover:bg-blue-100 transition-colors">
-                                    <i class="fas fa-signature mr-2 text-blue-600"></i>
-                                    <span class="text-sm font-medium">Insert Signature</span>
-                                </button>
-                                <button type="button" id="insertDateBtn" class="w-full text-left p-2 rounded border border-blue-200 hover:bg-blue-100 transition-colors">
-                                    <i class="fas fa-calendar mr-2 text-blue-600"></i>
-                                    <span class="text-sm font-medium">Insert Date</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-8 flex justify-between">
-                    <button type="button" id="prevStep2" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Previous Step
-                    </button>
-                    <button type="button" id="nextStep2" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        Next Step
-                        <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 3: Review & Save -->
-            <div id="step3" class="p-6 hidden">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Step 3: Review & Save</h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Template Summary -->
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Template Summary</h3>
-                        <div class="space-y-3">
-                            <div>
-                                <span class="text-sm font-medium text-gray-700">Document Type:</span>
-                                <p id="summary_document_type" class="text-sm text-gray-900"></p>
-                            </div>
-                            <div>
-                                <span class="text-sm font-medium text-gray-700">Category:</span>
-                                <p id="summary_category" class="text-sm text-gray-900"></p>
-                            </div>
-                            <div>
-                                <span class="text-sm font-medium text-gray-700">Description:</span>
-                                <p id="summary_description" class="text-sm text-gray-900"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Preview -->
-                    <div class="bg-white border border-gray-200 rounded-lg p-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Document Preview</h3>
-                        <div id="finalPreview" class="border border-gray-200 rounded p-4 bg-white" style="min-height: 300px; font-family: 'Times New Roman', serif;">
-                            <!-- Preview content will be loaded here -->
-                        </div>
-                    </div>
-            </div>
-
-                <div class="mt-8 flex justify-between">
-                    <button type="button" id="prevStep3" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Previous Step
-                    </button>
                     <button type="submit" class="inline-flex items-center px-6 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                    <i class="fas fa-save mr-2"></i>
+                        <i class="fas fa-upload mr-2"></i>
                     Create Template
                 </button>
                 </div>
+            </form>
             </div>
-        </form>
     </div>
     </div>
 </div>
 
 @endsection 
-
-@push('scripts')
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-<script>
-// Skeleton loading control
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        const pageSkeleton = document.getElementById('createTemplateSkeleton');
-        const content = document.getElementById('createTemplateContent');
-        
-        if (pageSkeleton) pageSkeleton.style.display = 'none';
-        if (content) content.style.display = 'block';
-    }, 1000);
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    let currentStep = 1;
-    const totalSteps = 3;
-
-    // Initialize TinyMCE for basic editing
-    tinymce.init({
-        selector: '.tinymce-basic',
-        height: 200,
-        plugins: ['advlist', 'autolink', 'lists', 'link', 'charmap', 'preview', 'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen', 'insertdatetime', 'media', 'table', 'help', 'wordcount'],
-        toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table | help',
-        menubar: 'file edit view insert format tools table help',
-        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }',
-        branding: false,
-        promotion: false
-    });
-
-    // Step navigation
-    function showStep(step) {
-        // Hide all steps
-        for (let i = 1; i <= totalSteps; i++) {
-            document.getElementById(`step${i}`).classList.add('hidden');
-            document.getElementById(`step${i}-indicator`).classList.remove('bg-green-600', 'text-white');
-            document.getElementById(`step${i}-indicator`).classList.add('bg-gray-300', 'text-gray-600');
-        }
-
-        // Show current step
-        document.getElementById(`step${step}`).classList.remove('hidden');
-        document.getElementById(`step${step}-indicator`).classList.remove('bg-gray-300', 'text-gray-600');
-        document.getElementById(`step${step}-indicator`).classList.add('bg-green-600', 'text-white');
-
-        currentStep = step;
-    }
-
-    // Next step buttons
-    document.getElementById('nextStep1').addEventListener('click', function() {
-        if (validateStep1()) {
-            showStep(2);
-        }
-    });
-
-    document.getElementById('nextStep2').addEventListener('click', function() {
-        if (validateStep2()) {
-            updateSummary();
-            updatePreview();
-            showStep(3);
-        }
-    });
-
-    // Previous step buttons
-    document.getElementById('prevStep2').addEventListener('click', function() {
-        showStep(1);
-    });
-
-    document.getElementById('prevStep3').addEventListener('click', function() {
-        showStep(2);
-    });
-
-    // Validation functions
-    function validateStep1() {
-        const documentType = document.getElementById('document_type').value;
-        if (!documentType) {
-            alert('Please select a document type');
-            return false;
-        }
-        if (documentType === 'Other') {
-            const customType = document.getElementById('custom_document_type').value;
-            if (!customType) {
-                alert('Please enter a custom document type');
-                return false;
-            }
-        }
-        return true;
-    }
-
-    function validateStep2() {
-        const bodyContent = tinymce.get('body_content').getContent();
-        if (!bodyContent || bodyContent.trim() === '') {
-            alert('Please add some content to the document body');
-            return false;
-        }
-        return true;
-    }
-
-    // Custom document type handling
-    document.getElementById('document_type').addEventListener('change', function() {
-        const customDiv = document.getElementById('custom_document_type_div');
-        if (this.value === 'Other') {
-            customDiv.classList.remove('hidden');
-        } else {
-            customDiv.classList.add('hidden');
-        }
-    });
-
-    // Template preset handling
-    document.getElementById('template_preset').addEventListener('change', function() {
-        const preset = this.value;
-        if (preset === 'official_letter') {
-            tinymce.get('header_content').setContent(`
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">REPUBLIC OF THE PHILIPPINES</h1>
-                    <h2 style="font-size: 16px; margin-bottom: 5px;">Province of [province_name]</h2>
-                    <h2 style="font-size: 16px; margin-bottom: 5px;">Municipality of [municipality_name]</h2>
-                    <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">BARANGAY [barangay_name]</h1>
-                </div>
-            `);
-            tinymce.get('body_content').setContent(`
-                <p>TO WHOM IT MAY CONCERN:</p>
-                <p>This is to certify that [resident_name], of legal age, Filipino, and a resident of [resident_address], Barangay [barangay_name], [municipality_name], [province_name], is known to me as a person of good moral character and law-abiding citizen of this Barangay.</p>
-                <p>This certification is being issued upon the request of the above-named person for [document_purpose].</p>
-            `);
-            tinymce.get('footer_content').setContent(`
-                <p>Issued this [current_date] at the Office of the Barangay Chairman, Barangay [barangay_name], [municipality_name], [province_name].</p>
-                <div style="margin-top: 50px; text-align: right;">
-                    <div style="border-top: 1px solid #000; width: 200px; margin-left: auto; margin-bottom: 10px;"></div>
-                    <p style="font-weight: bold; margin-bottom: 5px;">[official_name]</p>
-                    <p style="font-size: 14px; color: #666;">[official_position]</p>
-                </div>
-            `);
-        } else if (preset === 'certificate') {
-            tinymce.get('header_content').setContent(`
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">CERTIFICATE</h1>
-                    <h2 style="font-size: 16px; margin-bottom: 5px;">Barangay [barangay_name]</h2>
-                    <h2 style="font-size: 16px; margin-bottom: 5px;">[municipality_name], [province_name]</h2>
-                </div>
-            `);
-            tinymce.get('body_content').setContent(`
-                <p>This is to certify that [resident_name], of legal age, [civil_status], Filipino, and a resident of [resident_address], has no pending case/s or record on file at the Office of the Barangay.</p>
-                <p>This certification is being issued upon the request of the above-named person for [purpose].</p>
-            `);
-            tinymce.get('footer_content').setContent(`
-                <p>Issued this [current_date] at Barangay [barangay_name], [municipality_name], [province_name], Philippines.</p>
-                <div style="margin-top: 50px; text-align: right;">
-                    <div style="border-top: 1px solid #000; width: 200px; margin-left: auto; margin-bottom: 10px;"></div>
-                    <p style="font-weight: bold; margin-bottom: 5px;">[official_name]</p>
-                    <p style="font-size: 14px; color: #666;">[official_position]</p>
-                </div>
-            `);
-        }
-    });
-
-    // Placeholder insertion
-    document.querySelectorAll('.placeholder-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const placeholder = this.dataset.placeholder;
-            const activeEditor = tinymce.activeEditor;
-            if (activeEditor) {
-                activeEditor.insertContent(`[${placeholder}]`);
-            }
-        });
-    });
-
-    // Quick action buttons
-    document.getElementById('insertHeaderBtn').addEventListener('click', function() {
-        const headerContent = `
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">REPUBLIC OF THE PHILIPPINES</h1>
-                <h2 style="font-size: 16px; margin-bottom: 5px;">Province of [province_name]</h2>
-                <h2 style="font-size: 16px; margin-bottom: 5px;">Municipality of [municipality_name]</h2>
-                <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">BARANGAY [barangay_name]</h1>
-            </div>
-        `;
-        tinymce.get('header_content').setContent(headerContent);
-    });
-
-    document.getElementById('insertSignatureBtn').addEventListener('click', function() {
-        const signatureContent = `
-            <div style="margin-top: 50px; text-align: right;">
-                <div style="border-top: 1px solid #000; width: 200px; margin-left: auto; margin-bottom: 10px;"></div>
-                <p style="font-weight: bold; margin-bottom: 5px;">[official_name]</p>
-                <p style="font-size: 14px; color: #666;">[official_position]</p>
-            </div>
-        `;
-        tinymce.get('footer_content').setContent(signatureContent);
-    });
-
-    document.getElementById('insertDateBtn').addEventListener('click', function() {
-        const dateContent = `
-            <p>Issued this [current_date] at Barangay [barangay_name], [municipality_name], [province_name], Philippines.</p>
-        `;
-        const activeEditor = tinymce.activeEditor;
-        if (activeEditor) {
-            activeEditor.insertContent(dateContent);
-        }
-    });
-
-    // Update summary and preview
-    function updateSummary() {
-        const documentType = document.getElementById('document_type').value;
-        const customType = document.getElementById('custom_document_type').value;
-        const category = document.getElementById('template_category').value;
-        const description = document.getElementById('description').value;
-
-        document.getElementById('summary_document_type').textContent = documentType === 'Other' ? customType : documentType;
-        document.getElementById('summary_category').textContent = category.charAt(0).toUpperCase() + category.slice(1);
-        document.getElementById('summary_description').textContent = description || 'No description provided';
-    }
-
-    function updatePreview() {
-        const headerContent = tinymce.get('header_content').getContent();
-        const bodyContent = tinymce.get('body_content').getContent();
-        const footerContent = tinymce.get('footer_content').getContent();
-
-        // Sample data for preview
-        const sampleData = {
-            'resident_name': 'Juan Dela Cruz',
-            'resident_address': '123 Sample Street, Barangay Sample',
-            'civil_status': 'Married',
-            'purpose': 'employment purposes',
-            'document_purpose': 'employment purposes',
-            'barangay_name': 'Sample Barangay',
-            'municipality_name': 'Sample Municipality',
-            'province_name': 'Sample Province',
-            'official_name': 'Hon. Sample Official',
-            'official_position': 'Barangay Captain',
-            'current_date': 'January 15, 2024'
-        };
-
-        // Replace placeholders with sample data
-        let previewContent = headerContent + bodyContent + footerContent;
-        Object.entries(sampleData).forEach(([key, value]) => {
-            previewContent = previewContent.replace(new RegExp(`\\[${key}\\]`, 'g'), value);
-        });
-
-        document.getElementById('finalPreview').innerHTML = previewContent;
-    }
-
-    // Form submission handling
-    document.getElementById('templateWizardForm').addEventListener('submit', function(e) {
-        // Set the final document type value
-        const documentType = document.getElementById('document_type').value;
-        if (documentType === 'Other') {
-            const customType = document.getElementById('custom_document_type').value;
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'document_type';
-            hiddenInput.value = customType;
-            this.appendChild(hiddenInput);
-        }
-    });
-});
-</script>
-@endpush 

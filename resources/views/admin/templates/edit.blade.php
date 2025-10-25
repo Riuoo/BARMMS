@@ -1,785 +1,166 @@
 @extends('admin.main.layout')
 
-@section('title', 'Word-Style Template Editor - ' . $template->document_type)
+@section('title', 'Edit Template - ' . $template->document_type)
 
 @section('content')
-<div class="h-screen flex flex-col bg-gray-100">
-    <!-- Word-Style Header Skeleton -->
-    <div id="editTemplateHeaderSkeleton" class="bg-white border-b border-gray-200 shadow-sm animate-pulse">
-        <!-- Title Bar Skeleton -->
-        <div class="flex items-center justify-between px-4 py-2 bg-blue-600 text-white">
-            <div class="flex items-center space-x-3">
-                <div class="w-6 h-6 bg-gray-200 rounded"></div>
-                <div class="h-5 w-64 bg-gray-200 rounded"></div>
+<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit Template</h1>
+                <p class="text-gray-600">{{ $template->document_type }} - Download, edit, and re-upload</p>
             </div>
-            <div class="flex items-center space-x-2">
-                <div class="h-8 w-24 bg-gray-200 rounded"></div>
-                <div class="h-8 w-20 bg-gray-200 rounded"></div>
-                <div class="h-8 w-16 bg-gray-200 rounded"></div>
-            </div>
-        </div>
-
-        <!-- Ribbon Toolbar Skeleton -->
-        <div class="bg-white border-b border-gray-200">
-            <!-- Ribbon Tabs Skeleton -->
-            <div class="flex border-b border-gray-200">
-                <div class="px-4 py-2">
-                    <div class="h-4 w-16 bg-gray-200 rounded"></div>
-                </div>
-                <div class="px-4 py-2">
-                    <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                </div>
-                <div class="px-4 py-2">
-                    <div class="h-4 w-16 bg-gray-200 rounded"></div>
-                </div>
-                <div class="px-4 py-2">
-                    <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-
-            <!-- Ribbon Content Skeleton -->
-            <div class="p-4">
-                <div class="grid grid-cols-4 gap-6">
-                    <div class="space-y-2">
-                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                        <div class="flex space-x-1">
-                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
-                        <div class="grid grid-cols-2 gap-1">
-                            <div class="h-6 w-20 bg-gray-200 rounded"></div>
-                            <div class="h-6 w-12 bg-gray-200 rounded"></div>
-                        </div>
-                        <div class="flex space-x-1">
-                            <div class="h-8 w-8 bg-gray-200 rounded"></div>
-                            <div class="h-8 w-8 bg-gray-200 rounded"></div>
-                            <div class="h-8 w-8 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                        <div class="flex space-x-1">
-                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="h-4 w-16 bg-gray-200 rounded"></div>
-                        <div class="flex space-x-1">
-                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                            <div class="h-8 w-16 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Editor Skeleton -->
-    <div id="editTemplateEditorSkeleton" class="flex-1 flex animate-pulse">
-        <!-- Sidebar Skeleton -->
-        <div class="w-64 bg-white border-r border-gray-200 p-4">
-            <div class="space-y-4">
-                <div class="h-6 w-32 bg-gray-200 rounded"></div>
-                <div class="space-y-2">
-                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-28 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-20 bg-gray-200 rounded"></div>
-                </div>
-                <div class="h-6 w-28 bg-gray-200 rounded"></div>
-                <div class="space-y-2">
-                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-36 bg-gray-200 rounded"></div>
-                    <div class="h-4 w-24 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Editor Skeleton -->
-        <div class="flex-1 bg-white">
-            <div class="h-full p-6">
-                <div class="h-full w-full bg-gray-200 rounded"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Real Content (hidden initially) -->
-    <div id="editTemplateContent" style="display: none;">
-        <!-- Word-Style Header -->
-        <div class="bg-white border-b border-gray-200 shadow-sm">
-        <!-- Title Bar -->
-        <div class="flex items-center justify-between px-4 py-2 bg-blue-600 text-white">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-file-word text-xl"></i>
-                <span class="font-medium">{{ $template->document_type }} - Template Editor</span>
-            </div>
-            <div class="flex items-center space-x-2">
-                <form id="docxUploadForm" action="{{ route('admin.templates.upload-word', $template) }}" method="POST" enctype="multipart/form-data" class="inline-flex items-center gap-2">
-                    @csrf
-                    <label class="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm cursor-pointer text-white">
-                        <i class="fas fa-file-word mr-1"></i>Upload DOCX
-                        <input type="file" name="word_file" accept=".docx,.html,.htm,.txt" class="hidden" onchange="this.form.submit()">
-                    </label>
-                </form>
-                <button id="previewBtn" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded text-sm">
-                    <i class="fas fa-eye mr-1"></i>Preview
-                </button>
-                <a href="{{ route('admin.templates.index') }}" class="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded text-sm">
-                    <i class="fas fa-times mr-1"></i>Close
+            <div class="mt-4 sm:mt-0">
+                <a href="{{ route('admin.templates.index') }}" 
+                   class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Templates
                 </a>
             </div>
         </div>
+    </div>
 
-        <!-- Ribbon Toolbar -->
-        <div class="bg-white border-b border-gray-200">
-            <!-- Ribbon Tabs -->
-            <div class="flex border-b border-gray-200">
-                <button class="ribbon-tab active px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600" data-tab="home">
-                    <i class="fas fa-home mr-1"></i>Home
-                </button>
-                <button class="ribbon-tab px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600" data-tab="insert">
-                    <i class="fas fa-plus mr-1"></i>Insert
-                </button>
-                <button class="ribbon-tab px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600" data-tab="layout">
-                    <i class="fas fa-columns mr-1"></i>Layout
-                </button>
-                <button class="ribbon-tab px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600" data-tab="review">
-                    <i class="fas fa-eye mr-1"></i>Review
-                </button>
-            </div>
-
-            <!-- Ribbon Content -->
-            <div class="p-4">
-                <!-- Home Tab -->
-                <div id="home-tab" class="ribbon-content active">
-                    <div class="grid grid-cols-4 gap-6">
-                        <!-- Clipboard Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Clipboard</h4>
-                            <div class="flex space-x-1">
-                                <button class="ribbon-btn" onclick="document.execCommand('paste')">
-                                    <i class="fas fa-paste"></i>
-                                    <span class="text-xs">Paste</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('cut')">
-                                    <i class="fas fa-cut"></i>
-                                    <span class="text-xs">Cut</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('copy')">
-                                    <i class="fas fa-copy"></i>
-                                    <span class="text-xs">Copy</span>
-                                </button>
-                            </div>
+    <!-- DOCX Workflow -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Edit with Microsoft Word</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Download Section -->
+                <div class="bg-blue-50 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-download text-blue-600 text-xl"></i>
                         </div>
-
-                        <!-- Font Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Font</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                <select id="fontFamily" class="ribbon-select text-xs">
-                                    <option value="Times New Roman">Times New Roman</option>
-                                    <option value="Arial">Arial</option>
-                                    <option value="Calibri">Calibri</option>
-                                    <option value="Georgia">Georgia</option>
-                                </select>
-                                <select id="fontSize" class="ribbon-select text-xs">
-                                    <option value="8">8</option>
-                                    <option value="10">10</option>
-                                    <option value="12" selected>12</option>
-                                    <option value="14">14</option>
-                                    <option value="16">16</option>
-                                    <option value="18">18</option>
-                                    <option value="20">20</option>
-                                    <option value="24">24</option>
-                                </select>
-                            </div>
-                            <div class="flex space-x-1">
-                                <button class="ribbon-btn" onclick="document.execCommand('bold')">
-                                    <i class="fas fa-bold"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('italic')">
-                                    <i class="fas fa-italic"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('underline')">
-                                    <i class="fas fa-underline"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('strikeThrough')">
-                                    <i class="fas fa-strikethrough"></i>
-                                </button>
-                            </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-blue-900">Step 1: Download</h3>
+                            <p class="text-sm text-blue-700">Get the current template as a Word document</p>
                         </div>
-
-                        <!-- Paragraph Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Paragraph</h4>
-                            <div class="flex space-x-1">
-                                <button class="ribbon-btn" onclick="document.execCommand('justifyLeft')">
-                                    <i class="fas fa-align-left"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('justifyCenter')">
-                                    <i class="fas fa-align-center"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('justifyRight')">
-                                    <i class="fas fa-align-right"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('justifyFull')">
-                                    <i class="fas fa-align-justify"></i>
-                                </button>
-                            </div>
-                            <div class="flex space-x-1">
-                                <button class="ribbon-btn" onclick="document.execCommand('insertUnorderedList')">
-                                    <i class="fas fa-list-ul"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('insertOrderedList')">
-                                    <i class="fas fa-list-ol"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('outdent')">
-                                    <i class="fas fa-outdent"></i>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('indent')">
-                                    <i class="fas fa-indent"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Styles Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Styles</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                <button class="ribbon-btn" onclick="document.execCommand('formatBlock', false, 'h1')">
-                                    <span class="text-xs font-bold">H1</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('formatBlock', false, 'h2')">
-                                    <span class="text-xs font-bold">H2</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('formatBlock', false, 'h3')">
-                                    <span class="text-xs font-bold">H3</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="document.execCommand('formatBlock', false, 'p')">
-                                    <span class="text-xs">Normal</span>
-                                </button>
-                            </div>
-                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <p class="text-sm text-blue-800">
+                            Download the template as a Microsoft Word document (.docx) to edit it with all the formatting and features you need.
+                        </p>
+                        
+                        <a href="{{ route('admin.templates.download-docx', $template) }}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                            <i class="fas fa-download mr-2"></i>
+                            Download as DOCX
+                        </a>
                     </div>
                 </div>
 
-                <!-- Insert Tab -->
-                <div id="insert-tab" class="ribbon-content hidden">
-                    <div class="grid grid-cols-3 gap-6">
-                        <!-- Placeholders Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Placeholders</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                @foreach($template->getAvailablePlaceholders() as $key => $description)
-                                    <button class="placeholder-btn ribbon-btn text-xs" data-placeholder="{{ $key }}" title="{{ $description }}">
-                                        <span class="font-mono text-green-600">[{{ $key }}]</span>
-                                    </button>
-                                @endforeach
+                <!-- Upload Section -->
+                <div class="bg-green-50 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-upload text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-green-900">Step 2: Upload</h3>
+                            <p class="text-sm text-green-700">Upload your edited document</p>
+                        </div>
+                    </div>
+                    
+                    <form action="{{ route('admin.templates.upload-docx', $template) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        @csrf
+                        <div>
+                            <label for="docx_file" class="block text-sm font-medium text-green-700 mb-2">
+                                Upload Edited DOCX File
+                            </label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-green-300 border-dashed rounded-md hover:border-green-400 transition-colors">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-green-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4l.01.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-green-600">
+                                        <label for="docx_file" class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500">
+                                            <span>Upload a file</span>
+                                            <input id="docx_file" name="docx_file" type="file" accept=".docx" required class="sr-only">
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-green-500">DOCX files only, up to 10MB</p>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Quick Elements Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Quick Elements</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                <button class="ribbon-btn" onclick="insertHeader()">
-                                    <i class="fas fa-heading mr-1"></i>
-                                    <span class="text-xs">Header</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="insertSignature()">
-                                    <i class="fas fa-signature mr-1"></i>
-                                    <span class="text-xs">Signature</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="insertDate()">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    <span class="text-xs">Date</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="insertTable()">
-                                    <i class="fas fa-table mr-1"></i>
-                                    <span class="text-xs">Table</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Special Characters Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Special</h4>
-                            <div class="grid grid-cols-3 gap-1">
-                                <button class="ribbon-btn" onclick="insertSpecialChar('©')">©</button>
-                                <button class="ribbon-btn" onclick="insertSpecialChar('®')">®</button>
-                                <button class="ribbon-btn" onclick="insertSpecialChar('™')">™</button>
-                                <button class="ribbon-btn" onclick="insertSpecialChar('°')">°</button>
-                                <button class="ribbon-btn" onclick="insertSpecialChar('±')">±</button>
-                                <button class="ribbon-btn" onclick="insertSpecialChar('×')">×</button>
-                </div>
+                        
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                            <i class="fas fa-upload mr-2"></i>
+                            Upload & Update Template
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
 
-                <!-- Layout Tab -->
-                <div id="layout-tab" class="ribbon-content hidden">
-                    <div class="grid grid-cols-3 gap-6">
-                        <!-- Page Setup Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Page Setup</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                <select id="pageSize" class="ribbon-select text-xs">
-                                    <option value="A4">A4</option>
-                                    <option value="Letter">Letter</option>
-                                    <option value="Legal">Legal</option>
-                                </select>
-                                <select id="orientation" class="ribbon-select text-xs">
-                                    <option value="portrait">Portrait</option>
-                                    <option value="landscape">Landscape</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Margins Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Margins</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                <button class="ribbon-btn" onclick="setMargins('normal')">
-                                    <span class="text-xs">Normal</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="setMargins('narrow')">
-                                    <span class="text-xs">Narrow</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="setMargins('wide')">
-                                    <span class="text-xs">Wide</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="setMargins('custom')">
-                                    <span class="text-xs">Custom</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Spacing Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Spacing</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                <button class="ribbon-btn" onclick="setLineSpacing(1)">
-                                    <span class="text-xs">1.0</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="setLineSpacing(1.5)">
-                                    <span class="text-xs">1.5</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="setLineSpacing(2)">
-                                    <span class="text-xs">2.0</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="setLineSpacing(2.5)">
-                                    <span class="text-xs">2.5</span>
-                                </button>
-                        </div>
-                        </div>
+    <!-- Template Information -->
+    <div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Template Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Current Placeholders</h4>
+                    <div class="space-y-2">
+                        @if($template->placeholders && count($template->placeholders) > 0)
+                            @foreach($template->placeholders as $placeholder)
+                                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                    <div>
+                                        <code class="text-sm font-mono text-blue-600">[{{ $placeholder }}]</code>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <p class="text-sm text-gray-500">No placeholders found</p>
+                        @endif
                     </div>
                 </div>
                 
-                <!-- Review Tab -->
-                <div id="review-tab" class="ribbon-content hidden">
-                    <div class="grid grid-cols-2 gap-6">
-                        <!-- Proofing Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Proofing</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                <button class="ribbon-btn" onclick="spellCheck()">
-                                    <i class="fas fa-spell-check mr-1"></i>
-                                    <span class="text-xs">Spell Check</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="validateTemplate()">
-                                    <i class="fas fa-check-circle mr-1"></i>
-                                    <span class="text-xs">Validate</span>
-                                </button>
-                            </div>
-            </div>
-
-                        <!-- View Group -->
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide">View</h4>
-                            <div class="grid grid-cols-2 gap-1">
-                                <button class="ribbon-btn" onclick="toggleRulers()">
-                                    <i class="fas fa-ruler mr-1"></i>
-                                    <span class="text-xs">Rulers</span>
-                                </button>
-                                <button class="ribbon-btn" onclick="toggleGrid()">
-                                    <i class="fas fa-th mr-1"></i>
-                                    <span class="text-xs">Grid</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                        </div>
-                </div>
-            </div>
-
-    <!-- Document Area -->
-    <div class="flex-1 flex">
-        <!-- Rulers -->
-        <div class="bg-white border-r border-gray-200">
-            <div id="verticalRuler" class="w-8 h-full bg-gray-50 border-b border-gray-200"></div>
-        </div>
-        
-        <!-- Main Document -->
-        <div class="flex-1 flex flex-col">
-            <!-- Horizontal Ruler -->
-            <div id="horizontalRuler" class="h-8 bg-gray-50 border-b border-gray-200"></div>
-            
-            <!-- Document Content -->
-            <div class="flex-1 bg-white shadow-inner overflow-auto">
-                <div class="max-w-4xl mx-auto p-8 bg-white min-h-full">
-                    <div id="documentEditor" 
-                         class="prose prose-lg max-w-none min-h-[800px] outline-none"
-                         contenteditable="false"
-                         style="font-family: 'Times New Roman', serif; line-height: 1.6;">
-                        {!! $template->header_content !!}
-                        {!! $template->body_content !!}
-                        {!! $template->footer_content !!}
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Template Preview</h4>
+                    <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                        <div class="text-sm text-gray-600 mb-2">Last updated: {{ $template->updated_at->format('M d, Y H:i') }}</div>
+                        <a href="{{ route('admin.templates.preview', $template) }}" 
+                           target="_blank"
+                           class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700">
+                            <i class="fas fa-eye mr-2"></i>
+                            Preview Template
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Status Bar -->
-        <div class="bg-gray-100 border-t border-gray-200 px-4 py-2 text-sm text-gray-600">
-            <div class="flex justify-between items-center">
-                <div class="flex space-x-4">
-                    <span>Words: <span id="wordCount">0</span></span>
-                    <span>Characters: <span id="charCount">0</span></span>
-                    <span>Pages: <span id="pageCount">1</span></span>
-                </div>
-                <div class="flex space-x-4">
-                    <span>Zoom: <span id="zoomLevel">100%</span></span>
-                    <span id="cursorPosition">Line 1, Col 1</span>
-                </div>
+    <!-- Instructions -->
+    <div class="mt-8 bg-blue-50 rounded-lg border border-blue-200 p-6">
+        <h3 class="text-lg font-medium text-blue-900 mb-4">
+            <i class="fas fa-info-circle mr-2"></i>
+            Instructions for Word Document Editing
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="font-medium text-blue-800 mb-2">Using Placeholders</h4>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Use <code class="bg-blue-100 px-1 rounded">[resident_name]</code> for resident names</li>
+                    <li>• Use <code class="bg-blue-100 px-1 rounded">[current_date]</code> for current date</li>
+                    <li>• Use <code class="bg-blue-100 px-1 rounded">[barangay_name]</code> for barangay name</li>
+                    <li>• Don't change placeholder names - they must match exactly</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-medium text-blue-800 mb-2">Word Editing Tips</h4>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Edit the document normally in Microsoft Word</li>
+                    <li>• Add placeholders using the exact format: [placeholder_name]</li>
+                    <li>• Save as .docx format (not .doc)</li>
+                    <li>• Upload the edited document to update the template</li>
+                </ul>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Save Form (Hidden) -->
-<form id="saveForm" action="{{ route('admin.templates.update', $template) }}" method="POST" class="hidden">
-    @csrf
-    @method('PUT')
-    <input type="hidden" id="header_content" name="header_content" value="{{ $template->header_content }}">
-    <input type="hidden" id="body_content" name="body_content" value="{{ $template->body_content }}">
-    <input type="hidden" id="footer_content" name="footer_content" value="{{ $template->footer_content }}">
-</form>
-
-<!-- Preview Modal -->
-<div id="previewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-10 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-medium text-gray-900">Document Preview</h3>
-            <button id="closePreview" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        <div id="previewContent" class="border border-gray-200 rounded-lg p-6 bg-white" style="min-height: 600px;">
-            <!-- Preview content will be loaded here -->
-        </div>
-    </div>
-    </div>
-</div>
-
-@endsection 
-
-@push('styles')
-<style>
-.ribbon-btn {
-    padding: 0.25rem 0.5rem;
-    background-color: #f3f4f6;
-    border: 1px solid #d1d5db;
-    border-radius: 0.25rem;
-    color: #374151;
-    font-size: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 150ms ease-in-out, color 150ms ease-in-out, border-color 150ms ease-in-out;
-}
-.ribbon-btn:hover { background-color: #e5e7eb; }
-.ribbon-btn.active { background-color: #dbeafe; border-color: #93c5fd; color: #1d4ed8; }
-
-.ribbon-select {
-    padding: 0.25rem 0.5rem;
-    background-color: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 0.25rem;
-    color: #374151;
-    font-size: 0.75rem;
-}
-
-.ribbon-tab { transition: color 150ms ease-in-out, border-color 150ms ease-in-out; }
-.ribbon-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
-
-.ribbon-content { transition: all 200ms ease-in-out; }
-
-.placeholder-btn { font-size: 0.75rem; }
-
-#documentEditor:focus { outline: none; }
-
-/* Word-like styling fallbacks in case Tailwind Typography isn't present */
-.prose { color: #111827; }
-.prose h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
-.prose h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
-.prose h3 { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; }
-.prose p { margin-bottom: 0.75rem; }
-.prose ul, .prose ol { margin-bottom: 0.75rem; padding-left: 1.5rem; }
-.prose li { margin-bottom: 0.25rem; }
-</style>
-@endpush
-
-@push('scripts')
-<script>
-// Skeleton loading control
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        const headerSkeleton = document.getElementById('editTemplateHeaderSkeleton');
-        const editorSkeleton = document.getElementById('editTemplateEditorSkeleton');
-        const content = document.getElementById('editTemplateContent');
-        
-        if (headerSkeleton) headerSkeleton.style.display = 'none';
-        if (editorSkeleton) editorSkeleton.style.display = 'none';
-        if (content) content.style.display = 'block';
-    }, 1000);
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const editor = document.getElementById('documentEditor');
-    const saveBtn = document.getElementById('saveBtn');
-    const previewBtn = document.getElementById('previewBtn');
-    const ribbonTabs = document.querySelectorAll('.ribbon-tab');
-    const ribbonContents = document.querySelectorAll('.ribbon-content');
-    const placeholderBtns = document.querySelectorAll('.placeholder-btn');
-
-    // Ribbon tab switching
-    ribbonTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const targetTab = this.dataset.tab;
-            
-            // Update active tab
-            ribbonTabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Show corresponding content
-            ribbonContents.forEach(content => {
-                content.classList.add('hidden');
-                content.classList.remove('active');
-            });
-            
-            document.getElementById(targetTab + '-tab').classList.remove('hidden');
-            document.getElementById(targetTab + '-tab').classList.add('active');
-        });
-    });
-
-    // Placeholder insertion
-    placeholderBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const placeholder = this.dataset.placeholder;
-            insertText(`[${placeholder}]`);
-        });
-    });
-
-    // Font controls
-    document.getElementById('fontFamily').addEventListener('change', function() {
-        document.execCommand('fontName', false, this.value);
-    });
-
-    document.getElementById('fontSize').addEventListener('change', function() {
-        applyFontSize(this.value);
-    });
-
-    // Word count and character count
-    function updateCounts() {
-        const text = editor.innerText || editor.textContent;
-        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-        const chars = text.length;
-        
-        document.getElementById('wordCount').textContent = words;
-        document.getElementById('charCount').textContent = chars;
-    }
-
-    editor.addEventListener('input', updateCounts);
-    editor.addEventListener('keyup', updateCounts);
-    updateCounts();
-
-    // Cursor position tracking
-    editor.addEventListener('keyup', updateCursorPosition);
-    editor.addEventListener('click', updateCursorPosition);
-    editor.addEventListener('mouseup', updateCursorPosition);
-
-    function updateCursorPosition() {
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            const preCaretRange = range.cloneRange();
-            preCaretRange.selectNodeContents(editor);
-            preCaretRange.setEnd(range.endContainer, range.endOffset);
-            const text = preCaretRange.toString();
-            const lines = text.split('\n');
-            const currentLine = lines.length;
-            const currentCol = lines[lines.length - 1].length + 1;
-            
-            document.getElementById('cursorPosition').textContent = `Line ${currentLine}, Col ${currentCol}`;
-        }
-    }
-
-    // No save functionality in upload-only mode
-
-    // Preview functionality
-    previewBtn.addEventListener('click', function() {
-        const content = editor.innerHTML;
-        
-        // Sample data for preview
-        const sampleData = {
-            'resident_name': 'Juan Dela Cruz',
-            'resident_address': '123 Sample Street, Barangay Sample',
-            'civil_status': 'Married',
-            'purpose': 'employment purposes',
-            'barangay_name': 'Sample Barangay',
-            'municipality_name': 'Sample Municipality',
-            'province_name': 'Sample Province',
-            'official_name': 'Hon. Sample Official',
-            'official_position': 'Barangay Captain',
-            'current_date': 'January 15, 2024'
-        };
-
-        // Replace placeholders with sample data
-        let previewContent = content;
-        Object.entries(sampleData).forEach(([key, value]) => {
-            previewContent = previewContent.replace(new RegExp(`\\[${key}\\]`, 'g'), value);
-        });
-
-        document.getElementById('previewContent').innerHTML = `
-            <style>
-                body { font-family: "Times New Roman", serif; line-height: 1.6; color: #333; }
-            </style>
-            ${previewContent}
-        `;
-        document.getElementById('previewModal').classList.remove('hidden');
-    });
-
-    document.getElementById('closePreview').addEventListener('click', function() {
-        document.getElementById('previewModal').classList.add('hidden');
-    });
-
-    // Close modal when clicking outside
-    document.getElementById('previewModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.add('hidden');
-        }
-    });
-
-    // Utility functions
-    function insertText(text) {
-        document.execCommand('insertText', false, text);
-    }
-
-    function applyFontSize(pointSize) {
-        // Use execCommand to create a wrapper, then convert to inline style with the requested size
-        document.execCommand('fontSize', false, '7');
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        const editorFonts = editor.querySelectorAll('font[size="7"]');
-        editorFonts.forEach(function(el) {
-            const span = document.createElement('span');
-            span.style.fontSize = pointSize + 'pt';
-            span.innerHTML = el.innerHTML;
-            el.parentNode.replaceChild(span, el);
-        });
-    }
-
-    // Expose functions used by inline onclick handlers to the global scope
-    window.insertSpecialChar = function(char) { insertText(char); };
-    window.insertHeader = function() {
-        const headerContent = `
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">REPUBLIC OF THE PHILIPPINES</h1>
-                <h2 style="font-size: 16px; margin-bottom: 5px;">Province of [province_name]</h2>
-                <h2 style="font-size: 16px; margin-bottom: 5px;">Municipality of [municipality_name]</h2>
-                <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">BARANGAY [barangay_name]</h1>
-            </div>
-        `;
-        document.execCommand('insertHTML', false, headerContent);
-    };
-    window.insertSignature = function() {
-        const signatureContent = `
-            <div style="margin-top: 50px; text-align: right;">
-                <div style="border-top: 1px solid #000; width: 200px; margin-left: auto; margin-bottom: 10px;"></div>
-                <p style="font-weight: bold; margin-bottom: 5px;">[official_name]</p>
-                <p style="font-size: 14px; color: #666;">[official_position]</p>
-            </div>
-        `;
-        document.execCommand('insertHTML', false, signatureContent);
-    };
-    window.insertDate = function() {
-        const dateContent = `
-            <p>Issued this [current_date] at Barangay [barangay_name], [municipality_name], [province_name], Philippines.</p>
-        `;
-        document.execCommand('insertHTML', false, dateContent);
-    };
-    window.insertTable = function() {
-        const tableContent = `
-            <table border="1" style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #000;">Header 1</td>
-                    <td style="padding: 8px; border: 1px solid #000;">Header 2</td>
-                    <td style="padding: 8px; border: 1px solid #000;">Header 3</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #000;">Data 1</td>
-                    <td style="padding: 8px; border: 1px solid #000;">Data 2</td>
-                    <td style="padding: 8px; border: 1px solid #000;">Data 3</td>
-                </tr>
-            </table>
-        `;
-        document.execCommand('insertHTML', false, tableContent);
-    };
-    window.setMargins = function(type) {
-        console.log('Setting margins:', type);
-    };
-    window.setLineSpacing = function(spacing) {
-        editor.style.lineHeight = spacing;
-    };
-    window.spellCheck = function() {
-        alert('Spell check feature would be implemented here');
-    };
-    window.validateTemplate = function() {
-        alert('Template validation would be implemented here');
-    };
-    window.toggleRulers = function() {
-        const verticalRuler = document.getElementById('verticalRuler');
-        const horizontalRuler = document.getElementById('horizontalRuler');
-        const isHidden = verticalRuler.style.display === 'none';
-        verticalRuler.style.display = isHidden ? 'block' : 'none';
-        horizontalRuler.style.display = isHidden ? 'block' : 'none';
-    };
-    window.toggleGrid = function() {
-        console.log('Grid toggle');
-    };
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey || e.metaKey) {
-            switch(e.key) {
-                case 's':
-                    e.preventDefault();
-                    saveBtn.click();
-                    break;
-                case 'p':
-                    e.preventDefault();
-                    previewBtn.click();
-                    break;
-            }
-        }
-    });
-});
-</script>
-@endpush
+@endsection

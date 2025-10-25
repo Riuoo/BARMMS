@@ -894,6 +894,9 @@ document.addEventListener('DOMContentLoaded', function() {
     'characteristics' => $characteristics ?? [],
     'grouped' => $grouped ?? [],
     'silhouette' => $silhouette ?? null,
+    'sampleSize' => $sampleSize ?? 0,
+    'mostCommonEmployment' => $mostCommonEmployment ?? 'N/A',
+    'mostCommonHealth' => $mostCommonHealth ?? 'N/A',
 ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>
 <script>
@@ -901,477 +904,74 @@ document.addEventListener('DOMContentLoaded', function() {
 (function(){
     try {
         var el = document.getElementById('clustering-data');
-        if (el) { window.clusteringData = JSON.parse(el.textContent || '{}'); }
-    } catch (e) { window.clusteringData = {}; }
+        if (el) { 
+            window.clusteringData = JSON.parse(el.textContent || '{}');
+            console.log('Clustering data loaded:', window.clusteringData);
+        }
+    } catch (e) { 
+        console.error('Error parsing clustering data:', e);
+        window.clusteringData = {};
+    }
 })();
 </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    initializeClusterChart();
-    initializeAnalyticsCharts(); // Initialize all new charts
-    initializeTableFeatures();
-    // Collapsible purok groups: collapse all except first 2
-    const purokGroups = document.querySelectorAll('.purok-group');
-    purokGroups.forEach((group, idx) => {
-        const clustersDiv = group.querySelector('.purok-clusters');
-        const chevron = group.querySelector('.purok-header i.fas');
-        if (idx > 1) {
-            clustersDiv.classList.add('hidden');
-            chevron.classList.add('rotate-180');
-        }
-    });
-    // Purok search/filter
-    const purokSearch = document.getElementById('purokSearch');
-    if (purokSearch) {
-        purokSearch.addEventListener('input', function() {
-            const val = this.value.trim().toLowerCase();
-            document.querySelectorAll('.purok-group').forEach(group => {
-                group.style.display = val === '' || group.getAttribute('data-purok').includes(val) ? '' : 'none';
-            });
-        });
-    }
-    // Initialize details collapsed
-    const details = document.getElementById('detailedAnalysisSection');
-    const toggleBtn = document.getElementById('toggleDetailsBtn');
-    if (details && toggleBtn) {
-        details.classList.add('hidden');
-        const icon = toggleBtn.querySelector('i');
-        if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
-        toggleBtn.setAttribute('data-state', 'hidden');
-        toggleBtn.querySelector('span.btn-text')?.remove();
-        const span = document.createElement('span');
-        span.className = 'btn-text';
-        span.textContent = ' Show Details';
-        toggleBtn.appendChild(span);
-    }
-});
-
-
-function initializeIncomeChart(chartData) {
-    const ctx = document.getElementById('incomeChart').getContext('2d');
-    const incomeLabels = ['Low', 'Lower Middle', 'Middle', 'Upper Middle', 'High'];
-    
-    const datasets = chartData.map((data) => ({
-        label: data.label,
-        data: incomeLabels.map(label => data.incomes[label] || 0),
-        backgroundColor: data.color + '80',
-        borderColor: data.color,
-        borderWidth: 2,
-        borderRadius: 4,
-        borderSkipped: false
-    }));
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: incomeLabels,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'nearest', intersect: true }, // ✅ Show one value at a time
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { 
-                        font: { size: 11 },
-                        usePointStyle: true,
-                        padding: 15
-                    }
-                },
-                tooltip: {
-                    enabled: true,
-                    mode: 'nearest',
-                    intersect: true,
-                    callbacks: {
-                        title: function(context) {
-                            // Just return the label without Auto/Manual K
-                            return context[0].label;
-                        },
-                        label: function(context) {
-                            const value = context.parsed.y ?? context.parsed;
-                            const datasetLabel = context.dataset.label;
-                            return `${datasetLabel}: ${value}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Number of Residents' },
-                    grid: { color: 'rgba(0,0,0,0.1)' }
-                },
-                x: {
-                    grid: { display: false }
-                }
+    // Wait for clustering data to be loaded
+    setTimeout(() => {
+        // Initialize main cluster chart
+        if (window.clusteringData && window.clusteringData.characteristics) {
+            if (window.clusteringData.isHier) {
+                initializePurokChart();
+            } else {
+                initializeClusterChart();
             }
         }
-    });
-}
-
-function initializeEmploymentChart(chartData) {
-    const ctx = document.getElementById('employmentChart').getContext('2d');
-    const employmentLabels = ['Unemployed', 'Part-time', 'Self-employed', 'Full-time'];
-    const employmentColors = ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'];
-    
-    // Create pie chart for overall employment distribution
-    const totalEmployments = { 'Unemployed': 0, 'Part-time': 0, 'Self-employed': 0, 'Full-time': 0 };
-    chartData.forEach(data => {
-        employmentLabels.forEach(label => {
-            totalEmployments[label] += data.employments[label] || 0;
-        });
-    });
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: employmentLabels,
-            datasets: [{
-                data: employmentLabels.map(label => totalEmployments[label]),
-                backgroundColor: employmentColors,
-                borderColor: '#fff',
-                borderWidth: 3,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { 
-                        font: { size: 11 },
-                        padding: 15
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                            return `${context.label}: ${context.parsed} (${percentage}%)`;
-                        }
-                    }
-                }
+        
+        // Initialize analytics charts
+        initializeAnalyticsCharts();
+        
+        // Initialize table features
+        initializeTableFeatures();
+        
+        // Collapsible purok groups: collapse all except first 2
+        const purokGroups = document.querySelectorAll('.purok-group');
+        purokGroups.forEach((group, idx) => {
+            const clustersDiv = group.querySelector('.purok-clusters');
+            const chevron = group.querySelector('.purok-header i.fas');
+            if (idx > 1) {
+                clustersDiv.classList.add('hidden');
+                chevron.classList.add('rotate-180');
             }
-        }
-    });
-}
-
-function initializeAgeChart(chartData) {
-    const ctx = document.getElementById('ageChart').getContext('2d');
-    const ageRanges = ['0-20', '21-40', '41-60', '61-80', '80+'];
-    const ageColors = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
-    
-    const datasets = chartData.map((data, idx) => {
-        const ageCounts = [0, 0, 0, 0, 0];
-        data.ages.forEach(age => {
-            if (age <= 20) ageCounts[0]++;
-            else if (age <= 40) ageCounts[1]++;
-            else if (age <= 60) ageCounts[2]++;
-            else if (age <= 80) ageCounts[3]++;
-            else ageCounts[4]++;
         });
         
-        return {
-            label: data.label,
-            data: ageCounts,
-            backgroundColor: data.color + '80',
-            borderColor: data.color,
-            borderWidth: 2,
-            borderRadius: 4,
-            borderSkipped: false
-        };
-    });
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ageRanges,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { 
-                        font: { size: 11 },
-                        usePointStyle: true,
-                        padding: 15
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Number of Residents' },
-                    grid: { color: 'rgba(0,0,0,0.1)' }
-                },
-                x: {
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-}
-
-function initializeHealthChart(chartData) {
-    const ctx = document.getElementById('healthChart').getContext('2d');
-    const healthLabels = ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'];
-    const healthColors = ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'];
-    
-    // Create stacked bar chart for health distribution
-    const datasets = healthLabels.map((label, idx) => ({
-        label: label,
-        data: chartData.map(data => data.healths[label] || 0),
-        backgroundColor: healthColors[idx],
-        borderColor: healthColors[idx],
-        borderWidth: 1
-    }));
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: chartData.map(data => data.label),
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { 
-                        font: { size: 11 },
-                        usePointStyle: true,
-                        padding: 15
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    stacked: true,
-                    grid: { display: false }
-                },
-                y: {
-                    stacked: true,
-                    beginAtZero: true,
-                    title: { display: true, text: 'Number of Residents' },
-                    grid: { color: 'rgba(0,0,0,0.1)' }
-                }
-            }
-        }
-    });
-}
-
-function initializeComparativeChart(chartData) {
-    const ctx = document.getElementById('comparativeChart').getContext('2d');
-    const labels = chartData.map(data => data.label);
-    
-    // Calculate metrics for comparison
-    const avgAges = chartData.map(data => {
-        if (data.ages.length === 0) return 0;
-        return Math.round(data.ages.reduce((a, b) => a + b, 0) / data.ages.length);
-    });
-    
-    const avgFamilySizes = chartData.map(data => {
-        if (data.familySizes.length === 0) return 0;
-        return Math.round((data.familySizes.reduce((a, b) => a + b, 0) / data.familySizes.length) * 10) / 10;
-    });
-    
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Average Age',
-                data: avgAges,
-                borderColor: '#3B82F6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                yAxisID: 'y'
-            }, {
-                label: 'Average Family Size',
-                data: avgFamilySizes,
-                borderColor: '#10B981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                yAxisID: 'y1'
-            }, {
-                label: 'Total Residents',
-                data: chartData.map(data => data.total),
-                borderColor: '#F59E0B',
-                backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                yAxisID: 'y2'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { font: { size: 11 } }
-                }
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: { display: true, text: 'Average Age' },
-                    grid: { color: 'rgba(0,0,0,0.1)' }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: { display: true, text: 'Average Family Size' },
-                    grid: { drawOnChartArea: false }
-                },
-                y2: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: { display: true, text: 'Total Residents' },
-                    grid: { drawOnChartArea: false }
-                }
-            }
-        }
-    });
-}
-
-function initializeFamilySizeChart(chartData) {
-    // Add family size chart if you want to include it
-    // This would be similar to the age chart but for family sizes
-}
-
-function initializeDemographicOverview(chartData) {
-    // Add demographic overview chart if needed
-    // This could be a radar chart showing multiple metrics
-}
-
-function downloadAllCharts() {
-    // Download all charts as images
-    const charts = ['incomeChart', 'employmentChart', 'ageChart', 'healthChart', 'comparativeChart'];
-    charts.forEach(chartId => {
-        const canvas = document.getElementById(chartId);
-        if (canvas) {
-            const link = document.createElement('a');
-            link.download = `${chartId}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-    });
-}
-
-function initializeTableFeatures() {
-    const searchInput = document.getElementById('searchTable');
-    const filterPurok = document.getElementById('filterPurok');
-    const rowsPerPageSelect = document.getElementById('rowsPerPage');
-    const table = document.getElementById('residentsTable');
-    const tbody = table.querySelector('tbody');
-    const allRows = Array.from(tbody.querySelectorAll('tr'));
-    const emptyState = document.getElementById('emptyState');
-    const loadingDiv = document.getElementById('tableLoading');
-    const paginationControls = document.getElementById('paginationControls');
-    const paginationInfo = document.getElementById('paginationInfo');
-    const prevPageBtn = document.getElementById('prevPage');
-    const nextPageBtn = document.getElementById('nextPage');
-    const currentPageSpan = document.getElementById('currentPage');
-    let currentPage = 1;
-    let rowsPerPage = parseInt(rowsPerPageSelect.value);
-    let filteredRows = allRows;
-
-    // Purok is always the 7th column (1-based index)
-    const purokColIdx = 7;
-
-    function showLoading(show) {
-        loadingDiv.classList.toggle('hidden', !show);
-        table.classList.toggle('opacity-50', show);
-    }
-
-    function updateTable() {
-        showLoading(true);
-        setTimeout(() => {
-            // Hide all rows
-            allRows.forEach(row => row.style.display = 'none');
-            // Show filtered rows for current page
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            let anyVisible = false;
-            filteredRows.slice(start, end).forEach(row => {
-                row.style.display = '';
-                anyVisible = true;
+        // Purok search/filter
+        const purokSearch = document.getElementById('purokSearch');
+        if (purokSearch) {
+            purokSearch.addEventListener('input', function() {
+                const val = this.value.trim().toLowerCase();
+                document.querySelectorAll('.purok-group').forEach(group => {
+                    group.style.display = val === '' || group.getAttribute('data-purok').includes(val) ? '' : 'none';
+                });
             });
-            // Empty state
-            emptyState.classList.toggle('hidden', anyVisible);
-            // Pagination info
-            const total = filteredRows.length;
-            const totalPages = Math.ceil(total / rowsPerPage) || 1;
-            paginationInfo.textContent = `Showing ${total ? start + 1 : 0} to ${Math.min(end, total)} of ${total} residents`;
-            currentPageSpan.textContent = `${currentPage} / ${totalPages}`;
-            prevPageBtn.disabled = currentPage === 1;
-            nextPageBtn.disabled = currentPage === totalPages;
-            showLoading(false);
-        }, 200); // Simulate loading
-    }
-
-    function filterRows() {
-        showLoading(true);
-        setTimeout(() => {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedPurok = filterPurok.value.trim().toUpperCase();
-            filteredRows = allRows.filter(row => {
-                let match = true;
-                if (searchTerm) {
-                    match = row.textContent.toLowerCase().includes(searchTerm);
-                }
-                if (match && selectedPurok) {
-                    // Use correct column index for purok
-                    const purokCell = row.querySelector(`td:nth-child(${purokColIdx})`);
-                    const val = (purokCell ? purokCell.textContent : '').trim().toUpperCase();
-                    match = val.includes(selectedPurok);
-                }
-                return match;
-            });
-            currentPage = 1;
-            updateTable();
-        }, 200);
-    }
-
-    // Debounced search
-    searchInput.addEventListener('input', debounce(filterRows, 300));
-    filterPurok.addEventListener('change', filterRows);
-    rowsPerPageSelect.addEventListener('change', function() {
-        rowsPerPage = parseInt(this.value);
-        currentPage = 1;
-        updateTable();
-    });
-    prevPageBtn.addEventListener('click', function() {
-        if (currentPage > 1) { currentPage--; updateTable(); }
-    });
-    nextPageBtn.addEventListener('click', function() {
-        const totalPages = Math.ceil(filteredRows.length / rowsPerPage) || 1;
-        if (currentPage < totalPages) { currentPage++; updateTable(); }
-    });
-
-    // Initial render
-    filterRows();
-}
+        }
+        
+        // Initialize details collapsed
+        const details = document.getElementById('detailedAnalysisSection');
+        const toggleBtn = document.getElementById('toggleDetailsBtn');
+        if (details && toggleBtn) {
+            details.classList.add('hidden');
+            const icon = toggleBtn.querySelector('i');
+            if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+            toggleBtn.setAttribute('data-state', 'hidden');
+            toggleBtn.querySelector('span.btn-text')?.remove();
+            const span = document.createElement('span');
+            span.className = 'btn-text';
+            span.textContent = ' Show Details';
+            toggleBtn.appendChild(span);
+        }
+    }, 100);
+});
 
 
 </script>
