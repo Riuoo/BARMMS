@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Residents;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Phpml\Clustering\KMeans;
+use Phpml\Clustering\KMeans;    
 use Phpml\Math\Distance\Euclidean;
 
 class ResidentDemographicAnalysisService
