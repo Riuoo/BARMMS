@@ -5,7 +5,7 @@
 
 @if($type === 'header')
     {{-- Generic Edit Header Skeleton --}}
-    <div class="mb-2 animate-pulse">
+    <div class="mb-2 animate-pulse" data-skeleton>
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
                 <div class="h-10 w-80 bg-gray-200 rounded"></div>
@@ -24,7 +24,7 @@
 
 @elseif($type === 'resident' || $type === 'barangay-profile')
     {{-- Resident / Barangay Profile Edit Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <div class="border-b border-gray-200 pb-6">
                 <div class="flex items-center mb-2">
@@ -65,7 +65,7 @@
 
 @elseif($type === 'medicine')
     {{-- Medicine Edit Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <div class="border-b border-gray-200 pb-6">
                 <div class="h-6 w-56 bg-gray-200 rounded mb-2"></div>
@@ -87,7 +87,7 @@
 
 @elseif($type === 'vaccination-edit')
     {{-- Vaccination Edit Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             {{-- Vaccine Details --}}
             <div class="border-b border-gray-200 pb-6">
@@ -140,7 +140,7 @@
 
 @elseif($type === 'health-activity')
     {{-- Health Activity Edit Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             {{-- Activity Header & Basic Details --}}
             <div class="border-b border-gray-200 pb-6">
@@ -224,7 +224,7 @@
 
 @elseif($type === 'accomplished-project')
     {{-- Accomplished Project Edit Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <div class="border-b border-gray-200 pb-6 mb-2">
                 <div class="flex items-center mb-2">
@@ -290,7 +290,7 @@
 
 @elseif($type === 'template')
     {{-- Template Edit Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <div class="border-b border-gray-200 pb-6 mb-2">
                 <div class="flex items-center mb-2">
@@ -317,7 +317,7 @@
 
 @else
     {{-- Default Edit Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <div class="border-b border-gray-200 pb-6 mb-2">
                 <div class="flex items-center mb-2">

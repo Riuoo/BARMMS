@@ -3,7 +3,7 @@
     $variant = $variant ?? 'document'; // 'document' | 'blotter' | 'concern'
 @endphp
 
-<div id="residentRequestFormSkeleton" class="animate-pulse">
+<div id="residentRequestFormSkeleton" class="animate-pulse" data-skeleton>
     <!-- Header Skeleton -->
     <div class="mb-2">
         <div class="h-8 {{ $variant === 'concern' ? 'w-96' : 'w-80' }} bg-gray-200 rounded"></div>

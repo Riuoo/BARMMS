@@ -1,5 +1,5 @@
 {{-- Resident Requests Consolidated Skeleton --}}
-<div id="residentRequestsSkeleton">
+<div id="residentRequestsSkeleton" class="animate-pulse" data-skeleton>
     <!-- Header Skeleton -->
     <div class="animate-pulse mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">

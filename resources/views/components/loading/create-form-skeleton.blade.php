@@ -5,7 +5,7 @@
 
 @if($type === 'resident')
     {{-- Resident Form Skeleton --}}
-    <div class="animate-pulse space-y-6">
+    <div class="animate-pulse space-y-6" data-skeleton>
         <div class="h-8 w-48 bg-gray-200 rounded mx-auto mb-2 animate-pulse"></div>
 
         <!-- Basic Information Section Skeleton -->
@@ -119,7 +119,7 @@
 
 @elseif($type === 'barangay-profile')
     {{-- Barangay Profile Form Skeleton --}}
-    <div class="animate-pulse space-y-6">
+    <div class="animate-pulse space-y-6" data-skeleton>
         <!-- Page Title Skeleton -->
         <div class="h-8 w-64 bg-gray-200 rounded mx-auto mb-2"></div>
         
@@ -174,7 +174,7 @@
 
 @elseif($type === 'medicine')
     {{-- Medicine Form Skeleton --}}
-    <div class="animate-pulse bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
+    <div class="animate-pulse bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6" data-skeleton>
         <!-- Medicine Information Section -->
         <div class="border-b border-gray-200 pb-6">
             <div class="h-6 w-56 bg-gray-200 rounded mb-4"></div>
@@ -212,7 +212,7 @@
 
 @elseif($type === 'medicine-request')
     {{-- Medicine Request Form Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <!-- Request Details Section -->
             <div class="border-b border-gray-200 pb-6 mb-6">
@@ -279,7 +279,7 @@
 
 @elseif($type === 'medical-record')
     {{-- Medical Record Form Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <!-- Patient Information Section -->
             <div class="border-b border-gray-200 pb-6 mb-6">
@@ -342,7 +342,7 @@
 
 @elseif(in_array($type, ['vaccination-child', 'vaccination-adult', 'vaccination-elderly']))
     {{-- Vaccination Form Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <!-- Patient Information Section -->
             <div class="border-b border-gray-200 pb-6 mb-2">
@@ -393,7 +393,7 @@
 
 @elseif($type === 'child-profile')
     {{-- Child Profile Form Skeleton --}}
-    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="animate-pulse bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-skeleton>
         <div class="space-y-6">
             <!-- Child Information Section -->
             <div class="border-b border-gray-200 pb-6 mb-2">
@@ -659,7 +659,7 @@
 
 @elseif($type === 'template')
     {{-- Template Page Skeleton (Header + Form) --}}
-    <div class="animate-pulse max-w-4xl mx-auto">
+    <div class="animate-pulse max-w-4xl mx-auto" data-skeleton>
         <!-- Header Skeleton -->
         <div class="mb-3">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -714,7 +714,7 @@
 
 @elseif($type === 'header')
     {{-- Header Skeleton (configurable buttons) --}}
-    <div class="mb-2 animate-pulse">
+    <div class="mb-2 animate-pulse" data-skeleton>
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
                 <div class="h-10 w-80 bg-gray-200 rounded"></div>

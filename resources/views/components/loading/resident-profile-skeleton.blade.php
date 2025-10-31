@@ -1,5 +1,5 @@
 {{-- Resident Profile Consolidated Skeleton --}}
-<div id="residentProfileSkeleton" class="animate-pulse">
+<div id="residentProfileSkeleton" class="animate-pulse" data-skeleton>
     <!-- Header Skeleton -->
     <div class="mb-2">
         <div class="h-8 w-64 bg-gray-200 rounded"></div>

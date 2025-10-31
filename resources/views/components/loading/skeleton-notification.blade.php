@@ -1,5 +1,5 @@
 {{-- Consolidated Notifications Skeleton --}}
-<div id="adminNotifSkeleton">
+<div id="adminNotifSkeleton" class="animate-pulse" data-skeleton>
     <!-- Header Skeleton -->
     <div class="animate-pulse mb-3">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">

@@ -2,7 +2,13 @@
 
 @section('title', 'FAQ Management')
 @section('content')
-<div class="max-w-6xl mx-auto pt-2">
+<!-- FAQ Management Skeleton -->
+<div id="faqManagementSkeleton" class="max-w-6xl mx-auto pt-2">
+    @include('components.loading.faq-management-skeleton')
+</div>
+
+<!-- Real Content (hidden on first paint if skeleton already seen) -->
+<div id="faqManagementContent" class="max-w-6xl mx-auto pt-2" style="display: none;">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-3xl font-bold text-gray-900">FAQ Management</h1>
         <a href="{{ route('admin.faqs.create') }}" class="bg-green-600 text-white rounded-lg px-5 py-2 hover:bg-green-700 font-semibold flex items-center"><i class="fas fa-plus mr-2"></i>Add FAQ</a>
@@ -101,6 +107,16 @@
 @endsection
 
 @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	setTimeout(function(){
+		var skeleton = document.getElementById('faqManagementSkeleton');
+		if (skeleton) skeleton.style.display = 'none';
+		var content = document.getElementById('faqManagementContent');
+		if (content) content.style.display = '';
+	}, 400);
+});
+</script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script>
@@ -207,3 +223,5 @@ document.addEventListener('click', function (event) {
 });
 </script>
 @endpush
+
+

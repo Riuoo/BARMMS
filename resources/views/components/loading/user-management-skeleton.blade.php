@@ -1,4 +1,4 @@
-<div id="userManagementSkeleton">
+<div id="userManagementSkeleton" class="animate-pulse" data-skeleton>
     {{-- Header Skeleton --}}
     <div class="mb-3 animate-pulse">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">

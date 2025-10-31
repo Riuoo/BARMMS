@@ -1,7 +1,7 @@
 <!-- Resident Project Detail Skeleton -->
-<div class="animate-pulse">
+<div class="animate-pulse" data-skeleton>
     <!-- Header Skeleton -->
-    <div class="mb-6">
+    <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <div class="h-8 bg-gray-200 rounded w-96 mb-2"></div>

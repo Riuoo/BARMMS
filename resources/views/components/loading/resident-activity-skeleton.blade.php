@@ -1,5 +1,5 @@
 <!-- Resident Activity Detail Skeleton -->
-<div class="animate-pulse">
+<div class="animate-pulse" data-skeleton>
     <!-- Header Skeleton -->
     <div class="mb-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">

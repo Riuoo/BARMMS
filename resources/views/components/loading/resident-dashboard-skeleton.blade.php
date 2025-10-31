@@ -1,5 +1,5 @@
 {{-- Resident Dashboard Consolidated Skeleton --}}
-<div id="residentDashboardSkeleton" class="animate-pulse">
+<div id="residentDashboardSkeleton" class="animate-pulse" data-skeleton>
     <!-- Header Skeleton -->
     <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">

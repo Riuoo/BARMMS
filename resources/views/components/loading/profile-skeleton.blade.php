@@ -1,5 +1,5 @@
 {{-- Consolidated Profile Page Skeleton --}}
-<div class="animate-pulse">
+<div class="animate-pulse" data-skeleton>
     <!-- Header Skeleton -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">

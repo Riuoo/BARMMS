@@ -1,5 +1,5 @@
 {{-- Analytics Dashboard Skeleton Component --}}
-<div class="animate-pulse space-y-6" data-skeleton>
+<div class="animate-pulse space-y-6">
     <!-- Header Skeleton -->
     <div class="text-center">
         <div class="h-8 w-80 bg-gray-200 rounded mb-3 mx-auto"></div>

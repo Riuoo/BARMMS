@@ -4,9 +4,9 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <!-- Analytics Dashboard Skeleton -->
+    <!-- Decision Tree Skeleton -->
     <div id="decisionTreeSkeleton">
-        @include('components.loading.analytics-dashboard-skeleton')
+        @include('components.loading.decision-tree-skeleton')
     </div>
 
     <!-- Real Content (hidden initially) -->

@@ -5,7 +5,7 @@
 
 @if($variant === 'health')
     {{-- Health Dashboard Skeleton (migrated from skeleton-health-dashboard) --}}
-    <div class="animate-pulse" id="healthDashboardSkeleton">
+    <div class="animate-pulse" id="healthDashboardSkeleton" data-skeleton>
         <!-- Header Skeleton -->
         <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -136,7 +136,7 @@
     </div>
 @else
     {{-- Admin Main Dashboard Skeleton --}}
-    <div class="animate-pulse" id="adminDashboardSkeleton">
+    <div class="animate-pulse" id="adminDashboardSkeleton" data-skeleton>
         <!-- Header Skeleton -->
         <div class="mb-3">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">

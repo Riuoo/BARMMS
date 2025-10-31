@@ -26,7 +26,7 @@
 @endif
 
 @if($type === 'vaccination')
-    <div class="animate-pulse">
+    <div class="animate-pulse" data-skeleton>
         @php
             $sections = $sections ?? [];
             $showHeader = $sections['header'] ?? true;
@@ -113,7 +113,7 @@
     </div>
 
 @elseif($type === 'medical-record')
-    <div class="animate-pulse">
+    <div class="animate-pulse" data-skeleton>
         <div class="bg-white rounded-lg shadow p-6 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -223,7 +223,7 @@
     </div>
 
 @elseif($type === 'health-activity')
-    <div class="animate-pulse">
+    <div class="animate-pulse" data-skeleton>
         <div class="mb-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -259,7 +259,7 @@
     </div>
 
 @elseif($type === 'accomplished-project')
-    <div class="animate-pulse">
+    <div class="animate-pulse" data-skeleton>
         <div class="mb-6">
             <div class="flex items-center justify-between">
                 <div class="h-8 w-64 bg-gray-200 rounded"></div>

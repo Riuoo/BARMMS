@@ -19,6 +19,7 @@
             try {
                 var path = window.location && window.location.pathname ? window.location.pathname : 'root';
                 var key = 'skeletonSeen:' + path;
+                // If we've already visited this page once, hide skeletons immediately
                 if (sessionStorage.getItem(key) === '1') {
                     document.documentElement.classList.add('skeleton-hide');
                 }
@@ -28,6 +29,14 @@
     <style>
         .skeleton-hide [data-skeleton],
         .skeleton-hide [id$="Skeleton"] { display: none !important; }
+    </style>
+    <style>
+        /* Improve skeleton visibility in dark mode */
+        [data-theme="dark"] [data-skeleton] .bg-gray-100 { background-color: #374151 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-200 { background-color: #4b5563 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-300 { background-color: #6b7280 !important; }
+        [data-theme="dark"] [data-skeleton] .border-gray-100,
+        [data-theme="dark"] [data-skeleton] .border-gray-200 { border-color: #475569 !important; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />

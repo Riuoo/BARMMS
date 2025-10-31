@@ -4,7 +4,7 @@
     $showSummary = $showSummary ?? false; // optional summary section under table
     $showBreadcrumb = $showBreadcrumb ?? false; // optional breadcrumb row above header
 @endphp
-<div id="tableDashboardSkeleton" data-skeleton>
+<div id="tableDashboardSkeleton" class="animate-pulse" data-skeleton>
     {{-- Breadcrumb Skeleton (optional) --}}
     @if($showBreadcrumb)
     <div class="mb-2 animate-pulse">

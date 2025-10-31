@@ -3,7 +3,13 @@
 @section('title', 'FAQ / Quick Help')
 
 @section('content')
-<div class="max-w-4xl mx-auto pt-2">
+<!-- Resident FAQ Skeleton -->
+<div id="residentFaqSkeleton" class="max-w-4xl mx-auto pt-2">
+    @include('components.loading.resident-faq-skeleton')
+    </div>
+
+<!-- Real Content (auto-shown by layout when skeleton hidden) -->
+<div id="residentFaqContent" class="max-w-4xl mx-auto pt-2">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">FAQ & Quick Help</h1>
@@ -66,3 +72,17 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	setTimeout(function(){
+		var skeleton = document.getElementById('residentFaqSkeleton');
+		if (skeleton) skeleton.style.display = 'none';
+		var content = document.getElementById('residentFaqContent');
+		if (content) content.style.display = '';
+	}, 400);
+});
+</script>
+@endpush
+
