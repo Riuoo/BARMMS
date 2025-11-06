@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, precision_recall_fscore_support, roc_auc_score
 from sklearn.preprocessing import LabelEncoder
 import pickle
 import json
@@ -101,6 +101,21 @@ class DecisionTreeService:
             
             train_accuracy = accuracy_score(y_train, y_train_pred)
             test_accuracy = accuracy_score(y_test, y_test_pred)
+
+            # Additional metrics (macro averages)
+            precision, recall, f1, _ = precision_recall_fscore_support(
+                y_test, y_test_pred, average='macro', zero_division=0
+            )
+            # ROC-AUC (only if probabilites available and binary/multiclass supported)
+            roc_auc = None
+            try:
+                if hasattr(model, 'predict_proba'):
+                    proba = model.predict_proba(X_test)
+                    # Handle binary and multiclass with 'ovr'
+                    roc_auc = roc_auc_score(y_test, proba, multi_class='ovr')
+                    roc_auc = float(roc_auc)
+            except Exception:
+                roc_auc = None
             
             # Feature importance
             feature_importance = None
@@ -148,6 +163,10 @@ class DecisionTreeService:
                 'metrics': {
                     'train_accuracy': float(train_accuracy),
                     'test_accuracy': float(test_accuracy),
+                    'test_precision': float(precision),
+                    'test_recall': float(recall),
+                    'test_f1_score': float(f1),
+                    'roc_auc_score': roc_auc if roc_auc is not None else None,
                     'train_size': len(X_train),
                     'test_size': len(X_test)
                 },

@@ -367,6 +367,7 @@ class DecisionTreeController
             'resident' => (object)['id' => $a['resident_id'], 'name' => $a['resident_name']],
             'predicted' => $a['predicted_eligibility'],
             'actual' => $a['actual_eligibility'],
+            'probability' => $a['probability'] ?? null,
             'correct' => $a['predicted_eligibility'] === $a['actual_eligibility']
         ], $eligibilityAnalysis);
         

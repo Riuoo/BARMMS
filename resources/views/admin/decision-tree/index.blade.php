@@ -24,8 +24,8 @@
     }
     
     $programMap = [];
-    if (isset($programRecommendation['predictions']) && !isset($programRecommendation['error'])) {
-        foreach ($programRecommendation['predictions'] as $pred) {
+    if (isset($programRecommendation['testing_predictions']) && !isset($programRecommendation['error'])) {
+        foreach ($programRecommendation['testing_predictions'] as $pred) {
             if (isset($pred['resident']->id)) {
                 $programMap[$pred['resident']->id] = $pred['predicted'];
             }
@@ -212,13 +212,24 @@
                     </span>
                 </div>
                 <div class="space-y-4">
+                    <!-- Threshold control (binary eligibility) -->
+                    @php
+                        $hasEligibilityProb = isset($serviceEligibility['predictions']) && collect($serviceEligibility['predictions'])->contains(function($p){ return isset($p['probability']); });
+                    @endphp
+                    @if($hasEligibilityProb)
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm text-gray-700 whitespace-nowrap"><i class="fas fa-sliders-h mr-1"></i>Decision Threshold</label>
+                        <input id="eligibilityThreshold" type="range" min="0" max="100" step="1" value="50" class="w-56">
+                        <span id="eligibilityThresholdValue" class="text-sm text-gray-700">50%</span>
+                    </div>
+                    @endif
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-center p-4 bg-green-50 rounded-lg">
-                            <p class="text-2xl font-bold text-green-600">{{ $serviceEligibility['eligible_count'] ?? 0 }}</p>
+                            <p id="eligibleCount" class="text-2xl font-bold text-green-600">{{ $serviceEligibility['eligible_count'] ?? 0 }}</p>
                             <p class="text-sm text-green-700">Eligible</p>
                         </div>
                         <div class="text-center p-4 bg-red-50 rounded-lg">
-                            <p class="text-2xl font-bold text-red-600">{{ $serviceEligibility['ineligible_count'] ?? 0 }}</p>
+                            <p id="ineligibleCount" class="text-2xl font-bold text-red-600">{{ $serviceEligibility['ineligible_count'] ?? 0 }}</p>
                             <p class="text-sm text-red-700">Ineligible</p>
                         </div>
                     </div>
@@ -421,9 +432,17 @@
         </div>
     </div>
 
+    <!-- Toggle for Detailed Resident Analysis -->
+    <div class="flex justify-start mb-2">
+        <button id="toggleResidentsBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+            <i class="fas fa-chevron-down mr-2"></i>
+            <span class="btn-text"> Show Details</span>
+        </button>
+    </div>
+
     <!-- Detailed Analysis Table -->
     @if(isset($residents) && $residents->count() > 0)
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 mb-8">
+        <div id="detailedResidentSection" class="bg-white rounded-xl shadow-lg border border-gray-100 mb-8 hidden">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-lg font-semibold text-gray-900">
@@ -670,6 +689,51 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize table search and filter
     initializeTableFeatures();
+    // Eligibility threshold tuning (client-side)
+    try {
+        const thresholdInput = document.getElementById('eligibilityThreshold');
+        if (thresholdInput) {
+            const thresholdValue = document.getElementById('eligibilityThresholdValue');
+            const eligibleCountEl = document.getElementById('eligibleCount');
+            const ineligibleCountEl = document.getElementById('ineligibleCount');
+            // Read probability map from embedded JSON
+            let probMap = {};
+            const probEl = document.getElementById('eligibility-probabilities');
+            if (probEl) {
+                try { probMap = JSON.parse(probEl.textContent || '{}'); } catch(e) { probMap = {}; }
+            }
+            function applyThreshold(pct) {
+                const rows = document.querySelectorAll('#residentsTable tbody tr');
+                let eligible = 0, ineligible = 0;
+                rows.forEach(row => {
+                    const idCell = row.querySelector('[data-resident-id]');
+                    const residentId = idCell ? idCell.getAttribute('data-resident-id') : (row.querySelector('button.js-view-resident')?.getAttribute('data-resident-id'));
+                    const eligCell = row.querySelector('td:nth-child(6) span');
+                    if (!residentId || !eligCell) return;
+                    const p = probMap[residentId];
+                    if (p == null) {
+                        // No probability available; keep as-is
+                        const isEligible = eligCell.textContent.includes('Eligible');
+                        if (isEligible) eligible++; else ineligible++;
+                        return;
+                    }
+                    const isEligibleNow = (p * 100) >= pct;
+                    eligCell.textContent = isEligibleNow ? 'Eligible' : 'Ineligible';
+                    eligCell.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + (isEligibleNow ? '{{ $statusColors['eligibility']['Eligible'] ?? 'bg-green-100 text-green-800' }}' : '{{ $statusColors['eligibility']['Ineligible'] ?? 'bg-red-100 text-red-800' }}');
+                    if (isEligibleNow) eligible++; else ineligible++;
+                });
+                if (eligibleCountEl) eligibleCountEl.textContent = eligible;
+                if (ineligibleCountEl) ineligibleCountEl.textContent = ineligible;
+            }
+            thresholdInput.addEventListener('input', function() {
+                const val = parseInt(this.value, 10) || 50;
+                if (thresholdValue) thresholdValue.textContent = val + '%';
+                applyThreshold(val);
+            });
+            // Initial apply
+            applyThreshold(parseInt(thresholdInput.value, 10) || 50);
+        }
+    } catch (e) { console.warn('Threshold tuning init failed:', e); }
     
     // View resident functionality
     document.querySelectorAll('.js-view-resident').forEach(button => {
@@ -680,6 +744,32 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Initialize residents details collapsed
+    const details = document.getElementById('detailedResidentSection');
+    const toggleBtn = document.getElementById('toggleResidentsBtn');
+    if (details && toggleBtn) {
+        details.classList.add('hidden');
+        const icon = toggleBtn.querySelector('i');
+        if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+        const textEl = toggleBtn.querySelector('.btn-text');
+        if (textEl) { textEl.textContent = ' Show Details'; }
+        toggleBtn.setAttribute('data-state', 'hidden');
+        toggleBtn.addEventListener('click', function() {
+            const isHidden = details.classList.contains('hidden');
+            if (isHidden) {
+                details.classList.remove('hidden');
+                if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); }
+                if (textEl) { textEl.textContent = ' Hide Details'; }
+                this.setAttribute('data-state', 'shown');
+            } else {
+                details.classList.add('hidden');
+                if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+                if (textEl) { textEl.textContent = ' Show Details'; }
+                this.setAttribute('data-state', 'hidden');
+            }
+        });
+    }
 });
 
 function initializeTableFeatures() {
@@ -736,6 +826,15 @@ function exportData() {
     link.click();
     document.body.removeChild(link);
 }
+</script>
+<script type="application/json" id="eligibility-probabilities">
+{!! json_encode(collect($serviceEligibility['predictions'] ?? [])->mapWithKeys(function($p){
+    if (isset($p['resident']->id)) {
+        $val = (isset($p['probability']) && is_numeric($p['probability'])) ? (float)$p['probability'] : null;
+        return [$p['resident']->id => $val];
+    }
+    return [];
+}), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>
 @endpush
 

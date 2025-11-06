@@ -19,6 +19,17 @@ function initializeAnalyticsCharts() {
         initializeComparativeChart(chartData);
     }
 }
+// Normalize colors: accept array or label->color object; return array in labels order
+function resolveColors(configColors, labels, fallback) {
+    if (Array.isArray(configColors)) {
+        return configColors.slice(0, labels.length);
+    }
+    if (configColors && typeof configColors === 'object' && labels && Array.isArray(labels)) {
+        return labels.map(label => configColors[label] || '#6b7280');
+    }
+    return (fallback || []).slice(0, labels.length);
+}
+
 
 // Prepare comprehensive chart data from clustering characteristics
 function prepareAnalyticsChartData() {
@@ -176,9 +187,11 @@ function initializeEmploymentChart(chartData) {
     if (!ctx) return;
 
     const employmentLabels = ['Unemployed', 'Part-time', 'Self-employed', 'Full-time'];
-    const employmentColors = (window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.employment)
-        ? window.clusteringConfig.colors.employment
-        : ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'];
+    const employmentColors = resolveColors(
+        window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.employment,
+        employmentLabels,
+        ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981']
+    );
     
     // Create pie chart for overall employment distribution
     const totalEmployments = { 'Unemployed': 0, 'Part-time': 0, 'Self-employed': 0, 'Full-time': 0 };
@@ -293,9 +306,11 @@ function initializeHealthChart(chartData) {
     if (!ctx) return;
 
     const healthLabels = ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'];
-    const healthColors = (window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.health)
-        ? window.clusteringConfig.colors.health
-        : ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'];
+    const healthColors = resolveColors(
+        window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.health,
+        healthLabels,
+        ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981']
+    );
     
     // Create stacked bar chart for health distribution
     const datasets = healthLabels.map((label, idx) => ({

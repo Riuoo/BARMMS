@@ -223,6 +223,34 @@ function generateClusterModalContent(payload) {
     const traits = payload.traits || [];
     const insights = payload.insights || {};
     
+    function getTopWithConfidence(counts, total) {
+        if (!counts || typeof counts !== 'object') return null;
+        let topKey = null;
+        let topVal = 0;
+        Object.keys(counts).forEach(k => {
+            const v = counts[k] || 0;
+            if (v > topVal) { topVal = v; topKey = k; }
+        });
+        if (!topKey) return null;
+        const pct = total > 0 ? Math.round((topVal / total) * 100) : 0;
+        return { key: topKey, count: topVal, pct };
+    }
+
+    function formatOneDecimal(value) {
+        const num = Number(value);
+        if (!isFinite(num)) return 'N/A';
+        return (Math.round(num * 10) / 10).toFixed(1);
+    }
+
+    const total = (typeof insights.total === 'number') ? insights.total : (cluster.size || 0);
+    const topIncome = getTopWithConfidence(cluster.income_distribution, total);
+    const topEmployment = getTopWithConfidence(cluster.employment_distribution, total);
+    const topHealth = getTopWithConfidence(cluster.health_distribution, total);
+
+    const topProgram = getTopWithConfidence(insights.program, insights.total || total);
+    const topEligibility = getTopWithConfidence(insights.eligibility, insights.total || total);
+    const topRisk = getTopWithConfidence(insights.risk, insights.total || total);
+
     return `
         <div class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
@@ -232,10 +260,35 @@ function generateClusterModalContent(payload) {
                 </div>
                 <div class="bg-gray-50 p-3 rounded">
                     <h4 class="font-semibold text-gray-700">Average Age</h4>
-                    <p class="text-lg font-bold text-green-600">${cluster.avg_age || 'N/A'}</p>
+                    <p class="text-lg font-bold text-green-600">${formatOneDecimal(cluster.avg_age)}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                    <h4 class="font-semibold text-gray-700">Average Family Size</h4>
+                    <p class="text-lg font-bold text-indigo-600">${formatOneDecimal(cluster.avg_family_size)}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                    <h4 class="font-semibold text-gray-700">Most Common Purok</h4>
+                    <p class="text-lg font-bold text-rose-600">${cluster.most_common_purok || 'N/A'}</p>
                 </div>
             </div>
-            
+
+            ${(topIncome || topEmployment || topHealth) ? `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-white border border-gray-200 rounded p-3">
+                        <h4 class="text-xs font-semibold text-gray-600">Income</h4>
+                        <p class="text-sm text-gray-800">${topIncome ? `${topIncome.key} (${topIncome.pct}%)` : 'N/A'}</p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded p-3">
+                        <h4 class="text-xs font-semibold text-gray-600">Employment</h4>
+                        <p class="text-sm text-gray-800">${topEmployment ? `${topEmployment.key} (${topEmployment.pct}%)` : 'N/A'}</p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded p-3">
+                        <h4 class="text-xs font-semibold text-gray-600">Health</h4>
+                        <p class="text-sm text-gray-800">${topHealth ? `${topHealth.key} (${topHealth.pct}%)` : 'N/A'}</p>
+                    </div>
+                </div>
+            ` : ''}
+
             ${traits.length > 0 ? `
                 <div>
                     <h4 class="font-semibold text-gray-700 mb-2">Top Traits</h4>
@@ -248,11 +301,12 @@ function generateClusterModalContent(payload) {
                     </div>
                 </div>
             ` : ''}
-            
-            ${insights.program ? `
-                <div class="bg-purple-50 p-3 rounded">
-                    <h4 class="font-semibold text-purple-700">Recommended Program</h4>
-                    <p class="text-purple-600">${insights.program}</p>
+
+            ${(topProgram || topEligibility || topRisk) ? `
+                <div class="flex flex-wrap gap-2">
+                    ${topProgram ? `<span class=\"inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800\"><i class=\"fas fa-magic mr-1\"></i> Program: ${topProgram.key} (${topProgram.pct}%)</span>` : ''}
+                    ${topEligibility ? `<span class=\"inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800\"><i class=\"fas fa-check mr-1\"></i> Eligibility: ${topEligibility.key} (${topEligibility.pct}%)</span>` : ''}
+                    ${topRisk ? `<span class=\"inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800\"><i class=\"fas fa-heartbeat mr-1\"></i> Risk: ${topRisk.key} (${topRisk.pct}%)</span>` : ''}
                 </div>
             ` : ''}
         </div>

@@ -309,7 +309,7 @@
             <!-- Toggle for Detailed Analysis -->
             <div class="flex justify-start mb-2">
                 <button id="toggleDetailsBtn" onclick="toggleDetails()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                    <i class="fas fa-chevron-down mr-2"></i>
+                    <i class="fas fa-chevron-down mr-2"></i> Show Details
                 </button>
             </div>
 
@@ -323,6 +323,7 @@
                         </h3>
                         <div class="flex flex-wrap gap-2 items-center mb-2">
                             <input type="text" id="searchTable" placeholder="Search residents..." class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <label for="rowsPerPage" class="text-sm text-gray-700">Rows per page:</label>
                             <select id="rowsPerPage" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
                                 <option value="25">25 per page</option>
                                 <option value="50">50 per page</option>
@@ -507,13 +508,13 @@
                                                 <div class="rounded-lg border border-gray-200 bg-white p-3">
                                                     <div class="text-xs text-gray-500">Typical Age</div>
                                                     <div class="text-lg font-bold text-emerald-700 flex items-center gap-2">
-                                                        <i class="fas fa-birthday-cake"></i> {{ $age }}
+                                                        <i class="fas fa-birthday-cake"></i> {{ is_numeric($age) ? number_format((float)$age, 1) : ($age ?? 'N/A') }}
                                                     </div>
                                                 </div>
                                                 <div class="rounded-lg border border-gray-200 bg-white p-3">
                                                     <div class="text-xs text-gray-500">Family Size</div>
                                                     <div class="text-lg font-bold text-indigo-700 flex items-center gap-2">
-                                                        <i class="fas fa-people-roof"></i> {{ $familySize }}
+                                                        <i class="fas fa-people-roof"></i> {{ is_numeric($familySize) ? number_format((float)$familySize, 1) : ($familySize ?? 'N/A') }}
                                                     </div>
                                                 </div>
                                                 @php
@@ -535,11 +536,29 @@
                                                     <i class="fas fa-chevron-down" id="cluster-icon-{{ $clusterId }}"></i>
                                                     Show Details
                                                 </button>
-                                                <button data-action="show-cluster-modal" data-cluster-id="{{ $clusterId }}" data-payload="{{ e(json_encode([
-                                                    'cluster' => $cluster,
-                                                    'traits' => $traits,
-                                                    'insights' => isset($insights) ? $insights : null
-                                                ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1">
+                                                @php
+                                                    // Build a safe, serializable payload for the modal (exclude Eloquent models/objects)
+                                                    $clusterForModal = [
+                                                        'label' => $cluster['label'] ?? ('Cluster ' . ($clusterId + 1)),
+                                                        'size' => $cluster['size'] ?? 0,
+                                                        'avg_age' => $cluster['avg_age'] ?? null,
+                                                        'avg_family_size' => $cluster['avg_family_size'] ?? null,
+                                                        'income_distribution' => $cluster['income_distribution'] ?? [],
+                                                        'employment_distribution' => $cluster['employment_distribution'] ?? [],
+                                                        'health_distribution' => $cluster['health_distribution'] ?? [],
+                                                        'education_distribution' => $cluster['education_distribution'] ?? [],
+                                                        'most_common_purok' => $cluster['most_common_purok'] ?? 'N/A',
+                                                        'most_common_employment' => $cluster['most_common_employment'] ?? 'N/A',
+                                                        'most_common_health' => $cluster['most_common_health'] ?? 'N/A',
+                                                    ];
+                                                    $modalPayload = [
+                                                        'cluster' => $clusterForModal,
+                                                        'traits' => $traits,
+                                                        'insights' => isset($insights) ? $insights : null,
+                                                    ];
+                                                @endphp
+                                                <button data-action="show-cluster-modal" data-cluster-id="{{ $clusterId }}" data-payload='@json($modalPayload, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'
+                                                    class="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1">
                                                     <i class="fas fa-external-link-alt"></i>
                                                     Full Analysis
                                                 </button>
