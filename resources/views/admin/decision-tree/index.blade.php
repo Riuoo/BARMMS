@@ -3,6 +3,65 @@
 @section('title', 'Decision Tree Analytics')
 
 @section('content')
+@php
+    // Create lookup maps for predictions by resident ID
+    $eligibilityMap = [];
+    if (isset($serviceEligibility['predictions']) && !isset($serviceEligibility['error'])) {
+        foreach ($serviceEligibility['predictions'] as $pred) {
+            if (isset($pred['resident']->id)) {
+                $eligibilityMap[$pred['resident']->id] = $pred['predicted'];
+            }
+        }
+    }
+    
+    $riskMap = [];
+    if (isset($healthRisk['testing_predictions']) && !isset($healthRisk['error'])) {
+        foreach ($healthRisk['testing_predictions'] as $pred) {
+            if (isset($pred['resident']->id)) {
+                $riskMap[$pred['resident']->id] = $pred['predicted'];
+            }
+        }
+    }
+    
+    $programMap = [];
+    if (isset($programRecommendation['predictions']) && !isset($programRecommendation['error'])) {
+        foreach ($programRecommendation['predictions'] as $pred) {
+            if (isset($pred['resident']->id)) {
+                $programMap[$pred['resident']->id] = $pred['predicted'];
+            }
+        }
+    }
+    
+    // Get enhanced metrics from Python models
+    $healthRiskMetrics = $healthRisk['model_info']['metrics'] ?? [];
+    $eligibilityMetrics = $serviceEligibility['model_info']['metrics'] ?? [];
+    $programMetrics = $programRecommendation['model_info']['metrics'] ?? [];
+    
+    // Feature importance (named if available)
+    $healthRiskFeatures = $healthRisk['model_info']['feature_importance_named'] ?? $healthRisk['model_info']['feature_importance'] ?? [];
+    $eligibilityFeatures = $serviceEligibility['model_info']['feature_importance_named'] ?? $serviceEligibility['model_info']['feature_importance'] ?? [];
+    
+    // Get model types
+    $eligibilityModelType = $modelTypes['eligibility'] ?? 'decision_tree';
+    $healthRiskModelType = $modelTypes['healthRisk'] ?? 'random_forest';
+    $programModelType = $modelTypes['program'] ?? 'random_forest';
+    
+    // Get model display names
+    $modelTypeNames = config('decision_tree.model_type_names', []);
+    $eligibilityModelName = $modelTypeNames[$eligibilityModelType] ?? ucfirst(str_replace('_', ' ', $eligibilityModelType));
+    $healthRiskModelName = $modelTypeNames[$healthRiskModelType] ?? ucfirst(str_replace('_', ' ', $healthRiskModelType));
+    
+    // Helper function to get status badge color
+    $getStatusColor = function($type, $value) use ($statusColors) {
+        $typeColors = $statusColors[$type] ?? [];
+        return $typeColors[$value] ?? ($typeColors['default'] ?? 'bg-gray-100 text-gray-800');
+    };
+    
+    // Helper function to get program description
+    $getProgramDescription = function($program) use ($programDescriptions) {
+        return $programDescriptions[$program] ?? 'Community support program';
+    };
+@endphp
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <!-- Decision Tree Skeleton -->
     <div id="decisionTreeSkeleton">
@@ -44,8 +103,8 @@
                 <div class="ml-3">
                     <h3 class="text-sm font-medium text-red-800">Analysis Errors</h3>
                     <div class="mt-2 text-sm text-red-700">
-                        @foreach($errors as $error)
-                            <p>{{ $error }}</p>
+                        @foreach($errors as $key => $error)
+                            <p>{{ is_array($error) ? json_encode($error) : $error }}</p>
                         @endforeach
                     </div>
                 </div>
@@ -163,21 +222,62 @@
                             <p class="text-sm text-red-700">Ineligible</p>
                         </div>
                     </div>
-                    @if(isset($serviceEligibility['rules']) && !isset($serviceEligibility['error']))
+                    @if(isset($eligibilityFeatures) && !empty($eligibilityFeatures) && !isset($serviceEligibility['error']))
                         <div class="space-y-2">
-                            <h4 class="text-sm font-semibold text-gray-900">Key Rules:</h4>
+                            <h4 class="text-sm font-semibold text-gray-900">Feature Importance ({{ $eligibilityModelName }} Model):</h4>
                             <div class="space-y-2">
-                                @foreach($serviceEligibility['rules'] as $rule)
-                                    <div class="p-3 bg-gray-50 rounded-lg">
-                                        <p class="text-sm text-gray-700">
-                                            @if(is_array($rule))
-                                                {{ $rule['description'] ?? $rule['condition'] ?? 'Rule' }}
-                                            @else
-                                                {{ $rule }}
-                                            @endif
-                                        </p>
-                                    </div>
-                                @endforeach
+                                @if(is_array($eligibilityFeatures))
+                                    @php
+                                        $featureDisplayNames = config('decision_tree.feature_display_names', []);
+                                        $maxFeatures = min(5, count($eligibilityFeatures));
+                                    @endphp
+                                    @foreach(array_slice($eligibilityFeatures, 0, $maxFeatures, true) as $index => $importance)
+                                        @php
+                                            $featureName = is_numeric($index) 
+                                                ? ($featureDisplayNames[$index] ?? 'Feature ' . ($index + 1))
+                                                : ucfirst(str_replace('_', ' ', $index));
+                                        @endphp
+                                        <div class="p-3 bg-gray-50 rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm font-medium text-gray-700">{{ $featureName }}</span>
+                                                <span class="text-xs text-gray-500">{{ round($importance * 100, 1) }}%</span>
+                                            </div>
+                                            <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-green-600 h-2 rounded-full" style="width: {{ round($importance * 100, 1) }}%"></div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                    @if(isset($eligibilityMetrics['test_precision']) && !isset($serviceEligibility['error']))
+                        <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                @if(isset($eligibilityMetrics['test_precision']))
+                                <div>
+                                    <span class="text-gray-600">Precision:</span>
+                                    <span class="font-semibold text-blue-700">{{ round($eligibilityMetrics['test_precision'] * 100, 1) }}%</span>
+                                </div>
+                                @endif
+                                @if(isset($eligibilityMetrics['test_recall']))
+                                <div>
+                                    <span class="text-gray-600">Recall:</span>
+                                    <span class="font-semibold text-blue-700">{{ round($eligibilityMetrics['test_recall'] * 100, 1) }}%</span>
+                                </div>
+                                @endif
+                                @if(isset($eligibilityMetrics['test_f1_score']))
+                                <div>
+                                    <span class="text-gray-600">F1-Score:</span>
+                                    <span class="font-semibold text-blue-700">{{ round($eligibilityMetrics['test_f1_score'] * 100, 1) }}%</span>
+                                </div>
+                                @endif
+                                @if(isset($eligibilityMetrics['roc_auc_score']))
+                                <div>
+                                    <span class="text-gray-600">ROC-AUC:</span>
+                                    <span class="font-semibold text-blue-700">{{ round($eligibilityMetrics['roc_auc_score'] * 100, 1) }}%</span>
+                                </div>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -216,21 +316,62 @@
                             <p class="text-xs text-red-700">High Risk</p>
                         </div>
                     </div>
-                    @if(isset($healthRisk['rules']) && !isset($healthRisk['error']))
+                    @if(isset($healthRiskFeatures) && !empty($healthRiskFeatures) && !isset($healthRisk['error']))
                         <div class="space-y-2">
-                            <h4 class="text-sm font-semibold text-gray-900">Risk Factors:</h4>
+                            <h4 class="text-sm font-semibold text-gray-900">Feature Importance ({{ $healthRiskModelName }} Model):</h4>
                             <div class="space-y-2">
-                                @foreach($healthRisk['rules'] as $rule)
-                                    <div class="p-3 bg-gray-50 rounded-lg">
-                                        <p class="text-sm text-gray-700">
-                                            @if(is_array($rule))
-                                                {{ $rule['description'] ?? $rule['condition'] ?? 'Rule' }}
-                                            @else
-                                                {{ $rule }}
-                                            @endif
-                                        </p>
-                                    </div>
-                                @endforeach
+                                @if(is_array($healthRiskFeatures))
+                                    @php
+                                        $featureDisplayNames = config('decision_tree.feature_display_names', []);
+                                        $maxFeatures = min(5, count($healthRiskFeatures));
+                                    @endphp
+                                    @foreach(array_slice($healthRiskFeatures, 0, $maxFeatures, true) as $index => $importance)
+                                        @php
+                                            $featureName = is_numeric($index) 
+                                                ? ($featureDisplayNames[$index] ?? 'Feature ' . ($index + 1))
+                                                : ucfirst(str_replace('_', ' ', $index));
+                                        @endphp
+                                        <div class="p-3 bg-gray-50 rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm font-medium text-gray-700">{{ $featureName }}</span>
+                                                <span class="text-xs text-gray-500">{{ round($importance * 100, 1) }}%</span>
+                                            </div>
+                                            <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-purple-600 h-2 rounded-full" style="width: {{ round($importance * 100, 1) }}%"></div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                    @if(isset($healthRiskMetrics['test_precision']) && !isset($healthRisk['error']))
+                        <div class="mt-4 p-3 bg-purple-50 rounded-lg">
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                @if(isset($healthRiskMetrics['test_precision']))
+                                <div>
+                                    <span class="text-gray-600">Precision:</span>
+                                    <span class="font-semibold text-purple-700">{{ round($healthRiskMetrics['test_precision'] * 100, 1) }}%</span>
+                                </div>
+                                @endif
+                                @if(isset($healthRiskMetrics['test_recall']))
+                                <div>
+                                    <span class="text-gray-600">Recall:</span>
+                                    <span class="font-semibold text-purple-700">{{ round($healthRiskMetrics['test_recall'] * 100, 1) }}%</span>
+                                </div>
+                                @endif
+                                @if(isset($healthRiskMetrics['test_f1_score']))
+                                <div>
+                                    <span class="text-gray-600">F1-Score:</span>
+                                    <span class="font-semibold text-purple-700">{{ round($healthRiskMetrics['test_f1_score'] * 100, 1) }}%</span>
+                                </div>
+                                @endif
+                                @if(isset($healthRiskMetrics['roc_auc_score']))
+                                <div>
+                                    <span class="text-gray-600">ROC-AUC:</span>
+                                    <span class="font-semibold text-purple-700">{{ round($healthRiskMetrics['roc_auc_score'] * 100, 1) }}%</span>
+                                </div>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -255,28 +396,18 @@
                     @endif
                 </span>
             </div>
-            @if(isset($programRecommendation['recommendations']) && !isset($programRecommendation['error']))
+            @if(isset($programRecommendation['recommendations']) && !isset($programRecommendation['error']) && count($programRecommendation['recommendations']) > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     @foreach($programRecommendation['recommendations'] as $program => $count)
                         <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200">
                             <div class="flex items-center justify-between mb-2">
                                 <h4 class="text-sm font-semibold text-gray-900">{{ $program }}</h4>
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ $count }} residents
+                                    {{ $count }} {{ $count == 1 ? 'resident' : 'residents' }}
                                 </span>
                             </div>
                             <p class="text-xs text-gray-600">
-                                @if($program === 'Financial Assistance')
-                                    For residents with low income levels
-                                @elseif($program === 'Health Programs')
-                                    For residents with health concerns
-                                @elseif($program === 'Education Support')
-                                    For residents needing educational assistance
-                                @elseif($program === 'Employment Training')
-                                    For unemployed residents
-                                @else
-                                    General community support program
-                                @endif
+                                {{ $getProgramDescription($program) }}
                             </p>
                         </div>
                     @endforeach
@@ -334,47 +465,54 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->age ?? 'N/A' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $resident->income_level === 'High' ? 'bg-green-100 text-green-800' : ($resident->income_level === 'Low' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $getStatusColor('income_level', $resident->income_level ?? '') }}">
                                             {{ $resident->income_level ?? 'N/A' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $resident->employment_status === 'Full-time' ? 'bg-green-100 text-green-800' : ($resident->employment_status === 'Unemployed' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800') }}">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $getStatusColor('employment_status', $resident->employment_status ?? '') }}">
                                             {{ $resident->employment_status ?? 'N/A' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $resident->health_status === 'Excellent' ? 'bg-green-100 text-green-800' : ($resident->health_status === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $getStatusColor('health_status', $resident->health_status ?? '') }}">
                                             {{ $resident->health_status ?? 'N/A' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
-                                            $eligible = ($resident->income_level === 'Low' || $resident->employment_status === 'Unemployed' || $resident->health_status === 'Critical');
+                                            $predictedEligibility = $eligibilityMap[$resident->id] ?? null;
+                                            $eligibilityStatus = $predictedEligibility ?? 'N/A';
                                         @endphp
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $eligible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                            {{ $eligible ? 'Eligible' : 'Ineligible' }}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $getStatusColor('eligibility', $eligibilityStatus) }}">
+                                            {{ $eligibilityStatus }}
+                                            @if($predictedEligibility !== null)
+                                                <i class="fas fa-robot ml-1 text-xs" title="AI Prediction"></i>
+                                            @endif
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
-                                            $risk = $resident->health_status === 'Critical' ? 'High' : ($resident->health_status === 'Good' ? 'Medium' : 'Low');
+                                            $predictedRisk = $riskMap[$resident->id] ?? null;
+                                            $riskLevel = $predictedRisk ?? 'N/A';
                                         @endphp
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $risk === 'Low' ? 'bg-green-100 text-green-800' : ($risk === 'High' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                            {{ $risk }} Risk
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $getStatusColor('risk_level', $riskLevel) }}">
+                                            {{ $riskLevel !== 'N/A' ? $riskLevel . ' Risk' : 'N/A' }}
+                                            @if($predictedRisk !== null)
+                                                <i class="fas fa-robot ml-1 text-xs" title="AI Prediction"></i>
+                                            @endif
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
-                                            $program = '';
-                                            if ($resident->income_level === 'Low') $program = 'Financial Assistance';
-                                            elseif ($resident->health_status === 'Critical') $program = 'Health Programs';
-                                            elseif ($resident->employment_status === 'Unemployed') $program = 'Employment Training';
-                                            elseif ($resident->education_level === 'Elementary') $program = 'Education Support';
-                                            else $program = 'Community Support';
+                                            $predictedProgram = $programMap[$resident->id] ?? null;
+                                            $program = $predictedProgram ?? 'N/A';
                                         @endphp
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             {{ $program }}
+                                            @if($predictedProgram !== null)
+                                                <i class="fas fa-robot ml-1 text-xs" title="AI Recommendation"></i>
+                                            @endif
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -405,51 +543,54 @@
                         Key Performance Metrics
                     </h4>
                     <div class="space-y-4">
+                        @if(isset($serviceEligibility['accuracy']) && !isset($serviceEligibility['error']))
                         <div class="p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h5 class="text-sm font-medium text-green-900">Service Eligibility Accuracy</h5>
-                                    <p class="text-sm text-green-700">High accuracy in identifying eligible residents</p>
+                                    <p class="text-sm text-green-700">Model accuracy for service eligibility classification</p>
                                 </div>
                                 <span class="text-2xl font-bold text-green-600">
-                                    @if(isset($serviceEligibility['accuracy']) && !isset($serviceEligibility['error']))
-                                        {{ round($serviceEligibility['accuracy'] * 100, 1) }}%
-                                    @else
-                                        0%
-                                    @endif
+                                    {{ round($serviceEligibility['accuracy'] * 100, 1) }}%
                                 </span>
+                                @if(isset($eligibilityMetrics['cv_mean']))
+                                    <p class="text-xs text-green-600 mt-1">CV Score: {{ round($eligibilityMetrics['cv_mean'] * 100, 1) }}% ± {{ round($eligibilityMetrics['cv_std'] * 100, 1) }}%</p>
+                                @endif
                             </div>
                         </div>
+                        @endif
+                        @if(isset($healthRisk['accuracy']) && !isset($healthRisk['error']))
                         <div class="p-4 border-l-4 border-purple-500 bg-purple-50 rounded-lg">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h5 class="text-sm font-medium text-purple-900">Health Risk Assessment</h5>
-                                    <p class="text-sm text-purple-700">Effective health risk classification</p>
+                                    <p class="text-sm text-purple-700">Model accuracy for health risk classification</p>
                                 </div>
                                 <span class="text-2xl font-bold text-purple-600">
-                                    @if(isset($healthRisk['accuracy']) && !isset($healthRisk['error']))
-                                        {{ round($healthRisk['accuracy'] * 100, 1) }}%
-                                    @else
-                                        0%
-                                    @endif
+                                    {{ round($healthRisk['accuracy'] * 100, 1) }}%
                                 </span>
+                                @if(isset($healthRiskMetrics['cv_mean']))
+                                    <p class="text-xs text-purple-600 mt-1">CV Score: {{ round($healthRiskMetrics['cv_mean'] * 100, 1) }}% ± {{ round($healthRiskMetrics['cv_std'] * 100, 1) }}%</p>
+                                @endif
                             </div>
                         </div>
+                        @endif
+                        @if(isset($programRecommendation['accuracy']) && !isset($programRecommendation['error']))
                         <div class="p-4 border-l-4 border-orange-500 bg-orange-50 rounded-lg">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h5 class="text-sm font-medium text-orange-900">Program Recommendations</h5>
-                                    <p class="text-sm text-orange-700">Targeted program suggestions</p>
+                                    <p class="text-sm text-orange-700">Model accuracy for program recommendation</p>
                                 </div>
                                 <span class="text-2xl font-bold text-orange-600">
-                                    @if(isset($programRecommendation['accuracy']) && !isset($programRecommendation['error']))
-                                        {{ round($programRecommendation['accuracy'] * 100, 1) }}%
-                                    @else
-                                        0%
-                                    @endif
+                                    {{ round($programRecommendation['accuracy'] * 100, 1) }}%
                                 </span>
+                                @if(isset($programMetrics['cv_mean']))
+                                    <p class="text-xs text-orange-600 mt-1">CV Score: {{ round($programMetrics['cv_mean'] * 100, 1) }}% ± {{ round($programMetrics['cv_std'] * 100, 1) }}%</p>
+                                @endif
                             </div>
                         </div>
+                        @endif
                     </div>
                 </div>
                 <div>
@@ -458,6 +599,7 @@
                         Strategic Recommendations
                     </h4>
                     <div class="space-y-4">
+                        @if(isset($serviceEligibility['eligible_count']) && $serviceEligibility['eligible_count'] > 0)
                         <div class="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg">
                             <div class="flex items-start">
                                 <div class="flex-shrink-0">
@@ -468,11 +610,13 @@
                                 <div class="ml-4">
                                     <h5 class="text-sm font-medium text-blue-900">Service Optimization</h5>
                                     <p class="text-sm text-blue-700 mt-1">
-                                        Focus on residents with low income and health concerns for immediate assistance programs.
+                                        {{ $serviceEligibility['eligible_count'] }} residents are eligible for services. Focus on priority cases for immediate assistance.
                                     </p>
                                 </div>
                             </div>
                         </div>
+                        @endif
+                        @if(isset($healthRisk['high_count']) && $healthRisk['high_count'] > 0)
                         <div class="p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
                             <div class="flex items-start">
                                 <div class="flex-shrink-0">
@@ -483,11 +627,13 @@
                                 <div class="ml-4">
                                     <h5 class="text-sm font-medium text-green-900">Health Intervention</h5>
                                     <p class="text-sm text-green-700 mt-1">
-                                        Prioritize health programs for residents identified as high-risk.
+                                        {{ $healthRisk['high_count'] }} residents identified as high-risk. Prioritize health programs for these individuals.
                                     </p>
                                 </div>
                             </div>
                         </div>
+                        @endif
+                        @if(isset($programRecommendation['recommendations']) && count($programRecommendation['recommendations']) > 0)
                         <div class="p-4 border-l-4 border-purple-500 bg-purple-50 rounded-lg">
                             <div class="flex items-start">
                                 <div class="flex-shrink-0">
@@ -496,13 +642,14 @@
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <h5 class="text-sm font-medium text-purple-900">Education & Training</h5>
+                                    <h5 class="text-sm font-medium text-purple-900">Program Development</h5>
                                     <p class="text-sm text-purple-700 mt-1">
-                                        Develop targeted education and employment training programs.
+                                        {{ count($programRecommendation['recommendations']) }} different programs recommended. Develop targeted programs based on resident needs.
                                     </p>
                                 </div>
                             </div>
                         </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -514,26 +661,28 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        // Hide consolidated skeleton
         const skeleton = document.getElementById('decisionTreeSkeleton');
         if (skeleton) skeleton.style.display = 'none';
 
-        // Show content
         const content = document.getElementById('decisionTreeContent');
         if (content) content.style.display = 'block';
     }, 1000);
-});
-</script>
-@endpush
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+    
     // Initialize table search and filter
     initializeTableFeatures();
+    
+    // View resident functionality
+    document.querySelectorAll('.js-view-resident').forEach(button => {
+        button.addEventListener('click', function() {
+            const residentId = this.getAttribute('data-resident-id');
+            if (residentId) {
+                window.open(`/admin/residents/${residentId}`, '_blank');
+            }
+        });
+    });
 });
 
 function initializeTableFeatures() {
-    // Search functionality
     const searchInput = document.getElementById('searchTable');
     if (searchInput) {
         searchInput.addEventListener('keyup', function() {
@@ -547,7 +696,6 @@ function initializeTableFeatures() {
         });
     }
     
-    // Filter by category
     const filterSelect = document.getElementById('filterCategory');
     if (filterSelect) {
         filterSelect.addEventListener('change', function() {
@@ -581,7 +729,6 @@ function refreshAnalysis() {
 }
 
 function exportData() {
-    // Create download link for CSV
     const link = document.createElement('a');
     link.href = '{{ route("admin.decision-tree.export") }}?format=csv';
     link.download = 'decision_tree_results.csv';
@@ -589,12 +736,8 @@ function exportData() {
     link.click();
     document.body.removeChild(link);
 }
-
-function viewResident(residentId) {
-    // Open resident details in modal or redirect
-    window.open(`/admin/residents/${residentId}`, '_blank');
-}
 </script>
+@endpush
 
 <style>
 @media print {
@@ -611,4 +754,4 @@ function viewResident(residentId) {
     }
 }
 </style>
-@endsection 
+@endsection

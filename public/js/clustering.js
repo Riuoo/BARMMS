@@ -7,6 +7,13 @@
 let clusteringData = {};
 let charts = {};
 
+function destroyChartIfExists(key) {
+    if (charts[key] && typeof charts[key].destroy === 'function') {
+        charts[key].destroy();
+        charts[key] = null;
+    }
+}
+
 // Utility functions
 function debounce(func, wait) {
     let timeout;
@@ -28,42 +35,8 @@ function initializeClusterChart() {
     const data = prepareClusterChartData();
     if (!data) return;
 
+    destroyChartIfExists('clusterChart');
     charts.clusterChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: data,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        font: { size: 12 },
-                        padding: 20
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                            return `${context.label}: ${context.parsed} (${percentage}%)`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-function initializePurokChart() {
-    const ctx = document.getElementById('purokChart');
-    if (!ctx) return;
-
-    const data = preparePurokChartData();
-    if (!data) return;
-
-    charts.purokChart = new Chart(ctx, {
         type: 'doughnut',
         data: data,
         options: {
@@ -98,7 +71,9 @@ function prepareClusterChartData() {
 
     const labels = [];
     const data = [];
-    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
+    const colors = (window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.clusters) 
+        ? window.clusteringConfig.colors.clusters 
+        : ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
 
     clusteringData.characteristics.forEach((cluster, index) => {
         labels.push(`Cluster ${index + 1}`);
@@ -117,49 +92,19 @@ function prepareClusterChartData() {
     };
 }
 
-function preparePurokChartData() {
-    if (!clusteringData.grouped || Object.keys(clusteringData.grouped).length === 0) {
-        return null;
-    }
-
-    const labels = [];
-    const data = [];
-    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316', '#EC4899', '#06B6D4'];
-
-    Object.keys(clusteringData.grouped).forEach((purok, index) => {
-        if (purok !== 'N/A') {
-            labels.push(`Purok ${purok}`);
-            data.push(clusteringData.grouped[purok].length || 0);
-        }
-    });
-
-    return {
-        labels: labels,
-        datasets: [{
-            data: data,
-            backgroundColor: colors.slice(0, labels.length),
-            borderColor: '#fff',
-            borderWidth: 3,
-            hoverOffset: 4
-        }]
-    };
-}
-
 // Chart utility functions
 function downloadChart() {
-    const chartId = clusteringData.isHier ? 'purokChart' : 'clusterChart';
-    const chart = charts[chartId];
+    const chart = charts.clusterChart;
     if (chart) {
         const link = document.createElement('a');
-        link.download = `${chartId}.png`;
+        link.download = 'clusterChart.png';
         link.href = chart.toBase64Image();
         link.click();
     }
 }
 
 function fullscreenChart() {
-    const chartId = clusteringData.isHier ? 'purokChart' : 'clusterChart';
-    const chart = charts[chartId];
+    const chart = charts.clusterChart;
     if (chart) {
         // Create fullscreen modal
         const modal = document.createElement('div');
@@ -181,7 +126,7 @@ function fullscreenChart() {
         
         // Create new chart instance
         const ctx = document.getElementById('fullscreenChart').getContext('2d');
-        const data = clusteringData.isHier ? preparePurokChartData() : prepareClusterChartData();
+        const data = prepareClusterChartData();
         new Chart(ctx, {
             type: 'doughnut',
             data: data,
@@ -255,32 +200,9 @@ document.addEventListener('click', function(e) {
         }
     }
     
-    if (e.target.closest('[data-action="toggle-purok-details"]')) {
-        const purok = e.target.closest('[data-action="toggle-purok-details"]').dataset.purok;
-        const expandedView = document.getElementById(`expanded-${purok}`);
-        const icon = document.getElementById(`icon-${purok}`);
-        
-        if (expandedView && icon) {
-            if (expandedView.classList.contains('hidden')) {
-                expandedView.classList.remove('hidden');
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
-            } else {
-                expandedView.classList.add('hidden');
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
-            }
-        }
-    }
-    
     if (e.target.closest('[data-action="show-cluster-modal"]')) {
         const payload = JSON.parse(e.target.closest('[data-action="show-cluster-modal"]').dataset.payload);
         showClusterModal(payload);
-    }
-    
-    if (e.target.closest('[data-action="show-purok-modal"]')) {
-        const payload = JSON.parse(e.target.closest('[data-action="show-purok-modal"]').dataset.payload);
-        showPurokModal(payload);
     }
 });
 
@@ -292,18 +214,6 @@ function showClusterModal(payload) {
     if (modal && title && content) {
         title.textContent = `Cluster ${payload.cluster?.label || 'Analysis'}`;
         content.innerHTML = generateClusterModalContent(payload);
-        modal.classList.remove('hidden');
-    }
-}
-
-function showPurokModal(payload) {
-    const modal = document.getElementById('analysisModal');
-    const title = document.getElementById('modalTitle');
-    const content = document.getElementById('modalContent');
-    
-    if (modal && title && content) {
-        title.textContent = `Purok ${payload.purok || 'Analysis'}`;
-        content.innerHTML = generatePurokModalContent(payload);
         modal.classList.remove('hidden');
     }
 }
@@ -349,36 +259,9 @@ function generateClusterModalContent(payload) {
     `;
 }
 
-function generatePurokModalContent(payload) {
-    return `
-        <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-gray-50 p-3 rounded">
-                    <h4 class="font-semibold text-gray-700">Total Residents</h4>
-                    <p class="text-lg font-bold text-blue-600">${payload.total || 0}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded">
-                    <h4 class="font-semibold text-gray-700">Average Age</h4>
-                    <p class="text-lg font-bold text-green-600">${payload.avgAge || 'N/A'}</p>
-                </div>
-            </div>
-            
-            <div>
-                <h4 class="font-semibold text-gray-700 mb-2">Most Common Characteristics</h4>
-                <div class="space-y-2">
-                    <p><strong>Income:</strong> ${payload.mostCommonIncome || 'N/A'}</p>
-                    <p><strong>Employment:</strong> ${payload.mostCommonEmployment || 'N/A'}</p>
-                    <p><strong>Health:</strong> ${payload.mostCommonHealth || 'N/A'}</p>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
 // Table features initialization
 function initializeTableFeatures() {
     const searchInput = document.getElementById('searchTable');
-    const filterPurok = document.getElementById('filterPurok');
     const rowsPerPageSelect = document.getElementById('rowsPerPage');
     const table = document.getElementById('residentsTable');
     
@@ -399,9 +282,6 @@ function initializeTableFeatures() {
     let currentPage = 1;
     let rowsPerPage = parseInt(rowsPerPageSelect.value);
     let filteredRows = allRows;
-
-    // Purok is always the 7th column (1-based index)
-    const purokColIdx = 7;
 
     function showLoading(show) {
         if (loadingDiv) loadingDiv.classList.toggle('hidden', !show);
@@ -438,17 +318,10 @@ function initializeTableFeatures() {
         showLoading(true);
         setTimeout(() => {
             const searchTerm = searchInput.value.toLowerCase();
-            const selectedPurok = filterPurok.value.trim().toUpperCase();
             filteredRows = allRows.filter(row => {
                 let match = true;
                 if (searchTerm) {
                     match = row.textContent.toLowerCase().includes(searchTerm);
-                }
-                if (match && selectedPurok) {
-                    // Use correct column index for purok
-                    const purokCell = row.querySelector(`td:nth-child(${purokColIdx})`);
-                    const val = (purokCell ? purokCell.textContent : '').trim().toUpperCase();
-                    match = val.includes(selectedPurok);
                 }
                 return match;
             });
@@ -459,7 +332,6 @@ function initializeTableFeatures() {
 
     // Debounced search
     if (searchInput) searchInput.addEventListener('input', debounce(filterRows, 300));
-    if (filterPurok) filterPurok.addEventListener('change', filterRows);
     if (rowsPerPageSelect) {
         rowsPerPageSelect.addEventListener('change', function() {
             rowsPerPage = parseInt(this.value);
@@ -497,9 +369,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Initialize charts based on mode
-    if (clusteringData.isHier) {
-        initializePurokChart();
-    } else {
-        initializeClusterChart();
-    }
+    initializeClusterChart();
 });

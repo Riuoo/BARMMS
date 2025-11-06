@@ -116,7 +116,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/decision-tree/stats', [DecisionTreeController::class, 'getStatistics'])->name('admin.decision-tree.stats');
         Route::get('/decision-tree/export', [DecisionTreeController::class, 'exportRules'])->name('admin.decision-tree.export');
         Route::get('/decision-tree/features', [DecisionTreeController::class, 'getFeatureImportance'])->name('admin.decision-tree.features');
-        Route::get('/decision-tree/visualization', [DecisionTreeController::class, 'getTreeVisualization'])->name('admin.decision-tree.visualization');
         
         // Clustering Analysis Routes (all admin roles can access)
         Route::prefix('clustering')->group(function () {

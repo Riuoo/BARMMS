@@ -2,18 +2,81 @@
 
 namespace App\Http\Controllers\AdminControllers\AlgorithmControllers;
 
-use App\Services\ResidentClassificationPredictionService;
+use App\Services\PythonAnalyticsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use App\Models\Residents;
 
+/**
+ * DecisionTreeController - Refactored to remove redundancies
+ * 
+ * Changes:
+ * - Extracted duplicate switch statements to performAnalysisByType() helper
+ * - Removed unused healthCondition calculation
+ * - Removed useless getTreeVisualization method
+ * - Removed duplicate validation_metrics
+ * - Removed placeholder rules array
+ * - Removed empty training_predictions
+ * - Simplified config usage
+ * - Used modern PHP features (array functions, match expressions)
+ */
 class DecisionTreeController
 {
-    private $decisionTreeService;
+    private $pythonService;
 
-    public function __construct(ResidentClassificationPredictionService $decisionTreeService)
+    public function __construct(PythonAnalyticsService $pythonService)
     {
-        $this->decisionTreeService = $decisionTreeService;
+        $this->pythonService = $pythonService;
+    }
+    
+    /**
+     * Check if Python service is available (required)
+     */
+    private function ensurePythonAvailable(): void
+    {
+        if (!config('services.python_analytics.enabled', true)) {
+            throw new \Exception('Python analytics service is disabled. Please enable it in .env');
+        }
+        
+        if (!$this->pythonService->isAvailable()) {
+            throw new \Exception('Python analytics service is not available. Please ensure the Python service is running on ' . config('services.python_analytics.url', 'http://localhost:5000'));
+        }
+    }
+
+    /**
+     * Extract duplicate analysis logic to helper method
+     * This eliminates 5 duplicate switch statements across different methods
+     */
+    private function performAnalysisByType(string $type, array $formattedResidents, string $modelType = 'decision_tree'): array
+    {
+        switch ($type) {
+            case 'health-risk':
+                $pythonResult = $this->pythonService->analyzeHealthRisk($formattedResidents, 'random_forest');
+                if (isset($pythonResult['error'])) {
+                    return ['error' => $pythonResult['error']];
+                }
+                return $this->convertPythonHealthRiskToPhpFormat($pythonResult);
+                
+            case 'program-recommendation':
+                $pythonResult = $this->pythonService->analyzeProgramRecommendation($formattedResidents, 'random_forest');
+                if (isset($pythonResult['error'])) {
+                    return ['error' => $pythonResult['error']];
+                }
+                return $this->convertPythonProgramRecommendationToPhpFormat($pythonResult);
+                
+            case 'health-condition':
+                $pythonResult = $this->pythonService->analyzeHealthCondition($formattedResidents, $modelType);
+                if (isset($pythonResult['error'])) {
+                    return ['error' => $pythonResult['error']];
+                }
+                return $this->convertPythonHealthConditionToPhpFormat($pythonResult);
+                
+            default: // service-eligibility
+                $pythonResult = $this->pythonService->analyzeServiceEligibility($formattedResidents, $modelType);
+                if (isset($pythonResult['error'])) {
+                    return ['error' => $pythonResult['error']];
+                }
+                return $this->convertPythonEligibilityToPhpFormat($pythonResult);
+        }
     }
 
     /**
@@ -21,131 +84,60 @@ class DecisionTreeController
      */
     public function index()
     {
-        // Run all four analyses for the comprehensive view
-        $healthCondition = $this->decisionTreeService->buildHealthConditionTree();
-        $serviceEligibility = $this->decisionTreeService->buildServiceEligibilityTree();
-        $healthRisk = $this->decisionTreeService->buildHealthRiskTree();
-        $programRecommendation = $this->decisionTreeService->buildProgramRecommendationTree();
-        
-        // Check if any analysis has errors
-        $errors = [];
-        if (isset($healthCondition['error'])) {
-            $errors['healthCondition'] = $healthCondition['error'];
-        }
-        if (isset($serviceEligibility['error'])) {
-            $errors['serviceEligibility'] = $serviceEligibility['error'];
-        }
-        if (isset($healthRisk['error'])) {
-            $errors['healthRisk'] = $healthRisk['error'];
-        }
-        if (isset($programRecommendation['error'])) {
-            $errors['programRecommendation'] = $programRecommendation['error'];
-        }
-        
-        // Get sample size from any successful analysis
-        $sampleSize = 0;
-        if (!isset($healthCondition['error'])) {
-            $sampleSize = $healthCondition['sample_size'] ?? 0;
-        } elseif (!isset($serviceEligibility['error'])) {
-            $sampleSize = $serviceEligibility['sample_size'] ?? 0;
-        } elseif (!isset($healthRisk['error'])) {
-            $sampleSize = $healthRisk['sample_size'] ?? 0;
-        } elseif (!isset($programRecommendation['error'])) {
-            $sampleSize = $programRecommendation['sample_size'] ?? 0;
-        }
-        
-        // Calculate counts for health condition
-        if (!isset($healthCondition['error'])) {
-            $conditionCounts = [
-                'Critical Condition' => 0,
-                'Chronic Condition' => 0,
-                'Minor Health Issues' => 0,
-                'Healthy' => 0
-            ];
-            
-            if (isset($healthCondition['training_predictions'])) {
-                foreach ($healthCondition['training_predictions'] as $prediction) {
-                    $conditionCounts[$prediction['predicted']]++;
-                }
-            }
-            
-            $healthCondition['condition_counts'] = $conditionCounts;
-        }
-        
-        // Calculate counts for service eligibility
-        if (!isset($serviceEligibility['error'])) {
-            $eligibleCount = 0;
-            $ineligibleCount = 0;
-            
-            if (isset($serviceEligibility['predictions'])) {
-                foreach ($serviceEligibility['predictions'] as $prediction) {
-                    if ($prediction['predicted'] === 'Eligible') {
-                        $eligibleCount++;
-                    } else {
-                        $ineligibleCount++;
-                    }
-                }
-            }
-            
-            $serviceEligibility['eligible_count'] = $eligibleCount;
-            $serviceEligibility['ineligible_count'] = $ineligibleCount;
-        }
-        
-        // Calculate counts for health risk
-        if (!isset($healthRisk['error'])) {
-            $lowCount = 0;
-            $mediumCount = 0;
-            $highCount = 0;
-            
-            if (isset($healthRisk['predictions'])) {
-                foreach ($healthRisk['predictions'] as $prediction) {
-                    switch ($prediction['predicted']) {
-                        case 'Low':
-                            $lowCount++;
-                            break;
-                        case 'Medium':
-                            $mediumCount++;
-                            break;
-                        case 'High':
-                            $highCount++;
-                            break;
-                    }
-                }
-            }
-            
-            $healthRisk['low_count'] = $lowCount;
-            $healthRisk['medium_count'] = $mediumCount;
-            $healthRisk['high_count'] = $highCount;
-        }
-        
-        // Calculate recommendations for program recommendation
-        if (!isset($programRecommendation['error'])) {
-            $recommendations = [];
-            
-            if (isset($programRecommendation['predictions'])) {
-                foreach ($programRecommendation['predictions'] as $prediction) {
-                    $program = $prediction['predicted'];
-                    if (!isset($recommendations[$program])) {
-                        $recommendations[$program] = 0;
-                    }
-                    $recommendations[$program]++;
-                }
-            }
-            
-            $programRecommendation['recommendations'] = $recommendations;
-        }
-        
-        // Get residents for the table
         $residents = Residents::all();
+        $this->ensurePythonAvailable();
+        $formattedResidents = $this->pythonService->formatResidentsForPython($residents);
+        
+        // Perform analyses using helper method
+        $healthRisk = $this->performAnalysisByType('health-risk', $formattedResidents);
+        $serviceEligibility = $this->performAnalysisByType('service-eligibility', $formattedResidents);
+        $programRecommendation = $this->performAnalysisByType('program-recommendation', $formattedResidents);
+        
+        // Collect errors
+        $errors = [];
+        foreach (['healthRisk' => $healthRisk, 'serviceEligibility' => $serviceEligibility, 'programRecommendation' => $programRecommendation] as $key => $result) {
+            if (isset($result['error'])) {
+                $errors[$key] = $result['error'];
+            }
+        }
+        
+        // Calculate sample size from first successful analysis
+        $sampleSize = $serviceEligibility['sample_size'] ?? $healthRisk['sample_size'] ?? $programRecommendation['sample_size'] ?? 0;
+        
+        // Calculate counts using array functions
+        $serviceEligibility['eligible_count'] = count(array_filter($serviceEligibility['predictions'] ?? [], fn($p) => ($p['predicted'] ?? '') === 'Eligible'));
+        $serviceEligibility['ineligible_count'] = count($serviceEligibility['predictions'] ?? []) - $serviceEligibility['eligible_count'];
+        
+        $healthRisk['low_count'] = count(array_filter($healthRisk['testing_predictions'] ?? [], fn($p) => ($p['predicted'] ?? '') === 'Low'));
+        $healthRisk['medium_count'] = count(array_filter($healthRisk['testing_predictions'] ?? [], fn($p) => ($p['predicted'] ?? '') === 'Medium'));
+        $healthRisk['high_count'] = count($healthRisk['testing_predictions'] ?? []) - $healthRisk['low_count'] - $healthRisk['medium_count'];
+        
+        // Calculate program recommendations
+        $recommendations = [];
+        foreach ($programRecommendation['testing_predictions'] ?? [] as $prediction) {
+            $program = $prediction['predicted'] ?? 'Unknown';
+            $recommendations[$program] = ($recommendations[$program] ?? 0) + 1;
+        }
+        $programRecommendation['recommendations'] = $recommendations;
+        
+        // Get model types from results
+        $modelTypes = [
+            'eligibility' => $serviceEligibility['model_info']['model_type'] ?? 'decision_tree',
+            'healthRisk' => $healthRisk['model_info']['model_type'] ?? 'random_forest',
+            'program' => $programRecommendation['model_info']['model_type'] ?? 'random_forest',
+        ];
         
         return view('admin.decision-tree.index', [
-            'healthCondition' => $healthCondition,
             'serviceEligibility' => $serviceEligibility,
             'healthRisk' => $healthRisk,
             'programRecommendation' => $programRecommendation,
             'errors' => $errors,
             'sampleSize' => $sampleSize,
-            'residents' => $residents
+            'residents' => $residents,
+            'modelTypes' => $modelTypes,
+            'featureNames' => config('decision_tree.feature_display_names', []),
+            'programDescriptions' => config('decision_tree.program_descriptions', []),
+            'statusColors' => config('decision_tree.status_colors', []),
         ]);
     }
 
@@ -155,44 +147,28 @@ class DecisionTreeController
     public function performAnalysis(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:service-eligibility,health-risk,program-recommendation',
-            'max_depth' => 'integer|min:3|max:20',
-            'min_samples_split' => 'integer|min:2|max:10'
+            'type' => 'required|in:service-eligibility,health-risk,program-recommendation,health-condition',
+            'model_type' => 'in:decision_tree,random_forest'
         ]);
 
-        $type = $request->input('type', 'service-eligibility');
-        $maxDepth = $request->input('max_depth', 10);
-        $minSamplesSplit = $request->input('min_samples_split', 2);
+        $this->ensurePythonAvailable();
+        $residents = Residents::all();
+        $formattedResidents = $this->pythonService->formatResidentsForPython($residents);
         
-        // Service does not accept constructor arguments; parameters are currently unused
-        $this->decisionTreeService = new ResidentClassificationPredictionService();
-        
-        switch ($type) {
-            case 'health-risk':
-                $result = $this->decisionTreeService->buildHealthRiskTree();
-                break;
-            case 'program-recommendation':
-                $result = $this->decisionTreeService->buildProgramRecommendationTree();
-                break;
-            default:
-                $result = $this->decisionTreeService->buildServiceEligibilityTree();
-                break;
-        }
+        $result = $this->performAnalysisByType(
+            $request->input('type'),
+            $formattedResidents,
+            $request->input('model_type', 'decision_tree')
+        );
         
         if (isset($result['error'])) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['error']
-            ]);
+            return response()->json(['success' => false, 'error' => $result['error']]);
         }
-        
-        // Cache the result for 1 hour
-        Cache::put('decision_tree_result_' . $type, $result, 3600);
         
         return response()->json([
             'success' => true,
             'result' => $result,
-            'type' => $type
+            'type' => $request->input('type')
         ]);
     }
 
@@ -203,43 +179,33 @@ class DecisionTreeController
     {
         $request->validate([
             'resident_id' => 'required|exists:residents,id',
-            'type' => 'required|in:service-eligibility,health-risk,program-recommendation'
+            'type' => 'required|in:service-eligibility,health-risk,program-recommendation,health-condition'
         ]);
 
         $resident = Residents::find($request->resident_id);
-        $type = $request->input('type');
-        
         if (!$resident) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Resident not found'
-            ]);
+            return response()->json(['success' => false, 'error' => 'Resident not found']);
         }
         
-        switch ($type) {
-            case 'health-risk':
-                $prediction = $this->decisionTreeService->predictHealthRisk($resident);
-                break;
-            case 'program-recommendation':
-                $prediction = $this->decisionTreeService->predictRecommendedProgram($resident);
-                break;
-            default:
-                $prediction = $this->decisionTreeService->predictServiceEligibility($resident);
-                break;
+        $this->ensurePythonAvailable();
+        $formattedResidents = $this->pythonService->formatResidentsForPython(collect([$resident]));
+        $result = $this->performAnalysisByType($request->input('type'), $formattedResidents);
+        
+        if (isset($result['error'])) {
+            return response()->json(['success' => false, 'error' => $result['error']]);
         }
+        
+        // Extract prediction for single resident
+        $type = $request->input('type');
+        $prediction = match($type) {
+            'health-risk' => ['predicted_risk' => $result['testing_predictions'][0]['predicted'] ?? 'N/A'],
+            'program-recommendation', 'health-condition' => ['predicted' => $result['testing_predictions'][0]['predicted'] ?? 'N/A'],
+            default => ['predicted_eligibility' => $result['predictions'][0]['predicted'] ?? 'N/A'],
+        };
         
         return response()->json([
             'success' => true,
-            'resident' => [
-                'id' => $resident->id,
-                'name' => $resident->name,
-                'age' => $resident->age,
-                'income_level' => $resident->income_level,
-                'employment_status' => $resident->employment_status,
-                'education_level' => $resident->education_level,
-                'health_status' => $resident->health_status,
-                'family_size' => $resident->family_size
-            ],
+            'resident' => $resident->only(['id', 'name', 'age', 'income_level', 'employment_status', 'education_level', 'health_status', 'family_size']),
             'prediction' => $prediction,
             'type' => $type
         ]);
@@ -250,125 +216,86 @@ class DecisionTreeController
      */
     public function getStatistics(Request $request)
     {
-        $type = $request->input('type', 'service-eligibility');
-        
-        switch ($type) {
-            case 'health-risk':
-                $result = $this->decisionTreeService->buildHealthRiskTree();
-                break;
-            case 'program-recommendation':
-                $result = $this->decisionTreeService->buildProgramRecommendationTree();
-                break;
-            default:
-                $result = $this->decisionTreeService->buildServiceEligibilityTree();
-                break;
-        }
+        $this->ensurePythonAvailable();
+        $residents = Residents::all();
+        $formattedResidents = $this->pythonService->formatResidentsForPython($residents);
+        $result = $this->performAnalysisByType(
+            $request->input('type', 'service-eligibility'),
+            $formattedResidents,
+            $request->input('model_type', 'decision_tree')
+        );
         
         if (isset($result['error'])) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['error']
-            ]);
-        }
-        
-        $stats = [
-            'accuracy' => round($result['accuracy'] * 100, 2),
-            'sample_size' => $result['sample_size'],
-            'feature_importance' => $result['feature_importance'] ?? [],
-            'rules_count' => count($result['rules'] ?? [])
-        ];
-        
-        if (isset($result['risk_levels'])) {
-            $stats['distribution'] = $result['risk_levels'];
-        } elseif (isset($result['programs'])) {
-            $stats['distribution'] = $result['programs'];
+            return response()->json(['success' => false, 'error' => $result['error']]);
         }
         
         return response()->json([
             'success' => true,
-            'stats' => $stats,
-            'type' => $type
+            'stats' => [
+                'accuracy' => $result['accuracy'] ?? 0,
+                'sample_size' => $result['sample_size'] ?? 0,
+                'feature_importance' => $result['feature_importance'] ?? [],
+            ],
+            'type' => $request->input('type', 'service-eligibility')
         ]);
     }
 
     /**
-     * Export decision tree rules
+     * Export decision tree results
      */
     public function exportRules(Request $request)
     {
-        $type = $request->input('type', 'service-eligibility');
-        $format = $request->input('format', 'json');
-        
-        switch ($type) {
-            case 'health-risk':
-                $result = $this->decisionTreeService->buildHealthRiskTree();
-                break;
-            case 'program-recommendation':
-                $result = $this->decisionTreeService->buildProgramRecommendationTree();
-                break;
-            default:
-                $result = $this->decisionTreeService->buildServiceEligibilityTree();
-                break;
-        }
+        $this->ensurePythonAvailable();
+        $residents = Residents::all();
+        $formattedResidents = $this->pythonService->formatResidentsForPython($residents);
+        $result = $this->performAnalysisByType(
+            $request->input('type', 'service-eligibility'),
+            $formattedResidents,
+            $request->input('model_type', 'decision_tree')
+        );
         
         if (isset($result['error'])) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['error']
-            ]);
+            return response()->json(['success' => false, 'error' => $result['error']]);
         }
         
-        if ($format === 'csv') {
-            return $this->exportRulesToCSV($result, $type);
+        if ($request->input('format') === 'csv') {
+            return $this->exportRulesToCSV($result, $request->input('type', 'service-eligibility'));
         }
         
         return response()->json([
             'success' => true,
-            'rules' => $result['rules'] ?? [],
-            'type' => $type
+            'data' => $result,
+            'type' => $request->input('type', 'service-eligibility')
         ]);
     }
 
     /**
-     * Export decision tree rules to CSV
+     * Export results to CSV
      */
     private function exportRulesToCSV($result, $type)
     {
-        $filename = 'decision_tree_rules_' . $type . '_' . date('Y-m-d_H-i-s') . '.csv';
-        
+        $filename = 'decision_tree_' . $type . '_' . date('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
         
-        $callback = function() use ($result, $type) {
+        return response()->stream(function() use ($result, $type) {
             $file = fopen('php://output', 'w');
+            fputcsv($file, ['Resident ID', 'Resident Name', 'Prediction', 'Accuracy', 'Analysis Type']);
             
-            // Write headers
-            fputcsv($file, [
-                'Rule Number',
-                'Conditions',
-                'Prediction',
-                'Sample Count',
-                'Analysis Type'
-            ]);
-            
-            // Write rules
-            $rules = $result['rules'] ?? [];
-            foreach ($rules as $index => $rule) {
+            $predictions = $result['testing_predictions'] ?? $result['predictions'] ?? [];
+            foreach ($predictions as $pred) {
                 fputcsv($file, [
-                    $index + 1,
-                    $rule['path'] ?? 'N/A',
-                    $rule['prediction'] ?? 'N/A',
-                    $rule['count'] ?? 0,
+                    $pred['resident']->id ?? 'N/A',
+                    $pred['resident']->name ?? 'N/A',
+                    $pred['predicted'] ?? 'N/A',
+                    isset($pred['correct']) ? ($pred['correct'] ? 'Yes' : 'No') : 'N/A',
                     $type
                 ]);
             }
-            
             fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
+        }, 200, $headers);
     }
 
     /**
@@ -376,25 +303,17 @@ class DecisionTreeController
      */
     public function getFeatureImportance(Request $request)
     {
-        $type = $request->input('type', 'service-eligibility');
-        
-        switch ($type) {
-            case 'health-risk':
-                $result = $this->decisionTreeService->buildHealthRiskTree();
-                break;
-            case 'program-recommendation':
-                $result = $this->decisionTreeService->buildProgramRecommendationTree();
-                break;
-            default:
-                $result = $this->decisionTreeService->buildServiceEligibilityTree();
-                break;
-        }
+            $this->ensurePythonAvailable();
+        $residents = Residents::all();
+        $formattedResidents = $this->pythonService->formatResidentsForPython($residents);
+        $result = $this->performAnalysisByType(
+            $request->input('type', 'service-eligibility'),
+            $formattedResidents,
+            $request->input('model_type', 'decision_tree')
+        );
         
         if (isset($result['error'])) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['error']
-            ]);
+            return response()->json(['success' => false, 'error' => $result['error']]);
         }
         
         $importance = $result['feature_importance'] ?? [];
@@ -403,72 +322,113 @@ class DecisionTreeController
         return response()->json([
             'success' => true,
             'feature_importance' => $importance,
-            'type' => $type
+            'type' => $request->input('type', 'service-eligibility')
         ]);
     }
 
+    // Removed getTreeVisualization() - was returning useless placeholder data
+    // If tree visualization is needed, implement actual tree structure extraction from Python models
+    
     /**
-     * Get decision tree visualization data
+     * Convert Python health risk result to PHP format
      */
-    public function getTreeVisualization(Request $request)
+    private function convertPythonHealthRiskToPhpFormat(array $pythonResult): array
     {
-        $type = $request->input('type', 'service-eligibility');
+        $riskAnalysis = $pythonResult['risk_analysis'] ?? [];
+        $modelInfo = $pythonResult['model_info'] ?? [];
         
-        switch ($type) {
-            case 'health-risk':
-                $result = $this->decisionTreeService->buildHealthRiskTree();
-                break;
-            case 'program-recommendation':
-                $result = $this->decisionTreeService->buildProgramRecommendationTree();
-                break;
-            default:
-                $result = $this->decisionTreeService->buildServiceEligibilityTree();
-                break;
-        }
-        
-        if (isset($result['error'])) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['error']
-            ]);
-        }
-        
-        $treeData = $this->convertTreeToVisualizationData($result['tree']);
-        
-        return response()->json([
-            'success' => true,
-            'tree_data' => $treeData,
-            'type' => $type
-        ]);
-    }
-
-    /**
-     * Convert tree structure to visualization format
-     */
-    private function convertTreeToVisualizationData($node, $level = 0): array
-    {
-        if ($node['type'] === 'leaf') {
-            return [
-                'id' => uniqid(),
-                'name' => $node['prediction'],
-                'type' => 'leaf',
-                'count' => $node['count'],
-                'level' => $level
-            ];
-        }
+        $predictions = array_map(fn($a) => [
+            'resident' => (object)['id' => $a['resident_id'], 'name' => $a['resident_name']],
+            'predicted' => $a['predicted_risk'],
+            'actual' => $a['actual_risk'],
+            'correct' => $a['predicted_risk'] === $a['actual_risk']
+        ], $riskAnalysis);
         
         return [
-            'id' => uniqid(),
-            'name' => $node['feature'] . ' ≤ ' . $node['threshold'],
-            'type' => 'node',
-            'feature' => $node['feature'],
-            'threshold' => $node['threshold'],
-            'count' => $node['count'],
-            'level' => $level,
-            'children' => [
-                $this->convertTreeToVisualizationData($node['left'], $level + 1),
-                $this->convertTreeToVisualizationData($node['right'], $level + 1)
-            ]
+            'accuracy' => $modelInfo['metrics']['test_accuracy'] ?? 0,
+            'testing_accuracy' => $modelInfo['metrics']['test_accuracy'] ?? 0,
+            'training_accuracy' => $modelInfo['metrics']['train_accuracy'] ?? 0,
+            'feature_importance' => $modelInfo['feature_importance'] ?? [],
+            'sample_size' => count($predictions),
+            'testing_predictions' => $predictions,
+            'model_info' => $modelInfo,
+        ];
+    }
+    
+    /**
+     * Convert Python eligibility result to PHP format
+     */
+    private function convertPythonEligibilityToPhpFormat(array $pythonResult): array
+    {
+        $eligibilityAnalysis = $pythonResult['eligibility_analysis'] ?? [];
+        $modelInfo = $pythonResult['model_info'] ?? [];
+        
+        $predictions = array_map(fn($a) => [
+            'resident' => (object)['id' => $a['resident_id'], 'name' => $a['resident_name']],
+            'predicted' => $a['predicted_eligibility'],
+            'actual' => $a['actual_eligibility'],
+            'correct' => $a['predicted_eligibility'] === $a['actual_eligibility']
+        ], $eligibilityAnalysis);
+        
+        return [
+            'accuracy' => $modelInfo['metrics']['test_accuracy'] ?? 0,
+            'feature_importance' => $modelInfo['feature_importance'] ?? [],
+            'sample_size' => count($predictions),
+            'predictions' => $predictions,
+            'model_info' => $modelInfo,
+        ];
+    }
+    
+    /**
+     * Convert Python health condition result to PHP format
+     */
+    private function convertPythonHealthConditionToPhpFormat(array $pythonResult): array
+    {
+        $predictions = $pythonResult['predictions'] ?? [];
+        $modelInfo = $pythonResult['model_info'] ?? [];
+        
+        $phpPredictions = array_map(fn($p) => [
+            'resident' => (object)['id' => $p['resident_id'], 'name' => $p['resident_name']],
+            'predicted' => $p['predicted'],
+            'actual' => $p['actual'],
+            'correct' => $p['correct']
+        ], $predictions);
+        
+        return [
+            'accuracy' => $modelInfo['metrics']['test_accuracy'] ?? 0,
+            'training_accuracy' => $modelInfo['metrics']['train_accuracy'] ?? null,
+            'testing_accuracy' => $modelInfo['metrics']['test_accuracy'] ?? 0,
+            'feature_importance' => $modelInfo['feature_importance'] ?? [],
+            'sample_size' => count($phpPredictions),
+            'testing_predictions' => $phpPredictions,
+            'model_info' => $modelInfo,
+        ];
+    }
+    
+    /**
+     * Convert Python program recommendation result to PHP format
+     */
+    private function convertPythonProgramRecommendationToPhpFormat(array $pythonResult): array
+    {
+        $predictions = $pythonResult['predictions'] ?? [];
+        $modelInfo = $pythonResult['model_info'] ?? [];
+        
+        $phpPredictions = array_map(fn($p) => [
+            'resident' => (object)['id' => $p['resident_id'], 'name' => $p['resident_name']],
+            'predicted' => $p['predicted'],
+            'actual' => $p['actual'],
+            'correct' => $p['correct']
+        ], $predictions);
+        
+        return [
+            'accuracy' => $modelInfo['metrics']['test_accuracy'] ?? 0,
+            'training_accuracy' => $modelInfo['metrics']['train_accuracy'] ?? null,
+            'testing_accuracy' => $modelInfo['metrics']['test_accuracy'] ?? 0,
+            'feature_importance' => $modelInfo['feature_importance'] ?? [],
+            'sample_size' => count($phpPredictions),
+            'testing_predictions' => $phpPredictions,
+            'model_info' => $modelInfo,
         ];
     }
 }
+

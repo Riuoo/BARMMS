@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'python_analytics' => [
+        'url' => env('PYTHON_ANALYTICS_URL', 'http://localhost:5000'),
+        'timeout' => env('PYTHON_ANALYTICS_TIMEOUT', 30),
+        'enabled' => env('PYTHON_ANALYTICS_ENABLED', true),
+    ],
+
 ];

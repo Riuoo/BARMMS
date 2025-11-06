@@ -28,7 +28,9 @@ function prepareAnalyticsChartData() {
     }
 
     const characteristics = window.clusteringData.characteristics;
-    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
+    const colors = (window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.clusters)
+        ? window.clusteringConfig.colors.clusters
+        : ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
     
     return characteristics.map((cluster, index) => {
         // Extract data from cluster characteristics
@@ -174,7 +176,9 @@ function initializeEmploymentChart(chartData) {
     if (!ctx) return;
 
     const employmentLabels = ['Unemployed', 'Part-time', 'Self-employed', 'Full-time'];
-    const employmentColors = ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'];
+    const employmentColors = (window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.employment)
+        ? window.clusteringConfig.colors.employment
+        : ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'];
     
     // Create pie chart for overall employment distribution
     const totalEmployments = { 'Unemployed': 0, 'Part-time': 0, 'Self-employed': 0, 'Full-time': 0 };
@@ -289,7 +293,9 @@ function initializeHealthChart(chartData) {
     if (!ctx) return;
 
     const healthLabels = ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'];
-    const healthColors = ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'];
+    const healthColors = (window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.health)
+        ? window.clusteringConfig.colors.health
+        : ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'];
     
     // Create stacked bar chart for health distribution
     const datasets = healthLabels.map((label, idx) => ({

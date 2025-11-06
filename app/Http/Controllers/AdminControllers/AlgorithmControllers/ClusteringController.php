@@ -2,19 +2,94 @@
 
 namespace App\Http\Controllers\AdminControllers\AlgorithmControllers;
 
-use App\Services\ResidentDemographicAnalysisService;
-use App\Services\ResidentClassificationPredictionService;
+use App\Services\PythonAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Residents;
 
 class ClusteringController
 {
-    private $clusteringService;
+    private $pythonService;
 
-    public function __construct(ResidentDemographicAnalysisService $clusteringService)
+    public function __construct(PythonAnalyticsService $pythonService)
     {
-        $this->clusteringService = $clusteringService;
+        $this->pythonService = $pythonService;
+    }
+    
+    /**
+     * Check if Python service is available (required)
+     */
+    private function ensurePythonAvailable(): void
+    {
+        if (!config('services.python_analytics.enabled', true)) {
+            throw new \Exception('Python analytics service is disabled. Please enable it in .env');
+        }
+        
+        if (!$this->pythonService->isAvailable()) {
+            throw new \Exception('Python analytics service is not available. Please ensure the Python service is running on ' . config('services.python_analytics.url', 'http://localhost:5000'));
+        }
+    }
+
+    private function extractPurokToken(?string $address): string
+    {
+        $addr = strtolower($address ?? '');
+        if ($addr === '') return 'N/A';
+        // Common patterns: "purok 1", "purok i", "prk-2", "zone 3"
+        $patterns = [
+            '/\bpurok\s*([0-9]+)/i',                 // Purok 1
+            '/\bpurok\s*([ivxlcdm]+)/i',            // Purok II (roman)
+            '/\bprk\s*[-]?\s*([0-9]+)/i',          // Prk-2 or Prk 2
+            '/\bzone\s*([0-9]+)/i',                 // Zone 3
+        ];
+        foreach ($patterns as $pat) {
+            if (preg_match($pat, $addr, $m)) {
+                $token = strtoupper($m[1]);
+                // Normalize roman numerals to roman (keep as-is), digits stay digits
+                return $token;
+            }
+        }
+        return 'N/A';
+    }
+
+    /**
+     * Perform clustering via Python by type, with normalized response shape
+     */
+    private function performClusteringByType(array $samples, string $type = 'kmeans', array $params = []): array
+    {
+        // Normalize and clamp params
+        $k = max(2, min((int)($params['k'] ?? 3), 50));
+        $maxIterations = max(10, min((int)($params['max_iterations'] ?? 100), 10000));
+        $numRuns = max(1, min((int)($params['num_runs'] ?? 3), 50));
+        $linkage = $params['linkage'] ?? 'ward';
+
+        if ($type === 'hierarchical') {
+            $resp = $this->pythonService->hierarchicalClustering($samples, $k, $linkage);
+        } else {
+            // default to kmeans
+            $resp = $this->pythonService->kmeansClustering($samples, $k, $maxIterations, $numRuns);
+        }
+
+        if (isset($resp['error'])) {
+            return ['error' => $resp['error']];
+        }
+
+        // Ensure normalized structure
+        $labels = $resp['labels'] ?? [];
+        $centers = $resp['centroids'] ?? ($resp['centers'] ?? []);
+        $metrics = $resp['metrics'] ?? [];
+
+        return [
+            'type' => $type,
+            'labels' => $labels,
+            'centers' => $centers,
+            'metrics' => [
+                'silhouette' => $metrics['silhouette_score'] ?? null,
+                'inertia' => $metrics['inertia'] ?? null,
+                'iterations' => $metrics['iterations'] ?? null,
+                'converged' => $metrics['converged'] ?? true,
+            ],
+            'characteristics' => $resp['characteristics'] ?? [],
+        ];
     }
 
     /**
@@ -24,74 +99,44 @@ class ClusteringController
     {
         $k = request('k', 3);
         $useOptimalK = request('use_optimal_k', false);
-        $useHierarchical = request('hierarchical', false);
         
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $allResidents = $residents; // keep original list for purok stats
+        
+        // Python service is required
+        $this->ensurePythonAvailable();
+        
+        // Find optimal K if requested
         if ($useOptimalK) {
-            $residents = Residents::all();
-            $k = $this->clusteringService->findOptimalK($residents);
+            $samples = $this->pythonService->buildSamplesFromResidents($residents);
+            $optimalKResult = $this->pythonService->findOptimalK($samples, 10, 'silhouette');
+            if (!isset($optimalKResult['error'])) {
+                $k = $optimalKResult['optimal_k'];
+            } else {
+                throw new \Exception('Failed to find optimal K: ' . ($optimalKResult['error'] ?? 'Unknown error'));
+            }
         }
         
-        // Always compute both global and hierarchical summaries for comparison
-        $globalService = new ResidentDemographicAnalysisService($k);
-        $globalResult = $globalService->clusterResidents();
-        $globalCharacteristics = $globalService->getClusterCharacteristics($globalResult);
+        // Perform K-Means clustering using Python
+        $samples = $this->pythonService->buildSamplesFromResidents($residents);
+        $pythonResult = $this->pythonService->kmeansClustering($samples, $k, 100, 3);
+        
+        if (isset($pythonResult['error'])) {
+            throw new \Exception('Python clustering failed: ' . $pythonResult['error']);
+        }
+        
+        // Convert Python result to PHP format
+        $globalResult = $this->convertPythonResultToPhpFormat($pythonResult, $residents);
+        $globalCharacteristics = $this->extractCharacteristicsFromPythonResult($pythonResult, $residents);
         $globalSummary = [
             'sizes' => array_map(fn($c) => $c['size'], $globalCharacteristics),
             'silhouette' => $globalResult['silhouette'] ?? null,
             'k' => $k,
         ];
         
-        $hierService = new ResidentDemographicAnalysisService($k);
-        $hierResult = $hierService->clusterResidentsHierarchical();
-        $hierCharacteristics = $hierService->getClusterCharacteristics($hierResult);
-        // Group by purok for summary
-        $purokTotals = [];
-        foreach ($hierCharacteristics as $c) {
-            $p = $c['most_common_purok'] ?? 'N/A';
-            if ($p === '' || $p === null) { $p = 'N/A'; }
-            $purokTotals[$p] = ($purokTotals[$p] ?? 0) + $c['size'];
-        }
-        $hierSummary = [
-            'purok_totals' => $purokTotals,
-            'k' => $k,
-        ];
-        
-        // Now select the main mode for detailed display
-        $this->clusteringService = $useHierarchical ? $hierService : $globalService;
-        $result = $useHierarchical ? $hierResult : $globalResult;
-        $characteristics = $this->clusteringService->getClusterCharacteristics($result);
-        // Build grouped array for purok summary
-        $grouped = [];
-        
-        // First, get all unique puroks from the system
-        $allPuroks = [];
-        $residents = Residents::all();
-        foreach ($residents as $resident) {
-            $address = strtolower($resident->address ?? '');
-            if (preg_match('/purok\s*([a-z0-9]+)/i', $address, $m)) {
-                $purok = strtoupper($m[1]);
-                $allPuroks[$purok] = true;
-            }
-        }
-        $allPuroks = array_keys($allPuroks);
-        sort($allPuroks);
-        
-        // Group clusters by purok
-        foreach ($characteristics as $idx => $c) {
-            $p = $c['most_common_purok'] ?? 'N/A';
-            if ($p === '' || $p === null) { $p = 'N/A'; }
-            $grouped[$p] = $grouped[$p] ?? [];
-            $grouped[$p][] = ['idx' => $idx, 'c' => $c];
-        }
-        
-        // For hierarchical view, ensure all puroks are represented
-        if ($useHierarchical) {
-            foreach ($allPuroks as $purok) {
-                if (!isset($grouped[$purok])) {
-                    $grouped[$purok] = [];
-                }
-            }
-        }
+        // Clusters-only view (no hierarchical/purok mode)
+        $result = $globalResult;
+        $characteristics = $globalCharacteristics;
 
         // Compute global most common employment and health across all clusters
         $employmentCounts = [];
@@ -114,8 +159,8 @@ class ClusteringController
         // Calculate processing time (simulate for enhanced approach)
         $processingTime = 35; // Enhanced approach takes ~35ms
         
-        // Build $residents collection for the table and compute model-driven predictions/insights per cluster
-        $predictionService = new ResidentClassificationPredictionService();
+        // Build $residents collection for the table
+        // Note: Predictions are now handled by Python service in DecisionTreeController
         $residents = collect();
         $insightCounts = [];
         $purokInsightCounts = [];
@@ -125,22 +170,8 @@ class ClusteringController
                     $resident = $point['resident'];
                     $resident->cluster_id = $clusterId + 1; // 1-based for display
 
-                    // Per-resident predictions (model-driven)
-                    try {
-                        $resident->predicted_program = $predictionService->predictEnhancedRecommendedProgram($resident);
-                    } catch (\Throwable $e) {
-                        $resident->predicted_program = null;
-                    }
-                    try {
-                        $resident->predicted_eligibility = $predictionService->predictEnhancedServiceEligibility($resident);
-                    } catch (\Throwable $e) {
-                        $resident->predicted_eligibility = null;
-                    }
-                    try {
-                        $resident->predicted_risk = $predictionService->predictEnhancedHealthRisk($resident);
-                    } catch (\Throwable $e) {
-                        $resident->predicted_risk = null;
-                    }
+                    // Note: Predictions are handled by Python service in DecisionTreeController
+                    // These can be added later if needed via Python service
 
                     // Aggregate per-cluster counts for insights
                     $insightCounts[$clusterId] = $insightCounts[$clusterId] ?? [
@@ -164,11 +195,7 @@ class ClusteringController
                     }
 
                     // Aggregate per-purok insights
-                    $addr = strtolower($resident->address ?? '');
-                    $purokToken = 'N/A';
-                    if (preg_match('/purok\s*([a-z0-9]+)/i', $addr, $m)) {
-                        $purokToken = strtolower($m[1]);
-                    }
+                    $purokToken = strtolower($this->extractPurokToken($resident->address ?? null));
                     $purokInsightCounts[$purokToken] = $purokInsightCounts[$purokToken] ?? [
                         'program' => [],
                         'eligibility' => [],
@@ -217,34 +244,7 @@ class ClusteringController
             ];
         }
 
-        // Compute dominant predictions and confidence per purok (hierarchical summaries)
-        $perPurokInsights = [];
-        foreach ($purokInsightCounts as $purok => $counts) {
-            $total = max(1, (int)($counts['total'] ?? 0));
-            $top = function(array $arr) {
-                if (empty($arr)) return [null, 0];
-                arsort($arr);
-                $key = array_key_first($arr);
-                return [$key, (int)$arr[$key]];
-            };
-            [$prog, $pc] = $top($counts['program']);
-            [$elig, $ec] = $top($counts['eligibility']);
-            [$risk, $rc] = $top($counts['risk']);
-            // Normalize purok key to match view group label (digits or 'N/A')
-            $key = $purok;
-            if ($key !== 'N/A') {
-                // The view shows numeric or roman; we keep the raw token (lowercase)
-                // It will be printed as-is by the view where grouping uses the token
-            }
-            $perPurokInsights[$key] = [
-                'program' => $prog,
-                'program_confidence' => $pc ? round(($pc / $total) * 100) : 0,
-                'eligibility' => $elig,
-                'eligibility_confidence' => $ec ? round(($ec / $total) * 100) : 0,
-                'risk' => $risk,
-                'risk_confidence' => $rc ? round(($rc / $total) * 100) : 0,
-            ];
-        }
+        // Clusters-only: drop per-purok summaries
         return view('admin.clustering.index', [
             'clusteringResult' => $result,
             'clusters' => $result['clusters'],
@@ -253,7 +253,6 @@ class ClusteringController
             'incidenceAnalysis' => $result['incidence_analysis'] ?? [],
             'k' => $k,
             'useOptimalK' => $useOptimalK,
-            'useHierarchical' => $useHierarchical,
             'iterations' => $result['iterations'],
             'converged' => $result['converged'],
             'sampleSize' => count($result['residents']),
@@ -263,10 +262,9 @@ class ClusteringController
             'mostCommonEmployment' => $mostCommonEmployment,
             'mostCommonHealth' => $mostCommonHealth,
             'perClusterInsights' => $perClusterInsights,
-            'perPurokInsights' => $perPurokInsights,
             'silhouette' => $result['silhouette'] ?? null,
             'globalSummary' => $globalSummary,
-            'hierSummary' => $hierSummary,
+            'hierSummary' => [],
             'incomeColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981', '#3B82F6'],
             'employmentColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'],
             'healthColors' => ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'],
@@ -279,33 +277,56 @@ class ClusteringController
     public function performClustering(Request $request)
     {
         $request->validate([
-            'k' => 'required|integer|min:2|max:10',
-            'max_iterations' => 'integer|min:10|max:1000'
+            'k' => 'required|integer|min:2|max:50',
+            'max_iterations' => 'integer|min:10|max:10000',
+            'num_runs' => 'integer|min:1|max:50',
+            'type' => 'in:kmeans,hierarchical',
+            'linkage' => 'in:ward,complete,average,single'
         ]);
 
-        $k = $request->input('k', 3);
-        $maxIterations = $request->input('max_iterations', 100);
+        $type = $request->input('type', 'kmeans');
+        $k = (int)$request->input('k', 3);
+        $maxIterations = (int)$request->input('max_iterations', 100);
+        $numRuns = (int)$request->input('num_runs', 3);
+        $linkage = $request->input('linkage', 'ward');
         
-        $this->clusteringService = new ResidentDemographicAnalysisService($k, $maxIterations);
-        $result = $this->clusteringService->clusterResidents();
-        
-        if (isset($result['error'])) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['error']
-            ]);
+        $this->ensurePythonAvailable();
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $samples = $this->pythonService->buildSamplesFromResidents($residents);
+
+        $normalized = $this->performClusteringByType($samples, $type, [
+            'k' => $k,
+            'max_iterations' => $maxIterations,
+            'num_runs' => $numRuns,
+            'linkage' => $linkage,
+        ]);
+
+        if (isset($normalized['error'])) {
+            return response()->json(['success' => false, 'error' => $normalized['error']]);
         }
+
+        // Convert to current view structures
+        $pythonResult = [
+            'labels' => $normalized['labels'],
+            'centroids' => $normalized['centers'],
+            'metrics' => [
+                'silhouette_score' => $normalized['metrics']['silhouette'],
+                'iterations' => $normalized['metrics']['iterations'],
+            ],
+            'characteristics' => $normalized['characteristics'],
+        ];
+
+        $result = $this->convertPythonResultToPhpFormat($pythonResult, $residents);
+        $characteristics = $this->extractCharacteristicsFromPythonResult($pythonResult, $residents);
         
-        $characteristics = $this->clusteringService->getClusterCharacteristics($result);
-        
-        // Cache the result for 1 hour
-        Cache::put('clustering_result_' . $k, [
+        Cache::put('clustering_result_' . $k . '_' . $type, [
             'result' => $result,
             'characteristics' => $characteristics
         ], 3600);
         
         return response()->json([
             'success' => true,
+            'type' => $type,
             'result' => $result,
             'characteristics' => $characteristics,
             'iterations' => $result['iterations'],
@@ -318,12 +339,25 @@ class ClusteringController
      */
     public function getOptimalK()
     {
-        $residents = Residents::all();
-        $optimalK = $this->clusteringService->findOptimalK($residents);
+        // Python service is required
+        $this->ensurePythonAvailable();
+        
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $samples = $this->pythonService->buildSamplesFromResidents($residents);
+        $optimalKResult = $this->pythonService->findOptimalK($samples, 10, 'silhouette');
+        
+        if (isset($optimalKResult['error'])) {
+            return response()->json([
+                'success' => false,
+                'error' => $optimalKResult['error']
+            ]);
+        }
         
         return response()->json([
             'success' => true,
-            'optimal_k' => $optimalK
+            'optimal_k' => $optimalKResult['optimal_k'],
+            'method' => $optimalKResult['method'],
+            'scores' => $optimalKResult['scores'] ?? []
         ]);
     }
 
@@ -332,20 +366,30 @@ class ClusteringController
      */
     public function export(Request $request)
     {
-        $k = $request->input('k', 3);
+        $k = (int)$request->input('k', 3);
         $format = $request->input('format', 'json');
-        
-        $this->clusteringService = new ResidentDemographicAnalysisService($k);
-        $result = $this->clusteringService->clusterResidents();
-        
-        if (isset($result['error'])) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['error']
-            ]);
+        $type = $request->input('type', 'kmeans');
+
+        $this->ensurePythonAvailable();
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $samples = $this->pythonService->buildSamplesFromResidents($residents);
+
+        $normalized = $this->performClusteringByType($samples, $type, ['k' => $k]);
+        if (isset($normalized['error'])) {
+            return response()->json(['success' => false, 'error' => $normalized['error']]);
         }
-        
-        $characteristics = $this->clusteringService->getClusterCharacteristics($result);
+        $pythonResult = [
+            'labels' => $normalized['labels'],
+            'centroids' => $normalized['centers'],
+            'metrics' => [
+                'silhouette_score' => $normalized['metrics']['silhouette'],
+                'iterations' => $normalized['metrics']['iterations'],
+            ],
+            'characteristics' => $normalized['characteristics'],
+        ];
+
+        $result = $this->convertPythonResultToPhpFormat($pythonResult, $residents);
+        $characteristics = $this->extractCharacteristicsFromPythonResult($pythonResult, $residents);
         
         if ($format === 'csv') {
             return $this->exportToCSV($result, $characteristics);
@@ -353,6 +397,7 @@ class ClusteringController
         
         return response()->json([
             'success' => true,
+            'type' => $type,
             'result' => $result,
             'characteristics' => $characteristics
         ]);
@@ -415,19 +460,28 @@ class ClusteringController
      */
     public function getClusterStats(Request $request)
     {
-        $k = $request->input('k', 3);
-        
-        $this->clusteringService = new ResidentDemographicAnalysisService($k);
-        $result = $this->clusteringService->clusterResidents();
-        
-        if (isset($result['error'])) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['error']
-            ]);
+        $k = (int)$request->input('k', 3);
+        $type = $request->input('type', 'kmeans');
+
+        $this->ensurePythonAvailable();
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $samples = $this->pythonService->buildSamplesFromResidents($residents);
+        $normalized = $this->performClusteringByType($samples, $type, ['k' => $k]);
+        if (isset($normalized['error'])) {
+            return response()->json(['success' => false, 'error' => $normalized['error']]);
         }
-        
-        $characteristics = $this->clusteringService->getClusterCharacteristics($result);
+        $pythonResult = [
+            'labels' => $normalized['labels'],
+            'centroids' => $normalized['centers'],
+            'metrics' => [
+                'silhouette_score' => $normalized['metrics']['silhouette'],
+                'iterations' => $normalized['metrics']['iterations'],
+            ],
+            'characteristics' => $normalized['characteristics'],
+        ];
+
+        $result = $this->convertPythonResultToPhpFormat($pythonResult, $residents);
+        $characteristics = $this->extractCharacteristicsFromPythonResult($pythonResult, $residents);
         
         $stats = [];
         foreach ($characteristics as $clusterId => $characteristic) {
@@ -461,5 +515,123 @@ class ClusteringController
         return $distribution;
     }
 
+    /**
+     * Convert Python clustering result to PHP format
+     */
+    private function convertPythonResultToPhpFormat(array $pythonResult, $residents): array
+    {
+        $clusters = [];
+        $labels = $pythonResult['labels'] ?? [];
+        $residentsArray = $residents->toArray();
+        
+        // Group residents by cluster
+        foreach ($labels as $index => $clusterId) {
+            if (!isset($clusters[$clusterId])) {
+                $clusters[$clusterId] = [];
+            }
+            
+            if (isset($residentsArray[$index])) {
+                $resident = $residents->get($index);
+                $clusters[$clusterId][] = [
+                    'id' => $resident->id,
+                    'features' => [],
+                    'resident' => $resident
+                ];
+            }
+        }
+        
+        // Extract centroids
+        $centroids = [];
+        if (isset($pythonResult['centroids'])) {
+            foreach ($pythonResult['centroids'] as $idx => $centroid) {
+                $centroids[$idx] = $centroid;
+            }
+        }
+        
+        // Extract metrics
+        $silhouette = $pythonResult['metrics']['silhouette_score'] ?? 0;
+        $iterations = $pythonResult['metrics']['iterations'] ?? 100;
+        
+        return [
+            'clusters' => $clusters,
+            'centroids' => $centroids,
+            'iterations' => $iterations,
+            'converged' => true,
+            'silhouette' => round($silhouette, 3),
+            'residents' => $residents,
+            'python_metrics' => $pythonResult['metrics'] ?? []
+        ];
+    }
+
+    /**
+     * Extract characteristics from Python result
+     */
+    private function extractCharacteristicsFromPythonResult(array $pythonResult, $residents): array
+    {
+        $characteristics = [];
+        $labels = $pythonResult['labels'] ?? [];
+        $pythonCharacteristics = $pythonResult['characteristics'] ?? [];
+        
+        // Group residents by cluster
+        $clusterGroups = [];
+        foreach ($labels as $index => $clusterId) {
+            if (!isset($clusterGroups[$clusterId])) {
+                $clusterGroups[$clusterId] = [];
+            }
+            $clusterGroups[$clusterId][] = $residents->get($index);
+        }
+        
+        // Build characteristics for each cluster
+        foreach ($clusterGroups as $clusterId => $clusterResidents) {
+            $pythonChar = $pythonCharacteristics[$clusterId] ?? [];
+            
+            // Calculate distributions
+            $incomeDistribution = [];
+            $employmentDistribution = [];
+            $healthDistribution = [];
+            $educationDistribution = [];
+            
+            foreach ($clusterResidents as $resident) {
+                $income = $resident->income_level ?? 'Unknown';
+                $employment = $resident->employment_status ?? 'Unknown';
+                $health = $resident->health_status ?? 'Unknown';
+                $education = $resident->education_level ?? 'Unknown';
+                
+                $incomeDistribution[$income] = ($incomeDistribution[$income] ?? 0) + 1;
+                $employmentDistribution[$employment] = ($employmentDistribution[$employment] ?? 0) + 1;
+                $healthDistribution[$health] = ($healthDistribution[$health] ?? 0) + 1;
+                $educationDistribution[$education] = ($educationDistribution[$education] ?? 0) + 1;
+            }
+            
+            // Find most common purok
+            $purokCounts = [];
+            foreach ($clusterResidents as $resident) {
+                $address = strtolower($resident->address ?? '');
+                if (preg_match('/purok\s*([a-z0-9]+)/i', $address, $m)) {
+                    $purok = strtoupper($m[1]);
+                    $purokCounts[$purok] = ($purokCounts[$purok] ?? 0) + 1;
+                }
+            }
+            $mostCommonPurok = count($purokCounts) > 0 ? array_search(max($purokCounts), $purokCounts) : 'N/A';
+            
+            $characteristics[$clusterId] = [
+                'size' => count($clusterResidents),
+                'avg_age' => $pythonChar['avg_age'] ?? 0,
+                'avg_family_size' => $pythonChar['avg_family_size'] ?? 0,
+                'income_distribution' => $incomeDistribution,
+                'employment_distribution' => $employmentDistribution,
+                'health_distribution' => $healthDistribution,
+                'education_distribution' => $educationDistribution,
+                'most_common_purok' => $mostCommonPurok,
+                'most_common_employment' => count($employmentDistribution) > 0 ? array_search(max($employmentDistribution), $employmentDistribution) : 'N/A',
+                'most_common_health' => count($healthDistribution) > 0 ? array_search(max($healthDistribution), $healthDistribution) : 'N/A',
+                'residents' => array_map(function($r) {
+                    return ['resident' => $r];
+                }, is_array($clusterResidents) ? $clusterResidents : $clusterResidents->toArray())
+            ];
+        }
+        
+        return array_values($characteristics);
+    }
 
 }

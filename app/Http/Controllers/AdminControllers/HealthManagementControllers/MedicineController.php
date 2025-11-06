@@ -8,7 +8,6 @@ use App\Models\MedicineTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Services\ResidentDemographicAnalysisService;
 
 class MedicineController
 {
