@@ -372,29 +372,3 @@ Route::post('/logout', function () {
     return redirect()->route('landing');
 })->name('logout');
 
-Route::match(['get', 'post'], '/test-docx-upload', function(Request $request) {
-    $output = '';
-    if ($request->isMethod('post')) {
-        if ($request->hasFile('test_docx')) {
-            $file = $request->file('test_docx');
-            $output .= '<p style="color:green;">File Uploaded! Name: '.$file->getClientOriginalName().' Size: '.$file->getSize().'</p>';
-            // Try to move to storage for confirmation
-            $saveDir = storage_path('app/test_uploads');
-            if (!file_exists($saveDir)) mkdir($saveDir, 0777, true);
-            $saved = $file->move($saveDir, $file->getClientOriginalName());
-            $output .= '<p>Saved to: '.$saved->getPathname().'</p>';
-        } else {
-            $output .= '<p style="color:red;">NO FILE RECEIVED</p>';
-        }
-    }
-    $csrf = $request->session()->token();
-    return <<<HTML
-    <h2 style="margin-top:40px;">Test DOCX Upload (Raw PHP/Laravel)</h2>
-    <form method="POST" enctype="multipart/form-data" style="margin-top:20px;">
-        <input type="hidden" name="_token" value="$csrf">
-        <label>Choose DOCX file: <input type="file" name="test_docx" /></label>
-        <button type="submit">Upload</button>
-    </form>
-    $output
-HTML;
-});

@@ -1,61 +1,121 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
+  <img src="public/images/lower-malinao-brgy-logo.png" alt="BARMMS Logo" width="140" />
+  <h1>Barangay Resource & Management Monitoring System (BARMMS)</h1>
+  <p>A unified Laravel + Python platform for barangay programs, requests, health data, and analytics.</p>
+</div>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
 
-## About Laravel
+BARMMS digitizes day-to-day barangay operations—account requests, document workflows, blotter tracking, medicine inventory, vaccination records, health center activities, announcements, and analytics.  
+The stack couples a Laravel 12 backend + Blade frontends with a Flask-based analytics microservice that handles clustering, decision trees, and recommendation models.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```
+/app                  Laravel domain logic, controllers, services
+/resources/views      Blade templates for admin + resident portals
+/analytics_service    Flask API, scikit-learn models, clustering/ML helpers
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Highlights
+- Multi-role administration (captain, secretary, nurse, treasurer, councilors) with middleware-based access control
+- Resident self-service for blotter/document/community concerns plus live status tracking
+- Health center toolkit: vaccinations, medical records, medicines inventory, activity scheduling, analytics exports
+- Integrated clustering/decision-tree dashboards backed by the Python service
+- Notification center + email templates for approvals, summons, and password resets
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tech Stack
 
-## Learning Laravel
+| Layer    | Technology                                   |
+| -------- | -------------------------------------------- |
+| Backend  | Laravel 12, PHP 8.2, Sanctum, Eloquent ORM   |
+| Frontend | Blade, Alpine.js, Tailwind (via Vite)        |
+| Storage  | MySQL / MariaDB, optional Redis cache/queue  |
+| Analytics| Flask + scikit-learn + pandas (`analytics_service/`) |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Requirements
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+| Service | Version |
+| ------- | ------- |
+| PHP     | 8.2+ (w/ BCMath, Ctype, Fileinfo, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML) |
+| Node    | 18+ (for Vite + frontend assets) |
+| Composer| 2.x     |
+| Python  | 3.9+ (for analytics service) |
+| MySQL   | 8+ or MariaDB 10.6+ |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Setup (Laravel)
 
-## Laravel Sponsors
+```bash
+cp .env.example .env           # configure DB, mail, python service URL
+composer install
+php artisan key:generate
+php artisan migrate --seed     # seeds residents, medicines, templates, etc.
+npm install && npm run build   # or `npm run dev` during local work
+php artisan serve              # app at http://127.0.0.1:8000/
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Important `.env` keys:
 
-### Premium Partners
+```
+APP_URL=http://localhost:8000
+PYTHON_ANALYTICS_URL=http://127.0.0.1:5000
+PYTHON_ANALYTICS_ENABLED=true
+QUEUE_CONNECTION=database
+CACHE_STORE=redis|file
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Setup (Analytics Service)
+
+```bash
+cd analytics_service
+python -m venv .venv
+.venv\Scripts\activate              # or source .venv/bin/activate
+pip install -r requirements.txt
+python app.py                       # Flask on http://127.0.0.1:5000
+```
+
+Models are saved under `analytics_service/models/`. Keep only the most recent `.pkl` + encoder pair to reduce repo size; older artifacts can be regenerated by retraining via the admin dashboard decision-tree tools.
+
+## Running the full stack
+
+1. Start MySQL and ensure `.env` credentials match.
+2. Run `php artisan serve` (or point Apache/Nginx to `public/index.php`).
+3. Start the queue worker if background notifications are enabled:
+   ```bash
+   php artisan queue:listen --tries=1
+   ```
+4. Launch Vite in watch mode for asset updates: `npm run dev`.
+5. Activate the Flask analytics API as shown above.
+
+Visit `/login` for admins, `/resident/login` for resident users (seed credentials are defined in the seeders).
+
+## Testing & QA
+
+```bash
+php artisan test                 # feature + unit tests
+php artisan pint                 # code style (PSR-12)
+npm run test                     # placeholder if you add JS tests
+```
+
+Key smoke tests before deployment:
+- Account request flow (guest ➜ admin approval ➜ email)
+- Resident requests (blotter, document, community concern)
+- Medicine inventory adjustments + request approvals
+- Document template uploads (DOCX + custom placeholders)
+- Analytics dashboard: clustering, decision tree stats, resident predictions
+
+## Deployment Checklist
+
+- `php artisan config:cache && route:cache`
+- Upload only the latest ML models needed by production
+- Ensure Python service runs under a process manager (e.g., Supervisor, Systemd)
+- Configure cron for Laravel scheduler: `* * * * * php /path/to/artisan schedule:run`
+- Point storage symlink: `php artisan storage:link`
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Fork + branch from `main`
+2. Follow PSR-12 for PHP, PEP8 for Python, and include tests
+3. Open a PR describing scope, screenshots for UI work, and steps to reproduce
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project inherits the default Laravel MIT license. See `LICENSE` for details.
