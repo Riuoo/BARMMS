@@ -1759,6 +1759,33 @@
                     </section>
                     @endif
 
+                    @if($isNurse || $isAdmin || $isSecretary || $isCaptain || $isCouncilor)
+                    <!-- QR Code & Attendance Section -->
+                    <section class="mb-6" aria-label="QR Code & Attendance">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">QR Code & Attendance</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li>
+                                <a href="{{ route('admin.attendance.scanner') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.attendance.scanner*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.attendance.scanner*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-qrcode fa-fw mr-3 {{ request()->routeIs('admin.attendance.scanner*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>QR Scanner</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.attendance.logs') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.attendance.logs*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.attendance.logs*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-list fa-fw mr-3 {{ request()->routeIs('admin.attendance.logs*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Attendance Logs</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.events.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.events*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.events*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-calendar-check fa-fw mr-3 {{ request()->routeIs('admin.events*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Events</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    @endif
+
                     @if(!$isNurse)
                     <!-- Analytics -->
                     <section class="mb-6" aria-label="Analytics">
@@ -1989,6 +2016,33 @@
                                 <a href="{{ route('admin.health-center-activities.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.health-center-activities*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-calendar-alt fa-fw mr-3 {{ request()->routeIs('admin.health-center-activities*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Health Activities</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    @endif
+
+                    @if($isNurse || $isAdmin || $isSecretary || $isCaptain || $isCouncilor)
+                    <!-- QR Code & Attendance Section -->
+                    <section class="mb-6" aria-label="QR Code & Attendance">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">QR Code & Attendance</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li>
+                                <a href="{{ route('admin.attendance.scanner') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.attendance.scanner*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-qrcode fa-fw mr-3 {{ request()->routeIs('admin.attendance.scanner*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>QR Scanner</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.attendance.logs') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.attendance.logs*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-list fa-fw mr-3 {{ request()->routeIs('admin.attendance.logs*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Attendance Logs</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.events.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.events*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-calendar-check fa-fw mr-3 {{ request()->routeIs('admin.events*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Events</span>
                                 </a>
                             </li>
                         </ul>

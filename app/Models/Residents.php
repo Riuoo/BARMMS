@@ -31,6 +31,7 @@ class Residents extends Authenticatable
         'emergency_contact_number',
         'emergency_contact_relationship',
         'active',
+        'qr_code_token',
     ];
 
     protected $hidden = [
@@ -61,5 +62,33 @@ class Residents extends Authenticatable
     public function vaccinationRecords()
     {
         return $this->hasMany(VaccinationRecord::class, 'resident_id');
+    }
+
+    public function attendanceLogs()
+    {
+        return $this->hasMany(AttendanceLog::class, 'resident_id');
+    }
+
+    /**
+     * Generate or retrieve QR code token for resident
+     */
+    public function generateQrCodeToken(): string
+    {
+        if (!$this->qr_code_token) {
+            // Generate a unique token using resident ID and a random string
+            $this->qr_code_token = hash('sha256', $this->id . '-' . $this->email . '-' . now()->timestamp . '-' . uniqid());
+            $this->save();
+        }
+        return $this->qr_code_token;
+    }
+
+    /**
+     * Get QR code data URL (for JavaScript QR code generation)
+     */
+    public function getQrCodeData(): string
+    {
+        $token = $this->generateQrCodeToken();
+        // Return a URL that will be used to verify the QR code
+        return route('qr.verify', ['token' => $token]);
     }
 }

@@ -70,6 +70,12 @@ class HealthCenterActivity extends Model
         return null;
     }
 
+    public function attendanceLogs()
+    {
+        return $this->hasMany(AttendanceLog::class, 'event_id')
+            ->where('event_type', 'health_center_activity');
+    }
+
     public function scopeUpcoming($query)
     {
         return $query->where('activity_date', '>=', now()->toDateString())

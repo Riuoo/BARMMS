@@ -42,6 +42,9 @@ use App\Http\Controllers\ResidentControllers\ResidentNotificationController;
 use App\Http\Controllers\ResidentControllers\ResidentProfileController;
 use App\Http\Controllers\ResidentControllers\ResidentFaqController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\QRCodeController;
+use App\Http\Controllers\AdminControllers\AttendanceController;
+use App\Http\Controllers\AdminControllers\EventController;
 
 // Landing page route
 Route::get('/', function () {
@@ -298,6 +301,29 @@ Route::prefix('admin')->group(function () {
         Route::post('/health-center-activities/{id}/toggle-featured', [HealthCenterActivityController::class, 'toggleFeatured'])->name('admin.health-center-activities.toggle-featured');
     });
 
+    // QR Code Verification (public endpoint for scanning)
+    Route::get('/qr/verify/{token}', [QRCodeController::class, 'verify'])->name('qr.verify');
+    
+    // QR Code & Attendance Routes (for admin/staff)
+    Route::middleware(['admin.role:admin,secretary,captain,councilor,nurse'])->group(function () {
+        // Attendance Scanner
+        Route::get('/attendance/scanner', [AttendanceController::class, 'scanner'])->name('admin.attendance.scanner');
+        Route::post('/attendance/scan', [AttendanceController::class, 'scan'])->name('admin.attendance.scan');
+        Route::post('/attendance/add-manual', [AttendanceController::class, 'addManualAttendance'])->name('admin.attendance.add-manual');
+        Route::get('/attendance/get-attendance', [AttendanceController::class, 'getAttendance'])->name('admin.attendance.get');
+        Route::get('/attendance/logs', [AttendanceController::class, 'logs'])->name('admin.attendance.logs');
+        Route::get('/attendance/report', [AttendanceController::class, 'report'])->name('admin.attendance.report');
+        
+        // Events Management
+        Route::get('/events', [EventController::class, 'index'])->name('admin.events.index');
+        Route::get('/events/create', [EventController::class, 'create'])->name('admin.events.create');
+        Route::post('/events', [EventController::class, 'store'])->name('admin.events.store');
+        Route::get('/events/{id}', [EventController::class, 'show'])->name('admin.events.show');
+        Route::get('/events/{id}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
+        Route::put('/events/{id}', [EventController::class, 'update'])->name('admin.events.update');
+        Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('admin.events.destroy');
+    });
+
     Route::middleware(['admin.role:admin,treasurer'])->group(function () {
 
         // Accomplished Projects Routes
@@ -364,6 +390,10 @@ Route::middleware(['resident.role'])->prefix('resident')->group(function () {
 
     // Resident FAQs
     Route::get('/faqs', [ResidentFaqController::class, 'index'])->name('resident.faqs');
+
+    // QR Code
+    Route::get('/qr-code', [QRCodeController::class, 'show'])->name('resident.qr-code');
+    Route::get('/qr-code/download', [QRCodeController::class, 'download'])->name('resident.qr-code.download');
 });
 
 // Logout route

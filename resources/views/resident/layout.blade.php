@@ -1220,6 +1220,12 @@
                     @click.stop
                 >
                     <div class="py-1">
+                        <a href="{{ route('resident.qr-code') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.qr-code') }} transition duration-300 text-base">
+                            <i class="fas fa-qrcode fa-fw mr-3 {{ request()->routeIs('resident.qr-code*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                            <span>My QR Code</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('resident.profile') }}"
                         class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 flex items-center"
                         role="menuitem" 
@@ -1317,6 +1323,25 @@
                                 <a href="{{ route('resident.my-requests') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.my-requests') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.my-requests') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.my-requests') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>My Requests</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- My Account -->
+                    <section class="mb-6" aria-label="My Account">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">My Account</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li>
+                                <a href="{{ route('resident.qr-code') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.qr-code*') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.qr-code*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-qrcode fa-fw mr-3 {{ request()->routeIs('resident.qr-code*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>My QR Code</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('resident.profile') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.profile') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.profile') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-user-circle fa-fw mr-3 {{ request()->routeIs('resident.profile') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>My Profile</span>
                                 </a>
                             </li>
                         </ul>
@@ -1430,6 +1455,25 @@
                         </ul>
                     </section>
 
+                    <!-- My Account -->
+                    <section class="mb-6" aria-label="My Account">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">My Account</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li>
+                                <a href="{{ route('resident.qr-code') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.qr-code*') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.qr-code*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-qrcode fa-fw mr-3 {{ request()->routeIs('resident.qr-code*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>My QR Code</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('resident.profile') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.profile') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.profile') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-user-circle fa-fw mr-3 {{ request()->routeIs('resident.profile') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>My Profile</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
                     <!-- Community -->
                     <section class="mb-6" aria-label="Community">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Community</h3>
@@ -1455,7 +1499,7 @@
                         </ul>
                     </section>
                 </nav>
-            </aside>
+            </aside
 
         <!-- Main content -->
         <main class="flex-grow p-6 overflow-auto">

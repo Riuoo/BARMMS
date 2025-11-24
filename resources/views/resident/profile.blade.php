@@ -350,6 +350,31 @@
         </div>
     </div>
 
+    <!-- QR Code Card -->
+    <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-qrcode text-green-600 text-xl"></i>
+            </div>
+            <div class="ml-4 flex-1">
+                <h2 class="text-xl font-semibold text-gray-900">QR Code Identity</h2>
+                <p class="text-sm text-gray-500">Your unique QR code for attendance and check-in</p>
+            </div>
+            <div>
+                <a href="{{ route('resident.qr-code') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700">
+                    <i class="fas fa-qrcode mr-2"></i>
+                    View QR Code
+                </a>
+            </div>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p class="text-sm text-green-800">
+                <i class="fas fa-info-circle mr-2"></i>
+                Use your QR code for quick check-in at barangay events, health center visits, and other activities.
+            </p>
+        </div>
+    </div>
+
     <!-- Account Information Card -->
     <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div class="flex items-center mb-2">
