@@ -31,11 +31,31 @@
     </style>
     <style>
         /* Improve skeleton visibility in dark mode */
-        [data-theme="dark"] [data-skeleton] .bg-gray-100 { background-color: #374151 !important; }
-        [data-theme="dark"] [data-skeleton] .bg-gray-200 { background-color: #4b5563 !important; }
-        [data-theme="dark"] [data-skeleton] .bg-gray-300 { background-color: #6b7280 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-100,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-800 { background-color: #374151 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-200,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-700 { background-color: #4b5563 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-300,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-600 { background-color: #6b7280 !important; }
         [data-theme="dark"] [data-skeleton] .border-gray-100,
-        [data-theme="dark"] [data-skeleton] .border-gray-200 { border-color: #475569 !important; }
+        [data-theme="dark"] [data-skeleton] .border-gray-200,
+        [data-theme="dark"] [data-skeleton] .dark\:border-gray-700,
+        [data-theme="dark"] [data-skeleton] .dark\:border-gray-800 { border-color: #475569 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-white,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-800 { background-color: #1f2937 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-50,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-900 { background-color: #111827 !important; }
+        /* Colored skeleton backgrounds in dark mode */
+        [data-theme="dark"] [data-skeleton] .bg-blue-50 { background-color: rgba(30, 58, 138, 0.2) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-blue-100 { background-color: rgba(30, 58, 138, 0.3) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-blue-200 { background-color: rgba(30, 58, 138, 0.4) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-yellow-50 { background-color: rgba(113, 63, 18, 0.2) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-yellow-200 { background-color: rgba(113, 63, 18, 0.4) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-purple-50 { background-color: rgba(88, 28, 135, 0.2) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-purple-200 { background-color: rgba(88, 28, 135, 0.4) !important; }
+        [data-theme="dark"] [data-skeleton] .border-blue-200 { border-color: rgba(30, 58, 138, 0.3) !important; }
+        [data-theme="dark"] [data-skeleton] .border-yellow-200 { border-color: rgba(113, 63, 18, 0.3) !important; }
+        [data-theme="dark"] [data-skeleton] .border-purple-200 { border-color: rgba(88, 28, 135, 0.3) !important; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -1217,14 +1237,8 @@
                     style="display: none;"
                     role="menu" 
                     aria-label="User menu"
-                    @click.stop
-                >
-                    <div class="py-1">
-                        <a href="{{ route('resident.qr-code') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.qr-code') }} transition duration-300 text-base">
-                            <i class="fas fa-qrcode fa-fw mr-3 {{ request()->routeIs('resident.qr-code*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                            <span>My QR Code</span>
-                        </a>
-                    </li>
+                    @click.stop>
+                    
                     <li>
                         <a href="{{ route('resident.profile') }}"
                         class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 flex items-center"
@@ -1336,12 +1350,6 @@
                                 <a href="{{ route('resident.qr-code') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.qr-code*') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.qr-code*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-qrcode fa-fw mr-3 {{ request()->routeIs('resident.qr-code*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>My QR Code</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('resident.profile') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.profile') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.profile') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-user-circle fa-fw mr-3 {{ request()->routeIs('resident.profile') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>My Profile</span>
                                 </a>
                             </li>
                         </ul>
@@ -1463,12 +1471,6 @@
                                 <a href="{{ route('resident.qr-code') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.qr-code*') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.qr-code*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-qrcode fa-fw mr-3 {{ request()->routeIs('resident.qr-code*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>My QR Code</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('resident.profile') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.profile') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.profile') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-user-circle fa-fw mr-3 {{ request()->routeIs('resident.profile') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>My Profile</span>
                                 </a>
                             </li>
                         </ul>

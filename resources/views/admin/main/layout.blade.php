@@ -32,11 +32,31 @@
     </style>
     <style>
         /* Improve skeleton visibility in dark mode */
-        [data-theme="dark"] [data-skeleton] .bg-gray-100 { background-color: #374151 !important; }
-        [data-theme="dark"] [data-skeleton] .bg-gray-200 { background-color: #4b5563 !important; }
-        [data-theme="dark"] [data-skeleton] .bg-gray-300 { background-color: #6b7280 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-100,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-800 { background-color: #374151 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-200,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-700 { background-color: #4b5563 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-300,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-600 { background-color: #6b7280 !important; }
         [data-theme="dark"] [data-skeleton] .border-gray-100,
-        [data-theme="dark"] [data-skeleton] .border-gray-200 { border-color: #475569 !important; }
+        [data-theme="dark"] [data-skeleton] .border-gray-200,
+        [data-theme="dark"] [data-skeleton] .dark\:border-gray-700,
+        [data-theme="dark"] [data-skeleton] .dark\:border-gray-800 { border-color: #475569 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-white,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-800 { background-color: #1f2937 !important; }
+        [data-theme="dark"] [data-skeleton] .bg-gray-50,
+        [data-theme="dark"] [data-skeleton] .dark\:bg-gray-900 { background-color: #111827 !important; }
+        /* Colored skeleton backgrounds in dark mode */
+        [data-theme="dark"] [data-skeleton] .bg-blue-50 { background-color: rgba(30, 58, 138, 0.2) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-blue-100 { background-color: rgba(30, 58, 138, 0.3) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-blue-200 { background-color: rgba(30, 58, 138, 0.4) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-yellow-50 { background-color: rgba(113, 63, 18, 0.2) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-yellow-200 { background-color: rgba(113, 63, 18, 0.4) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-purple-50 { background-color: rgba(88, 28, 135, 0.2) !important; }
+        [data-theme="dark"] [data-skeleton] .bg-purple-200 { background-color: rgba(88, 28, 135, 0.4) !important; }
+        [data-theme="dark"] [data-skeleton] .border-blue-200 { border-color: rgba(30, 58, 138, 0.3) !important; }
+        [data-theme="dark"] [data-skeleton] .border-yellow-200 { border-color: rgba(113, 63, 18, 0.3) !important; }
+        [data-theme="dark"] [data-skeleton] .border-purple-200 { border-color: rgba(88, 28, 135, 0.3) !important; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />

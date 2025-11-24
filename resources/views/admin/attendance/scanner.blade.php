@@ -3,7 +3,9 @@
 @section('title', 'QR Code Scanner')
 
 @section('content')
-<div class="max-w-7xl mx-auto pt-2">
+@include('components.loading.scanner-skeleton')
+
+<div class="max-w-7xl mx-auto pt-2" id="scannerContent" style="display: none;">
     <!-- Header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">QR Code Scanner</h1>
@@ -151,6 +153,37 @@ let lastScannedCode = null;
 let lastScanTime = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Hide skeleton and show content after a minimum display time
+    const skeleton = document.querySelector('[data-skeleton]');
+    const content = document.getElementById('scannerContent');
+    
+    // Minimum skeleton display time (1000ms) for better UX
+    const minDisplayTime = 1000;
+    const startTime = Date.now();
+    
+    function showContent() {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, minDisplayTime - elapsed);
+        
+        setTimeout(function() {
+            if (skeleton) {
+                skeleton.style.display = 'none';
+            }
+            if (content) {
+                content.style.display = 'block';
+            }
+        }, remaining);
+    }
+    
+    // Wait for page to be fully ready
+    if (document.readyState === 'complete') {
+        showContent();
+    } else {
+        window.addEventListener('load', showContent);
+        // Fallback: show content after max 1 second even if load event doesn't fire
+        setTimeout(showContent, 1000);
+    }
+
     video = document.getElementById('video');
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
@@ -186,6 +219,8 @@ function loadEvents() {
     let firstOngoingId = null;
 
     // Load events based on type
+    /* eslint-disable */
+    // @ts-ignore - Blade template syntax mixed with JavaScript
     if (eventType === 'event') {
         @if(isset($events))
             @php
@@ -212,7 +247,7 @@ function loadEvents() {
                         $firstEvtId = $evt->id;
                     }
                 @endphp
-                eventSelect.innerHTML += '<option value="{{ $evt->id }}">{{ $evt->event_name }} - {{ $evt->event_date->format('M d, Y') }}{!! $statusBadge !!}</option>';
+                eventSelect.innerHTML += '<option value="{{ $evt->id }}">{{ $evt->event_name }} - {{ $evt->event_date->format("M d, Y") }}{!! $statusBadge !!}</option>';
             @endforeach
             @if($firstEvtId)
                 firstEventId = {{ $firstEvtId }};
@@ -247,7 +282,7 @@ function loadEvents() {
                         $firstActId = $act->id;
                     }
                 @endphp
-                eventSelect.innerHTML += '<option value="{{ $act->id }}">{{ $act->activity_name }} - {{ $act->activity_date->format('M d, Y') }}{!! $statusBadge !!}</option>';
+                eventSelect.innerHTML += '<option value="{{ $act->id }}">{{ $act->activity_name }} - {{ $act->activity_date->format("M d, Y") }}{!! $statusBadge !!}</option>';
             @endforeach
             @if($firstActId)
                 firstEventId = {{ $firstActId }};
@@ -259,6 +294,7 @@ function loadEvents() {
     }
 
     // Auto-select: prioritize URL-selected event, then ongoing event, then first event
+    /* eslint-enable */
     @if(isset($eventId) && $eventId)
         eventSelect.value = {{ $eventId }};
         refreshAttendance();
@@ -601,7 +637,13 @@ function addGuestAttendance() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showResult(`✓ ${data.guest.name} - Guest attendance logged!`, 'success');
+            if (data.is_guest === false) {
+                // Matched a resident
+                showResult(`✓ ${data.resident.name} - Resident attendance logged!`, 'success');
+            } else {
+                // No match - logged as guest
+                showResult(`✓ ${data.guest.name} - Guest attendance logged!`, 'success');
+            }
             document.getElementById('guestName').value = '';
             document.getElementById('guestContact').value = '';
             refreshAttendance();

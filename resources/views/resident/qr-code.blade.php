@@ -3,7 +3,9 @@
 @section('title', 'My QR Code')
 
 @section('content')
-<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+@include('components.loading.qr-code-skeleton')
+
+<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8" id="qrCodeContent" style="display: none;">
     <!-- Header Section -->
     <div class="mb-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -121,6 +123,18 @@ document.addEventListener('DOMContentLoaded', function() {
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.H
     });
+
+    // Hide skeleton and show content after QR code is generated
+    setTimeout(function() {
+        const skeleton = document.querySelector('[data-skeleton]');
+        const content = document.getElementById('qrCodeContent');
+        if (skeleton) {
+            skeleton.style.display = 'none';
+        }
+        if (content) {
+            content.style.display = 'block';
+        }
+    }, 500);
 });
 
 function copyToken() {

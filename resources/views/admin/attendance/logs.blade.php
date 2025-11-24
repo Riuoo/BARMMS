@@ -3,7 +3,9 @@
 @section('title', 'Attendance Logs')
 
 @section('content')
-<div class="max-w-7xl mx-auto pt-2">
+@include('components.loading.attendance-logs-skeleton')
+
+<div class="max-w-7xl mx-auto pt-2" id="logsContent" style="display: none;">
     <div class="mb-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -123,5 +125,42 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Hide skeleton and show content after a minimum display time
+    const skeleton = document.querySelector('[data-skeleton]');
+    const content = document.getElementById('logsContent');
+    
+    // Minimum skeleton display time (1000ms) for better UX
+    const minDisplayTime = 1000;
+    const startTime = Date.now();
+    
+    function showContent() {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, minDisplayTime - elapsed);
+        
+        setTimeout(function() {
+            if (skeleton) {
+                skeleton.style.display = 'none';
+            }
+            if (content) {
+                content.style.display = 'block';
+            }
+        }, remaining);
+    }
+    
+    // Wait for page to be fully ready
+    if (document.readyState === 'complete') {
+        showContent();
+    } else {
+        window.addEventListener('load', showContent);
+        // Fallback: show content after max 1 second even if load event doesn't fire
+        setTimeout(showContent, 1000);
+    }
+});
+</script>
+@endpush
 @endsection
 

@@ -217,8 +217,8 @@ class AttendanceController
         $eventId = $request->input('event_id');
         $eventType = $request->input('event_type', 'event');
         $scannedBy = Session::get('user_id');
-        $guestName = trim($request->input('name'));
-        $guestContact = trim($request->input('contact', ''));
+        $enteredName = trim($request->input('name'));
+        $enteredContact = trim($request->input('contact', ''));
         $notes = $request->input('notes');
 
         if (!$eventId) {
@@ -228,59 +228,131 @@ class AttendanceController
             ], 400);
         }
 
-        // Check for duplicate (same name, same event, same day)
-        $existingLog = AttendanceLog::where('guest_name', $guestName)
-            ->where('event_id', $eventId)
-            ->where('event_type', $eventType)
-            ->whereDate('scanned_at', now()->toDateString())
+        // Try to find matching resident by name (case-insensitive, trimmed)
+        $resident = Residents::whereRaw('LOWER(TRIM(name)) = ?', [strtolower(trim($enteredName))])
+            ->where('active', true)
             ->first();
 
-        if ($existingLog) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Already attended. This person has already been recorded for this event today.',
-                'previous_scan' => $existingLog->scanned_at->format('Y-m-d H:i:s'),
-            ], 409);
-        }
+        if ($resident) {
+            // Found matching resident - log as resident attendance
+            // Check for duplicate scan (same resident, same event)
+            $existingLog = AttendanceLog::where('resident_id', $resident->id)
+                ->where('event_id', $eventId)
+                ->where('event_type', $eventType)
+                ->whereNotNull('resident_id')
+                ->first();
 
-        try {
-            $attendanceLog = AttendanceLog::create([
-                'resident_id' => null, // No resident account
-                'guest_name' => $guestName,
-                'guest_contact' => $guestContact ?: null,
-                'event_id' => $eventId,
-                'event_type' => $eventType,
-                'scanned_by' => $scannedBy,
-                'scanned_at' => now(),
-                'notes' => $notes,
-            ]);
-
-            // Update event attendance count if applicable
-            if ($eventId && $eventType === 'health_center_activity') {
-                $activity = HealthCenterActivity::find($eventId);
-                if ($activity) {
-                    $count = AttendanceLog::where('event_id', $eventId)
-                        ->where('event_type', 'health_center_activity')
-                        ->count();
-                    $activity->actual_participants = $count;
-                    $activity->save();
-                }
+            if ($existingLog) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Already attended. This resident has already been scanned for this event.',
+                    'resident' => [
+                        'id' => $resident->id,
+                        'name' => $resident->name,
+                        'email' => $resident->email,
+                    ],
+                    'previous_scan' => $existingLog->scanned_at->format('Y-m-d H:i:s'),
+                ], 409);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Guest attendance logged successfully.',
-                'guest' => [
-                    'name' => $guestName,
-                    'contact' => $guestContact,
-                ],
-                'attendance_count' => $this->getAttendanceCount($eventId, $eventType),
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error logging attendance: ' . $e->getMessage(),
-            ], 500);
+            try {
+                $attendanceLog = AttendanceLog::create([
+                    'resident_id' => $resident->id, // Log as resident
+                    'guest_name' => null, // Not a guest
+                    'guest_contact' => null,
+                    'event_id' => $eventId,
+                    'event_type' => $eventType,
+                    'scanned_by' => $scannedBy,
+                    'scanned_at' => now(),
+                    'notes' => $notes,
+                ]);
+
+                // Update event attendance count if applicable
+                if ($eventId && $eventType === 'health_center_activity') {
+                    $activity = HealthCenterActivity::find($eventId);
+                    if ($activity) {
+                        $count = AttendanceLog::where('event_id', $eventId)
+                            ->where('event_type', 'health_center_activity')
+                            ->count();
+                        $activity->actual_participants = $count;
+                        $activity->save();
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Resident attendance logged successfully.',
+                    'resident' => [
+                        'id' => $resident->id,
+                        'name' => $resident->name,
+                        'email' => $resident->email,
+                    ],
+                    'is_guest' => false,
+                    'attendance_count' => $this->getAttendanceCount($eventId, $eventType),
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error logging attendance: ' . $e->getMessage(),
+                ], 500);
+            }
+        } else {
+            // No matching resident found - log as guest
+            // Check for duplicate (same name, same event, same day)
+            $existingLog = AttendanceLog::where('guest_name', $enteredName)
+                ->where('event_id', $eventId)
+                ->where('event_type', $eventType)
+                ->whereDate('scanned_at', now()->toDateString())
+                ->first();
+
+            if ($existingLog) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Already attended. This person has already been recorded for this event today.',
+                    'previous_scan' => $existingLog->scanned_at->format('Y-m-d H:i:s'),
+                ], 409);
+            }
+
+            try {
+                $attendanceLog = AttendanceLog::create([
+                    'resident_id' => null, // No resident account
+                    'guest_name' => $enteredName,
+                    'guest_contact' => $enteredContact ?: null,
+                    'event_id' => $eventId,
+                    'event_type' => $eventType,
+                    'scanned_by' => $scannedBy,
+                    'scanned_at' => now(),
+                    'notes' => $notes,
+                ]);
+
+                // Update event attendance count if applicable
+                if ($eventId && $eventType === 'health_center_activity') {
+                    $activity = HealthCenterActivity::find($eventId);
+                    if ($activity) {
+                        $count = AttendanceLog::where('event_id', $eventId)
+                            ->where('event_type', 'health_center_activity')
+                            ->count();
+                        $activity->actual_participants = $count;
+                        $activity->save();
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Guest attendance logged successfully.',
+                    'guest' => [
+                        'name' => $enteredName,
+                        'contact' => $enteredContact,
+                    ],
+                    'is_guest' => true,
+                    'attendance_count' => $this->getAttendanceCount($eventId, $eventType),
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error logging attendance: ' . $e->getMessage(),
+                ], 500);
+            }
         }
     }
 
