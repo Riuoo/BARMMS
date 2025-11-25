@@ -46,14 +46,22 @@ class ResidentController
                 $query->where('active', false);
             }
         }
-        // Filter by recently added (last 30 days)
-        if ($request->filled('recent') && $request->get('recent') === 'recent') {
-            $query->where('created_at', '>=', now()->subDays(30));
-        }
         // Only select needed columns for the residents list and demographics modal
         $residents = $query->select([
-            'id', 'name', 'email', 'address', 'active', 'created_at',
-            'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status'
+            'id',
+            'name',
+            'email',
+            'contact_number',
+            'address',
+            'birth_date',
+            'active',
+            'created_at',
+            'age',
+            'family_size',
+            'education_level',
+            'income_level',
+            'employment_status',
+            'health_status',
         ])
         ->orderByDesc('active')->orderBy('name')->paginate(10);
         return view('admin.residents.residents', compact('residents', 'totalResidents', 'activeResidents', 'recentResidents', 'withAddress'));

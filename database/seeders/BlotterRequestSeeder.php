@@ -7,6 +7,7 @@ use App\Models\BlotterRequest;
 use App\Models\Residents;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Faker\Factory as Faker;
 
 class BlotterRequestSeeder extends Seeder
 {
@@ -15,6 +16,8 @@ class BlotterRequestSeeder extends Seeder
      */
     public function run(): void
     {
+        $faker = Faker::create();
+
         $types = [
             'Physical Injury', 'Theft', 'Vandalism', 'Family Dispute', 'Verbal Abuse',
             'Trespassing', 'Property Damage', 'Public Disturbance', 'Threat', 'Others'
@@ -68,6 +71,7 @@ class BlotterRequestSeeder extends Seeder
             ] : null;
 
             BlotterRequest::create([
+                'complainant_name' => $faker->name(),
                 'resident_id' => $resident->id,
                 'recipient_name' => $recipient,
                 'type' => $type,

@@ -83,13 +83,6 @@
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                 </div>
-                <!-- Recent Filter -->
-                <div class="sm:w-48">
-                    <select name="recent" id="recentFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                        <option value="">All Residents</option>
-                        <option value="recent" {{ request('recent') == 'recent' ? 'selected' : '' }}>Recently Added</option>
-                    </select>
-                </div>
                 <div class="flex space-x-2">
                     <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                         <i class="fas fa-filter mr-2"></i>Filter
@@ -195,7 +188,13 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <i class="fas fa-envelope mr-2"></i>
-                                    Contact
+                                    Email
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-phone mr-2"></i>
+                                    Contact No.
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -208,6 +207,12 @@
                                 <div class="flex items-center">
                                     <i class="fas fa-calendar mr-2"></i>
                                     Birth Date
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-user-clock mr-2"></i>
+                                    Age
                                 </div>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -246,10 +251,16 @@
                                 <div class="text-sm text-gray-900">{{ $resident->email }}</div>
                             </td>
                             <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ $resident->contact_number ?: 'No contact provided' }}</div>
+                            </td>
+                            <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->address ?: 'No address provided' }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->birth_date ? \Carbon\Carbon::parse($resident->birth_date)->format('M d, Y') : 'Not provided' }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ $resident->age ?? 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
@@ -330,6 +341,10 @@
                             <div class="ml-3 flex-1 min-w-0">
                                 <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $resident->name }}</h3>
                                 <p class="text-sm text-gray-500 truncate">{{ $resident->email }}</p>
+                                <p class="text-sm text-gray-500 truncate">
+                                    <i class="fas fa-phone mr-1 text-gray-400"></i>
+                                    {{ $resident->contact_number ?: 'No contact provided' }}
+                                </p>
                                 <div class="flex items-center mt-1">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
                                         <i class="fas fa-circle mr-1 {{ $statusIconClass }}"></i>
@@ -352,13 +367,21 @@
 
                     <!-- Birth date section -->
                     @if($resident->birth_date)
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <p class="text-sm text-gray-600 leading-relaxed">
                             <i class="fas fa-calendar mr-1 text-gray-400"></i>
                             {{ \Carbon\Carbon::parse($resident->birth_date)->format('M d, Y') }}
                         </p>
                     </div>
                     @endif
+
+                    <!-- Age info -->
+                    <div class="mb-3">
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            <i class="fas fa-user-clock mr-1 text-gray-400"></i>
+                            {{ $resident->age ?? 'Age not provided' }}
+                        </p>
+                    </div>
 
                     <!-- Action buttons -->
                     <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">

@@ -73,10 +73,10 @@
                                id="complainant_name" 
                                name="complainant_name" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200" 
-                               placeholder="Enter complainant name (will be shown as Anonymous)"
+                               placeholder="Enter complainant name"
                                value="{{ old('complainant_name') }}"
                                required>
-                        <p class="mt-1 text-sm text-gray-500">Complainant name will be displayed as "Anonymous" in reports</p>
+                        <p class="mt-1 text-sm text-gray-500">Complainant name will be shown exactly as entered in reports.</p>
                     </div>
                 </div>
             </div>
@@ -101,21 +101,17 @@
                             aria-label="Search for a resident"
                         />
                         <input type="hidden" id="resident_id" name="resident_id">
+                        <input type="hidden" id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}">
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
-                        <p class="mt-1 text-sm text-gray-500">Search and select if the respondent is a registered resident</p>
-                    </div>
-                    <div>
-                        <label for="recipient_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Respondent Name <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" 
-                               id="recipient_name" 
-                               name="recipient_name" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200" 
-                               placeholder="Enter the name of the person being reported"
-                               value="{{ old('recipient_name') }}"
-                               required>
-                        <p class="mt-1 text-sm text-gray-500">Enter the full name of the person being reported (required)</p>
+                        <p class="mt-1 text-sm text-gray-500">Search and select a registered resident to set as the respondent.</p>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Selected Respondent
+                            </label>
+                            <div id="selectedRespondentDisplay" class="w-full px-3 py-2 border border-dashed border-red-300 rounded-lg text-sm text-gray-600">
+                                {{ old('recipient_name') ? 'Selected: ' . old('recipient_name') : 'No resident selected yet' }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -392,6 +388,20 @@
             const form = e.target;
             const formData = new FormData(form);
             const csrfToken = form.querySelector('input[name="_token"]').value;
+
+            const residentId = formData.get('resident_id');
+            const respondentName = formData.get('recipient_name');
+            if (!residentId || !respondentName) {
+                const message = 'Please select a registered resident as the respondent before submitting.';
+                if (typeof notify === 'function') {
+                    notify('error', message);
+                } else if (window.toast && typeof window.toast.error === 'function') {
+                    window.toast.error(message);
+                } else {
+                    alert(message);
+                }
+                return;
+            }
             try {
                 const response = await fetch(form.action, {
                     method: 'POST',
@@ -470,6 +480,35 @@
     const searchInput = document.getElementById('respondentSearch');
     const searchResults = document.getElementById('searchResults');
     const residentIdInput = document.getElementById('resident_id');
+    const recipientNameInput = document.getElementById('recipient_name');
+    const selectedRespondentDisplay = document.getElementById('selectedRespondentDisplay');
+
+    function updateSelectedRespondentDisplay(name = null) {
+        if (!selectedRespondentDisplay) {
+            return;
+        }
+        if (name) {
+            selectedRespondentDisplay.textContent = `Selected: ${name}`;
+            selectedRespondentDisplay.classList.remove('text-gray-600');
+            selectedRespondentDisplay.classList.add('text-green-700', 'border-green-300');
+            selectedRespondentDisplay.classList.remove('border-red-300');
+        } else {
+            selectedRespondentDisplay.textContent = 'No resident selected yet';
+            selectedRespondentDisplay.classList.add('text-gray-600');
+            selectedRespondentDisplay.classList.remove('text-green-700', 'border-green-300');
+            selectedRespondentDisplay.classList.add('border-red-300');
+        }
+    }
+
+    function clearRespondentSelection() {
+        if (residentIdInput) {
+            residentIdInput.value = '';
+        }
+        if (recipientNameInput) {
+            recipientNameInput.value = '';
+        }
+        updateSelectedRespondentDisplay(null);
+    }
 
     // Debug: Check if elements exist
     if (!searchInput) {
@@ -481,6 +520,20 @@
     if (!residentIdInput) {
         console.error('Resident ID input not found');
     }
+    if (!recipientNameInput) {
+        console.error('Recipient name input not found');
+    }
+    if (!searchInput || !searchResults || !residentIdInput || !recipientNameInput) {
+        return;
+    }
+
+    updateSelectedRespondentDisplay(recipientNameInput.value ? recipientNameInput.value : null);
+
+    searchInput.addEventListener('input', () => {
+        if (recipientNameInput.value && searchInput.value.trim() !== recipientNameInput.value.trim()) {
+            clearRespondentSelection();
+        }
+    });
 
     searchInput.addEventListener('input', debounce(async () => {
         const term = searchInput.value.trim();
@@ -534,18 +587,10 @@
         if (target && target.dataset.id) {
             residentIdInput.value = target.dataset.id;
             searchInput.value = target.dataset.name;
-            // Auto-fill recipient name when resident is selected
-            document.getElementById('recipient_name').value = target.dataset.name;
+            recipientNameInput.value = target.dataset.name;
+            updateSelectedRespondentDisplay(target.dataset.name);
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
-        }
-    });
-
-    // Clear resident selection when recipient name is manually entered
-    document.getElementById('recipient_name').addEventListener('input', function() {
-        if (this.value.trim() !== searchInput.value.trim()) {
-            residentIdInput.value = '';
-            searchInput.value = '';
         }
     });
 

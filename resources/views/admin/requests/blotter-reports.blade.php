@@ -243,19 +243,12 @@
                                         <div class="flex-shrink-0">
                                         </div>
                                         <div>
-                                            <div class="text-sm font-medium text-gray-900">Anonymous</div>
+                                            <div class="text-sm font-medium text-gray-900">{{ $request->complainant_name ?? 'N/A' }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="text-sm text-gray-900">{{ $request->resident->name ?? $request->recipient_name }}</div>
-                                    <div class="text-sm text-gray-500">
-                                        @if($request->resident)
-                                            <span class="text-green-600">Registered Resident</span>
-                                        @else
-                                            <span class="text-orange-600">Non-Registered</span>
-                                        @endif
-                                    </div>
                                 </td>
                                 <td class="px-4 py-4">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -272,7 +265,7 @@
                                             <button 
                                                 class="text-xs text-blue-600 hover:text-blue-800 underline mt-1 view-full-btn"
                                                 data-description="{{ $request->description }}"
-                                                data-user-name="{{ $request->resident->name ?? 'N/A' }}">
+                                                data-user-name="{{ $request->complainant_name ?? 'N/A' }}">
                                                 View Full
                                             </button>
                                         @endif
@@ -388,7 +381,7 @@
                                 <i class="fas fa-file-alt text-red-600"></i>
                             </div>
                             <div class="ml-3 flex-1 min-w-0">
-                                <h3 class="text-sm font-medium text-gray-900 truncate">Anonymous</h3>
+                                <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->complainant_name ?? 'N/A' }}</h3>
                                 <p class="text-sm text-gray-500 truncate">vs {{ $request->resident->name ?? $request->recipient_name }}</p>
                                 <div class="flex items-center mt-1">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
@@ -663,8 +656,45 @@ document.addEventListener('DOMContentLoaded', function() {
             const userName = e.target.getAttribute('data-user-name');
             showFullDescription(description, userName);
         }
+
+        const copyBtn = e.target.closest('.copy-description-btn');
+        if (copyBtn) {
+            const encodedDescription = copyBtn.getAttribute('data-description') || '';
+            const description = decodeURIComponent(encodedDescription);
+            const originalContent = copyBtn.innerHTML;
+            copyDescriptionToClipboard(description)
+                .then(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Copied';
+                    copyBtn.classList.remove('bg-gray-100', 'text-gray-700');
+                    copyBtn.classList.add('bg-green-100', 'text-green-700');
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalContent;
+                        copyBtn.classList.add('bg-gray-100', 'text-gray-700');
+                        copyBtn.classList.remove('bg-green-100', 'text-green-700');
+                    }, 2000);
+                })
+                .catch(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Error';
+                    copyBtn.classList.remove('bg-gray-100', 'text-gray-700');
+                    copyBtn.classList.add('bg-red-100', 'text-red-700');
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalContent;
+                        copyBtn.classList.add('bg-gray-100', 'text-gray-700');
+                        copyBtn.classList.remove('bg-red-100', 'text-red-700');
+                    }, 2000);
+                });
+        }
     });
 });
+
+function escapeHtml(unsafeText = '') {
+    return unsafeText
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 // Function to view all media files
 function viewAllMedia(blotterId) {
@@ -758,23 +788,76 @@ function toggleDescription(requestId) {
 
 // Function to show full description in modal
 function showFullDescription(description, userName) {
+    const safeDescription = escapeHtml(description || '');
+    const safeUserName = escapeHtml(userName || 'Resident');
+    const formattedDescription = safeDescription.replace(/\n/g, '<br>');
+    const wordCount = (description || '').trim() ? (description || '').trim().split(/\s+/).length : 0;
+    const charCount = (description || '').length;
+    const estimatedMinutes = Math.max(1, Math.ceil(charCount / 900));
+    const encodedDescription = encodeURIComponent(description || '');
+
     // Create modal HTML
     const modalHTML = `
         <div id="descriptionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-                <div class="mt-3">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">
-                            Full Description - ${userName}
-                        </h3>
-                        <button onclick="closeDescriptionModal()" class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times text-xl"></i>
+            <div class="relative mx-auto my-12 w-11/12 md:w-4/5 lg:w-3/5 xl:w-2/5">
+                <div class="bg-white rounded-2xl shadow-2xl border border-gray-100">
+                    <div class="flex items-start justify-between px-6 py-5 border-b border-gray-100">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-align-left text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm uppercase tracking-wide text-gray-500">Incident Description</p>
+                                <h3 class="text-xl font-semibold text-gray-900">Filed by ${safeUserName}</h3>
+                            </div>
+                        </div>
+                        <button onclick="closeDescriptionModal()" class="text-gray-400 hover:text-gray-600 transition">
+                            <i class="fas fa-times text-2xl"></i>
                         </button>
                     </div>
-                    <div class="max-h-96 overflow-y-auto">
-                        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                            ${description}
-                        </p>
+                    <div class="px-6 py-5 space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                <p class="text-xs uppercase text-gray-500 mb-1">Approx. Read</p>
+                                <p class="text-lg font-semibold text-gray-900">${estimatedMinutes} min</p>
+                                <p class="text-xs text-gray-400">Based on content length</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                <p class="text-xs uppercase text-gray-500 mb-1">Word Count</p>
+                                <p class="text-lg font-semibold text-gray-900">${wordCount}</p>
+                                <p class="text-xs text-gray-400">All paragraphs included</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                <p class="text-xs uppercase text-gray-500 mb-1">Characters</p>
+                                <p class="text-lg font-semibold text-gray-900">${charCount}</p>
+                                <p class="text-xs text-gray-400">Spaces included</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 relative">
+                            <div class="absolute -top-4 left-5 px-3 py-1 bg-blue-600 text-white text-xs rounded-full shadow">Description</div>
+                            <div class="max-h-96 overflow-y-auto pr-1 custom-scrollbar">
+                                <p class="text-sm text-gray-700 leading-relaxed" style="white-space: normal;">
+                                    ${formattedDescription}
+                                </p>
+                            </div>
+                            <button type="button"
+                                    class="copy-description-btn flex items-center justify-center mt-4 w-full md:w-auto px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                    data-description="${encodedDescription}">
+                                <i class="fas fa-copy mr-2"></i>
+                                Copy Text
+                            </button>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2">
+                            <p class="text-xs text-gray-500 flex items-center">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Keep this window open while reviewing to avoid losing context.
+                            </p>
+                            <div class="flex items-center justify-end space-x-2 w-full md:w-auto">
+                                <button onclick="closeDescriptionModal()" class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -791,6 +874,29 @@ function closeDescriptionModal() {
     if (modal) {
         modal.remove();
     }
+}
+
+function copyDescriptionToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+    }
+    return new Promise((resolve, reject) => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.top = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            resolve();
+        } catch (err) {
+            reject(err);
+        } finally {
+            textArea.remove();
+        }
+    });
 }
 
 // Function to get file icon based on type

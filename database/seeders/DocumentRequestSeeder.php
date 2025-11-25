@@ -17,26 +17,26 @@ class DocumentRequestSeeder extends Seeder
     {
         $statuses = ['pending', 'approved', 'completed'];
         $purposes = [
-            'For employment application',
-            'For school enrollment',
-            'For financial assistance',
-            'For travel requirements',
-            'For SSS/GSIS benefits',
-            'For PhilHealth registration',
-            'For business permit',
-            'For legal purposes',
-            'For medical assistance',
-            'For housing loan',
-            'For scholarship application',
-            'For government ID application',
-            'For insurance claim',
-            'For marriage requirements',
-            'For police clearance',
-            'For passport application',
-            'For driver’s license',
-            'For barangay records',
-            'For community project',
-            'For personal record keeping'
+            'For employment application For employment application For employment application For employment applicationFor employment applicationFor employment applicationFor employment applicationFor employment application',
+            'For school enrollmentFor employment applicationFor employment applicationFor employment applicationFor employment application',
+            'For financial assistanceFor employment applicationFor employment applicationFor employment application',
+            'For travel requirementsFor employment applicationFor employment applicationFor employment application',
+            'For SSS/GSIS benefitsFor employment applicationFor employment applicationFor employment application',
+            'For PhilHealth registrationFor employment applicationFor employment applicationFor employment application',
+            'For business permitFor employment applicationFor employment applicationFor employment application',
+            'For legal purposesFor employment applicationFor employment application',
+            'For medical assistanceFor employment applicationFor employment application',
+            'For housing loanFor employment applicationFor employment application',
+            'For scholarship applicationFor employment applicationFor employment applicationFor employment application',
+            'For government ID applicationFor employment applicationFor employment applicationFor employment application',
+            'For insurance claimFor employment applicationFor employment applicationFor employment application',
+            'For marriage requirementsFor employment applicationFor employment applicationFor employment application',
+            'For police clearanceFor employment applicationFor employment applicationFor employment application',
+            'For passport applicationFor employment applicationFor employment applicationFor employment application',
+            'For driver’s licenseFor employment applicationFor employment applicationFor employment application',
+            'For barangay recordsFor employment applicationFor employment applicationFor employment application',
+            'For community projectFor employment applicationFor employment applicationFor employment application',
+            'For personal record keepingFor employment applicationFor employment applicationFor employment application'
         ];
         $residents = Residents::all();
         $templates = DocumentTemplate::all();

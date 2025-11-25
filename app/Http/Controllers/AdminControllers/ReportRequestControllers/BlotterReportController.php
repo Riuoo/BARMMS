@@ -62,7 +62,7 @@ class BlotterReportController
             }
             
             return response()->json([
-                'user_name' => $blotterRequest->resident->name ?? 'N/A',
+                'user_name' => $blotterRequest->complainant_name ?? 'N/A',
                 'respondent_name' => $blotterRequest->resident ? $blotterRequest->resident->name : $blotterRequest->recipient_name,
                 'description' => $blotterRequest->description,
                 'status' => $blotterRequest->status,
