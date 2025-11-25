@@ -43,9 +43,11 @@ class AdminNotificationController
             
             // Search in blotter reports
             $blotterQuery->where(function($q) use ($search) {
-                $q->where('recipient_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%");
+                $q->where('description', 'like', "%{$search}%")
+                  ->orWhere('type', 'like', "%{$search}%")
+                  ->orWhereHas('resident', function($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%");
+                  });
             });
             
             // Search in document requests

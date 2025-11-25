@@ -12,7 +12,6 @@ class BlotterRequest extends Model
     protected $fillable = [
         'complainant_name',
         'resident_id',
-        'recipient_name',
         'type',
         'description',
         'status',

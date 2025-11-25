@@ -60,25 +60,37 @@
         <form action="{{ route('resident.request_blotter_report') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
-            <!-- Recipient Information -->
+            <!-- Respondent Information -->
             <div class="border-b border-gray-200 pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-user-tag mr-2 text-red-600"></i>
                     Respondent Information
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="recipient_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Respondent Name <span class="text-red-500">*</span>
+                    <div class="relative">
+                        <label for="respondentSearch" class="block text-sm font-medium text-gray-700 mb-2">
+                            Respondent (Registered Resident) <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="recipient_name" 
-                               name="recipient_name" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200" 
-                               placeholder="Enter the name of the person involved"
-                               value="{{ old('recipient_name') }}"
-                               required>
-                        <p class="mt-1 text-sm text-gray-500">Enter the full name of the person you are filing the report against</p>
+                        <input
+                            type="text"
+                            id="respondentSearch"
+                            placeholder="Type to search for a resident..."
+                            autocomplete="off"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200"
+                            aria-label="Search for a resident"
+                            required
+                        />
+                        <input type="hidden" id="respondent_id" name="respondent_id">
+                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
+                        <p class="mt-1 text-sm text-gray-500">Search and select a registered resident to set as the respondent.</p>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Selected Respondent
+                            </label>
+                            <div id="selectedRespondentDisplay" class="w-full px-3 py-2 border border-dashed border-red-300 rounded-lg text-sm text-gray-600">
+                                No resident selected yet
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -343,6 +355,105 @@ document.addEventListener('DOMContentLoaded', function() {
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Resident search for respondent
+    const searchInput = document.getElementById('respondentSearch');
+    const searchResults = document.getElementById('searchResults');
+    const respondentIdInput = document.getElementById('respondent_id');
+    const selectedRespondentDisplay = document.getElementById('selectedRespondentDisplay');
+    const form = document.querySelector('form');
+
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    function updateSelectedRespondentDisplay(name = null) {
+        if (!selectedRespondentDisplay) return;
+        if (name) {
+            selectedRespondentDisplay.textContent = `Selected: ${name}`;
+            selectedRespondentDisplay.classList.remove('text-gray-600', 'border-red-300');
+            selectedRespondentDisplay.classList.add('text-green-700', 'border-green-300');
+        } else {
+            selectedRespondentDisplay.textContent = 'No resident selected yet';
+            selectedRespondentDisplay.classList.add('text-gray-600', 'border-red-300');
+            selectedRespondentDisplay.classList.remove('text-green-700', 'border-green-300');
+        }
+    }
+
+    if (searchInput && searchResults && respondentIdInput) {
+        searchInput.addEventListener('input', debounce(async () => {
+            const term = searchInput.value.trim();
+            
+            if (term.length < 2) {
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+                return;
+            }
+            
+            try {
+                searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Searching...</div>';
+                searchResults.classList.remove('hidden');
+                
+                const response = await fetch(`{{ route('resident.search.residents') }}?term=${encodeURIComponent(term)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const results = await response.json();
+                
+                if (results.length > 0) {
+                    searchResults.innerHTML = results.map(resident => `
+                        <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                            <div class="font-medium text-gray-900">${resident.name}</div>
+                            <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                        </div>
+                    `).join('');
+                    searchResults.classList.remove('hidden');
+                } else {
+                    searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+                    searchResults.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                searchResults.innerHTML = '<div class="p-3 text-red-500 text-center">Search error. Please try again.</div>';
+                searchResults.classList.remove('hidden');
+            }
+        }, 250));
+
+        searchResults.addEventListener('click', (event) => {
+            const target = event.target.closest('[data-id]');
+            if (target && target.dataset.id) {
+                respondentIdInput.value = target.dataset.id;
+                searchInput.value = target.dataset.name;
+                updateSelectedRespondentDisplay(target.dataset.name);
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        // Form validation
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!respondentIdInput.value) {
+                    e.preventDefault();
+                    alert('Please select a registered resident as the respondent before submitting.');
+                    return false;
+                }
+            });
+        }
     }
 });
 </script>

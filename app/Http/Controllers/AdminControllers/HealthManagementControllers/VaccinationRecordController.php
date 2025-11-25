@@ -295,23 +295,55 @@ class VaccinationRecordController
 
     public function dueVaccinations(Request $request)
     {
-        $query = VaccinationRecord::with(['resident', 'childProfile'])
+        $baseQuery = VaccinationRecord::with(['resident', 'childProfile'])
             ->whereNotNull('next_dose_date')
             ->where('next_dose_date', '<=', now()->addDays(30));
 
-        // Apply status filter
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $baseQuery->where(function ($q) use ($search) {
+                $q->where('vaccine_name', 'like', '%' . $search . '%')
+                    ->orWhere('vaccine_type', 'like', '%' . $search . '%')
+                    ->orWhereHas('resident', function ($residentQuery) use ($search) {
+                        $residentQuery->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('childProfile', function ($childQuery) use ($search) {
+                        $childQuery->where('first_name', 'like', '%' . $search . '%')
+                            ->orWhere('last_name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        $now = now();
+        $oneWeekFromNow = $now->copy()->addDays(7);
+        $oneMonthFromNow = $now->copy()->addDays(30);
+
+        $statsBaseQuery = clone $baseQuery;
+        $stats = [
+            'total_due' => (clone $statsBaseQuery)->count(),
+            'overdue' => (clone $statsBaseQuery)->where('next_dose_date', '<', $now)->count(),
+            'due_this_week' => (clone $statsBaseQuery)
+                ->whereBetween('next_dose_date', [$now, $oneWeekFromNow])
+                ->count(),
+            'due_soon' => (clone $statsBaseQuery)
+                ->where('next_dose_date', '>', $oneWeekFromNow)
+                ->where('next_dose_date', '<=', $oneMonthFromNow)
+                ->count(),
+        ];
+
+        $query = clone $baseQuery;
+
         if ($request->filled('status')) {
-            switch($request->get('status')) {
+            switch ($request->get('status')) {
                 case 'overdue':
-                    $query->where('next_dose_date', '<', now());
+                    $query->where('next_dose_date', '<', $now);
                     break;
                 case 'due_this_week':
-                    $query->where('next_dose_date', '>=', now())
-                          ->where('next_dose_date', '<=', now()->addDays(7));
+                    $query->whereBetween('next_dose_date', [$now, $oneWeekFromNow]);
                     break;
                 case 'due_soon':
-                    $query->where('next_dose_date', '>', now()->addDays(7))
-                          ->where('next_dose_date', '<=', now()->addDays(30));
+                    $query->where('next_dose_date', '>', $oneWeekFromNow)
+                        ->where('next_dose_date', '<=', $oneMonthFromNow);
                     break;
             }
         }
@@ -319,14 +351,6 @@ class VaccinationRecordController
         $dueVaccinations = $query->orderBy('next_dose_date', 'asc')
             ->paginate(15)
             ->withQueryString();
-
-        // Get additional statistics for the due vaccinations
-        $stats = [
-            'overdue' => $dueVaccinations->where('next_dose_date', '<', now())->count(),
-            'due_this_week' => $dueVaccinations->where('next_dose_date', '>=', now())->where('next_dose_date', '<=', now()->addDays(7))->count(),
-            'due_soon' => $dueVaccinations->where('next_dose_date', '>', now()->addDays(7))->where('next_dose_date', '<=', now()->addDays(30))->count(),
-            'total_due' => $dueVaccinations->total(),
-        ];
 
         return view('admin.vaccination-records.due', compact('dueVaccinations', 'stats'));
     }

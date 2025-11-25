@@ -47,25 +47,45 @@
 
     <!-- Filter Section -->
     <div class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
+        <form method="GET" action="{{ route('admin.vaccination-records.due') }}" class="flex flex-col sm:flex-row gap-4 w-full">
             <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700">Filter by Status</label>
-                <div class="flex space-x-2">
-                    <a href="{{ route('admin.vaccination-records.due') }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        All ({{ $stats['total_due'] }})
-                    </a>
-                    <a href="{{ route('admin.vaccination-records.due') }}?status=overdue" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        Overdue ({{ $stats['overdue'] }})
-                    </a>
-                    <a href="{{ route('admin.vaccination-records.due') }}?status=due_this_week" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        Due This Week ({{ $stats['due_this_week'] }})
-                    </a>
-                    <a href="{{ route('admin.vaccination-records.due') }}?status=due_soon" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        Due Soon ({{ $stats['due_soon'] }})
-                    </a>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input
+                        type="text"
+                        id="dueSearchInput"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search by patient name, vaccine, or type"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    >
                 </div>
             </div>
-        </div>
+            <div class="sm:w-56">
+                <select
+                    id="dueStatusFilter"
+                    name="status"
+                    class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md"
+                >
+                    <option value="" {{ request('status') ? '' : 'selected' }}>All Due ({{ $stats['total_due'] }})</option>
+                    <option value="overdue" {{ request('status') === 'overdue' ? 'selected' : '' }}>Overdue ({{ $stats['overdue'] }})</option>
+                    <option value="due_this_week" {{ request('status') === 'due_this_week' ? 'selected' : '' }}>Due This Week ({{ $stats['due_this_week'] }})</option>
+                    <option value="due_soon" {{ request('status') === 'due_soon' ? 'selected' : '' }}>Due Soon ({{ $stats['due_soon'] }})</option>
+                </select>
+            </div>
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 sm:self-end w-full sm:w-auto">
+                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                    <i class="fas fa-filter mr-2"></i>
+                    Apply Filters
+                </button>
+                <a href="{{ route('admin.vaccination-records.due') }}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                    <i class="fas fa-undo mr-2"></i>
+                    Reset
+                </a>
+            </div>
+        </form>
     </div>
 
     <!-- Due Vaccinations List -->

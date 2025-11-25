@@ -15,7 +15,7 @@ class ResidentBlotterController extends BaseResidentRequestController
     public function storeBlotter(Request $request)
     {
         $request->validate([
-            'recipient_name' => 'required|string|max:255',
+            'respondent_id' => 'required|exists:residents,id',
             'type' => 'required|string|max:255',
             'description' => 'required|string',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240', // 10MB max per file
@@ -26,14 +26,25 @@ class ResidentBlotterController extends BaseResidentRequestController
             return redirect()->route('landing');
         }
 
-        // Prevent multiple ongoing requests
-        if ($this->checkExistingRequests(BlotterRequest::class, $userId, ['pending', 'processing'], 'blotter request')) {
+        // Get the logged-in resident (complainant)
+        $complainant = \App\Models\Residents::find($userId);
+        if (!$complainant) {
+            return redirect()->route('landing');
+        }
+
+        // Prevent multiple ongoing requests (check by complainant_name since resident_id is now the respondent)
+        $existing = BlotterRequest::where('complainant_name', $complainant->name)
+            ->whereIn('status', ['pending', 'processing'])
+            ->first();
+            
+        if ($existing) {
+            notify()->error('You already have an ongoing blotter request. Please wait until it is resolved before submitting another.');
             return back();
         }
 
         $blotter = new BlotterRequest();
-        $blotter->resident_id = $userId;
-        $blotter->recipient_name = $request->recipient_name;
+        $blotter->complainant_name = $complainant->name; // The person filing the report
+        $blotter->resident_id = $request->respondent_id; // The respondent (person being reported)
         $blotter->type = $request->type;
         $blotter->description = $request->description;
         $blotter->status = 'pending';

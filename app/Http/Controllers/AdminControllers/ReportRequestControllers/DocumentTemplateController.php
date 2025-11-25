@@ -10,10 +10,68 @@ use Illuminate\Support\Facades\DB;
 
 class DocumentTemplateController
 {
-    public function index()
+    public function index(Request $request)
     {
-        $templates = DocumentTemplate::all();
-        return view('admin.templates.index', compact('templates'));
+        $query = DocumentTemplate::query();
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('document_type', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        $category = strtolower($request->input('category', ''));
+        if ($category) {
+            $categoryKeywords = [
+                'certificates' => ['certificate'],
+                'clearances' => ['clearance'],
+                'permits' => ['permit'],
+                'identifications' => ['identification', 'id'],
+                'reports' => ['report'],
+            ];
+
+            if ($category === 'other') {
+                $query->where(function ($q) use ($categoryKeywords) {
+                    foreach ($categoryKeywords as $keywords) {
+                        foreach ($keywords as $keyword) {
+                            $q->whereRaw('LOWER(document_type) NOT LIKE ?', ['%' . $keyword . '%']);
+                        }
+                    }
+                });
+            } elseif (isset($categoryKeywords[$category])) {
+                $keywords = $categoryKeywords[$category];
+                $query->where(function ($q) use ($keywords) {
+                    foreach ($keywords as $keyword) {
+                        $q->orWhereRaw('LOWER(document_type) LIKE ?', ['%' . $keyword . '%']);
+                    }
+                });
+            } else {
+                $query->whereRaw('LOWER(document_type) LIKE ?', ['%' . $category . '%']);
+            }
+        }
+
+        if ($status = strtolower($request->input('status'))) {
+            if (in_array($status, ['active', 'inactive'], true)) {
+                $query->where('is_active', $status === 'active');
+            }
+        }
+
+        if ($request->boolean('recent')) {
+            $query->where('updated_at', '>=', now()->subDays(7));
+        }
+
+        $templates = $query->orderBy('document_type')->get();
+        $totalTemplates = DocumentTemplate::count();
+        $activeTemplates = DocumentTemplate::where('is_active', true)->count();
+        $recentTemplates = DocumentTemplate::where('updated_at', '>=', now()->subDays(7))->count();
+
+        return view('admin.templates.index', compact(
+            'templates',
+            'totalTemplates',
+            'activeTemplates',
+            'recentTemplates'
+        ));
     }
 
     public function edit($id)

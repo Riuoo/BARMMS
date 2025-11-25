@@ -45,10 +45,6 @@ class BlotterRequestSeeder extends Seeder
             'Dispute over land inheritance.',
             'Alleged harassment at the barangay plaza.'
         ];
-        $recipients = [
-            'Barangay Captain', 'Barangay Secretary', 'Barangay Councilor', 'Barangay Tanod',
-            'Barangay Treasurer', 'Barangay Health Worker', 'SK Chairman', 'Barangay Resident'
-        ];
 
         $residents = Residents::all();
         if ($residents->isEmpty()) return;
@@ -57,7 +53,10 @@ class BlotterRequestSeeder extends Seeder
             $type = Arr::random($types);
             $status = Arr::random($statuses);
             $desc = Arr::random($descriptions);
-            $recipient = Arr::random($recipients);
+            // Select a random resident as the respondent (different from complainant)
+            $respondents = $residents->where('id', '!=', $resident->id);
+            if ($respondents->isEmpty()) continue;
+            $respondent = $respondents->random();
             $createdAt = now()->subDays(rand(1, 90))->setTime(rand(7, 20), Arr::random([0, 15, 30, 45]));
             $approvedAt = $status !== 'pending' ? $createdAt->copy()->addDays(rand(1, 5)) : null;
             $completedAt = $status === 'completed' ? $approvedAt?->copy()->addDays(rand(1, 7)) : null;
@@ -72,8 +71,7 @@ class BlotterRequestSeeder extends Seeder
 
             BlotterRequest::create([
                 'complainant_name' => $faker->name(),
-                'resident_id' => $resident->id,
-                'recipient_name' => $recipient,
+                'resident_id' => $respondent->id, // The respondent (person being reported)
                 'type' => $type,
                 'description' => $desc,
                 'status' => $status,

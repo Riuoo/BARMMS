@@ -56,7 +56,7 @@ class ResidentNotificationController
                 $notifications->push((object) [
                     'id' => $blotter->id,
                     'type' => 'blotter_request',
-                    'message' => 'Your blotter report for "' . ($blotter->recipient_name ?? $blotter->type) . '" has been approved. A hearing/summon is scheduled for ' . ($blotter->summon_date ? $blotter->summon_date->format('F d, Y h:i A') : 'N/A') . '.',
+                    'message' => 'Your blotter report for "' . $blotter->type . '" has been approved. A hearing/summon is scheduled for ' . ($blotter->summon_date ? $blotter->summon_date->format('F d, Y h:i A') : 'N/A') . '.',
                     'created_at' => $blotter->updated_at,
                     'is_read' => (bool) ($blotter->resident_is_read ?? true),
                     'link' => route('resident.my-requests'),
@@ -65,7 +65,7 @@ class ResidentNotificationController
                 $notifications->push((object) [
                     'id' => $blotter->id,
                     'type' => 'blotter_request',
-                    'message' => 'Your blotter report for "' . ($blotter->recipient_name ?? $blotter->type) . '" has been completed.',
+                    'message' => 'Your blotter report for "' . $blotter->type . '" has been completed.',
                     'created_at' => $blotter->updated_at,
                     'is_read' => true,
                     'link' => route('resident.my-requests'),

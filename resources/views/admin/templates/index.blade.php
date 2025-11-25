@@ -64,61 +64,66 @@
         @endif
 
         <!-- Search and Filter Section -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
+        <form method="GET" action="{{ route('admin.templates.index') }}" id="templatesFilterForm" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
+            <div class="flex flex-col sm:flex-row gap-4">
                 <!-- Search Input -->
-                <div class="md:col-span-2">
-                    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search Templates</label>
+                <div class="flex-1">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input type="text" id="searchInput" placeholder="Search by document type, description..."
-                               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                        <input
+                            type="text"
+                            id="searchInput"
+                            name="search"
+                            placeholder="Search by document type, description..."
+                            value="{{ request('search') }}"
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                        >
                     </div>
                 </div>
 
                 <!-- Category Filter -->
-                <div>
-                    <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select id="categoryFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                        <option value="">All Categories</option>
-                        <option value="certificates">Certificates</option>
-                        <option value="clearances">Clearances</option>
-                        <option value="permits">Permits</option>
-                        <option value="identifications">Identifications</option>
-                        <option value="reports">Reports</option>
-                        <option value="other">Other</option>
+                <div class="sm:w-48">
+                    <select
+                        id="categoryFilter"
+                        name="category"
+                        class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md"
+                    >
+                        <option value="" {{ request('category') === null || request('category') === '' ? 'selected' : '' }}>All Categories</option>
+                        <option value="certificates" {{ request('category') === 'certificates' ? 'selected' : '' }}>Certificates</option>
+                        <option value="clearances" {{ request('category') === 'clearances' ? 'selected' : '' }}>Clearances</option>
+                        <option value="permits" {{ request('category') === 'permits' ? 'selected' : '' }}>Permits</option>
+                        <option value="identifications" {{ request('category') === 'identifications' ? 'selected' : '' }}>Identifications</option>
+                        <option value="reports" {{ request('category') === 'reports' ? 'selected' : '' }}>Reports</option>
+                        <option value="other" {{ request('category') === 'other' ? 'selected' : '' }}>Other</option>
                     </select>
                 </div>
 
                 <!-- Status Filter -->
-                <div>
-                    <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="statusFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                <div class="sm:w-48">
+                    <select
+                        id="statusFilter"
+                        name="status"
+                        class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md"
+                    >
                         <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                 </div>
-            </div>
-
-            <!-- Quick Actions -->
-                <div class="flex flex-wrap gap-2">
-                    <button id="showAllBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        <i class="fas fa-list mr-1"></i>
-                        Show All
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 sm:self-end w-full sm:w-auto">
+                    <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-filter mr-2"></i>
+                        Apply Filters
                     </button>
-                    <button id="showActiveBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        <i class="fas fa-check-circle mr-1"></i>
-                        Active Only
-                    </button>
-                    <button id="showRecentBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
-                        <i class="fas fa-clock mr-1"></i>
-                        Recently Updated
-                    </button>
+                    <a href="{{ route('admin.templates.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                        <i class="fas fa-undo mr-2"></i>
+                        Reset
+                    </a>
                 </div>
-        </div>
+            </div>
+        </form>
 
         <!-- Statistics Cards -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
@@ -131,7 +136,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500">Total Templates</p>
-                        <p class="text-2xl font-semibold text-gray-900" id="totalTemplates">{{ $templates->count() }}</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="totalTemplates">{{ $totalTemplates ?? $templates->count() }}</p>
                     </div>
                 </div>
             </div>
@@ -145,7 +150,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500">Active Templates</p>
-                        <p class="text-2xl font-semibold text-gray-900" id="activeTemplates">{{ $templates->where('is_active', true)->count() }}</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="activeTemplates">{{ $activeTemplates ?? $templates->where('is_active', true)->count() }}</p>
                     </div>
                 </div>
             </div>
@@ -159,7 +164,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500">Recently Updated</p>
-                        <p class="text-2xl font-semibold text-gray-900" id="recentTemplates">{{ $templates->where('updated_at', '>=', now()->subDays(7))->count() }}</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="recentTemplates">{{ $recentTemplates ?? $templates->where('updated_at', '>=', now()->subDays(7))->count() }}</p>
                     </div>
                 </div>
             </div>
@@ -272,18 +277,6 @@
             </div>
         </div>
 
-        <!-- No Results Message -->
-        <div id="noResults" class="hidden text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-search text-gray-400 text-2xl"></i>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
-            <p class="text-gray-500">Try adjusting your search criteria or filters.</p>
-            <button id="clearFilters" class="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
-                <i class="fas fa-times mr-2"></i>
-                Clear Filters
-            </button>
-        </div>
     </div>
 </div>
 
@@ -319,107 +312,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 previewTemplate(id);
             }
         }
-    });
-    const searchInput = document.getElementById('searchInput');
-    const categoryFilter = document.getElementById('categoryFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const templatesContainer = document.getElementById('templatesContainer');
-    const noResults = document.getElementById('noResults');
-    const templateCards = document.querySelectorAll('.template-card');
-
-    // Search and filter functionality
-    function filterTemplates() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const category = categoryFilter.value.toLowerCase();
-        const status = statusFilter.value.toLowerCase();
-        let visibleCount = 0;
-
-        templateCards.forEach(card => {
-            const title = card.querySelector('.template-title').textContent.toLowerCase();
-            const templateType = card.dataset.templateType;
-            const templateStatus = card.dataset.templateStatus;
-            const updated = parseInt(card.dataset.templateUpdated);
-
-            let show = true;
-
-            // Search filter
-            if (searchTerm && !title.includes(searchTerm)) {
-                show = false;
-            }
-
-            // Category filter
-            if (category && !templateType.includes(category)) {
-                show = false;
-            }
-
-            // Status filter
-            if (status && templateStatus !== status) {
-                show = false;
-            }
-
-            if (show) {
-                card.style.display = 'block';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        // Show/hide no results message
-        if (visibleCount === 0) {
-            templatesContainer.style.display = 'none';
-            noResults.classList.remove('hidden');
-        } else {
-            templatesContainer.style.display = 'block';
-            noResults.classList.add('hidden');
-        }
-    }
-
-    // Event listeners
-    searchInput.addEventListener('input', filterTemplates);
-    categoryFilter.addEventListener('change', filterTemplates);
-    statusFilter.addEventListener('change', filterTemplates);
-
-    // Quick action buttons
-    document.getElementById('showAllBtn').addEventListener('click', function() {
-        searchInput.value = '';
-        categoryFilter.value = '';
-        statusFilter.value = '';
-        filterTemplates();
-    });
-
-    document.getElementById('showActiveBtn').addEventListener('click', function() {
-        searchInput.value = '';
-        categoryFilter.value = '';
-        statusFilter.value = 'active';
-        filterTemplates();
-    });
-
-    document.getElementById('showRecentBtn').addEventListener('click', function() {
-        searchInput.value = '';
-        categoryFilter.value = '';
-        statusFilter.value = '';
-        
-        const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-        
-        templateCards.forEach(card => {
-            const updated = parseInt(card.dataset.templateUpdated);
-            if (updated >= oneWeekAgo) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        
-        templatesContainer.style.display = 'block';
-        noResults.classList.add('hidden');
-    });
-
-    document.getElementById('clearFilters').addEventListener('click', function() {
-        searchInput.value = '';
-        categoryFilter.value = '';
-        statusFilter.value = '';
-        filterTemplates();
     });
 
     // Preview functionality

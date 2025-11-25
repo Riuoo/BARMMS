@@ -101,7 +101,6 @@
                             aria-label="Search for a resident"
                         />
                         <input type="hidden" id="resident_id" name="resident_id">
-                        <input type="hidden" id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}">
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
                         <p class="mt-1 text-sm text-gray-500">Search and select a registered resident to set as the respondent.</p>
                         <div class="mt-4">
@@ -109,7 +108,7 @@
                                 Selected Respondent
                             </label>
                             <div id="selectedRespondentDisplay" class="w-full px-3 py-2 border border-dashed border-red-300 rounded-lg text-sm text-gray-600">
-                                {{ old('recipient_name') ? 'Selected: ' . old('recipient_name') : 'No resident selected yet' }}
+                                No resident selected yet
                             </div>
                         </div>
                     </div>
@@ -227,7 +226,7 @@
                     <button type="submit" 
                             class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                         <i class="fas fa-save mr-2"></i>
-                        Create Report
+                        Create
                     </button>
                 </div>
             </div>
@@ -390,8 +389,7 @@
             const csrfToken = form.querySelector('input[name="_token"]').value;
 
             const residentId = formData.get('resident_id');
-            const respondentName = formData.get('recipient_name');
-            if (!residentId || !respondentName) {
+            if (!residentId) {
                 const message = 'Please select a registered resident as the respondent before submitting.';
                 if (typeof notify === 'function') {
                     notify('error', message);
@@ -480,7 +478,6 @@
     const searchInput = document.getElementById('respondentSearch');
     const searchResults = document.getElementById('searchResults');
     const residentIdInput = document.getElementById('resident_id');
-    const recipientNameInput = document.getElementById('recipient_name');
     const selectedRespondentDisplay = document.getElementById('selectedRespondentDisplay');
 
     function updateSelectedRespondentDisplay(name = null) {
@@ -504,9 +501,6 @@
         if (residentIdInput) {
             residentIdInput.value = '';
         }
-        if (recipientNameInput) {
-            recipientNameInput.value = '';
-        }
         updateSelectedRespondentDisplay(null);
     }
 
@@ -520,17 +514,12 @@
     if (!residentIdInput) {
         console.error('Resident ID input not found');
     }
-    if (!recipientNameInput) {
-        console.error('Recipient name input not found');
-    }
-    if (!searchInput || !searchResults || !residentIdInput || !recipientNameInput) {
+    if (!searchInput || !searchResults || !residentIdInput) {
         return;
     }
 
-    updateSelectedRespondentDisplay(recipientNameInput.value ? recipientNameInput.value : null);
-
     searchInput.addEventListener('input', () => {
-        if (recipientNameInput.value && searchInput.value.trim() !== recipientNameInput.value.trim()) {
+        if (residentIdInput.value && searchInput.value.trim() === '') {
             clearRespondentSelection();
         }
     });
@@ -587,7 +576,6 @@
         if (target && target.dataset.id) {
             residentIdInput.value = target.dataset.id;
             searchInput.value = target.dataset.name;
-            recipientNameInput.value = target.dataset.name;
             updateSelectedRespondentDisplay(target.dataset.name);
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');

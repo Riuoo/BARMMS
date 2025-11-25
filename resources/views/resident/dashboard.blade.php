@@ -122,7 +122,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-900">Blotter Report</p>
-                        <p class="text-sm text-gray-500">vs {{ $request->recipient_name }}</p>
+                        <p class="text-sm text-gray-500">vs {{ $request->resident->name ?? 'N/A' }}</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">

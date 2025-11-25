@@ -248,7 +248,7 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <div class="text-sm text-gray-900">{{ $request->resident->name ?? $request->recipient_name }}</div>
+                                    <div class="text-sm text-gray-900">{{ $request->resident->name ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-4 py-4">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -382,7 +382,7 @@
                             </div>
                             <div class="ml-3 flex-1 min-w-0">
                                 <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->complainant_name ?? 'N/A' }}</h3>
-                                <p class="text-sm text-gray-500 truncate">vs {{ $request->resident->name ?? $request->recipient_name }}</p>
+                                <p class="text-sm text-gray-500 truncate">vs {{ $request->resident->name ?? 'N/A' }}</p>
                                 <div class="flex items-center mt-1">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                         @if($request->status === 'pending') bg-yellow-100 text-yellow-800
@@ -816,12 +816,7 @@ function showFullDescription(description, userName) {
                         </button>
                     </div>
                     <div class="px-6 py-5 space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
-                                <p class="text-xs uppercase text-gray-500 mb-1">Approx. Read</p>
-                                <p class="text-lg font-semibold text-gray-900">${estimatedMinutes} min</p>
-                                <p class="text-xs text-gray-400">Based on content length</p>
-                            </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
                                 <p class="text-xs uppercase text-gray-500 mb-1">Word Count</p>
                                 <p class="text-lg font-semibold text-gray-900">${wordCount}</p>

@@ -379,6 +379,9 @@ Route::middleware(['resident.role'])->prefix('resident')->group(function () {
     Route::post('/notifications/mark-all', [ResidentNotificationController::class, 'markAllAsRead'])->name('resident.notifications.mark-all');
     Route::post('/notifications/mark-as-read/{id}', [ResidentNotificationController::class, 'markAsRead'])->name('resident.notifications.mark-as-read');
 
+    // Resident search (for selecting respondents in blotter reports)
+    Route::get('/search/residents', [ResidentController::class, 'search'])->name('resident.search.residents');
+
     // Profile
     Route::get('/profile', [ResidentProfileController::class, 'profile'])->name('resident.profile');
 

@@ -46,9 +46,11 @@ class ResidentRequestListController
             });
             
             $blotterQuery->where(function ($q) use ($search) {
-                $q->where('recipient_name', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                $q->where('type', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('resident', function($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%");
+                  });
             });
             
             $concernQuery->where(function ($q) use ($search) {

@@ -131,25 +131,12 @@ class BlotterAnalysisService
 
     /**
      * Get unregistered respondent names for analysis
+     * Note: Since respondents must be registered, this method returns empty array
      */
     public function getUnregisteredRespondents(): array
     {
-        $unregisteredBlotters = BlotterRequest::whereNull('resident_id')
-            ->select('recipient_name', 'type', 'description', 'created_at')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $respondentNames = [];
-        foreach ($unregisteredBlotters as $blotter) {
-            $respondentNames[] = [
-                'name' => $blotter->recipient_name,
-                'type' => $blotter->type,
-                'description' => $blotter->description,
-                'date' => $blotter->created_at->format('M d, Y')
-            ];
-        }
-
-        return $respondentNames;
+        // All respondents must be registered residents now
+        return [];
     }
 }
 

@@ -27,8 +27,7 @@ class BlotterReportController
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
-                $q->where('recipient_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
+                $q->where('description', 'like', "%{$search}%")
                   ->orWhere('type', 'like', "%{$search}%")
                   ->orWhereHas('resident', function($uq) use ($search) {
                       $uq->where('name', 'like', "%{$search}%");
@@ -63,7 +62,7 @@ class BlotterReportController
             
             return response()->json([
                 'user_name' => $blotterRequest->complainant_name ?? 'N/A',
-                'respondent_name' => $blotterRequest->resident ? $blotterRequest->resident->name : $blotterRequest->recipient_name,
+                'respondent_name' => $blotterRequest->resident ? $blotterRequest->resident->name : 'N/A',
                 'description' => $blotterRequest->description,
                 'status' => $blotterRequest->status,
                 'created_at' => $blotterRequest->created_at->format('M d, Y \a\t g:i A'),
@@ -112,7 +111,7 @@ class BlotterReportController
                 try {
                     Mail::to($user->email)->queue(new BlotterSummonReadyMail(
                         $user->name,
-                        $blotter->recipient_name ?? $blotter->type,
+                        $blotter->type,
                         $blotter->summon_date ? $blotter->summon_date->format('F d, Y h:i A') : 'N/A'
                     ));
                 } catch (\Exception $e) {
@@ -227,33 +226,29 @@ class BlotterReportController
     {
         $validated = $request->validate([
             'complainant_name' => 'required|string|max:255',
-            'resident_id' => 'nullable|exists:residents,id',
-            'recipient_name' => 'required|string|max:255',
+            'resident_id' => 'required|exists:residents,id',
             'type' => 'required|string|max:255',
             'description' => 'required|string',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240',
             'summon_date' => 'required|date|after:today'
         ]);
-        // Only validate user if resident_id is provided
-        if ($validated['resident_id']) {
-            $user = Residents::find($validated['resident_id']);
-            if (!$user || !$user->active) {
-                notify()->error('This user account is inactive and cannot make transactions.');
-                return back()->withInput();
-            }
-            // Prevent multiple ongoing blotter requests
-            if (BlotterRequest::where('resident_id', $validated['resident_id'])
-                    ->whereIn('status', ['pending', 'processing', 'approved'])
-                    ->exists()) {
-                notify()->error('Resident already has an ongoing blotter request. Complete it before creating a new one.');
-                return back()->withInput();
-            }
+        // Validate user
+        $user = Residents::find($validated['resident_id']);
+        if (!$user || !$user->active) {
+            notify()->error('This user account is inactive and cannot make transactions.');
+            return back()->withInput();
+        }
+        // Prevent multiple ongoing blotter requests
+        if (BlotterRequest::where('resident_id', $validated['resident_id'])
+                ->whereIn('status', ['pending', 'processing', 'approved'])
+                ->exists()) {
+            notify()->error('Resident already has an ongoing blotter request. Complete it before creating a new one.');
+            return back()->withInput();
         }
         try {
             $blotter = new BlotterRequest();
             $blotter->complainant_name = $validated['complainant_name'];
-            $blotter->resident_id = $validated['resident_id']; // This is now the respondent
-            $blotter->recipient_name = $validated['recipient_name'];
+            $blotter->resident_id = $validated['resident_id']; // This is the respondent
             $blotter->type = $validated['type'];
             $blotter->description = $validated['description'];
             $blotter->status = 'approved';

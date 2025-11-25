@@ -654,18 +654,7 @@ function showFullDescription(description, userName) {
                         </button>
                     </div>
                     <div class="px-6 py-5 space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
-                                <p class="text-xs uppercase text-gray-500 mb-1">Word Count</p>
-                                <p class="text-lg font-semibold text-gray-900">${wordCount}</p>
-                                <p class="text-xs text-gray-400">All paragraphs included</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
-                                <p class="text-xs uppercase text-gray-500 mb-1">Characters</p>
-                                <p class="text-lg font-semibold text-gray-900">${charCount}</p>
-                                <p class="text-xs text-gray-400">Spaces included</p>
-                            </div>
-                        </div>
+                        
                         <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 relative">
                             <div class="absolute -top-4 left-5 px-3 py-1 bg-blue-600 text-white text-xs rounded-full shadow">Description</div>
                             <div class="max-h-96 overflow-y-auto pr-1 custom-scrollbar">

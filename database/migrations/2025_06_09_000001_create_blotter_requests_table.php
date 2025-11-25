@@ -11,7 +11,6 @@ class CreateBlotterRequestsTable extends Migration
         Schema::create('blotter_requests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('resident_id')->nullable()->index();
-            $table->string('recipient_name')->nullable();
             $table->string('type');
             $table->text('description');
             $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
