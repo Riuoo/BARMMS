@@ -62,12 +62,12 @@
             $percentage = $total > 0 ? round(($employmentCount / $total) * 100) : 0;
             $traits[] = ['label' => "Employment: {$topEmployment} ({$percentage}%)", 'type' => 'employment'];
         }
-        if (!empty($cluster['health_distribution'])) {
-            $topHealth = array_search(max($cluster['health_distribution']), $cluster['health_distribution']);
-            $healthCount = $cluster['health_distribution'][$topHealth];
-            $total = array_sum($cluster['health_distribution']);
-            $percentage = $total > 0 ? round(($healthCount / $total) * 100) : 0;
-            $traits[] = ['label' => "Health: {$topHealth} ({$percentage}%)", 'type' => 'health'];
+        if (!empty($cluster['pwd_distribution'])) {
+            $topPWD = array_search(max($cluster['pwd_distribution']), $cluster['pwd_distribution']);
+            $pwdCount = $cluster['pwd_distribution'][$topPWD];
+            $total = array_sum($cluster['pwd_distribution']);
+            $percentage = $total > 0 ? round(($pwdCount / $total) * 100) : 0;
+            $traits[] = ['label' => "PWD: {$topPWD} ({$percentage}%)", 'type' => 'pwd'];
         }
         return $traits;
     }
@@ -82,13 +82,6 @@
         'Full-time' => '#10b981',
         'Part-time' => '#3b82f6',
         'Unemployed' => '#ef4444'
-    ];
-    $healthColors = [
-        'Excellent' => '#10b981',
-        'Good' => '#f59e0b',
-        'Fair' => '#f97316',
-        'Poor' => '#ef4444',
-        'Critical' => '#dc2626'
     ];
 @endphp
 <div class="max-w-7xl mx-auto pt-2">
@@ -252,18 +245,18 @@
                     </div>
                 </div>
             </div>
-            <!-- Most Common Health Card -->
+            <!-- Blotter Reports Summary Card -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
-                            <i class="fas fa-heartbeat text-red-600 text-sm md:text-base"></i>
+                            <i class="fas fa-file-alt text-red-600 text-sm md:text-base"></i>
                         </div>
                     </div>
                     <div class="ml-3 md:ml-4">
-                        <p class="text-xs md:text-sm font-medium text-gray-500">Most Common Health</p>
+                        <p class="text-xs md:text-sm font-medium text-gray-500">Residents with Blotter Reports</p>
                         <p class="text-lg md:text-2xl font-bold text-gray-900">
-                            {{ $mostCommonHealth }}
+                            {{ $globalBlotterStats['residents_with_reports'] ?? 0 }}
                         </p>
                     </div>
                 </div>
@@ -342,10 +335,11 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Education</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Income</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employment</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Health Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PWD</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Predicted Eligibility</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Predicted Risk</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Predicted Program</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blotter Reports</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
@@ -374,8 +368,8 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($resident->health_status ?? '') === 'Excellent' ? 'bg-green-100 text-green-800' : (($resident->health_status ?? '') === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                {{ $resident->health_status ?? 'N/A' }}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ($resident->is_pwd ?? false) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
+                                                {{ ($resident->is_pwd ?? false) ? 'Yes' : 'No' }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -395,6 +389,9 @@
                                                 {{ $resident->predicted_program ?? 'N/A' }}
                                             </span>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $resident->blotter_count ?? 0 }}
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <button data-action="view-resident" data-resident-id="{{ $resident->id ?? 0 }}" class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
                                                 <i class="fas fa-eye"></i>
@@ -404,7 +401,7 @@
                                 @endforeach
                                 @if(count($residents) === 0)
                                     <tr>
-                                        <td colspan="9" class="px-6 py-6 text-center text-gray-500">No residents to display</td>
+                                        <td colspan="12" class="px-6 py-6 text-center text-gray-500">No residents to display</td>
                                     </tr>
                                 @endif
                             </tbody>
@@ -495,8 +492,7 @@
                                         <div class="space-y-3">
                                             <p class="text-sm text-gray-700">
                                                 This group mostly includes <span class="font-semibold">{{ strtolower($cluster['most_common_employment'] ?? 'various') }}</span> households with
-                                                <span class="font-semibold">{{ strtolower($cluster['most_common_income'] ?? 'various') }}</span> income, and overall health is
-                                                <span class="font-semibold">{{ strtolower($cluster['most_common_health'] ?? 'mixed') }}</span>.
+                                                <span class="font-semibold">{{ strtolower($cluster['most_common_income'] ?? 'various') }}</span> income.
                                             </p>
                                             <div class="grid grid-cols-2 gap-2">
                                                 <div class="rounded-lg border border-gray-200 bg-white p-3">
@@ -508,26 +504,26 @@
                                                 <div class="rounded-lg border border-gray-200 bg-white p-3">
                                                     <div class="text-xs text-gray-500">Typical Age</div>
                                                     <div class="text-lg font-bold text-emerald-700 flex items-center gap-2">
-                                                        <i class="fas fa-birthday-cake"></i> {{ is_numeric($age) ? number_format((float)$age, 1) : ($age ?? 'N/A') }}
+                                                        <i class="fas fa-birthday-cake"></i> {{ is_numeric($age) ? round((float)$age) : ($age ?? 'N/A') }}
                                                     </div>
                                                 </div>
                                                 <div class="rounded-lg border border-gray-200 bg-white p-3">
                                                     <div class="text-xs text-gray-500">Family Size</div>
                                                     <div class="text-lg font-bold text-indigo-700 flex items-center gap-2">
-                                                        <i class="fas fa-people-roof"></i> {{ is_numeric($familySize) ? number_format((float)$familySize, 1) : ($familySize ?? 'N/A') }}
+                                                        <i class="fas fa-people-roof"></i> {{ is_numeric($familySize) ? round((float)$familySize) : ($familySize ?? 'N/A') }}
                                                     </div>
                                                 </div>
                                                 @php
-                                                    $clusterHealth = $cluster['most_common_health'] ?? 'N/A';
-                                                    $clusterHealthClass = 'bg-gray-100 text-gray-800';
-                                                    if (in_array($clusterHealth, ['Excellent','Good'])) $clusterHealthClass = 'bg-green-100 text-green-800';
-                                                    elseif ($clusterHealth === 'Fair') $clusterHealthClass = 'bg-yellow-100 text-yellow-800';
-                                                    elseif (in_array($clusterHealth, ['Poor','Critical'])) $clusterHealthClass = 'bg-red-100 text-red-800';
+                                                    $blotterStats = $clusterBlotterStats[$clusterId] ?? ['total_reports' => 0, 'residents_with_reports' => 0, 'total_residents' => ($cluster['size'] ?? 0)];
+                                                    $blotterRate = ($blotterStats['total_residents'] ?? 0) > 0
+                                                        ? round(($blotterStats['residents_with_reports'] / max(1, $blotterStats['total_residents'])) * 100)
+                                                        : 0;
                                                 @endphp
                                                 <div class="rounded-lg border border-gray-200 bg-white p-3">
-                                                    <div class="text-xs text-gray-500">Health</div>
-                                                    <div class="text-lg font-bold flex items-center gap-2 {{ $clusterHealthClass }} px-2 py-1 rounded">
-                                                        <i class="fas fa-heartbeat"></i> {{ $clusterHealth }}
+                                                    <div class="text-xs text-gray-500">Blotter Involvement</div>
+                                                    <div class="text-sm font-semibold text-red-700 flex flex-col">
+                                                        <span><i class="fas fa-file-alt mr-1"></i>{{ $blotterStats['total_reports'] ?? 0 }} reports</span>
+                                                        <span class="text-xs text-gray-600">{{ $blotterRate }}% of residents in this group</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -545,11 +541,10 @@
                                                         'avg_family_size' => $cluster['avg_family_size'] ?? null,
                                                         'income_distribution' => $cluster['income_distribution'] ?? [],
                                                         'employment_distribution' => $cluster['employment_distribution'] ?? [],
-                                                        'health_distribution' => $cluster['health_distribution'] ?? [],
+                                                        'pwd_distribution' => $cluster['pwd_distribution'] ?? [],
                                                         'education_distribution' => $cluster['education_distribution'] ?? [],
                                                         'most_common_purok' => $cluster['most_common_purok'] ?? 'N/A',
                                                         'most_common_employment' => $cluster['most_common_employment'] ?? 'N/A',
-                                                        'most_common_health' => $cluster['most_common_health'] ?? 'N/A',
                                                     ];
                                                     $modalPayload = [
                                                         'cluster' => $clusterForModal,
@@ -592,17 +587,13 @@
                                                             {!! generateMiniBar($cluster['employment_distribution'], $employmentColors) !!}
                                                         </div>
                                                     @endif
-                                                    @if(!empty($cluster['health_distribution']))
+                                                    @if(!empty($cluster['pwd_distribution']))
                                                         <div class="text-xs">
-                                                            <span class="font-semibold text-gray-700">Health:</span>
-                                                            {!! generateMiniBar($cluster['health_distribution'], $healthColors) !!}
+                                                            <span class="font-semibold text-gray-700">PWD:</span>
+                                                            {!! generateMiniBar($cluster['pwd_distribution'], ['Yes' => '#ef4444', 'No' => '#10b981']) !!}
                                                         </div>
                                                     @endif
                                                 </div>
-                                                
-                                                @if(!empty($cluster['health_percent']['Critical'] ?? null) && ($cluster['health_percent']['Critical'] ?? 0) > 40)
-                                                    <span class="inline-block px-2 py-0.5 rounded-full bg-red-600 text-white text-xs font-bold mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>High Health Risk!</span>
-                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -637,7 +628,7 @@
                             <div>
                                 <p class="font-medium">Legend</p>
                                 <ul class="list-disc ml-5 mt-1 space-y-1">
-                                    <li><span class="font-semibold">Clusters</span>: data-driven groups computed by Python from resident features (age, family size, education, income, employment, health).</li>
+                                    <li><span class="font-semibold">Clusters</span>: data-driven groups computed by Python from resident features (age, family size, education, income, employment).</li>
                                     <li><span class="font-semibold">k</span>: number of clusters used. <span class="font-semibold">Silhouette</span> indicates cluster separation quality (higher is better).</li>
                                 </ul>
                             </div>
@@ -680,14 +671,14 @@
                         </div>
                     </div>
 
-                    <!-- Health Status Distribution -->
+                    <!-- PWD Distribution -->
                     <div class="bg-gray-50 rounded-lg p-4">
                         <h4 class="text-md font-semibold text-gray-900 mb-3">
-                            <i class="fas fa-heartbeat text-red-600 mr-2"></i>
-                            Health Status
+                            <i class="fas fa-wheelchair text-red-600 mr-2"></i>
+                            Person with Disability (PWD)
                         </h4>
                         <div class="chart-container" style="position: relative; height: 300px;">
-                            <canvas id="healthChart"></canvas>
+                            <canvas id="pwdChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -732,7 +723,6 @@ window.clusteringConfig = {
     colors: {
         clusters: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316', '#EC4899', '#06B6D4'],
         employment: @json($employmentColors) ?? ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'],
-        health: @json($healthColors) ?? ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981']
     },
     thresholds: {
         largeDataset: 500
@@ -756,7 +746,6 @@ window.clusteringConfig = {
     'silhouette' => $silhouette ?? null,
     'sampleSize' => $sampleSize ?? 0,
     'mostCommonEmployment' => $mostCommonEmployment ?? 'N/A',
-    'mostCommonHealth' => $mostCommonHealth ?? 'N/A'
 ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>
 <script>

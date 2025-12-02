@@ -15,13 +15,13 @@
     <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Accomplished Projects</h1>
-                <p class="text-gray-600">Manage and showcase completed community projects</p>
+                <h1 class="text-3xl font-bold text-gray-900">Barangay Activities</h1>
+                <p class="text-gray-600">Manage and showcase ongoing, upcoming, and completed barangay activities and projects</p>
             </div>
             <div>
                 <a href="{{ route('admin.accomplished-projects.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-plus mr-2"></i>
-                    Add New Project
+                    Add New Activity / Project
                 </a>
             </div>
         </div>
@@ -85,7 +85,7 @@
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Projects</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Activities / Projects</p>
                     <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['total_projects'] }}</p>
                 </div>
             </div>
@@ -98,7 +98,7 @@
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Budget</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Budget (All)</p>
                     <p class="text-lg lg:text-2xl font-bold text-gray-900">₱ {{ number_format($stats['total_budget'], 2) }}</p>
                 </div>
             </div>
@@ -127,7 +127,7 @@
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Recent Projects</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Recent Activities / Projects</p>
                     <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['recent_projects'] }}</p>
                 </div>
             </div>
@@ -208,19 +208,38 @@
                 <p class="text-gray-600 text-sm mb-3 line-clamp-3">{{ $project->description }}</p>
                 
                 <!-- Project Stats -->
-                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span><i class="fas fa-calendar-alt mr-1"></i>{{ $project->completion_date->format('M Y') }}</span>
-                    <span><i class="fas fa-money-bill-wave mr-1"></i>₱{{ number_format($project->budget, 2) }}</span>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="mb-4">
-                    <div class="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>Progress</span>
-                        <span>100%</span>
+                <div class="space-y-2 mb-4 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                        <span>
+                            @if($project->start_date)
+                                {{ $project->start_date->format('M d, Y') }}
+                                @if($project->completion_date)
+                                    - {{ $project->completion_date->format('M d, Y') }}
+                                @endif
+                            @elseif($project->completion_date)
+                                {{ $project->completion_date->format('M d, Y') }}
+                            @else
+                                <span class="text-gray-400">No schedule set</span>
+                            @endif
+                        </span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-green-600 h-2 rounded-full" style="width: 100%"></div>
+                    @if($project->location)
+                    <div class="flex items-start">
+                        <i class="fas fa-map-marker-alt mr-2 mt-0.5 text-gray-400"></i>
+                        <span>{{ $project->location }}</span>
+                    </div>
+                    @endif
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                            <i class="fas fa-info-circle mr-1 text-[10px]"></i>
+                            {{ ucfirst($project->status ?? 'completed') }}
+                        </span>
+                        @if(!is_null($project->budget))
+                        <span class="text-gray-700">
+                            <i class="fas fa-money-bill-wave mr-1"></i>₱{{ number_format($project->budget, 2) }}
+                        </span>
+                        @endif
                     </div>
                 </div>
 
@@ -246,11 +265,11 @@
             <div class="text-gray-400 mb-4">
                 <i class="fas fa-project-diagram text-4xl sm:text-6xl"></i>
             </div>
-            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Projects Yet</h3>
-            <p class="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base px-4">Start by adding your first accomplished project to showcase community achievements.</p>
+            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Activities or Projects Yet</h3>
+            <p class="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base px-4">Start by adding your first barangay activity or project to showcase community achievements.</p>
             <a href="{{ route('admin.accomplished-projects.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition duration-300 inline-flex items-center text-sm sm:text-base">
                 <i class="fas fa-plus mr-2"></i>
-                Add First Project
+                Add First Activity / Project
             </a>
         </div>
         @endforelse

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AdminControllers\AlgorithmControllers;
 use App\Services\PythonAnalyticsService;
 use Illuminate\Http\Request;
 use App\Models\Residents;
+use App\Models\BlotterRequest;
 
 /**
  * DecisionTreeController - Refactored to remove redundancies
@@ -85,6 +86,16 @@ class DecisionTreeController
     public function index()
     {
         $residents = Residents::all();
+
+        // Attach blotter report counts to residents so decision-tree analytics can display incident context
+        $blotterCountsMap = BlotterRequest::selectRaw('resident_id, COUNT(*) as cnt')
+            ->whereNotNull('resident_id')
+            ->groupBy('resident_id')
+            ->pluck('cnt', 'resident_id');
+        foreach ($residents as $resident) {
+            $resident->blotter_count = (int) ($blotterCountsMap[$resident->id] ?? 0);
+        }
+
         $this->ensurePythonAvailable();
         $formattedResidents = $this->pythonService->formatResidentsForPython($residents);
         
@@ -205,7 +216,7 @@ class DecisionTreeController
         
         return response()->json([
             'success' => true,
-            'resident' => $resident->only(['id', 'name', 'age', 'income_level', 'employment_status', 'education_level', 'health_status', 'family_size']),
+            'resident' => $resident->only(['id', 'name', 'age', 'income_level', 'employment_status', 'education_level', 'is_pwd', 'family_size']),
             'prediction' => $prediction,
             'type' => $type
         ]);

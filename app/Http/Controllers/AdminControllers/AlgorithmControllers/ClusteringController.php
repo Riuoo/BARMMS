@@ -6,6 +6,7 @@ use App\Services\PythonAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Residents;
+use App\Models\BlotterRequest;
 
 class ClusteringController
 {
@@ -100,8 +101,16 @@ class ClusteringController
         $k = (int)max(2, min((int)request('k', 3), 50));
         $useOptimalK = (bool)request('use_optimal_k', false);
         
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $allResidents = $residents; // keep original list for purok stats
+        
+        // Pre-compute blotter report counts per resident for later clustering insights
+        $blotterCountsMap = BlotterRequest::selectRaw('resident_id, COUNT(*) as cnt')
+            ->whereNotNull('resident_id')
+            ->groupBy('resident_id')
+            ->pluck('cnt', 'resident_id');
+        $totalBlotterReports = array_sum($blotterCountsMap->all());
+        $residentsWithBlotter = $blotterCountsMap->count();
         
         // Measure processing time
         $t0 = microtime(true);
@@ -125,14 +134,12 @@ class ClusteringController
                 'processingTime' => (int)round((microtime(true) - $t0) * 1000),
                 'residents' => collect(),
                 'mostCommonEmployment' => 'N/A',
-                'mostCommonHealth' => 'N/A',
                 'perClusterInsights' => [],
                 'silhouette' => null,
                 'globalSummary' => ['sizes' => [], 'silhouette' => null, 'k' => $k],
                 'hierSummary' => [],
                 'incomeColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981', '#3B82F6'],
                 'employmentColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'],
-                'healthColors' => ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'],
             ]);
         }
         
@@ -164,14 +171,12 @@ class ClusteringController
                 'processingTime' => (int)round((microtime(true) - $t0) * 1000),
                 'residents' => collect(),
                 'mostCommonEmployment' => 'N/A',
-                'mostCommonHealth' => 'N/A',
                 'perClusterInsights' => [],
                 'silhouette' => null,
                 'globalSummary' => ['sizes' => [], 'silhouette' => null, 'k' => $k],
                 'hierSummary' => [],
                 'incomeColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981', '#3B82F6'],
                 'employmentColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'],
-                'healthColors' => ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'],
             ]);
         }
         
@@ -195,7 +200,6 @@ class ClusteringController
             $label = $c['label'] ?? null;
             if (!$label) {
                 $emp = $c['most_common_employment'] ?? 'N/A';
-                $hlth = $c['most_common_health'] ?? 'N/A';
                 $incomeCounts = $c['income_distribution'] ?? [];
                 $income = 'N/A';
                 if (!empty($incomeCounts)) {
@@ -205,7 +209,6 @@ class ClusteringController
                 $label = trim(implode(' • ', array_filter([
                     $emp !== 'N/A' ? $emp : null,
                     $income !== 'N/A' ? $income : null,
-                    $hlth !== 'N/A' ? $hlth : null,
                 ]))) ?: ('Cluster ' . ($idx + 1));
             }
             // Apply cached label if present for this index
@@ -219,23 +222,17 @@ class ClusteringController
         unset($c);
         Cache::put('clustering_labels_' . $k, $generatedLabels, 3600);
 
-        // Compute global most common employment and health across all clusters
+        // Compute global most common employment across all clusters
         $employmentCounts = [];
-        $healthCounts = [];
         foreach ($characteristics as $c) {
             $size = $c['size'] ?? 0;
             if ($size <= 0) { continue; }
             $emp = $c['most_common_employment'] ?? null;
-            $hlth = $c['most_common_health'] ?? null;
             if (!empty($emp) && $emp !== 'N/A') {
                 $employmentCounts[$emp] = ($employmentCounts[$emp] ?? 0) + $size;
             }
-            if (!empty($hlth) && $hlth !== 'N/A') {
-                $healthCounts[$hlth] = ($healthCounts[$hlth] ?? 0) + $size;
-            }
         }
         $mostCommonEmployment = count($employmentCounts) ? array_search(max($employmentCounts), $employmentCounts) : 'N/A';
-        $mostCommonHealth = count($healthCounts) ? array_search(max($healthCounts), $healthCounts) : 'N/A';
         
         // Calculate processing time (real)
         $processingTime = (int)round((microtime(true) - $t0) * 1000);
@@ -259,11 +256,30 @@ class ClusteringController
         $residents = collect();
         $insightCounts = [];
         $purokInsightCounts = [];
+        $clusterBlotterStats = [];
         foreach ($result['clusters'] as $clusterId => $cluster) {
             foreach ($cluster as $point) {
                 if (isset($point['resident'])) {
                     $resident = $point['resident'];
                     $resident->cluster_id = $clusterId + 1; // 1-based for display
+
+                    // Attach pre-computed blotter report count to resident
+                    $resident->blotter_count = (int) ($blotterCountsMap[$resident->id] ?? 0);
+
+                    // Initialize cluster-level blotter stats bucket
+                    if (!isset($clusterBlotterStats[$clusterId])) {
+                        $clusterBlotterStats[$clusterId] = [
+                            'total_residents' => 0,
+                            'total_reports' => 0,
+                            'residents_with_reports' => 0,
+                        ];
+                    }
+                    $clusterBlotterStats[$clusterId]['total_residents']++;
+                    if ($resident->blotter_count > 0) {
+                        $clusterBlotterStats[$clusterId]['total_reports'] += $resident->blotter_count;
+                        $clusterBlotterStats[$clusterId]['residents_with_reports']++;
+                    }
+
                     if (isset($programMap[$resident->id])) {
                         $resident->predicted_program = $programMap[$resident->id];
                     }
@@ -354,14 +370,17 @@ class ClusteringController
             'processingTime' => $processingTime,
             'residents' => $residents,
             'mostCommonEmployment' => $mostCommonEmployment,
-            'mostCommonHealth' => $mostCommonHealth,
             'perClusterInsights' => $perClusterInsights,
             'silhouette' => $result['silhouette'] ?? null,
             'globalSummary' => $globalSummary,
             'hierSummary' => [],
+            'clusterBlotterStats' => $clusterBlotterStats,
+            'globalBlotterStats' => [
+                'total_reports' => $totalBlotterReports,
+                'residents_with_reports' => $residentsWithBlotter,
+            ],
             'incomeColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981', '#3B82F6'],
             'employmentColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'],
-            'healthColors' => ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'],
         ]);
     }
 
@@ -385,7 +404,7 @@ class ClusteringController
         $linkage = $request->input('linkage', 'ward');
         
         $this->ensurePythonAvailable();
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $samples = $this->pythonService->buildSamplesFromResidents($residents);
 
         $normalized = $this->performClusteringByType($samples, $type, [
@@ -436,7 +455,7 @@ class ClusteringController
         // Python service is required
         $this->ensurePythonAvailable();
         
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $samples = $this->pythonService->buildSamplesFromResidents($residents);
         $optimalKResult = $this->pythonService->findOptimalK($samples, 10, 'silhouette');
         
@@ -465,7 +484,7 @@ class ClusteringController
         $type = $request->input('type', 'kmeans');
 
         $this->ensurePythonAvailable();
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $samples = $this->pythonService->buildSamplesFromResidents($residents);
 
         $normalized = $this->performClusteringByType($samples, $type, ['k' => $k]);
@@ -538,7 +557,7 @@ class ClusteringController
                         $resident->education_level ?? 'N/A',
                         $resident->income_level ?? 'N/A',
                         $resident->employment_status ?? 'N/A',
-                        $resident->health_status ?? 'N/A'
+                        $resident->is_pwd ? 'Yes' : 'No'
                     ]);
                 }
             }
@@ -558,7 +577,7 @@ class ClusteringController
         $type = $request->input('type', 'kmeans');
 
         $this->ensurePythonAvailable();
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'health_status', 'address')->get();
+        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $samples = $this->pythonService->buildSamplesFromResidents($residents);
         $normalized = $this->performClusteringByType($samples, $type, ['k' => $k]);
         if (isset($normalized['error'])) {
@@ -586,7 +605,7 @@ class ClusteringController
                 'education_distribution' => $this->getDistribution($characteristic['residents'], 'education_level'),
                 'income_distribution' => $this->getDistribution($characteristic['residents'], 'income_level'),
                 'employment_distribution' => $this->getDistribution($characteristic['residents'], 'employment_status'),
-                'health_distribution' => $this->getDistribution($characteristic['residents'], 'health_status')
+                'pwd_distribution' => $this->getDistribution($characteristic['residents'], 'is_pwd')
             ];
         }
         
@@ -682,18 +701,18 @@ class ClusteringController
             // Calculate distributions
             $incomeDistribution = [];
             $employmentDistribution = [];
-            $healthDistribution = [];
+            $pwdDistribution = [];
             $educationDistribution = [];
             
             foreach ($clusterResidents as $resident) {
                 $income = $resident->income_level ?? 'Unknown';
                 $employment = $resident->employment_status ?? 'Unknown';
-                $health = $resident->health_status ?? 'Unknown';
+                $pwd = $resident->is_pwd ? 'Yes' : 'No';
                 $education = $resident->education_level ?? 'Unknown';
                 
                 $incomeDistribution[$income] = ($incomeDistribution[$income] ?? 0) + 1;
                 $employmentDistribution[$employment] = ($employmentDistribution[$employment] ?? 0) + 1;
-                $healthDistribution[$health] = ($healthDistribution[$health] ?? 0) + 1;
+                $pwdDistribution[$pwd] = ($pwdDistribution[$pwd] ?? 0) + 1;
                 $educationDistribution[$education] = ($educationDistribution[$education] ?? 0) + 1;
             }
             
@@ -714,11 +733,11 @@ class ClusteringController
                 'avg_family_size' => $pythonChar['avg_family_size'] ?? 0,
                 'income_distribution' => $incomeDistribution,
                 'employment_distribution' => $employmentDistribution,
-                'health_distribution' => $healthDistribution,
+                'pwd_distribution' => $pwdDistribution,
                 'education_distribution' => $educationDistribution,
                 'most_common_purok' => $mostCommonPurok,
                 'most_common_employment' => count($employmentDistribution) > 0 ? array_search(max($employmentDistribution), $employmentDistribution) : 'N/A',
-                'most_common_health' => count($healthDistribution) > 0 ? array_search(max($healthDistribution), $healthDistribution) : 'N/A',
+                'most_common_pwd' => count($pwdDistribution) > 0 ? array_search(max($pwdDistribution), $pwdDistribution) : 'N/A',
                 'residents' => array_map(function($r) {
                     return ['resident' => $r];
                 }, is_array($clusterResidents) ? $clusterResidents : $clusterResidents->toArray())

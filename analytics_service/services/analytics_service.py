@@ -190,9 +190,9 @@ class AnalyticsService:
                 self._encode_employment(resident.get('employment_status', '')),
             ]
             
-            # Extract label (health status)
-            health_status = resident.get('health_status', '')
-            label = self._encode_health_status(health_status)
+            # Extract label (PWD status)
+            is_pwd = resident.get('is_pwd', False)
+            label = 1.0 if (is_pwd == True or is_pwd == 1 or is_pwd == '1') else 0.0
             
             samples.append(features)
             labels.append(label)
@@ -213,7 +213,7 @@ class AnalyticsService:
                 self._encode_education(resident.get('education_level', '')),
                 self._encode_income(resident.get('income_level', '')),
                 self._encode_employment(resident.get('employment_status', '')),
-                self._encode_health_status(resident.get('health_status', ''))
+                1.0 if (resident.get('is_pwd', False) == True or resident.get('is_pwd', False) == 1 or resident.get('is_pwd', False) == '1') else 0.0
             ]
             
             # Determine eligibility based on income and age
@@ -242,7 +242,7 @@ class AnalyticsService:
                 self._encode_education(resident.get('education_level', '')),
                 self._encode_income(resident.get('income_level', '')),
                 self._encode_employment(resident.get('employment_status', '')),
-                self._encode_health_status(resident.get('health_status', ''))
+                1.0 if (resident.get('is_pwd', False) == True or resident.get('is_pwd', False) == 1 or resident.get('is_pwd', False) == '1') else 0.0
             ]
             samples.append(features)
         
@@ -419,16 +419,12 @@ class AnalyticsService:
                 self._encode_employment(resident.get('employment_status', '')),
             ]
             
-            # Extract label (health status) and categorize
-            health_status = resident.get('health_status', '')
-            if health_status in ['Critical', 'Poor']:
-                label = 'Critical Condition'
-            elif health_status == 'Fair':
-                label = 'Chronic Condition'
-            elif health_status == 'Good':
-                label = 'Minor Health Issues'
+            # Extract label (PWD status) and categorize
+            is_pwd = resident.get('is_pwd', False)
+            if is_pwd == True or is_pwd == 1 or is_pwd == '1':
+                label = 'PWD - Needs Support'
             else:
-                label = 'Healthy'
+                label = 'Non-PWD - Standard Care'
             
             samples.append(features)
             labels.append(label)
@@ -449,21 +445,21 @@ class AnalyticsService:
                 self._encode_education(resident.get('education_level', '')),
                 self._encode_income(resident.get('income_level', '')),
                 self._encode_employment(resident.get('employment_status', '')),
-                self._encode_health_status(resident.get('health_status', ''))
+                1.0 if (resident.get('is_pwd', False) == True or resident.get('is_pwd', False) == 1 or resident.get('is_pwd', False) == '1') else 0.0
             ]
             
             # Determine program recommendation based on multiple factors
             age = float(resident.get('age', 0))
             income = resident.get('income_level', '')
-            health = resident.get('health_status', '')
+            is_pwd = resident.get('is_pwd', False)
             employment = resident.get('employment_status', '')
             
             if age >= 60:
                 label = 'Senior Care Program'
             elif age < 18 and income in ['Low', 'Lower Middle']:
                 label = 'Youth Education Support'
-            elif health in ['Critical', 'Poor']:
-                label = 'Health Assistance Program'
+            elif is_pwd == True or is_pwd == 1 or is_pwd == '1':
+                label = 'PWD Support Program'
             elif employment == 'Unemployed':
                 label = 'Employment Training Program'
             elif income in ['Low', 'Lower Middle']:

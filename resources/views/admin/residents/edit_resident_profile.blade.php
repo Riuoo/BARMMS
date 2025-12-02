@@ -69,20 +69,65 @@
                     Basic Information
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Full Name <span class="text-gray-500">(Read Only)</span>
-                        </label>
+                    @php
+                        $nameParts = explode(' ', $resident->name);
+                        $firstName = $nameParts[0] ?? '';
+                        $lastName = $nameParts[1] ?? '';
+                        $middleName = '';
+                        $suffix = '';
+                        if (count($nameParts) === 3) {
+                            $middleName = $nameParts[1];
+                            $lastName = $nameParts[2];
+                        } elseif (count($nameParts) >= 4) {
+                            $middleName = $nameParts[1];
+                            $lastName = $nameParts[2];
+                            $suffix = implode(' ', array_slice($nameParts, 3));
+                        }
+                    @endphp
+                    <!-- First Name -->
+                    <div class="mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-gray-500">(Read Only)</span></label>
                         <input type="text" 
-                               id="name" 
-                               name="name" 
-                               value="{{ old('name', $resident->name) }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
-                               readonly>
-                        <p class="mt-1 text-sm text-gray-500">Basic information cannot be modified</p>
+                               value="{{ old('first_name', $firstName) }}" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed" 
+                               readonly
+                               placeholder="First Name">
                     </div>
-
+                    <!-- Middle Name (optional, can be disabled) -->
+                    <div class="mb-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-0">Middle Name <span class="text-gray-500">(Read Only)</span></label>
+                        </div>
+                        <input type="text" 
+                               value="{{ old('middle_name', $middleName) }}" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed" 
+                               readonly
+                               placeholder="Middle Name (optional)">
+                    </div>
+                    <!-- Last Name -->
+                    <div class="mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-gray-500">(Read Only)</span></label>
+                        <input type="text" 
+                               value="{{ old('last_name', $lastName) }}" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed" 
+                               readonly
+                               placeholder="Last Name">
+                    </div>
+                    <!-- Suffix (optional dropdown) -->
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Suffix <span class="text-gray-500">(Read Only)</span></label>
+                        <select class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed" disabled>
+                            <option value="">None</option>
+                            <option value="Jr." {{ old('suffix', $suffix) == 'Jr.' ? 'selected' : '' }}>Jr.</option>
+                            <option value="Sr." {{ old('suffix', $suffix) == 'Sr.' ? 'selected' : '' }}>Sr.</option>
+                            <option value="II" {{ old('suffix', $suffix) == 'II' ? 'selected' : '' }}>II</option>
+                            <option value="III" {{ old('suffix', $suffix) == 'III' ? 'selected' : '' }}>III</option>
+                            <option value="IV" {{ old('suffix', $suffix) == 'IV' ? 'selected' : '' }}>IV</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                             Email Address <span class="text-gray-500">(Read Only)</span>
                         </label>
@@ -108,6 +153,66 @@
                         <p class="mt-1 text-sm text-gray-500">Resident's role is fixed</p>
                     </div>
                 </div>
+            </div>
+
+            <!-- Address / Location -->
+            @php
+                $defaultBarangay = config('app.default_barangay', 'Lower Malinao');
+                $defaultCity = config('app.default_city', 'Padada');
+                $defaultProvince = config('app.default_province', 'Davao Del Sur');
+                $currentPurok = 'Purok 1';
+                if (!empty($resident->address) && preg_match('/Purok\s*\d+/i', $resident->address, $m)) {
+                    $currentPurok = $m[0];
+                }
+            @endphp
+            <div class="border-b border-gray-200 pb-6 mt-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    <i class="fas fa-map-marker-alt mr-2 text-indigo-600"></i>
+                    Address
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Barangay
+                        </label>
+                        <input type="text"
+                               value="{{ $defaultBarangay }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                               readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            City/Municipality
+                        </label>
+                        <input type="text"
+                               value="{{ $defaultCity }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                               readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Province
+                        </label>
+                        <input type="text"
+                               value="{{ $defaultProvince }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                               readonly>
+                    </div>
+                    <div>
+                        <label for="purok" class="block text-sm font-medium text-gray-700 mb-2">
+                            Purok <span class="text-red-500">*</span>
+                        </label>
+                        <select id="purok"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="">Select Purok</option>
+                            @for($i = 1; $i <= 7; $i++)
+                                @php $val = 'Purok '.$i; @endphp
+                                <option value="{{ $val }}" {{ $currentPurok === $val ? 'selected' : '' }}>Purok {{ $i }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="address" name="address" value="{{ old('address', $resident->address) }}">
             </div>
 
                 <!-- Personal Information -->
@@ -145,14 +250,39 @@
                         </select>
                     </div>
                     </div>
+                    @php
+                        $knownOccupations = [
+                            'Teacher',
+                            'Student',
+                            'Farmer',
+                            'Fisherman',
+                            'Vendor',
+                            'Government Employee',
+                            'Private Employee',
+                            'Housewife',
+                            'Construction Worker',
+                            'Driver',
+                        ];
+                        $currentOccupation = old('occupation', $resident->occupation);
+                        $occupationSelectValue = in_array($currentOccupation, $knownOccupations) ? $currentOccupation : '_other';
+                    @endphp
                     <div class="mt-2">
-                        <label for="occupation" class="block text-sm font-medium text-gray-700 mb-2">Occupation</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Occupation <span class="text-red-500">*</span></label>
+                        <select id="occupation_select" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="">Select Occupation</option>
+                            @foreach($knownOccupations as $occ)
+                                <option value="{{ $occ }}" {{ $occupationSelectValue === $occ ? 'selected' : '' }}>{{ $occ }}</option>
+                            @endforeach
+                            <option value="_other" {{ $occupationSelectValue === '_other' ? 'selected' : '' }}>Other (specify)</option>
+                        </select>
                         <input type="text" 
                                id="occupation" 
                                name="occupation" 
-                               value="{{ old('occupation', $resident->occupation) }}" 
+                               value="{{ $currentOccupation }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                               placeholder="e.g., Teacher, Business Owner, Student">
+                               placeholder="Start typing occupation"
+                               required
+                               style="display: {{ $occupationSelectValue === '_other' ? 'block' : 'none' }};">
                 </div>
             </div>
 
@@ -173,7 +303,7 @@
                                value="{{ old('age', $resident->age) }}" 
                                min="1" 
                                max="120" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700" 
                                required>
                     </div>
                     <div>
@@ -200,11 +330,12 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                     required>
                             <option value="">Select Education Level</option>
+                            <option value="No Education" {{ old('education_level', $resident->education_level) == 'No Education' ? 'selected' : '' }}>No Education</option>
                             <option value="Elementary" {{ old('education_level', $resident->education_level) == 'Elementary' ? 'selected' : '' }}>Elementary</option>
                             <option value="High School" {{ old('education_level', $resident->education_level) == 'High School' ? 'selected' : '' }}>High School</option>
+                            <option value="Vocational" {{ old('education_level', $resident->education_level) == 'Vocational' ? 'selected' : '' }}>Vocational</option>
                             <option value="College" {{ old('education_level', $resident->education_level) == 'College' ? 'selected' : '' }}>College</option>
                             <option value="Post Graduate" {{ old('education_level', $resident->education_level) == 'Post Graduate' ? 'selected' : '' }}>Post Graduate</option>
-                                <option value="No Formal Education" {{ old('education_level', $resident->education_level) == 'No Formal Education' ? 'selected' : '' }}>No Formal Education</option>
                         </select>
                     </div>
                     <div>
@@ -216,59 +347,48 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                     required>
                             <option value="">Select Income Level</option>
-                                <option value="Below Poverty Line" {{ old('income_level', $resident->income_level) == 'Below Poverty Line' ? 'selected' : '' }}>Below Poverty Line</option>
-                                <option value="Low Income" {{ old('income_level', $resident->income_level) == 'Low Income' ? 'selected' : '' }}>Low Income</option>
-                                <option value="Middle Income" {{ old('income_level', $resident->income_level) == 'Middle Income' ? 'selected' : '' }}>Middle Income</option>
-                                <option value="Upper Middle Income" {{ old('income_level', $resident->income_level) == 'Upper Middle Income' ? 'selected' : '' }}>Upper Middle Income</option>
-                                <option value="High Income" {{ old('income_level', $resident->income_level) == 'High Income' ? 'selected' : '' }}>High Income</option>
+                                <option value="Low" {{ old('income_level', $resident->income_level) == 'Low' ? 'selected' : '' }}>Low (₱0 – ₱10,000)</option>
+                                <option value="Lower Middle" {{ old('income_level', $resident->income_level) == 'Lower Middle' ? 'selected' : '' }}>Lower Middle (₱10,001 – ₱20,000)</option>
+                                <option value="Middle" {{ old('income_level', $resident->income_level) == 'Middle' ? 'selected' : '' }}>Middle (₱20,001 – ₱40,000)</option>
+                                <option value="Upper Middle" {{ old('income_level', $resident->income_level) == 'Upper Middle' ? 'selected' : '' }}>Upper Middle (₱40,001 – ₱80,000)</option>
+                                <option value="High" {{ old('income_level', $resident->income_level) == 'High' ? 'selected' : '' }}>High (₱80,001 and above)</option>
                         </select>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-                    <div>
-                        <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-2">
-                            Employment Status <span class="text-red-500">*</span>
-                        </label>
-                            <select id="employment_status" 
-                                    name="employment_status" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                    required>
-                            <option value="">Select Employment Status</option>
-                                <option value="Employed" {{ old('employment_status', $resident->employment_status) == 'Employed' ? 'selected' : '' }}>Employed</option>
-                            <option value="Unemployed" {{ old('employment_status', $resident->employment_status) == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
-                                <option value="Self-Employed" {{ old('employment_status', $resident->employment_status) == 'Self-Employed' ? 'selected' : '' }}>Self-Employed</option>
-                                <option value="Student" {{ old('employment_status', $resident->employment_status) == 'Student' ? 'selected' : '' }}>Student</option>
-                                <option value="Retired" {{ old('employment_status', $resident->employment_status) == 'Retired' ? 'selected' : '' }}>Retired</option>
-                        </select>
+                        <div>
+                            <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-2">
+                                Employment Status <span class="text-red-500">*</span>
+                            </label>
+                                <select id="employment_status" 
+                                        name="employment_status" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                        required>
+                                <option value="">Select Employment Status</option>
+                                    <option value="Unemployed" {{ old('employment_status', $resident->employment_status) == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
+                                <option value="Part-time" {{ old('employment_status', $resident->employment_status) == 'Part-time' ? 'selected' : '' }}>Part-time</option>
+                                    <option value="Self-employed" {{ old('employment_status', $resident->employment_status) == 'Self-employed' ? 'selected' : '' }}>Self-employed</option>
+                                    <option value="Full-time" {{ old('employment_status', $resident->employment_status) == 'Full-time' ? 'selected' : '' }}>Full-time</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <!-- Spacer to keep grid alignment without health status field -->
+                        </div>
                     </div>
-                    <div>
-                        <label for="health_status" class="block text-sm font-medium text-gray-700 mb-2">
-                            Health Status <span class="text-red-500">*</span>
-                        </label>
-                            <select id="health_status" 
-                                    name="health_status" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                    required>
-                            <option value="">Select Health Status</option>
-                                <option value="Healthy" {{ old('health_status', $resident->health_status) == 'Healthy' ? 'selected' : '' }}>Healthy</option>
-                                <option value="With Minor Health Issues" {{ old('health_status', $resident->health_status) == 'With Minor Health Issues' ? 'selected' : '' }}>With Minor Health Issues</option>
-                                <option value="With Chronic Conditions" {{ old('health_status', $resident->health_status) == 'With Chronic Conditions' ? 'selected' : '' }}>With Chronic Conditions</option>
-                                <option value="Disabled" {{ old('health_status', $resident->health_status) == 'Disabled' ? 'selected' : '' }}>Disabled</option>
-                        </select>
-                    </div>
+                <div class="mt-2">
+                    <label for="is_pwd" class="block text-sm font-medium text-gray-700 mb-2">
+                        Person with Disability (PWD) <span class="text-red-500">*</span>
+                    </label>
+                    @php $pwdVal = old('is_pwd', $resident->is_pwd ? '1' : '0'); @endphp
+                    <select id="is_pwd" 
+                            name="is_pwd" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            required>
+                        <option value="0" {{ $pwdVal == '0' ? 'selected' : '' }}>No</option>
+                        <option value="1" {{ $pwdVal == '1' ? 'selected' : '' }}>Yes</option>
+                    </select>
                 </div>
-                    <div class="mt-2">
-                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Emergency Contact Name <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" 
-                               id="emergency_contact_name" 
-                               name="emergency_contact_name" 
-                               value="{{ old('emergency_contact_name', $resident->emergency_contact_name) }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                               required>
-                    </div>
-                    </div>
+            </div>
 
                 <!-- Emergency Contact Information -->
                 <div class="border-b border-gray-200 pb-6">
@@ -276,35 +396,67 @@
                         <i class="fas fa-phone-alt mr-2 text-red-600"></i>
                         Emergency Contact Information
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-700 mb-2">
-                                Relationship <span class="text-red-500">*</span>
+                            <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Name
                             </label>
+                            <input type="text" 
+                                   id="emergency_contact_name" 
+                                   name="emergency_contact_name" 
+                                   value="{{ old('emergency_contact_name', $resident->emergency_contact_name) }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        </div>
+                        @php
+                            $knownRelationships = [
+                                'Spouse',
+                                'Mother',
+                                'Father',
+                                'Parent',
+                                'Sibling',
+                                'Child',
+                                'Relative',
+                                'Neighbor',
+                                'Friend',
+                                'Guardian',
+                            ];
+                            $currentRelationship = old('emergency_contact_relationship', $resident->emergency_contact_relationship);
+                            $relationshipSelectValue = in_array($currentRelationship, $knownRelationships) ? $currentRelationship : '_other';
+                        @endphp
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Relationship
+                            </label>
+                            <select id="relationship_select" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                <option value="">Select Relationship</option>
+                                @foreach($knownRelationships as $rel)
+                                    <option value="{{ $rel }}" {{ $relationshipSelectValue === $rel ? 'selected' : '' }}>{{ $rel }}</option>
+                                @endforeach
+                                <option value="_other" {{ $relationshipSelectValue === '_other' ? 'selected' : '' }}>Other (specify)</option>
+                            </select>
                             <input type="text" 
                                    id="emergency_contact_relationship" 
                                    name="emergency_contact_relationship" 
-                                   value="{{ old('emergency_contact_relationship', $resident->emergency_contact_relationship) }}" 
+                                   value="{{ $currentRelationship }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                   placeholder="e.g., Spouse, Parent, Sibling" 
-                                   required>
+                                   placeholder="e.g., Spouse, Parent, Sibling"
+                                   style="display: {{ $relationshipSelectValue === '_other' ? 'block' : 'none' }};">
                         </div>
-                    <div>
-                        <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">
-                                Contact Number <span class="text-red-500">*</span>
-                        </label>
-                        <input type="number" 
-                               id="emergency_contact_number" 
-                               name="emergency_contact_number" 
-                               value="{{ old('emergency_contact_number', $resident->emergency_contact_number) }}" 
+                        <div>
+                            <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                Contact Number
+                            </label>
+                            <input type="number" 
+                                   id="emergency_contact_number" 
+                                   name="emergency_contact_number" 
+                                   value="{{ old('emergency_contact_number', $resident->emergency_contact_number) }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                               placeholder="e.g., 9191234567"
+                                   placeholder="e.g., 9191234567"
                                    min="0" 
                                    pattern="[0-9]*" 
-                                   inputmode="numeric" 
-                                   required>
+                                   inputmode="numeric">
+                        </div>
                     </div>
-                </div>
             </div>
 
             <!-- Form Actions -->
@@ -336,6 +488,112 @@
             if (headerSkeleton) headerSkeleton.style.display = 'none';
             if (content) content.style.display = 'block';
         }, 1000); // 1 second delay to show skeleton effect
+
+        const birthInput = document.getElementById('birth_date');
+        const ageInput = document.getElementById('age');
+        const purokSelect = document.getElementById('purok');
+        const addressInput = document.getElementById('address');
+        const occupationSelect = document.getElementById('occupation_select');
+        const occupationInput = document.getElementById('occupation');
+        const relationshipSelect = document.getElementById('relationship_select');
+        const relationshipInput = document.getElementById('emergency_contact_relationship');
+
+        function updateAge() {
+            if (!birthInput || !ageInput) return;
+            const val = birthInput.value;
+            if (!val) { ageInput.value = ''; return; }
+            const birthDate = new Date(val);
+            if (isNaN(birthDate.getTime())) { ageInput.value = ''; return; }
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            ageInput.value = age > 0 ? age : '';
+        }
+
+        function updateAddress() {
+            if (!purokSelect || !addressInput) return;
+            const purok = purokSelect.value || '';
+            const barangay = "{{ $defaultBarangay }}";
+            const city = "{{ $defaultCity }}";
+            const province = "{{ $defaultProvince }}";
+            if (!purok) {
+                addressInput.value = '';
+                return;
+            }
+            addressInput.value = `${purok}, ${barangay}, ${city}, ${province}`;
+        }
+
+        function handleOccupationChange() {
+            if (!occupationSelect || !occupationInput) return;
+            const val = occupationSelect.value;
+            if (!val) {
+                if (occupationInput.value && occupationInput.value.trim() !== '') {
+                    occupationInput.style.display = 'block';
+                    occupationInput.readOnly = false;
+                } else {
+                    occupationInput.value = '';
+                    occupationInput.readOnly = true;
+                    occupationInput.style.display = 'none';
+                }
+                return;
+            }
+            if (val === '_other') {
+                occupationInput.readOnly = false;
+                occupationInput.style.display = 'block';
+                occupationInput.value = '';
+                occupationInput.focus();
+            } else {
+                occupationInput.value = val;
+                occupationInput.readOnly = true;
+                occupationInput.style.display = 'none';
+            }
+        }
+
+        function handleRelationshipChange() {
+            if (!relationshipSelect || !relationshipInput) return;
+            const val = relationshipSelect.value;
+            if (!val) {
+                if (relationshipInput.value && relationshipInput.value.trim() !== '') {
+                    relationshipInput.style.display = 'block';
+                    relationshipInput.readOnly = false;
+                } else {
+                    relationshipInput.value = '';
+                    relationshipInput.readOnly = false;
+                    relationshipInput.style.display = 'none';
+                }
+                return;
+            }
+            if (val === '_other') {
+                relationshipInput.readOnly = false;
+                relationshipInput.style.display = 'block';
+                relationshipInput.value = '';
+                relationshipInput.focus();
+            } else {
+                relationshipInput.value = val;
+                relationshipInput.readOnly = true;
+                relationshipInput.style.display = 'none';
+            }
+        }
+
+        if (birthInput) {
+            birthInput.addEventListener('change', updateAge);
+            birthInput.addEventListener('input', updateAge);
+            updateAge();
+        }
+        if (purokSelect) {
+            purokSelect.addEventListener('change', updateAddress);
+        }
+        if (occupationSelect) {
+            occupationSelect.addEventListener('change', handleOccupationChange);
+            handleOccupationChange();
+        }
+        if (relationshipSelect) {
+            relationshipSelect.addEventListener('change', handleRelationshipChange);
+            handleRelationshipChange();
+        }
     });
 </script>
 @endsection 

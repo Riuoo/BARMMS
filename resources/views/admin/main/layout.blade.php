@@ -1696,14 +1696,14 @@
                     @endif
 
                     @if($isTreasurer || $isAdmin)
-                    <!-- Projects -->
-                    <section class="mb-6" aria-label="Projects">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Projects</h3>
+                    <!-- Barangay Activities & Projects -->
+                    <section class="mb-6" aria-label="Barangay Activities & Projects">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Barangay Activities & Projects</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.accomplished-projects') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.accomplished-projects*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.accomplished-projects*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-check-circle fa-fw mr-3 {{ request()->routeIs('admin.accomplished-projects*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Accomplished Projects</span>
+                                    <span>Barangay Activities</span>
                                 </a>
                             </li>
                         </ul>
@@ -1794,12 +1794,6 @@
                                 <a href="{{ route('admin.attendance.logs') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.attendance.logs*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.attendance.logs*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-list fa-fw mr-3 {{ request()->routeIs('admin.attendance.logs*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Attendance Logs</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.events.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.events*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.events*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-calendar-check fa-fw mr-3 {{ request()->routeIs('admin.events*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Events</span>
                                 </a>
                             </li>
                         </ul>
@@ -1959,14 +1953,14 @@
                     @endif
 
                     @if($isTreasurer || $isAdmin)
-                    <!-- Projects -->
-                    <section class="mb-6" aria-label="Projects">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Projects</h3>
+                    <!-- Barangay Activities & Projects -->
+                    <section class="mb-6" aria-label="Barangay Activities & Projects">
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Barangay Activities & Projects</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.accomplished-projects') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.accomplished-projects*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-check-circle fa-fw mr-3 {{ request()->routeIs('admin.accomplished-projects*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Accomplished Projects</span>
+                                    <span>Barangay Activities</span>
                                 </a>
                             </li>
                         </ul>
@@ -2057,12 +2051,6 @@
                                 <a href="{{ route('admin.attendance.logs') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.attendance.logs*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-list fa-fw mr-3 {{ request()->routeIs('admin.attendance.logs*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Attendance Logs</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.events.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.events*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-calendar-check fa-fw mr-3 {{ request()->routeIs('admin.events*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Events</span>
                                 </a>
                             </li>
                         </ul>

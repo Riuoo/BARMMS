@@ -10,6 +10,7 @@ class CreateBlotterRequestsTable extends Migration
     {
         Schema::create('blotter_requests', function (Blueprint $table) {
             $table->id();
+            $table->string('complainant_name')->nullable();
             $table->unsignedBigInteger('resident_id')->nullable()->index();
             $table->string('type');
             $table->text('description');

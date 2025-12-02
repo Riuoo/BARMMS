@@ -175,12 +175,12 @@
 
     <!-- Enhanced Data Visualization Section -->
     <div class="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-2">
-        <!-- Health Status Distribution Chart -->
+        <!-- PWD Distribution Chart -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100">
             <div class="p-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Health Status Distribution</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Person with Disability (PWD) Distribution</h3>
                 <div class="chart-container" style="position: relative; height:200px; width:100%">
-                    <canvas id="healthStatusChart"></canvas>
+                    <canvas id="pwdChart"></canvas>
                 </div>
             </div>
         </div>
@@ -451,27 +451,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Health Status Distribution Chart
         try {
-            const healthStatusData = JSON.parse(`@json($healthStatusDistribution)`);
-            if (healthStatusData && healthStatusData.length > 0) {
-                const labels = healthStatusData.map(item => item.health_status || 'Unknown');
-                const counts = healthStatusData.map(item => parseInt(item.count) || 0);
+            const pwdData = JSON.parse(`@json($pwdDistribution)`);
+            if (pwdData && pwdData.length > 0) {
+                const labels = pwdData.map(item => (item.is_pwd == 1 || item.is_pwd === true) ? 'Yes' : 'No');
+                const counts = pwdData.map(item => parseInt(item.count) || 0);
 
-                const healthCtx = document.getElementById('healthStatusChart').getContext('2d');
-                window.healthStatusChartInstance = new Chart(healthCtx, {
+                const pwdCtx = document.getElementById('pwdChart').getContext('2d');
+                window.pwdChartInstance = new Chart(pwdCtx, {
                     type: 'doughnut',
                     data: {
                         labels: labels,
                         datasets: [{
                             data: counts,
                             backgroundColor: [
-                                '#3B82F6', // blue-500
-                                '#10B981', // green-500
-                                '#8B5CF6', // purple-500
-                                '#F59E0B', // amber-500
-                                '#EF4444', // red-500
-                                '#EC4899', // pink-500
-                                '#6366F1', // indigo-500
-                                '#14B8A6'  // teal-500
+                                '#EF4444', // red-500 for Yes (PWD)
+                                '#10B981', // green-500 for No (Not PWD)
                             ],
                             borderWidth: 0
                         }]
@@ -492,8 +486,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             } else {
                 // Create empty chart with placeholder data
-                const healthCtx = document.getElementById('healthStatusChart').getContext('2d');
-                window.healthStatusChartInstance = new Chart(healthCtx, {
+                const pwdCtx = document.getElementById('pwdChart').getContext('2d');
+                window.pwdChartInstance = new Chart(pwdCtx, {
                     type: 'doughnut',
                     data: {
                         labels: ['No Data Available'],
@@ -519,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         } catch (error) {
-            console.error('Error initializing health status chart:', error);
+            console.error('Error initializing PWD chart:', error);
         }
 
         // Monthly Consultation Trends Chart

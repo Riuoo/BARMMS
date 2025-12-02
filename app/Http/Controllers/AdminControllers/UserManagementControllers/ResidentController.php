@@ -61,7 +61,6 @@ class ResidentController
             'education_level',
             'income_level',
             'employment_status',
-            'health_status',
         ])
         ->orderByDesc('active')->orderBy('name')->paginate(10);
         return view('admin.residents.residents', compact('residents', 'totalResidents', 'activeResidents', 'recentResidents', 'withAddress'));
@@ -81,7 +80,6 @@ class ResidentController
             'education_level' => $resident->education_level,
             'income_level' => $resident->income_level,
             'employment_status' => $resident->employment_status,
-            'health_status' => $resident->health_status,
             'emergency_contact_name' => $resident->emergency_contact_name,
             'emergency_contact_number' => $resident->emergency_contact_number,
             'emergency_contact_relationship' => $resident->emergency_contact_relationship
@@ -133,18 +131,18 @@ class ResidentController
                 },
             ],
             'address' => 'required|string|max:500',
-            'gender' => 'required|in:Male,Female,Other',
+            'gender' => 'required|in:Male,Female',
             'contact_number' => 'required|string|max:255',
             'birth_date' => 'required|date|before:today',
             'marital_status' => 'required|in:Single,Married,Widowed,Divorced,Separated',
-            'occupation' => 'nullable|string|max:255',
+            'occupation' => 'required|string|max:255',
             'password' => 'required|string|min:6|confirmed',
             'age' => 'required|integer|min:1|max:120',
             'family_size' => 'required|integer|min:1|max:20',
             'education_level' => 'required|string|in:No Education,Elementary,High School,Vocational,College,Post Graduate',
             'income_level' => 'required|string|in:Low,Lower Middle,Middle,Upper Middle,High',
             'employment_status' => 'required|string|in:Unemployed,Part-time,Self-employed,Full-time',
-            'health_status' => 'required|string|in:Critical,Poor,Fair,Good,Excellent',
+            'is_pwd' => 'required|boolean',
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_number' => 'nullable|string|max:255',
             'emergency_contact_relationship' => 'nullable|string|max:255',
@@ -166,7 +164,7 @@ class ResidentController
                 'education_level' => $validatedData['education_level'],
                 'income_level' => $validatedData['income_level'],
                 'employment_status' => $validatedData['employment_status'],
-                'health_status' => $validatedData['health_status'],
+                'is_pwd' => (bool)$validatedData['is_pwd'],
                 'emergency_contact_name' => $validatedData['emergency_contact_name'],
                 'emergency_contact_number' => $validatedData['emergency_contact_number'],
                 'emergency_contact_relationship' => $validatedData['emergency_contact_relationship'],
@@ -195,18 +193,18 @@ class ResidentController
 
             $validatedData = $request->validate([
                 'address' => 'required|string|max:500',
-                'gender' => 'required|in:Male,Female,Other',
+                'gender' => 'required|in:Male,Female',
                 'contact_number' => 'required|string|max:255',
                 'birth_date' => 'required|date|before:today',
                 'marital_status' => 'required|in:Single,Married,Widowed,Divorced,Separated',
-                'occupation' => 'nullable|string|max:255',
+                'occupation' => 'required|string|max:255',
                 'password' => 'nullable|string|min:6|confirmed',
                 'age' => 'required|integer|min:1|max:120',
                 'family_size' => 'required|integer|min:1|max:20',
                 'education_level' => 'required|string|in:No Education,Elementary,High School,Vocational,College,Post Graduate',
                 'income_level' => 'required|string|in:Low,Lower Middle,Middle,Upper Middle,High',
                 'employment_status' => 'required|string|in:Unemployed,Part-time,Self-employed,Full-time',
-                'health_status' => 'required|string|in:Critical,Poor,Fair,Good,Excellent',
+                'is_pwd' => 'required|boolean',
                 'emergency_contact_name' => 'nullable|string|max:255',
                 'emergency_contact_number' => 'nullable|string|max:255',
                 'emergency_contact_relationship' => 'nullable|string|max:255',
@@ -227,7 +225,7 @@ class ResidentController
             $resident->education_level = $validatedData['education_level'];
             $resident->income_level = $validatedData['income_level'];
             $resident->employment_status = $validatedData['employment_status'];
-            $resident->health_status = $validatedData['health_status'];
+            $resident->is_pwd = (bool)$validatedData['is_pwd'];
             $resident->emergency_contact_name = $validatedData['emergency_contact_name'];
             $resident->emergency_contact_number = $validatedData['emergency_contact_number'];
             $resident->emergency_contact_relationship = $validatedData['emergency_contact_relationship'];

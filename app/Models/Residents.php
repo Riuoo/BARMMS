@@ -26,7 +26,7 @@ class Residents extends Authenticatable
         'education_level',
         'income_level',
         'employment_status',
-        'health_status',
+        'is_pwd',
         'emergency_contact_name',
         'emergency_contact_number',
         'emergency_contact_relationship',
@@ -46,6 +46,7 @@ class Residents extends Authenticatable
             'birth_date' => 'date',
             'password' => 'hashed',
             'active' => 'boolean',
+            'is_pwd' => 'boolean',
         ];
     }
 

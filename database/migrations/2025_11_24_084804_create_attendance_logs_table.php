@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('attendance_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('resident_id')->index();
+            $table->unsignedBigInteger('resident_id')->nullable()->index();
+            $table->string('guest_name')->nullable();
+            $table->string('guest_contact')->nullable();
             $table->unsignedBigInteger('event_id')->nullable()->index();
             $table->string('event_type')->nullable(); // 'event', 'health_center_activity', 'medical_consultation', 'medicine_claim', etc.
             $table->unsignedBigInteger('scanned_by')->nullable()->index(); // Staff/admin who scanned
@@ -25,7 +27,9 @@ return new class extends Migration
             $table->foreign('scanned_by')->references('id')->on('barangay_profiles')->onDelete('set null');
             
             // Prevent duplicate scans for same event (same day)
-            $table->unique(['resident_id', 'event_id', 'event_type'], 'unique_attendance');
+            // For residents: same resident can't attend same event twice
+            $table->unique(['resident_id', 'event_id', 'event_type'], 'unique_resident_attendance');
+            // Note: Guest duplicate prevention is handled in application logic since we need to check by date
         });
     }
 

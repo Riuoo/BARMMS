@@ -15,7 +15,6 @@ function initializeAnalyticsCharts() {
         initializeIncomeChart(chartData);
         initializeEmploymentChart(chartData);
         initializeAgeChart(chartData);
-        initializeHealthChart(chartData);
         initializeComparativeChart(chartData);
     }
 }
@@ -47,7 +46,6 @@ function prepareAnalyticsChartData() {
         // Extract data from cluster characteristics
         const incomeDistribution = cluster.income_distribution || {};
         const employmentDistribution = cluster.employment_distribution || {};
-        const healthDistribution = cluster.health_distribution || {};
         
         // Prepare age data (simulate from average age)
         const avgAge = cluster.avg_age || 35;
@@ -77,13 +75,6 @@ function prepareAnalyticsChartData() {
                 'Self-employed': employmentDistribution['Self-employed'] || 0,
                 'Full-time': employmentDistribution['Full-time'] || 0
             },
-            healths: {
-                'Critical': healthDistribution['Critical'] || 0,
-                'Poor': healthDistribution['Poor'] || 0,
-                'Fair': healthDistribution['Fair'] || 0,
-                'Good': healthDistribution['Good'] || 0,
-                'Excellent': healthDistribution['Excellent'] || 0
-            }
         };
     });
 }
@@ -300,62 +291,6 @@ function initializeAgeChart(chartData) {
     });
 }
 
-// Health Status Distribution Chart
-function initializeHealthChart(chartData) {
-    const ctx = document.getElementById('healthChart');
-    if (!ctx) return;
-
-    const healthLabels = ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'];
-    const healthColors = resolveColors(
-        window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.health,
-        healthLabels,
-        ['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981']
-    );
-    
-    // Create stacked bar chart for health distribution
-    const datasets = healthLabels.map((label, idx) => ({
-        label: label,
-        data: chartData.map(data => data.healths[label] || 0),
-        backgroundColor: healthColors[idx],
-        borderColor: healthColors[idx],
-        borderWidth: 1
-    }));
-    
-    analyticsCharts.healthChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: chartData.map(data => data.label),
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { 
-                        font: { size: 11 },
-                        usePointStyle: true,
-                        padding: 15
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    stacked: true,
-                    grid: { display: false }
-                },
-                y: {
-                    stacked: true,
-                    beginAtZero: true,
-                    title: { display: true, text: 'Number of Residents' },
-                    grid: { color: 'rgba(0,0,0,0.1)' }
-                }
-            }
-        }
-    });
-}
-
 // Comparative Chart (Line Chart)
 function initializeComparativeChart(chartData) {
     const ctx = document.getElementById('comparativeChart');
@@ -445,7 +380,7 @@ function initializeComparativeChart(chartData) {
 
 // Download all charts as images
 function downloadAllCharts() {
-    const chartIds = ['incomeChart', 'employmentChart', 'ageChart', 'healthChart', 'comparativeChart'];
+    const chartIds = ['incomeChart', 'employmentChart', 'ageChart', 'comparativeChart'];
     chartIds.forEach(chartId => {
         const chart = analyticsCharts[chartId];
         if (chart) {

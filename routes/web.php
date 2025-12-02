@@ -314,14 +314,14 @@ Route::prefix('admin')->group(function () {
         Route::get('/attendance/logs', [AttendanceController::class, 'logs'])->name('admin.attendance.logs');
         Route::get('/attendance/report', [AttendanceController::class, 'report'])->name('admin.attendance.report');
         
-        // Events Management
-        Route::get('/events', [EventController::class, 'index'])->name('admin.events.index');
-        Route::get('/events/create', [EventController::class, 'create'])->name('admin.events.create');
-        Route::post('/events', [EventController::class, 'store'])->name('admin.events.store');
-        Route::get('/events/{id}', [EventController::class, 'show'])->name('admin.events.show');
-        Route::get('/events/{id}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
-        Route::put('/events/{id}', [EventController::class, 'update'])->name('admin.events.update');
-        Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('admin.events.destroy');
+        // Events Management (retired - use Barangay Activities based on Accomplished Projects instead)
+        // Route::get('/events', [EventController::class, 'index'])->name('admin.events.index');
+        // Route::get('/events/create', [EventController::class, 'create'])->name('admin.events.create');
+        // Route::post('/events', [EventController::class, 'store'])->name('admin.events.store');
+        // Route::get('/events/{id}', [EventController::class, 'show'])->name('admin.events.show');
+        // Route::get('/events/{id}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
+        // Route::put('/events/{id}', [EventController::class, 'update'])->name('admin.events.update');
+        // Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('admin.events.destroy');
     });
 
     Route::middleware(['admin.role:admin,treasurer'])->group(function () {

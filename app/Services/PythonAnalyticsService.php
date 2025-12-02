@@ -356,7 +356,7 @@ class PythonAnalyticsService
                 'education_level' => $resident->education_level ?? '',
                 'income_level' => $resident->income_level ?? '',
                 'employment_status' => $resident->employment_status ?? '',
-                'health_status' => $resident->health_status ?? '',
+                'is_pwd' => $resident->is_pwd ?? false,
                 'address' => $resident->address ?? ''
             ];
         }
@@ -378,7 +378,7 @@ class PythonAnalyticsService
                 $this->encodeEducation($resident->education_level ?? ''),
                 $this->encodeIncome($resident->income_level ?? ''),
                 $this->encodeEmployment($resident->employment_status ?? ''),
-                $this->encodeHealthStatus($resident->health_status ?? '')
+                $this->encodePWD($resident->is_pwd ?? false)
             ];
         }
         
@@ -422,17 +422,9 @@ class PythonAnalyticsService
         return $mapping[$employmentStatus] ?? 0;
     }
 
-    private function encodeHealthStatus(string $healthStatus): float
+    private function encodePWD(bool $isPWD): float
     {
-        $mapping = [
-            'Critical' => 0,
-            'Poor' => 1,
-            'Fair' => 2,
-            'Good' => 3,
-            'Excellent' => 4,
-        ];
-        
-        return $mapping[$healthStatus] ?? 2;
+        return $isPWD ? 1.0 : 0.0;
     }
 }
 

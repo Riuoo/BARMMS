@@ -51,12 +51,20 @@
     </div>
 
     <div class="info">
-        <h2>Event Information</h2>
-        <p><strong>Event Name:</strong> {{ isset($eventName) ? $eventName : ($eventType === 'event' ? $event->event_name : $event->activity_name) }}</p>
-        <p><strong>Event Type:</strong> {{ ucfirst(str_replace('_', ' ', $eventType)) }}</p>
-        <p><strong>Date:</strong> {{ $eventType === 'event' ? $event->event_date->format('F d, Y') : $event->activity_date->format('F d, Y') }}</p>
-        @if($eventType === 'event' && $event->location)
-            <p><strong>Location:</strong> {{ $event->location }}</p>
+        <h2>Event / Activity Information</h2>
+        <p><strong>Name:</strong> {{ isset($eventName) ? $eventName : ($eventType === 'event' ? $event->title : $event->activity_name) }}</p>
+        <p><strong>Type:</strong> {{ ucfirst(str_replace('_', ' ', $eventType)) }}</p>
+        @if($eventType === 'event')
+            <p><strong>Start Date:</strong> {{ $event->start_date ? $event->start_date->format('F d, Y') : 'N/A' }}</p>
+            <p><strong>Completion Date:</strong> {{ $event->completion_date ? $event->completion_date->format('F d, Y') : 'N/A' }}</p>
+            @if($event->location)
+                <p><strong>Location:</strong> {{ $event->location }}</p>
+            @endif
+        @else
+            <p><strong>Date:</strong> {{ $event->activity_date->format('F d, Y') }}</p>
+            @if($event->location)
+                <p><strong>Location:</strong> {{ $event->location }}</p>
+            @endif
         @endif
     </div>
 

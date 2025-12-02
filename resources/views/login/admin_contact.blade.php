@@ -59,7 +59,7 @@
                 <h2 class="text-3xl font-bold text-gray-900 text-center flex-1 mr-8">Contact Administrator</h2>
             </div>
             <p class="text-gray-600 mb-6 text-center">Please enter your email address below to request an account. The administrator will contact you with a link to complete your account creation.</p>
-           <form action="{{ route('admin.contact') }}" method="POST" class="space-y-6">
+           <form action="{{ route('admin.contact.store') }}" method="POST" class="space-y-6">
                 @csrf
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>

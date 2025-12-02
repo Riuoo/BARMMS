@@ -20,13 +20,11 @@
                 
                 <!-- Event Selection -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Event/Activity</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Barangay Activity / Health Activity</label>
                     <div class="grid grid-cols-2 gap-2">
                         <select id="eventType" class="block w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <option value="event">Event</option>
+                            <option value="event">Barangay Activity / Project</option>
                             <option value="health_center_activity">Health Activity</option>
-                            <option value="medical_consultation">Medical Consultation</option>
-                            <option value="medicine_claim">Medicine Claim</option>
                         </select>
                         <select id="eventId" class="block w-full px-3 py-2 border border-gray-300 rounded-md">
                             <option value="">Select...</option>
@@ -34,7 +32,7 @@
                     </div>
                     <p class="text-xs text-gray-500 mt-1">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Showing: Ongoing, Today, and Upcoming (next 7 days) events
+                        Showing all barangay activities/projects and health activities
                     </p>
                 </div>
 
@@ -218,95 +216,44 @@ function loadEvents() {
     let firstEventId = null;
     let firstOngoingId = null;
 
-    // Load events based on type
-    /* eslint-disable */
-    // @ts-ignore - Blade template syntax mixed with JavaScript
+    // Data prepared server-side for clean JS (no Blade helpers inside JS)
+    const barangayEvents = {!! $formattedEventsJson !!};
+    const healthActivities = {!! $formattedHealthActivitiesJson !!};
+
     if (eventType === 'event') {
-        @if(isset($events))
-            @php
-                $firstEvtId = null;
-                $firstOngoingEvtId = null;
-            @endphp
-            @foreach($events as $evt)
-                @php
-                    $isOngoing = $evt->status === 'Ongoing';
-                    $isToday = $evt->event_date->isToday();
-                    $isUpcoming = $evt->event_date->isFuture();
-                    $statusBadge = '';
-                    if ($isOngoing) {
-                        $statusBadge = ' 🔴 ONGOING';
-                        if ($firstOngoingEvtId === null) {
-                            $firstOngoingEvtId = $evt->id;
-                        }
-                    } elseif ($isToday) {
-                        $statusBadge = ' 🟢 TODAY';
-                    } elseif ($isUpcoming) {
-                        $statusBadge = ' 🔵 UPCOMING';
-                    }
-                    if ($firstEvtId === null) {
-                        $firstEvtId = $evt->id;
-                    }
-                @endphp
-                eventSelect.innerHTML += '<option value="{{ $evt->id }}">{{ $evt->event_name }} - {{ $evt->event_date->format("M d, Y") }}{!! $statusBadge !!}</option>';
-            @endforeach
-            @if($firstEvtId)
-                firstEventId = {{ $firstEvtId }};
-            @endif
-            @if($firstOngoingEvtId)
-                firstOngoingId = {{ $firstOngoingEvtId }};
-            @endif
-        @endif
+        barangayEvents.forEach((evt, index) => {
+            if (firstEventId === null) firstEventId = evt.id;
+            const option = document.createElement('option');
+            option.value = evt.id;
+            option.textContent = evt.label;
+            eventSelect.appendChild(option);
+        });
     } else if (eventType === 'health_center_activity') {
-        @if(isset($healthActivities))
-            @php
-                $firstActId = null;
-                $firstOngoingActId = null;
-            @endphp
-            @foreach($healthActivities as $act)
-                @php
-                    $isOngoing = $act->status === 'Ongoing';
-                    $isToday = $act->activity_date->isToday();
-                    $isUpcoming = $act->activity_date->isFuture();
-                    $statusBadge = '';
-                    if ($isOngoing) {
-                        $statusBadge = ' 🔴 ONGOING';
-                        if ($firstOngoingActId === null) {
-                            $firstOngoingActId = $act->id;
-                        }
-                    } elseif ($isToday) {
-                        $statusBadge = ' 🟢 TODAY';
-                    } elseif ($isUpcoming) {
-                        $statusBadge = ' 🔵 UPCOMING';
-                    }
-                    if ($firstActId === null) {
-                        $firstActId = $act->id;
-                    }
-                @endphp
-                eventSelect.innerHTML += '<option value="{{ $act->id }}">{{ $act->activity_name }} - {{ $act->activity_date->format("M d, Y") }}{!! $statusBadge !!}</option>';
-            @endforeach
-            @if($firstActId)
-                firstEventId = {{ $firstActId }};
-            @endif
-            @if($firstOngoingActId)
-                firstOngoingId = {{ $firstOngoingActId }};
-            @endif
-        @endif
+        healthActivities.forEach((act, index) => {
+            if (firstEventId === null) firstEventId = act.id;
+            if (firstOngoingId === null && act.is_ongoing) {
+                firstOngoingId = act.id;
+            }
+            const option = document.createElement('option');
+            option.value = act.id;
+            option.textContent = act.label;
+            eventSelect.appendChild(option);
+        });
     }
 
     // Auto-select: prioritize URL-selected event, then ongoing event, then first event
-    /* eslint-enable */
-    @if(isset($eventId) && $eventId)
-        eventSelect.value = {{ $eventId }};
+    const initialEventId = {{ $eventId ? (int) $eventId : 'null' }};
+
+    if (initialEventId) {
+        eventSelect.value = initialEventId;
         refreshAttendance();
-    @else
-        if (firstOngoingId) {
-            eventSelect.value = firstOngoingId;
-            refreshAttendance();
-        } else if (firstEventId) {
-            eventSelect.value = firstEventId;
-            refreshAttendance();
-        }
-    @endif
+    } else if (firstOngoingId) {
+        eventSelect.value = firstOngoingId;
+        refreshAttendance();
+    } else if (firstEventId) {
+        eventSelect.value = firstEventId;
+        refreshAttendance();
+    }
 }
 
 function startCamera() {

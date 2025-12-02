@@ -33,18 +33,16 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Event Type</label>
                 <select name="event_type" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                     <option value="">All Types</option>
-                    <option value="event" {{ $eventType == 'event' ? 'selected' : '' }}>Event</option>
+                    <option value="event" {{ $eventType == 'event' ? 'selected' : '' }}>Barangay Activity / Project</option>
                     <option value="health_center_activity" {{ $eventType == 'health_center_activity' ? 'selected' : '' }}>Health Activity</option>
-                    <option value="medical_consultation" {{ $eventType == 'medical_consultation' ? 'selected' : '' }}>Medical Consultation</option>
-                    <option value="medicine_claim" {{ $eventType == 'medicine_claim' ? 'selected' : '' }}>Medicine Claim</option>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Event</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Barangay Activity / Project</label>
                 <select name="event_id" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    <option value="">All Events</option>
+                    <option value="">All Activities/Projects</option>
                     @foreach($events as $evt)
-                        <option value="{{ $evt->id }}" {{ $eventId == $evt->id ? 'selected' : '' }}>{{ $evt->event_name }}</option>
+                        <option value="{{ $evt->id }}" {{ $eventId == $evt->id ? 'selected' : '' }}>{{ $evt->title }}</option>
                     @endforeach
                 </select>
             </div>
@@ -89,7 +87,7 @@
                                         @if($log->event_type === 'health_center_activity')
                                             {{ $log->healthCenterActivity->activity_name ?? 'Health Activity #' . $log->event_id }}
                                         @elseif($log->event_type === 'event')
-                                            {{ $log->event->event_name ?? 'Event #' . $log->event_id }}
+                                            {{ $log->event->title ?? 'Activity/Project #' . $log->event_id }}
                                         @else
                                             {{ ucfirst(str_replace('_', ' ', $log->event_type)) }} #{{ $log->event_id }}
                                         @endif

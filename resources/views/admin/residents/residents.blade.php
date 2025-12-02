@@ -696,7 +696,7 @@
                         'education_level': { label: 'Education Level', icon: 'fas fa-graduation-cap' },
                         'income_level': { label: 'Income Level', icon: 'fas fa-money-bill-wave' },
                         'employment_status': { label: 'Employment Status', icon: 'fas fa-briefcase' },
-                        'health_status': { label: 'Health Status', icon: 'fas fa-heartbeat' },
+                        'is_pwd': { label: 'PWD', icon: 'fas fa-wheelchair' },
                         'emergency_contact_name': { label: 'Emergency Contact', icon: 'fas fa-exclamation-triangle' },
                         'emergency_contact_number': { label: 'Emergency Phone', icon: 'fas fa-phone' },
                         'emergency_contact_relationship': { label: 'Relationship', icon: 'fas fa-user-friends' }

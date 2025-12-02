@@ -29,18 +29,48 @@
             <div class="bg-gray-50 p-4 rounded-lg">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
-                    <input id="name" name="name" type="text" autocomplete="name" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                        placeholder="Full Name" value="{{ old('name') }}">
+                    <!-- First Name -->
+                    <div class="mb-2">
+                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="First Name" required>
+                    </div>
+                    <!-- Middle Name (optional, can be disabled) -->
+                    <div class="mb-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-0">Middle Name</label>
+                            <label class="inline-flex items-center text-xs text-gray-600">
+                                <input type="checkbox" id="no_middle_name" class="mr-1">
+                                No middle name
+                            </label>
+                        </div>
+                        <input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Middle Name">
+                    </div>
+                    <!-- Last Name -->
+                    <div class="mb-2">
+                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Last Name" required>
+                    </div>
+                    <!-- Suffix (optional dropdown) -->
+                    <div>
+                        <label for="suffix" class="block text-sm font-medium text-gray-700 mb-1">Suffix</label>
+                        <select id="suffix" name="suffix" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
+                            <option value="">None</option>
+                            <option value="Jr." {{ old('suffix') == 'Jr.' ? 'selected' : '' }}>Jr.</option>
+                            <option value="Sr." {{ old('suffix') == 'Sr.' ? 'selected' : '' }}>Sr.</option>
+                            <option value="II" {{ old('suffix') == 'II' ? 'selected' : '' }}>II</option>
+                            <option value="III" {{ old('suffix') == 'III' ? 'selected' : '' }}>III</option>
+                            <option value="IV" {{ old('suffix') == 'IV' ? 'selected' : '' }}>IV</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="name" name="name" value="{{ old('name') }}">
                 </div>
-                <div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address <span class="text-red-500">*</span></label>
-                    <input id="email" name="email" type="email" autocomplete="email" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                        placeholder="Email address" value="{{ $accountRequest->email ?? old('email') }}" @if($accountRequest->email) readonly @endif>
-                </div>
+                        <input id="email" name="email" type="email" autocomplete="email" required
+                                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" disabled
+                            placeholder="Email address" value="{{ $accountRequest->email ?? old('email') }}" @if($accountRequest->email) readonly @endif>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
@@ -50,22 +80,44 @@
                             <option value="">Select Gender</option>
                             <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Male</option>
                             <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Female</option>
-                            <option value="Other" {{ old('gender') == 'Other' ? 'selected' : '' }}>Other</option>
                         </select>
-                </div>
-                <div>
+                    </div>
+                    <div>
                         <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
                         <input id="contact_number" name="contact_number" type="number" required
                             class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                             placeholder="e.g., 09191234567" min="0" pattern="[0-9]*" inputmode="numeric" value="{{ old('contact_number') }}">
                     </div>
                 </div>
-                <div class="mt-4">
-                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Full Address <span class="text-red-500">*</span></label>
-                    <input id="address" name="address" type="text" autocomplete="address" required
-                        class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                        placeholder="Full Address (include Purok if applicable)" value="{{ old('address') }}">
+                @php
+                    $defaultBarangay = config('app.default_barangay', 'Lower Malinao');
+                    $defaultCity = config('app.default_city', 'Padada');
+                    $defaultProvince = config('app.default_province', 'Davao Del Sur');
+                @endphp
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
+                        <input type="text" value="{{ $defaultBarangay }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-gray-100 text-gray-600 rounded-md cursor-not-allowed" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">City/Municipality</label>
+                        <input type="text" value="{{ $defaultCity }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-gray-100 text-gray-600 rounded-md cursor-not-allowed" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                        <input type="text" value="{{ $defaultProvince }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-gray-100 text-gray-600 rounded-md cursor-not-allowed" readonly>
+                    </div>
+                    <div>
+                        <label for="purok" class="block text-sm font-medium text-gray-700 mb-1">Purok <span class="text-red-500">*</span></label>
+                        <select id="purok" name="purok" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" required>
+                            <option value="">Select Purok</option>
+                            @for($i = 1; $i <= 7; $i++)
+                                <option value="Purok {{ $i }}" {{ old('purok') == 'Purok '.$i ? 'selected' : '' }}>Purok {{ $i }}</option>
+                            @endfor
+                        </select>
+                    </div>
                 </div>
+                <input type="hidden" id="address" name="address" value="{{ old('address') }}">
             </div>
 
             <!-- Personal Information Section -->
@@ -92,10 +144,22 @@
                     </div>
                 </div>
                 <div class="mt-4">
-                    <label for="occupation" class="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
-                    <input id="occupation" name="occupation" type="text"
-                        class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                        placeholder="e.g., Teacher, Business Owner, Student" value="{{ old('occupation') }}">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Occupation <span class="text-red-500">*</span></label>
+                    <select id="occupation_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2">
+                        <option value="">Select Occupation</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Student">Student</option>
+                        <option value="Farmer">Farmer</option>
+                        <option value="Fisherman">Fisherman</option>
+                        <option value="Vendor">Vendor</option>
+                        <option value="Government Employee">Government Employee</option>
+                        <option value="Private Employee">Private Employee</option>
+                        <option value="Housewife">Housewife</option>
+                        <option value="Construction Worker">Construction Worker</option>
+                        <option value="Driver">Driver</option>
+                        <option value="_other">Other (specify)</option>
+                    </select>
+                    <input type="text" id="occupation" name="occupation" value="{{ old('occupation') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Start typing occupation" required style="display: none;">
                 </div>
             </div>
 
@@ -106,8 +170,8 @@
                     <div>
                         <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
                         <input id="age" name="age" type="number" min="1" max="120" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                            placeholder="Age" value="{{ old('age') }}">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-gray-100 text-gray-700 rounded-md cursor-not-allowed"
+                            placeholder="Age" value="{{ old('age') }}" readonly>
                     </div>
                     <div>
                         <label for="family_size" class="block text-sm font-medium text-gray-700 mb-1">Family Size <span class="text-red-500">*</span></label>
@@ -131,15 +195,15 @@
                         </select>
                     </div>
                     <div>
-                        <label for="income_level" class="block text-sm font-medium text-gray-700 mb-1">Income Level <span class="text-red-500">*</span></label>
+                        <label for="income_level" class="block text-sm font-medium text-gray-700 mb-1">Income Level (Monthly, PHP) <span class="text-red-500">*</span></label>
                         <select id="income_level" name="income_level" required
                             class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
-                            <option value="">Select Income Level</option>
-                            <option value="Low" {{ old('income_level') == 'Low' ? 'selected' : '' }}>Low</option>
-                            <option value="Lower Middle" {{ old('income_level') == 'Lower Middle' ? 'selected' : '' }}>Lower Middle</option>
-                            <option value="Middle" {{ old('income_level') == 'Middle' ? 'selected' : '' }}>Middle</option>
-                            <option value="Upper Middle" {{ old('income_level') == 'Upper Middle' ? 'selected' : '' }}>Upper Middle</option>
-                            <option value="High" {{ old('income_level') == 'High' ? 'selected' : '' }}>High</option>
+                            <option value="">Select Income Range</option>
+                            <option value="Low" {{ old('income_level') == 'Low' ? 'selected' : '' }}>Low (₱0 – ₱10,000)</option>
+                            <option value="Lower Middle" {{ old('income_level') == 'Lower Middle' ? 'selected' : '' }}>Lower Middle (₱10,001 – ₱20,000)</option>
+                            <option value="Middle" {{ old('income_level') == 'Middle' ? 'selected' : '' }}>Middle (₱20,001 – ₱40,000)</option>
+                            <option value="Upper Middle" {{ old('income_level') == 'Upper Middle' ? 'selected' : '' }}>Upper Middle (₱40,001 – ₱80,000)</option>
+                            <option value="High" {{ old('income_level') == 'High' ? 'selected' : '' }}>High (₱80,001 and above)</option>
                         </select>
                     </div>
                 </div>
@@ -156,15 +220,12 @@
                         </select>
                     </div>
                     <div>
-                        <label for="health_status" class="block text-sm font-medium text-gray-700 mb-1">Health Status <span class="text-red-500">*</span></label>
-                        <select id="health_status" name="health_status" required
+                        <label for="is_pwd" class="block text-sm font-medium text-gray-700 mb-1">Person with Disability (PWD) <span class="text-red-500">*</span></label>
+                        <select id="is_pwd" name="is_pwd" required
                             class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
-                            <option value="">Select Health Status</option>
-                            <option value="Critical" {{ old('health_status') == 'Critical' ? 'selected' : '' }}>Critical</option>
-                            <option value="Poor" {{ old('health_status') == 'Poor' ? 'selected' : '' }}>Poor</option>
-                            <option value="Fair" {{ old('health_status') == 'Fair' ? 'selected' : '' }}>Fair</option>
-                            <option value="Good" {{ old('health_status') == 'Good' ? 'selected' : '' }}>Good</option>
-                            <option value="Excellent" {{ old('health_status') == 'Excellent' ? 'selected' : '' }}>Excellent</option>
+                            @php $pwdOld = old('is_pwd', '0'); @endphp
+                            <option value="0" {{ $pwdOld == '0' ? 'selected' : '' }}>No</option>
+                            <option value="1" {{ $pwdOld == '1' ? 'selected' : '' }}>Yes</option>
                         </select>
                     </div>
                 </div>
@@ -172,26 +233,38 @@
 
             <!-- Emergency Contact Section -->
             <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Emergency Contact</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Emergency Contact Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Name</label>
+                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
                         <input id="emergency_contact_name" name="emergency_contact_name" type="text"
                             class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                             placeholder="Full Name" value="{{ old('emergency_contact_name') }}">
-                </div>
-                <div>
-                        <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Number</label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                        <select id="relationship_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2">
+                            <option value="">Select Relationship</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Father">Father</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Child">Child</option>
+                            <option value="Relative">Relative</option>
+                            <option value="Neighbor">Neighbor</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="_other">Other (specify)</option>
+                        </select>
+                        <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{ old('emergency_contact_relationship') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Start typing (e.g., Spouse, Parent)" style="display: none;">
+                    </div>
+                    <div>
+                        <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
                         <input id="emergency_contact_number" name="emergency_contact_number" type="number"
                             class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                             placeholder="e.g., 09191234567" min="0" pattern="[0-9]*" inputmode="numeric" value="{{ old('emergency_contact_number') }}">
                     </div>
-                </div>
-                <div class="mt-4">
-                    <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-700 mb-1">Relationship to Emergency Contact</label>
-                    <input id="emergency_contact_relationship" name="emergency_contact_relationship" type="text"
-                        class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                        placeholder="e.g., Spouse, Parent, Sibling" value="{{ old('emergency_contact_relationship') }}">
                 </div>
             </div>
 
@@ -235,18 +308,223 @@
     </div>
 
     <script>
-        // Auto-calculate age from birth date
-        document.getElementById('birth_date').addEventListener('change', function() {
-            const birthDate = new Date(this.value);
-            const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
+        document.addEventListener('DOMContentLoaded', function() {
+            const birthInput = document.getElementById('birth_date');
+            const ageInput = document.getElementById('age');
+            const purokSelect = document.getElementById('purok');
+            const addressInput = document.getElementById('address');
+            const firstNameInput = document.getElementById('first_name');
+            const middleNameInput = document.getElementById('middle_name');
+            const noMiddleCheckbox = document.getElementById('no_middle_name');
+            const lastNameInput = document.getElementById('last_name');
+            const suffixInput = document.getElementById('suffix');
+            const fullNameInput = document.getElementById('name');
+            const occupationSelect = document.getElementById('occupation_select');
+            const occupationInput = document.getElementById('occupation');
+            const relationshipSelect = document.getElementById('relationship_select');
+            const relationshipInput = document.getElementById('emergency_contact_relationship');
+
+            // Auto-calculate age from birth date
+            function updateAge() {
+                if (!birthInput || !ageInput) return;
+                const val = birthInput.value;
+                if (!val) { ageInput.value = ''; return; }
+                const birthDate = new Date(val);
+                if (isNaN(birthDate.getTime())) { ageInput.value = ''; return; }
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                ageInput.value = age > 0 ? age : '';
             }
-            
-            document.getElementById('age').value = age;
+
+            // Update address from purok selection
+            function updateAddress() {
+                if (!purokSelect || !addressInput) return;
+                const purok = purokSelect.value || '';
+                const barangay = "{{ $defaultBarangay }}";
+                const city = "{{ $defaultCity }}";
+                const province = "{{ $defaultProvince }}";
+                if (!purok) {
+                    addressInput.value = '';
+                    return;
+                }
+                addressInput.value = `${purok}, ${barangay}, ${city}, ${province}`;
+            }
+
+            // Update full name from parts
+            function updateFullName() {
+                if (!firstNameInput || !lastNameInput || !fullNameInput) return;
+                const middle = (middleNameInput && !middleNameInput.disabled)
+                    ? middleNameInput.value.trim()
+                    : '';
+                const suffixVal = suffixInput ? suffixInput.value.trim() : '';
+                const parts = [
+                    firstNameInput.value.trim(),
+                    middle,
+                    lastNameInput.value.trim(),
+                    suffixVal,
+                ].filter(Boolean);
+                fullNameInput.value = parts.join(' ');
+            }
+
+            // Handle no middle name checkbox
+            function handleNoMiddleToggle() {
+                if (!middleNameInput || !noMiddleCheckbox) return;
+                if (noMiddleCheckbox.checked) {
+                    middleNameInput.value = '';
+                    middleNameInput.disabled = true;
+                } else {
+                    middleNameInput.disabled = false;
+                }
+                updateFullName();
+            }
+
+            // Handle occupation dropdown
+            function handleOccupationChange() {
+                if (!occupationSelect || !occupationInput) return;
+                const val = occupationSelect.value;
+                if (!val) {
+                    if (occupationInput.value && occupationInput.value.trim() !== '') {
+                        occupationInput.style.display = 'block';
+                        occupationInput.readOnly = false;
+                    } else {
+                        occupationInput.value = '';
+                        occupationInput.readOnly = true;
+                        occupationInput.style.display = 'none';
+                    }
+                    return;
+                }
+                if (val === '_other') {
+                    occupationInput.readOnly = false;
+                    occupationInput.value = '';
+                    occupationInput.style.display = 'block';
+                    occupationInput.focus();
+                } else {
+                    occupationInput.value = val;
+                    occupationInput.readOnly = true;
+                    occupationInput.style.display = 'none';
+                }
+            }
+
+            // Handle relationship dropdown
+            function handleRelationshipChange() {
+                if (!relationshipSelect || !relationshipInput) return;
+                const val = relationshipSelect.value;
+                if (!val) {
+                    if (relationshipInput.value && relationshipInput.value.trim() !== '') {
+                        relationshipInput.style.display = 'block';
+                        relationshipInput.readOnly = false;
+                    } else {
+                        relationshipInput.value = '';
+                        relationshipInput.readOnly = false;
+                        relationshipInput.style.display = 'none';
+                    }
+                    return;
+                }
+                if (val === '_other') {
+                    relationshipInput.readOnly = false;
+                    relationshipInput.value = '';
+                    relationshipInput.style.display = 'block';
+                    relationshipInput.focus();
+                } else {
+                    relationshipInput.value = val;
+                    relationshipInput.readOnly = true;
+                    relationshipInput.style.display = 'none';
+                }
+            }
+
+            // Event listeners
+            if (birthInput) {
+                birthInput.addEventListener('change', updateAge);
+                birthInput.addEventListener('input', updateAge);
+                updateAge();
+            }
+            if (purokSelect) {
+                purokSelect.addEventListener('change', updateAddress);
+                updateAddress();
+            }
+            if (firstNameInput && lastNameInput) {
+                firstNameInput.addEventListener('input', updateFullName);
+                lastNameInput.addEventListener('input', updateFullName);
+                if (middleNameInput) middleNameInput.addEventListener('input', updateFullName);
+                if (suffixInput) suffixInput.addEventListener('input', updateFullName);
+                updateFullName();
+            }
+            if (noMiddleCheckbox) {
+                noMiddleCheckbox.addEventListener('change', handleNoMiddleToggle);
+                handleNoMiddleToggle();
+            }
+            if (occupationSelect) {
+                occupationSelect.addEventListener('change', handleOccupationChange);
+                handleOccupationChange();
+            }
+            if (relationshipSelect) {
+                relationshipSelect.addEventListener('change', handleRelationshipChange);
+                handleRelationshipChange();
+            }
+
+            // Form submit handler - ensure all fields are populated before submission
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Ensure name is populated
+                    updateFullName();
+                    
+                    // Ensure address is populated
+                    updateAddress();
+                    
+                    // Ensure occupation has a value and is visible for submission
+                    if (occupationSelect && occupationInput) {
+                        const occupationVal = occupationSelect.value;
+                        if (occupationVal && occupationVal !== '_other') {
+                            occupationInput.value = occupationVal;
+                            occupationInput.style.display = 'block';
+                            occupationInput.readOnly = true;
+                        }
+                        if (!occupationInput.value || occupationInput.value.trim() === '') {
+                            e.preventDefault();
+                            alert('Please select or enter an occupation.');
+                            occupationSelect.focus();
+                            return false;
+                        }
+                    }
+                    
+                    // Ensure relationship has a value and is visible for submission
+                    if (relationshipSelect && relationshipInput) {
+                        const relationshipVal = relationshipSelect.value;
+                        if (relationshipVal && relationshipVal !== '_other') {
+                            relationshipInput.value = relationshipVal;
+                            relationshipInput.style.display = 'block';
+                            relationshipInput.readOnly = true;
+                        }
+                        if (!relationshipInput.value || relationshipInput.value.trim() === '') {
+                            e.preventDefault();
+                            alert('Please select or enter an emergency contact relationship.');
+                            relationshipSelect.focus();
+                            return false;
+                        }
+                    }
+                    
+                    // Validate name field
+                    if (!fullNameInput || !fullNameInput.value || fullNameInput.value.trim() === '') {
+                        e.preventDefault();
+                        alert('Please fill in at least First Name and Last Name.');
+                        if (firstNameInput) firstNameInput.focus();
+                        return false;
+                    }
+                    
+                    // Validate address field
+                    if (!addressInput || !addressInput.value || addressInput.value.trim() === '') {
+                        e.preventDefault();
+                        alert('Please select a Purok.');
+                        if (purokSelect) purokSelect.focus();
+                        return false;
+                    }
+                });
+            }
         });
     </script>
 </body>

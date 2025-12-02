@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('residents', function (Blueprint $table) {
             $table->id();
+            $table->string('qr_code_token')->unique()->nullable();
             $table->string('name')->index();
             $table->string('email')->unique()->index();
             $table->string('password');
@@ -17,7 +18,7 @@ return new class extends Migration
             $table->string('address')->index();
             
             // New personal information fields
-            $table->enum('gender', ['Male', 'Female', 'Other']);
+            $table->enum('gender', ['Male', 'Female']);
             $table->string('contact_number');
             $table->date('birth_date');
             $table->enum('marital_status', ['Single', 'Married', 'Widowed', 'Divorced', 'Separated']);
@@ -29,7 +30,7 @@ return new class extends Migration
             $table->enum('education_level', ['No Education', 'Elementary', 'High School', 'Vocational', 'College', 'Post Graduate']);
             $table->enum('income_level', ['Low', 'Lower Middle', 'Middle', 'Upper Middle', 'High']);
             $table->enum('employment_status', ['Unemployed', 'Part-time', 'Self-employed', 'Full-time'])->default('Unemployed');
-            $table->enum('health_status', ['Critical', 'Poor', 'Fair', 'Good', 'Excellent'])->default('Fair');
+            $table->boolean('is_pwd')->default(false);
             
             // Emergency contact fields
             $table->string('emergency_contact_name')->nullable();

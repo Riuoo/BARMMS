@@ -39,10 +39,9 @@ class HealthReportController
             ->limit(10)
             ->get();
 
-        // Health status distribution
-        $healthStatusDistribution = Residents::selectRaw('health_status, count(*) as count')
-            ->whereNotNull('health_status')
-            ->groupBy('health_status')
+        // PWD distribution
+        $pwdDistribution = Residents::selectRaw('is_pwd, count(*) as count')
+            ->groupBy('is_pwd')
             ->get();
 
         // Monthly consultation trends
@@ -127,7 +126,7 @@ class HealthReportController
             'recentConsultations',
             'upcomingActivities',
             'dueVaccinations',
-            'healthStatusDistribution',
+            'pwdDistribution',
             'monthlyConsultations',
             'overdueVaccinations',
             'analyticsAlerts',

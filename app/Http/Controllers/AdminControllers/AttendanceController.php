@@ -4,7 +4,7 @@ namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\Residents;
 use App\Models\AttendanceLog;
-use App\Models\Event;
+use App\Models\AccomplishedProject;
 use App\Models\HealthCenterActivity;
 use App\Models\MedicalRecord;
 use Illuminate\Http\Request;
@@ -26,79 +26,77 @@ class AttendanceController
 
         if ($eventId) {
             if ($eventType === 'event') {
-                $event = Event::find($eventId);
-                $eventName = $event ? $event->event_name : null;
+                // Barangay activities/projects now use AccomplishedProject
+                $event = AccomplishedProject::find($eventId);
+                $eventName = $event ? $event->title : null;
             } elseif ($eventType === 'health_center_activity') {
                 $event = HealthCenterActivity::find($eventId);
                 $eventName = $event ? $event->activity_name : null;
             }
         }
 
-        // Get relevant events for dropdown (ongoing, today, or upcoming within 7 days)
-        $today = now()->startOfDay();
-        $nextWeek = now()->addDays(7)->endOfDay();
-        $lastWeek = now()->subDays(7)->startOfDay();
-
-        $events = Event::where('qr_attendance_enabled', true)
-            ->where('status', '!=', 'Cancelled')
-            ->where(function($query) use ($today, $nextWeek, $lastWeek) {
-                // Show ongoing events
-                $query->where('status', 'Ongoing')
-                    // Or planned/ongoing events today or in the next 7 days
-                    ->orWhere(function($q) use ($today, $nextWeek) {
-                        $q->whereIn('status', ['Planned', 'Ongoing'])
-                          ->whereBetween('event_date', [$today, $nextWeek]);
-                    })
-                    // Or completed events from today (for same-day attendance)
-                    ->orWhere(function($q) use ($today) {
-                        $q->where('status', 'Completed')
-                          ->whereDate('event_date', $today);
-                    })
-                    // Or recently completed events (last 7 days) for late attendance
-                    ->orWhere(function($q) use ($lastWeek, $today) {
-                        $q->where('status', 'Completed')
-                          ->whereBetween('event_date', [$lastWeek, $today]);
-                    });
-            })
-            ->orderByRaw("CASE 
-                WHEN status = 'Ongoing' THEN 1 
-                WHEN event_date = CURDATE() THEN 2 
-                WHEN event_date > CURDATE() THEN 3 
-                ELSE 4 
-            END")
-            ->orderBy('event_date', 'asc')
+        // Barangay activities/projects for dropdown – show ONGOING only
+        $events = AccomplishedProject::whereIn('status', ['Ongoing', 'ongoing'])
+            ->orderBy('start_date', 'asc')
+            ->orderBy('completion_date', 'asc')
             ->get();
 
-        $healthActivities = HealthCenterActivity::where('status', '!=', 'Cancelled')
-            ->where(function($query) use ($today, $nextWeek, $lastWeek) {
-                // Show ongoing activities
-                $query->where('status', 'Ongoing')
-                    // Or planned/ongoing activities today or in the next 7 days
-                    ->orWhere(function($q) use ($today, $nextWeek) {
-                        $q->whereIn('status', ['Planned', 'Ongoing'])
-                          ->whereBetween('activity_date', [$today, $nextWeek]);
-                    })
-                    // Or completed activities from today
-                    ->orWhere(function($q) use ($today) {
-                        $q->where('status', 'Completed')
-                          ->whereDate('activity_date', $today);
-                    })
-                    // Or recently completed activities (last 7 days)
-                    ->orWhere(function($q) use ($lastWeek, $today) {
-                        $q->where('status', 'Completed')
-                          ->whereBetween('activity_date', [$lastWeek, $today]);
-                    });
-            })
-            ->orderByRaw("CASE 
-                WHEN status = 'Ongoing' THEN 1 
-                WHEN activity_date = CURDATE() THEN 2 
-                WHEN activity_date > CURDATE() THEN 3 
-                ELSE 4 
-            END")
+        // Health activities for dropdown – show ONGOING only
+        $healthActivities = HealthCenterActivity::where('status', 'Ongoing')
             ->orderBy('activity_date', 'asc')
             ->get();
 
-        return view('admin.attendance.scanner', compact('event', 'eventId', 'eventType', 'eventName', 'events', 'healthActivities'));
+        // Pre-format options for clean JavaScript (avoids Blade inside JS)
+        $formattedEvents = $events->map(function ($e) {
+            $label = $e->title;
+            if ($e->completion_date) {
+                $label .= ' - ' . $e->completion_date->format('M d, Y');
+            }
+            return [
+                'id' => $e->id,
+                'label' => $label,
+            ];
+        })->values();
+
+        $formattedHealthActivities = $healthActivities->map(function ($act) {
+            $statusSuffix = '';
+            if ($act->status === 'Ongoing') {
+                $statusSuffix = ' 🔴 ONGOING';
+            } elseif ($act->activity_date && $act->activity_date->isToday()) {
+                $statusSuffix = ' 🟢 TODAY';
+            } elseif ($act->activity_date && $act->activity_date->isFuture()) {
+                $statusSuffix = ' 🔵 UPCOMING';
+            }
+
+            $label = $act->activity_name;
+            if ($act->activity_date) {
+                $label .= ' - ' . $act->activity_date->format('M d, Y');
+            }
+            $label .= $statusSuffix;
+
+            return [
+                'id' => $act->id,
+                'label' => $label,
+                'is_ongoing' => $act->status === 'Ongoing',
+            ];
+        })->values();
+
+        // JSON strings for embedding in JS without Blade helpers
+        $formattedEventsJson = $formattedEvents->toJson();
+        $formattedHealthActivitiesJson = $formattedHealthActivities->toJson();
+
+        return view('admin.attendance.scanner', compact(
+            'event',
+            'eventId',
+            'eventType',
+            'eventName',
+            'events',
+            'healthActivities',
+            'formattedEvents',
+            'formattedHealthActivities',
+            'formattedEventsJson',
+            'formattedHealthActivitiesJson'
+        ));
     }
 
     /**
@@ -109,7 +107,7 @@ class AttendanceController
         $request->validate([
             'token' => 'required|string',
             'event_id' => 'nullable|integer',
-            'event_type' => 'nullable|string|in:event,health_center_activity,medical_consultation,medicine_claim',
+            'event_type' => 'nullable|string|in:event,health_center_activity',
         ]);
 
         $token = $request->input('token');
@@ -166,13 +164,8 @@ class AttendanceController
                 'notes' => $notes,
             ]);
 
-            // Update event attendance count if applicable
-            if ($eventId && $eventType === 'event') {
-                $event = Event::find($eventId);
-                if ($event) {
-                    // Count is calculated via relationship, but we can update actual_participants if needed
-                }
-            } elseif ($eventId && $eventType === 'health_center_activity') {
+            // Update event attendance count if applicable (health activities only)
+            if ($eventId && $eventType === 'health_center_activity') {
                 $activity = HealthCenterActivity::find($eventId);
                 if ($activity) {
                     $count = AttendanceLog::where('event_id', $eventId)
@@ -210,7 +203,7 @@ class AttendanceController
             'name' => 'required|string|max:255',
             'contact' => 'nullable|string|max:255',
             'event_id' => 'nullable|integer',
-            'event_type' => 'nullable|string|in:event,health_center_activity,medical_consultation,medicine_claim',
+            'event_type' => 'nullable|string|in:event,health_center_activity',
             'notes' => 'nullable|string|max:1000',
         ]);
 
@@ -439,7 +432,10 @@ class AttendanceController
 
         $logs = $query->orderBy('scanned_at', 'desc')->paginate(20);
 
-        $events = Event::orderBy('event_date', 'desc')->get();
+        // For barangay activities/projects we now use AccomplishedProject
+        $events = AccomplishedProject::orderBy('completion_date', 'desc')
+            ->orderBy('start_date', 'desc')
+            ->get();
         $healthActivities = HealthCenterActivity::orderBy('activity_date', 'desc')->get();
 
         return view('admin.attendance.logs', compact('logs', 'events', 'healthActivities', 'search', 'eventId', 'eventType'));
@@ -461,7 +457,8 @@ class AttendanceController
 
         $event = null;
         if ($eventType === 'event') {
-            $event = Event::find($eventId);
+            // Barangay activities/projects now use AccomplishedProject
+            $event = AccomplishedProject::find($eventId);
         } elseif ($eventType === 'health_center_activity') {
             $event = HealthCenterActivity::find($eventId);
         }
@@ -481,13 +478,17 @@ class AttendanceController
         $logs->loadMissing(['resident', 'event', 'healthCenterActivity']);
 
         if ($format === 'pdf') {
+            $eventName = $eventType === 'event'
+                ? ($event->title ?? 'Barangay Activity/Project')
+                : ($event->activity_name ?? 'Health Activity');
+
             $pdf = Pdf::loadView('admin.attendance.report-pdf', [
                 'event' => $event,
                 'logs' => $logs,
                 'eventType' => $eventType,
+                'eventName' => $eventName,
             ]);
 
-            $eventName = $eventType === 'event' ? $event->event_name : $event->activity_name;
             $filename = 'attendance-report-' . str_replace(' ', '-', strtolower($eventName)) . '-' . now()->format('Y-m-d') . '.pdf';
 
             return $pdf->download($filename);

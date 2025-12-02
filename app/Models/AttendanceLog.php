@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\AccomplishedProject;
+use App\Models\HealthCenterActivity;
 
 class AttendanceLog extends Model
 {
@@ -31,7 +33,8 @@ class AttendanceLog extends Model
 
     public function event()
     {
-        return $this->belongsTo(Event::class, 'event_id');
+        // For event_type === 'event', this now points to AccomplishedProject
+        return $this->belongsTo(AccomplishedProject::class, 'event_id');
     }
 
     public function healthCenterActivity()
@@ -53,11 +56,11 @@ class AttendanceLog extends Model
             return $activity ? $activity->activity_name : 'N/A';
         } elseif ($this->event_type === 'event') {
             if ($this->relationLoaded('event') && $this->event) {
-                return $this->event->event_name;
+                return $this->event->title;
             }
             // If not loaded, try to load it
-            $event = Event::find($this->event_id);
-            return $event ? $event->event_name : 'N/A';
+            $activity = AccomplishedProject::find($this->event_id);
+            return $activity ? $activity->title : 'N/A';
         }
         return 'N/A';
     }
