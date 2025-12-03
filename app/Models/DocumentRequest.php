@@ -17,6 +17,11 @@ class DocumentRequest extends Model
         'is_read',
         'resident_is_read',
         'document_template_id',
+        'additional_data',
+    ];
+
+    protected $casts = [
+        'additional_data' => 'array',
     ];
 
     public function resident()

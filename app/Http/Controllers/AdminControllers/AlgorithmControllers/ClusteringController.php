@@ -105,10 +105,10 @@ class ClusteringController
         $allResidents = $residents; // keep original list for purok stats
         
         // Pre-compute blotter report counts per resident for later clustering insights
-        $blotterCountsMap = BlotterRequest::selectRaw('resident_id, COUNT(*) as cnt')
-            ->whereNotNull('resident_id')
-            ->groupBy('resident_id')
-            ->pluck('cnt', 'resident_id');
+        $blotterCountsMap = BlotterRequest::selectRaw('respondent_id, COUNT(*) as cnt')
+            ->whereNotNull('respondent_id')
+            ->groupBy('respondent_id')
+            ->pluck('cnt', 'respondent_id');
         $totalBlotterReports = array_sum($blotterCountsMap->all());
         $residentsWithBlotter = $blotterCountsMap->count();
         

@@ -114,7 +114,7 @@ class DocumentRequestController
             $values = [
                 'resident_name' => $documentRequest->resident ? $documentRequest->resident->name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
-                'civil_status' => $documentRequest->resident ? $documentRequest->resident->civil_status : '',
+                'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
                 'purpose' => $documentRequest->description,
                 'day' => date('jS'),
                 'month' => date('F'),
@@ -125,6 +125,15 @@ class DocumentRequestController
                 'official_name' => $adminUser ? $adminUser->name : '',
                 'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
             ];
+
+            // Add prepared by (current admin) and captain information for dual-signature footer
+            $officials = $this->getBarangayOfficials($adminUser);
+            $values = array_merge($values, $officials);
+
+            // Merge dynamic template fields from additional_data
+            if (is_array($documentRequest->additional_data)) {
+                $values = array_merge($values, $documentRequest->additional_data);
+            }
 
             // Generate the HTML using the template's generateHtml method
             $html = $template->generateHtml($values);
@@ -206,7 +215,7 @@ class DocumentRequestController
             $values = [
                 'resident_name' => $documentRequest->resident ? $documentRequest->resident->name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
-                'civil_status' => $documentRequest->resident ? $documentRequest->resident->civil_status : '',
+                'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
                 'purpose' => $documentRequest->description,
                 'day' => date('jS'),
                 'month' => date('F'),
@@ -217,6 +226,15 @@ class DocumentRequestController
                 'official_name' => $adminUser ? $adminUser->name : '',
                 'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
             ];
+
+            // Add prepared by (current admin) and captain information for dual-signature footer
+            $officials = $this->getBarangayOfficials($adminUser);
+            $values = array_merge($values, $officials);
+
+            // Merge dynamic template fields from additional_data
+            if (is_array($documentRequest->additional_data)) {
+                $values = array_merge($values, $documentRequest->additional_data);
+            }
 
             $html = $template->generateHtml($values);
 
@@ -308,6 +326,8 @@ class DocumentRequestController
             'document_type' => 'required|string|max:255',
             'description' => 'required|string',
             'document_template_id' => 'nullable|exists:document_templates,id',
+            'template_fields' => 'nullable|array',
+            'template_fields.*' => 'nullable|string|max:1000',
         ]);
 
         $user = Residents::find($validated['resident_id']);
@@ -338,11 +358,21 @@ class DocumentRequestController
                 $template = DocumentTemplate::whereRaw('LOWER(document_type) = ?', [strtolower(trim($validated['document_type']))])->first();
             }
 
+            // Prepare additional_data from template_fields
+            $additionalData = [];
+            if (!empty($validated['template_fields'])) {
+                // Filter out empty values and clean the array
+                $additionalData = array_filter($validated['template_fields'], function($value) {
+                    return $value !== null && $value !== '';
+                });
+            }
+
             $documentRequest = DocumentRequest::create([
                 'resident_id' => $validated['resident_id'],
                 'document_type' => $template?->document_type ?? $validated['document_type'],
                 'document_template_id' => $template?->id,
                 'description' => $validated['description'],
+                'additional_data' => !empty($additionalData) ? $additionalData : null,
                 'status' => 'approved',
             ]);
 
@@ -378,7 +408,7 @@ class DocumentRequestController
         $values = [
             'resident_name' => $documentRequest->resident?->name ?? '',
             'resident_address' => $documentRequest->resident?->address ?? '',
-            'civil_status' => $documentRequest->resident?->civil_status ?? '',
+            'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
             'purpose' => $documentRequest->description,
             'day' => date('jS'),
             'month' => date('F'),
@@ -389,6 +419,15 @@ class DocumentRequestController
             'official_name' => $adminUser->name ?? '',
             'official_position' => $adminUser->position ?? '',
         ];
+
+        // Add prepared by (current admin) and captain information for dual-signature footer
+        $officials = $this->getBarangayOfficials($adminUser);
+        $values = array_merge($values, $officials);
+
+        // Merge dynamic template fields from additional_data
+        if (is_array($documentRequest->additional_data)) {
+            $values = array_merge($values, $documentRequest->additional_data);
+        }
 
         $html = $template->generateHtml($values);
         $pdf = Pdf::loadHTML($html);
@@ -506,5 +545,30 @@ class DocumentRequestController
         $documentRequest = DocumentRequest::findOrFail($id);
         $user = $documentRequest->resident;
         return response()->json(['active' => $user && $user->active ? true : false]);
+    }
+
+    /**
+     * Get barangay officials for document signatures
+     * Returns: prepared_by_name (secretary or current admin user) and captain_name (Punong Barangay)
+     */
+    protected function getBarangayOfficials($adminUser = null)
+    {
+        // Get secretary name (who prepared the document)
+        // If no secretary found, fall back to current admin user
+        $secretary = BarangayProfile::where('role', 'secretary')
+            ->where('active', true)
+            ->first();
+        
+        $preparedByName = $secretary ? $secretary->name : ($adminUser ? $adminUser->name : '');
+        
+        // Get current Punong Barangay (captain)
+        $captain = BarangayProfile::where('role', 'captain')
+            ->where('active', true)
+            ->first();
+        
+        return [
+            'prepared_by_name' => $preparedByName,
+            'captain_name' => $captain ? $captain->name : '',
+        ];
     }
 }

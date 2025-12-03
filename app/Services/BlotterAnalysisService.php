@@ -11,7 +11,7 @@ class BlotterAnalysisService
      */
     public function getAnalysis(): array
     {
-        $blotters = BlotterRequest::with('resident')->get();
+        $blotters = BlotterRequest::with('respondent')->get();
         
         $purokCounts = $this->countByPurok($blotters);
         $respondentTypeCounts = $this->countByRespondentType($blotters);
@@ -33,9 +33,9 @@ class BlotterAnalysisService
     {
         $counts = [];
         foreach ($blotters as $blotter) {
-            if ($blotter->resident_id) {
+            if ($blotter->respondent_id) {
                 // Registered respondent - use their address
-                $purok = $this->extractPurok($blotter->resident->address ?? '');
+                $purok = $this->extractPurok($blotter->respondent->address ?? '');
             } else {
                 // Unregistered respondent - categorize as "Unregistered"
                 $purok = 'Unregistered';
@@ -57,7 +57,7 @@ class BlotterAnalysisService
         ];
         
         foreach ($blotters as $blotter) {
-            if ($blotter->resident_id) {
+            if ($blotter->respondent_id) {
                 $counts['registered']++;
             } else {
                 $counts['unregistered']++;

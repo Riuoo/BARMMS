@@ -84,6 +84,28 @@
                         <input type="hidden" id="resident_id" name="resident_id" required>
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
                         <p class="mt-1 text-sm text-gray-500">Search and select the resident requesting the document</p>
+                        
+                        <!-- Resident Info Card (auto-populated) -->
+                        <div id="residentInfoCard" class="mt-3 hidden bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-info-circle mr-1 text-blue-600"></i>
+                                Resident Information
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-gray-700">
+                                <div>
+                                    <span class="font-semibold">Age:</span>
+                                    <span id="residentInfoAge" class="ml-1">-</span>
+                                </div>
+                                <div>
+                                    <span class="font-semibold">Civil Status:</span>
+                                    <span id="residentInfoCivilStatus" class="ml-1">-</span>
+                                </div>
+                                <div class="sm:col-span-3">
+                                    <span class="font-semibold">Address:</span>
+                                    <span id="residentInfoAddress" class="ml-1">-</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -131,12 +153,15 @@
                         <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
                                   id="description" 
                                   name="description" 
-                                  rows="4" 
+                                  rows="3" 
                                   placeholder="Please specify the purpose of the document request (e.g., For job application, school enrollment, financial assistance, government transaction, etc.)"
                                   required>{{ old('description') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Provide a clear and specific purpose for the document request</p>
                     </div>
                 </div>
+
+                <!-- Template-specific fields will be dynamically loaded here -->
+                <div id="templateFieldsContainer" class="mt-4 space-y-4"></div>
             </div>
 
             <!-- Form Actions -->
@@ -209,6 +234,136 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 250));
 
+    const residentInfoCard = document.getElementById('residentInfoCard');
+    const residentInfoAge = document.getElementById('residentInfoAge');
+    const residentInfoAddress = document.getElementById('residentInfoAddress');
+    const residentInfoCivilStatus = document.getElementById('residentInfoCivilStatus');
+    const templateFieldsContainer = document.getElementById('templateFieldsContainer');
+
+    // Load resident summary for auto-population
+    async function loadResidentSummary(residentId) {
+        if (!residentId || !residentInfoCard) return;
+
+        try {
+            const url = `{{ url('/admin/residents') }}/${residentId}/summary`;
+            const res = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+            if (!res.ok) throw new Error('Failed');
+
+            const data = await res.json();
+            if (residentInfoAge) residentInfoAge.textContent = data.age ?? '-';
+            if (residentInfoAddress) residentInfoAddress.textContent = data.address ?? '-';
+            if (residentInfoCivilStatus) residentInfoCivilStatus.textContent = data.civil_status ?? '-';
+            if (residentInfoCard) residentInfoCard.classList.remove('hidden');
+        } catch (e) {
+            console.error('Failed to load resident summary', e);
+            if (residentInfoCard) residentInfoCard.classList.add('hidden');
+        }
+    }
+
+    // Load template-specific form fields
+    async function loadTemplateFields(templateId) {
+        if (!templateId || !templateFieldsContainer) {
+            if (templateFieldsContainer) templateFieldsContainer.innerHTML = '';
+            return;
+        }
+
+        try {
+            templateFieldsContainer.innerHTML = '<div class="text-sm text-gray-500 flex items-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading template fields...</div>';
+
+            const url = `{{ url('/admin/templates') }}/${templateId}/form-config`;
+            const res = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+
+            if (!res.ok) {
+                templateFieldsContainer.innerHTML = '<p class="text-sm text-red-500">Failed to load template fields.</p>';
+                return;
+            }
+
+            const data = await res.json();
+            const fields = data.manual_fields || [];
+
+            if (!fields.length) {
+                templateFieldsContainer.innerHTML = '<p class="text-sm text-gray-500">No additional details required for this template.</p>';
+                return;
+            }
+
+            // Build form inputs dynamically
+            let html = '<div class="mt-4 pt-4 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-700 mb-3">Additional Information</h4>';
+            fields.forEach(field => {
+                const inputName = `template_fields[${field.name}]`;
+                const label = field.label || field.name.replace(/_/g, ' ');
+                const requiredAttr = field.required ? 'required' : '';
+                const fieldId = `template_field_${field.name}`;
+
+                if (field.type === 'textarea') {
+                    html += `
+                        <div class="mb-4">
+                            <label for="${fieldId}" class="block text-sm font-medium text-gray-700 mb-1">
+                                ${label}${field.required ? ' <span class="text-red-500">*</span>' : ''}
+                            </label>
+                            <textarea
+                                id="${fieldId}"
+                                name="${inputName}"
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ${requiredAttr}
+                                placeholder="${field.placeholder || ''}"
+                            ></textarea>
+                        </div>
+                    `;
+                } else if (field.type === 'select' && Array.isArray(field.options)) {
+                    html += `
+                        <div class="mb-4">
+                            <label for="${fieldId}" class="block text-sm font-medium text-gray-700 mb-1">
+                                ${label}${field.required ? ' <span class="text-red-500">*</span>' : ''}
+                            </label>
+                            <select
+                                id="${fieldId}"
+                                name="${inputName}"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ${requiredAttr}
+                            >
+                                <option value="">Select...</option>
+                                ${field.options.map(opt => `
+                                    <option value="${opt.value}">${opt.label}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    const inputType = field.type === 'number' ? 'number' : (field.type === 'date' ? 'date' : (field.type === 'time' ? 'time' : 'text'));
+                    const numberAttrs = field.type === 'number' ? `min="${field.min || 0}" step="${field.step || 1}"` : '';
+                    html += `
+                        <div class="mb-4">
+                            <label for="${fieldId}" class="block text-sm font-medium text-gray-700 mb-1">
+                                ${label}${field.required ? ' <span class="text-red-500">*</span>' : ''}
+                            </label>
+                            <input
+                                type="${inputType}"
+                                id="${fieldId}"
+                                name="${inputName}"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ${requiredAttr}
+                                ${numberAttrs}
+                                placeholder="${field.placeholder || ''}"
+                            />
+                        </div>
+                    `;
+                }
+            });
+            html += '</div>';
+            templateFieldsContainer.innerHTML = html;
+        } catch (e) {
+            console.error('Error loading template fields', e);
+            templateFieldsContainer.innerHTML = '<p class="text-sm text-red-500">Error loading template fields.</p>';
+        }
+    }
+
     searchResults.addEventListener('click', (event) => {
         const target = event.target.closest('[data-id]');
         if (target && target.dataset.id) {
@@ -216,6 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.value = target.dataset.name;
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
+            
+            // Load resident summary for display
+            loadResidentSummary(target.dataset.id);
         }
     });
 
@@ -234,15 +392,24 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Sync hidden document_type with selected template to ensure type strictly matches an active template
+    // Sync hidden document_type with selected template and load template fields
     if (templateSelect && documentTypeHidden) {
         templateSelect.addEventListener('change', () => {
             const selected = templateSelect.options[templateSelect.selectedIndex];
+            const templateId = templateSelect.value || '';
             documentTypeHidden.value = selected ? (selected.textContent || '').trim() : '';
+            
+            // Load template-specific fields
+            loadTemplateFields(templateId);
         });
         // Initialize on load
         const initSelected = templateSelect.options[templateSelect.selectedIndex];
         documentTypeHidden.value = initSelected ? (initSelected.textContent || '').trim() : '';
+        
+        // Load fields if template is pre-selected
+        if (templateSelect.value) {
+            loadTemplateFields(templateSelect.value);
+        }
     }
 
     // Create -> success -> download -> back with notify()

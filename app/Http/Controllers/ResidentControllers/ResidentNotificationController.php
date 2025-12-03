@@ -21,12 +21,16 @@ class ResidentNotificationController
 
         // (Reverted) No auto-mark as read here
 
+        $resident = \App\Models\Residents::find($userId);
+        $complainantName = $resident ? $resident->name : null;
+
         $docs = DocumentRequest::where('resident_id', $userId)
             ->orderBy('updated_at', 'desc')
             ->get();
-        $blotters = \App\Models\BlotterRequest::where('resident_id', $userId)
+        // Query blotters by complainant_name since residents see blotters they filed
+        $blotters = $complainantName ? \App\Models\BlotterRequest::where('complainant_name', $complainantName)
             ->orderBy('updated_at', 'desc')
-            ->get();
+            ->get() : collect();
 
         $notifications = collect();
         foreach ($docs as $doc) {
@@ -141,7 +145,10 @@ class ResidentNotificationController
             });
 
         // Fetch unread blotter notifications
-        $blotterUnread = BlotterRequest::where('resident_id', $userId)
+        $resident = \App\Models\Residents::find($userId);
+        $complainantName = $resident ? $resident->name : null;
+        // Query blotters by complainant_name since residents see blotters they filed
+        $blotterUnread = $complainantName ? BlotterRequest::where('complainant_name', $complainantName)
             ->where('status', 'approved')
             ->where(function ($q) {
                 $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
@@ -154,7 +161,7 @@ class ResidentNotificationController
                     'created_at' => $blotter->created_at,
                     'is_read' => (bool) $blotter->resident_is_read
                 ];
-            });
+            }) : collect();
 
         // Ensure both are collections before merging
         $allUnread = collect($docUnread)->merge(collect($blotterUnread))->sortByDesc('created_at')->values()->take(5);
@@ -177,7 +184,10 @@ class ResidentNotificationController
             }
             
             // If not found, try blotter request
-            $blotter = BlotterRequest::where('resident_id', $userId)->where('id', $id)->first();
+            $resident = \App\Models\Residents::find($userId);
+            $complainantName = $resident ? $resident->name : null;
+            // Query blotters by complainant_name since residents see blotters they filed
+            $blotter = $complainantName ? BlotterRequest::where('complainant_name', $complainantName)->where('id', $id)->first() : null;
             if ($blotter) {
                 $blotter->resident_is_read = true;
                 $blotter->save();
@@ -202,9 +212,14 @@ class ResidentNotificationController
                 ->update(['resident_is_read' => true]);
                 
             // Mark all approved blotter requests as read
-            BlotterRequest::where('resident_id', $userId)
-                ->where('status', 'approved')
-                ->update(['resident_is_read' => true]);
+            $resident = \App\Models\Residents::find($userId);
+            $complainantName = $resident ? $resident->name : null;
+            // Query blotters by complainant_name since residents see blotters they filed
+            if ($complainantName) {
+                BlotterRequest::where('complainant_name', $complainantName)
+                    ->where('status', 'approved')
+                    ->update(['resident_is_read' => true]);
+            }
                 
             notify()->success('All notifications marked as read.');
             return redirect()->back();

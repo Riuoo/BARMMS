@@ -69,19 +69,46 @@
                         Basic Information
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- First Name -->
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Full Name <span class="text-gray-500">(Read Only)</span>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                First Name <span class="text-gray-500">(Read Only)</span>
                             </label>
                             <input type="text" 
-                                   id="name" 
-                                   name="name" 
-                                   value="{{ old('name', $barangayProfile->name) }}" 
+                                   value="{{ old('first_name', isset($nameParts) ? $nameParts['first_name'] : '') }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
                                    readonly>
-                            <p class="mt-1 text-sm text-gray-500">Basic information cannot be modified</p>
                         </div>
-
+                        <!-- Middle Name -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Middle Name <span class="text-gray-500">(Read Only)</span>
+                            </label>
+                            <input type="text" 
+                                   value="{{ old('middle_name', isset($nameParts) ? $nameParts['middle_name'] : '') }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
+                                   readonly>
+                        </div>
+                        <!-- Last Name -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Last Name <span class="text-gray-500">(Read Only)</span>
+                            </label>
+                            <input type="text" 
+                                   value="{{ old('last_name', isset($nameParts) ? $nameParts['last_name'] : '') }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
+                                   readonly>
+                        </div>
+                        <!-- Suffix -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Suffix <span class="text-gray-500">(Read Only)</span>
+                            </label>
+                            <input type="text" 
+                                   value="{{ old('suffix', isset($nameParts) ? $nameParts['suffix'] : '') }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
+                                   readonly>
+                        </div>
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address <span class="text-gray-500">(Read Only)</span>
@@ -94,7 +121,19 @@
                                    readonly>
                             <p class="mt-1 text-sm text-gray-500">Contact email cannot be changed</p>
                         </div>
-
+                        <div>
+                            <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                Contact Number <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   id="contact_number" 
+                                   name="contact_number" 
+                                   value="{{ old('contact_number', $barangayProfile->contact_number) }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                   placeholder="e.g., 09191234567"
+                                   required>
+                            <p class="mt-1 text-sm text-gray-500">Official contact number</p>
+                        </div>
                         <div>
                             <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
                                 Official Role <span class="text-gray-500">(Read Only)</span>
@@ -106,6 +145,18 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
                                    readonly>
                             <p class="mt-1 text-sm text-gray-500">Official position is fixed</p>
+                        </div>
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                                Address <span class="text-gray-500">(Read Only)</span>
+                            </label>
+                            <input type="text" 
+                                   id="address" 
+                                   name="address" 
+                                   value="{{ old('address', $barangayProfile->address) }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
+                                   readonly>
+                            <p class="mt-1 text-sm text-gray-500">Address cannot be changed</p>
                         </div>
                     </div>
                 </div>

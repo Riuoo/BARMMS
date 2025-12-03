@@ -11,7 +11,8 @@ class CreateBlotterRequestsTable extends Migration
         Schema::create('blotter_requests', function (Blueprint $table) {
             $table->id();
             $table->string('complainant_name')->nullable();
-            $table->unsignedBigInteger('resident_id')->nullable()->index();
+            // Respondent (person being reported)
+            $table->unsignedBigInteger('respondent_id')->nullable()->index();
             $table->string('type');
             $table->text('description');
             $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
@@ -24,7 +25,8 @@ class CreateBlotterRequestsTable extends Migration
             $table->integer('attempts')->default(0);
             $table->dateTime('completed_at')->nullable();
 
-            $table->foreign('resident_id')->references('id')->on('residents')->onDelete('cascade');
+            // Foreign key to residents table for respondent
+            $table->foreign('respondent_id')->references('id')->on('residents')->onDelete('cascade');
         });
     }
 

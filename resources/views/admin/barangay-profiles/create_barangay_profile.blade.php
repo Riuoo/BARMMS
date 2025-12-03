@@ -41,13 +41,49 @@
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
                     <h3 class="text-lg font-semibold mb-2 text-gray-700">Basic Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
-                            <input type="text" id="name" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <!-- First Name -->
+                        <div class="mb-2">
+                            <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="First Name" required>
                         </div>
+                        <!-- Middle Name (optional, can be disabled) -->
+                        <div class="mb-2">
+                            <div class="flex items-center justify-between mb-1">
+                                <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-0">Middle Name</label>
+                                <label class="inline-flex items-center text-xs text-gray-600">
+                                    <input type="checkbox" id="no_middle_name" class="mr-1">
+                                    No middle name
+                                </label>
+                            </div>
+                            <input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Middle Name (optional)">
+                        </div>
+                        <!-- Last Name -->
+                        <div class="mb-2">
+                            <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Last Name" required>
+                        </div>
+                        <!-- Suffix (optional dropdown) -->
+                        <div>
+                            <label for="suffix" class="block text-sm font-medium text-gray-700 mb-1">Suffix</label>
+                            <select id="suffix" name="suffix" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="">None</option>
+                                <option value="Jr." {{ old('suffix') == 'Jr.' ? 'selected' : '' }}>Jr.</option>
+                                <option value="Sr." {{ old('suffix') == 'Sr.' ? 'selected' : '' }}>Sr.</option>
+                                <option value="II" {{ old('suffix') == 'II' ? 'selected' : '' }}>II</option>
+                                <option value="III" {{ old('suffix') == 'III' ? 'selected' : '' }}>III</option>
+                                <option value="IV" {{ old('suffix') == 'IV' ? 'selected' : '' }}>IV</option>
+                            </select>
+                        </div>
+                        <input type="hidden" id="name" name="name" value="{{ old('name') }}">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
                             <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        </div>
+                        <div>
+                            <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
+                            <input type="text" id="contact_number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., 09191234567" required>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
@@ -117,6 +153,52 @@
                 if (headerSkeleton) headerSkeleton.style.display = 'none';
                 if (content) content.style.display = 'block';
             }, 1000); // 1 second delay to show skeleton effect
+
+            // Name field combination logic
+            const firstNameInput = document.getElementById('first_name');
+            const middleNameInput = document.getElementById('middle_name');
+            const noMiddleCheckbox = document.getElementById('no_middle_name');
+            const lastNameInput = document.getElementById('last_name');
+            const suffixInput = document.getElementById('suffix');
+            const fullNameInput = document.getElementById('name');
+
+            function updateFullName() {
+                if (!firstNameInput || !lastNameInput || !fullNameInput) return;
+                const middle = (middleNameInput && !middleNameInput.disabled)
+                    ? middleNameInput.value.trim()
+                    : '';
+                const suffixVal = suffixInput ? suffixInput.value.trim() : '';
+                const parts = [
+                    firstNameInput.value.trim(),
+                    middle,
+                    lastNameInput.value.trim(),
+                    suffixVal,
+                ].filter(Boolean);
+                fullNameInput.value = parts.join(' ');
+            }
+
+            function handleNoMiddleToggle() {
+                if (!middleNameInput || !noMiddleCheckbox) return;
+                if (noMiddleCheckbox.checked) {
+                    middleNameInput.disabled = true;
+                    middleNameInput.value = '';
+                } else {
+                    middleNameInput.disabled = false;
+                }
+                updateFullName();
+            }
+
+            if (firstNameInput && lastNameInput) {
+                firstNameInput.addEventListener('input', updateFullName);
+                lastNameInput.addEventListener('input', updateFullName);
+                if (middleNameInput) middleNameInput.addEventListener('input', updateFullName);
+                if (suffixInput) suffixInput.addEventListener('change', updateFullName);
+                updateFullName();
+            }
+            if (noMiddleCheckbox) {
+                noMiddleCheckbox.addEventListener('change', handleNoMiddleToggle);
+                handleNoMiddleToggle();
+            }
         });
     </script>
 @endsection

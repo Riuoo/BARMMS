@@ -88,9 +88,9 @@ class DecisionTreeController
         $residents = Residents::all();
 
         // Attach blotter report counts to residents so decision-tree analytics can display incident context
-        $blotterCountsMap = BlotterRequest::selectRaw('resident_id, COUNT(*) as cnt')
-            ->whereNotNull('resident_id')
-            ->groupBy('resident_id')
+        $blotterCountsMap = BlotterRequest::selectRaw('respondent_id, COUNT(*) as cnt')
+            ->whereNotNull('respondent_id')
+            ->groupBy('respondent_id')
             ->pluck('cnt', 'resident_id');
         foreach ($residents as $resident) {
             $resident->blotter_count = (int) ($blotterCountsMap[$resident->id] ?? 0);

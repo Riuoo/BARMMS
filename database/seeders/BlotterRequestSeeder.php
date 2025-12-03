@@ -71,7 +71,7 @@ class BlotterRequestSeeder extends Seeder
 
             BlotterRequest::create([
                 'complainant_name' => $faker->name(),
-                'resident_id' => $respondent->id, // The respondent (person being reported)
+                'respondent_id' => $respondent->id, // The respondent (person being reported)
                 'type' => $type,
                 'description' => $desc,
                 'status' => $status,

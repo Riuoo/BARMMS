@@ -363,6 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const respondentIdInput = document.getElementById('respondent_id');
     const selectedRespondentDisplay = document.getElementById('selectedRespondentDisplay');
     const form = document.querySelector('form');
+    const currentUserId = @json($currentUserId ?? null);
 
     function debounce(func, delay) {
         let timeoutId;
@@ -408,13 +409,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 const results = await response.json();
                 
                 if (results.length > 0) {
-                    searchResults.innerHTML = results.map(resident => `
-                        <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
-                            <div class="font-medium text-gray-900">${resident.name}</div>
-                            <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
-                        </div>
-                    `).join('');
-                    searchResults.classList.remove('hidden');
+                    // Filter out the logged-in user from search results
+                    const filteredResults = results.filter(resident => {
+                        return !currentUserId || resident.id.toString() !== currentUserId.toString();
+                    });
+                    
+                    if (filteredResults.length > 0) {
+                        searchResults.innerHTML = filteredResults.map(resident => `
+                            <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                                <div class="font-medium text-gray-900">${resident.name}</div>
+                                <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                            </div>
+                        `).join('');
+                        searchResults.classList.remove('hidden');
+                    } else {
+                        searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No other residents found</div>';
+                        searchResults.classList.remove('hidden');
+                    }
                 } else {
                     searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
                     searchResults.classList.remove('hidden');
@@ -449,7 +460,28 @@ document.addEventListener('DOMContentLoaded', function() {
             form.addEventListener('submit', function(e) {
                 if (!respondentIdInput.value) {
                     e.preventDefault();
-                    alert('Please select a registered resident as the respondent before submitting.');
+                    const message = 'Please select a registered resident as the respondent before submitting.';
+                    if (typeof notify === 'function') {
+                        notify('error', message);
+                    } else if (window.toast && typeof window.toast.error === 'function') {
+                        window.toast.error(message);
+                    } else {
+                        alert(message);
+                    }
+                    return false;
+                }
+                
+                // Check if complainant and respondent are the same person
+                if (currentUserId && respondentIdInput.value === currentUserId.toString()) {
+                    e.preventDefault();
+                    const message = 'You cannot file a blotter report against yourself. Please select a different person as the respondent.';
+                    if (typeof notify === 'function') {
+                        notify('error', message);
+                    } else if (window.toast && typeof window.toast.error === 'function') {
+                        window.toast.error(message);
+                    } else {
+                        alert(message);
+                    }
                     return false;
                 }
             });

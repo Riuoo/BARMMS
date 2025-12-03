@@ -23,17 +23,25 @@ class ResidentRequestListController
             })
             ->update(['resident_is_read' => true]);
 
+        // Get logged-in resident for blotter queries
+        $resident = \App\Models\Residents::find($userId);
+        $complainantName = $resident ? $resident->name : null;
+
         // Auto-mark all unread approved blotter notifications as read when visiting this page
-        BlotterRequest::where('resident_id', $userId)
-            ->where('status', 'approved')
-            ->where(function ($q) {
-                $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
-            })
-            ->update(['resident_is_read' => true]);
+        // Query by complainant_name since residents see blotters they filed, not blotters filed against them
+        if ($complainantName) {
+            BlotterRequest::where('complainant_name', $complainantName)
+                ->where('status', 'approved')
+                ->where(function ($q) {
+                    $q->whereNull('resident_is_read')->orWhere('resident_is_read', false);
+                })
+                ->update(['resident_is_read' => true]);
+        }
 
         // Get all requests without pagination first
         $documentQuery = DocumentRequest::where('resident_id', $userId);
-        $blotterQuery = BlotterRequest::where('resident_id', $userId);
+        // Query blotters by complainant_name since residents are viewing requests they filed
+        $blotterQuery = $complainantName ? BlotterRequest::where('complainant_name', $complainantName) : BlotterRequest::whereRaw('1=0');
         $concernQuery = CommunityConcern::where('resident_id', $userId);
 
         // Apply search filter if provided

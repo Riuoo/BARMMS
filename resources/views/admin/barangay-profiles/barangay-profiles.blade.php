@@ -43,7 +43,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input type="text" name="search" id="searchInput" placeholder="Search officials by name, email, or role..." 
+                        <input type="text" name="search" id="searchInput" placeholder="Search officials by name, email, contact, or role..." 
                             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                             value="{{ request('search') }}">
                     </div>
@@ -167,12 +167,18 @@
                                         Official
                                     </div>
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-envelope mr-2"></i>
-                                        Contact
-                                    </div>
-                                </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-envelope mr-2"></i>
+                                    Email
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <i class="fas fa-phone mr-2"></i>
+                                    Contact No.
+                                </div>
+                            </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     <div class="flex items-center">
                                         <i class="fas fa-briefcase mr-2"></i>
@@ -219,6 +225,9 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">{{ $user->contact_number ?: 'No contact provided' }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center py-0.5 rounded-full text-xs font-medium 
@@ -314,6 +323,10 @@
                             <div class="ml-3 flex-1 min-w-0">
                                 <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $user->name }}</h3>
                                 <p class="text-sm text-gray-500 truncate">{{ $user->email }}</p>
+                                <p class="text-sm text-gray-500 truncate">
+                                    <i class="fas fa-phone mr-1 text-gray-400"></i>
+                                    {{ $user->contact_number ?: 'No contact provided' }}
+                                </p>
                                 <div class="flex items-center mt-1">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
                                         @if($user->role === 'Captain') bg-yellow-100 text-yellow-800

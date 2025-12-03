@@ -27,8 +27,8 @@
 
     <div class="box">
         <h2>Parties</h2>
-        <div class="row"><strong>Complainant:</strong> Anonymous</div>
-        <div class="row"><strong>Respondent:</strong> {{ optional($blotter->resident)->name ?? 'N/A' }}</div>
+        <div class="row"><strong>Complainant:</strong> {{ $blotter->complainant_name ?? 'N/A' }}</div>
+        <div class="row"><strong>Respondent:</strong> {{ optional($blotter->respondent)->name ?? 'N/A' }}</div>
     </div>
 
     <h2>Summary</h2>

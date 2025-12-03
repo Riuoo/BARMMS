@@ -18,12 +18,13 @@ class BarangayProfileController
 
         // For display (filtered)
         $query = BarangayProfile::query();
-        // Search by name, email, or role
+        // Search by name, email, contact_number, or role
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('contact_number', 'like', "%{$search}%")
                   ->orWhere('role', 'like', "%{$search}%");
             });
         }
@@ -52,9 +53,14 @@ class BarangayProfileController
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'suffix' => 'nullable|string|max:10',
             'email' => 'required|email|unique:barangay_profiles,email',
             'role' => 'required|string|max:255',
             'address' => 'required|string|max:500',
+            'contact_number' => 'required|string|max:20',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -64,6 +70,7 @@ class BarangayProfileController
                 'email' => $validatedData['email'],
                 'role' => $validatedData['role'],
                 'address' => $validatedData['address'],
+                'contact_number' => $validatedData['contact_number'],
                 'password' => Hash::make($validatedData['password']),
             ]);
 
@@ -80,7 +87,68 @@ class BarangayProfileController
     public function edit($id)
     {    
         $barangayProfile = BarangayProfile::findOrFail($id);
-        return view('admin.barangay-profiles.edit_barangay_profile', compact('barangayProfile'));
+        
+        // Parse name into components for display
+        $nameParts = $this->parseName($barangayProfile->name);
+        
+        return view('admin.barangay-profiles.edit_barangay_profile', compact('barangayProfile', 'nameParts'));
+    }
+
+    /**
+     * Parse full name into first, middle, last, and suffix
+     */
+    private function parseName($fullName)
+    {
+        if (empty($fullName)) {
+            return [
+                'first_name' => '',
+                'middle_name' => '',
+                'last_name' => '',
+                'suffix' => ''
+            ];
+        }
+        
+        $parts = array_filter(explode(' ', trim($fullName)), function($part) {
+            return !empty(trim($part));
+        });
+        $parts = array_values($parts); // Re-index array
+        
+        $suffixes = ['Jr.', 'Sr.', 'II', 'III', 'IV', 'V', 'Jr', 'Sr'];
+        
+        $result = [
+            'first_name' => '',
+            'middle_name' => '',
+            'last_name' => '',
+            'suffix' => ''
+        ];
+        
+        if (empty($parts)) {
+            return $result;
+        }
+        
+        // Check if last part is a suffix
+        $lastPart = end($parts);
+        $hasSuffix = in_array($lastPart, $suffixes, true);
+        
+        if ($hasSuffix && count($parts) > 1) {
+            $result['suffix'] = array_pop($parts);
+        }
+        
+        if (count($parts) >= 1) {
+            $result['first_name'] = $parts[0];
+        }
+        
+        if (count($parts) >= 2) {
+            $result['last_name'] = end($parts);
+        }
+        
+        if (count($parts) >= 3) {
+            // Middle name(s) are everything between first and last
+            $middleParts = array_slice($parts, 1, -1);
+            $result['middle_name'] = implode(' ', $middleParts);
+        }
+        
+        return $result;
     }
 
     public function update(Request $request, $id)
@@ -88,19 +156,24 @@ class BarangayProfileController
         try {
             $barangayProfile = BarangayProfile::findOrFail($id);
 
-            // Only validate password since other fields are readonly
+            // Validate password and contact_number
             $validatedData = $request->validate([
                 'password' => 'nullable|string|min:6|confirmed',
+                'contact_number' => 'required|string|max:20',
             ]);
+
+            // Update contact number
+            $barangayProfile->contact_number = $validatedData['contact_number'];
 
             // Only update password if provided
             if (!empty($validatedData['password'])) {
                 $barangayProfile->password = Hash::make($validatedData['password']);
-                $barangayProfile->save();
-                notify()->success('Password updated successfully.');
+                notify()->success('Profile updated successfully.');
             } else {
-                notify()->info('No changes were made to the profile.');
+                notify()->success('Contact number updated successfully.');
             }
+            
+            $barangayProfile->save();
 
             return redirect()->route('admin.barangay-profiles');
             

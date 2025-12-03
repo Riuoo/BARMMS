@@ -321,4 +321,28 @@ class ResidentController
             return response()->json(['error' => 'Search failed'], 500);
         }
     }
+
+    /**
+     * Get summary information for a resident (for auto-populating forms)
+     */
+    public function summary($id)
+    {
+        try {
+            $resident = Residents::findOrFail($id);
+            
+            return response()->json([
+                'id'              => $resident->id,
+                'name'            => $resident->name,
+                'age'             => $resident->age,
+                'address'         => $resident->address,
+                'civil_status'    => $resident->marital_status ?? $resident->civil_status ?? null,
+                'contact_number'  => $resident->contact_number,
+                'birth_date'      => $resident->birth_date ? $resident->birth_date->format('Y-m-d') : null,
+                'gender'          => $resident->gender,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching resident summary: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch resident information'], 500);
+        }
+    }
 }

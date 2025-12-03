@@ -1,22 +1,38 @@
-<!-- Complaint Details Modal -->
+<!-- Complaint Details Modal (styled similar to document request description modal) -->
 <div id="complaintDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Concern Details</h3>
+    <div class="relative mx-auto my-12 w-11/12 md:w-4/5 lg:w-3/5 xl:w-2/5">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100">
+            <div class="flex items-start justify-between px-6 py-5 border-b border-gray-100">
+                <div class="flex items-start space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class="fas fa-clipboard-list text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm uppercase tracking-wide text-gray-500">Community Concern</p>
+                        <h3 class="text-xl font-semibold text-gray-900">Concern Details</h3>
+                    </div>
+                </div>
                 <button onclick="document.getElementById('complaintDetailsModal').classList.add('hidden')" 
-                        class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
+                        class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times text-2xl"></i>
                 </button>
             </div>
-            <div id="complaintDetailsContent" class="max-h-96 overflow-y-auto">
-                <!-- Content will be loaded here -->
-            </div>
-            <div class="mt-6 flex justify-end">
-                <button onclick="document.getElementById('complaintDetailsModal').classList.add('hidden')" 
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-200">
-                    Close
-                </button>
+            <div class="px-6 py-5 space-y-5">
+                <div id="complaintDetailsContent" class="max-h-96 overflow-y-auto pr-1 custom-scrollbar">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2">
+                    <p class="text-xs text-gray-500 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Review the concern carefully before updating its status.
+                    </p>
+                    <div class="flex items-center justify-end space-x-2 w-full md:w-auto">
+                        <button onclick="document.getElementById('complaintDetailsModal').classList.add('hidden')" 
+                                class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
+                            Close
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

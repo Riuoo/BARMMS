@@ -96,6 +96,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/notifications/mark-as-read-by-type/{type}', [AdminNotificationController::class, 'markAsReadByType'])->name('admin.notifications.mark-as-read-by-type');
         // Resident search (needed by vaccination and medical forms) - allow nurse access
         Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
+        Route::get('/residents/{resident}/summary', [ResidentController::class, 'summary'])->name('admin.residents.summary');
     });
 
     // Routes that all admin roles can view but only admin/secretary can modify
@@ -142,6 +143,7 @@ Route::prefix('admin')->group(function () {
         
         Route::get('/templates', [DocumentTemplateController::class, 'index'])->name('admin.templates.index');
         Route::get('/templates/{template}/preview', [DocumentTemplateController::class, 'preview'])->name('admin.templates.preview');
+        Route::get('/templates/{template}/form-config', [DocumentTemplateController::class, 'formConfig'])->name('admin.templates.form-config');
         
         Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
     });

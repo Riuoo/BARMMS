@@ -15,7 +15,7 @@ class ResidentSeeder extends Seeder
     {
         // Senior Citizen - Low Income
         Residents::create([
-            'name' => 'Lola Remedios Santos Dela Cruz',
+            'name' => 'Remedios Santos Dela Cruz',
             'email' => 'remedios.santos@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -135,7 +135,7 @@ class ResidentSeeder extends Seeder
 
         // High-income Professional
         Residents::create([
-            'name' => 'Dr. Carlos Miguel Lopez Gonzales',
+            'name' => 'Carlos Miguel Lopez Gonzales',
             'email' => 'carlos.lopez@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -151,7 +151,7 @@ class ResidentSeeder extends Seeder
             'income_level' => 'High',
             'employment_status' => 'Full-time',
             'is_pwd' => false,
-            'emergency_contact_name' => 'Dr. Elena Lopez',
+            'emergency_contact_name' => 'Elena Lopez',
             'emergency_contact_number' => '09191234578',
             'emergency_contact_relationship' => 'Spouse',
             'active' => true,
@@ -207,7 +207,7 @@ class ResidentSeeder extends Seeder
 
         // Senior Professional - Upper Middle Income
         Residents::create([
-            'name' => 'Prof. Elena Maria Santos Reyes',
+            'name' => 'Elena Maria Santos Reyes',
             'email' => 'elena.santos@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -368,6 +368,28 @@ class ResidentSeeder extends Seeder
             'employment_status' => 'Self-employed',
             'is_pwd' => true,
             'emergency_contact_name' => 'Ricardo Castro',
+            'emergency_contact_number' => '09191234596',
+            'emergency_contact_relationship' => 'Spouse',
+            'active' => true,
+        ]);
+        Residents::create([
+            'name' => 'Kyo kusanagi',
+            'email' => 'kyo.kusanagi@email.com',
+            'password' => bcrypt('password123'),
+            'role' => 'resident',
+            'address' => 'Purok 1, Lower Malinao, Padada, Davao Del Sur',
+            'gender' => 'Female',
+            'contact_number' => '09123456789',
+            'birth_date' => Carbon::now()->subYears(50),
+            'marital_status' => 'Married',
+            'occupation' => 'Vendor',
+            'age' => 50,
+            'family_size' => 5,
+            'education_level' => 'Elementary',
+            'income_level' => 'Lower Middle',
+            'employment_status' => 'Self-employed',
+            'is_pwd' => true,
+            'emergency_contact_name' => 'Ricardo kusanagi',
             'emergency_contact_number' => '09191234596',
             'emergency_contact_relationship' => 'Spouse',
             'active' => true,

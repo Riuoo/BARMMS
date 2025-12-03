@@ -803,6 +803,120 @@ class DocumentTemplateController
         }
     }
 
+    /**
+     * Get form configuration for a template (which fields to show in the form)
+     */
+    public function formConfig($id)
+    {
+        try {
+            $template = DocumentTemplate::findOrFail($id);
+            $placeholders = $template->placeholders ?? [];
+
+            // Define which placeholders are auto-filled from resident/barangay/date data
+            $autoMap = [
+                'resident_name'      => ['source' => 'resident.name', 'label' => 'Resident Name'],
+                'resident_address'   => ['source' => 'resident.address', 'label' => 'Resident Address'],
+                'civil_status'       => ['source' => 'resident.marital_status', 'label' => 'Civil Status'],
+                'age'                => ['source' => 'resident.age', 'label' => 'Age'],
+                'birth_date'         => ['source' => 'resident.birth_date', 'label' => 'Birth Date'],
+                'birth_place'        => ['source' => 'resident.birth_place', 'label' => 'Birth Place'],
+                'contact_number'     => ['source' => 'resident.contact_number', 'label' => 'Contact Number'],
+
+                'barangay_name'      => ['source' => 'barangay.barangay_name', 'label' => 'Barangay Name'],
+                'municipality_name'  => ['source' => 'barangay.municipality_name', 'label' => 'Municipality Name'],
+                'province_name'      => ['source' => 'barangay.province_name', 'label' => 'Province Name'],
+                'official_name'      => ['source' => 'barangay.name', 'label' => 'Official Name'],
+                'official_position'  => ['source' => 'barangay.position', 'label' => 'Official Position'],
+                'prepared_by_name'   => ['source' => 'admin.name', 'label' => 'Prepared By Name'],
+                'captain_name'       => ['source' => 'barangay.captain', 'label' => 'Punong Barangay Name'],
+
+                'day'                => ['source' => 'date.day', 'label' => 'Day'],
+                'month'              => ['source' => 'date.month', 'label' => 'Month'],
+                'year'               => ['source' => 'date.year', 'label' => 'Year'],
+            ];
+
+            $autoFields = [];
+            $manualFields = [];
+
+            // Process placeholders - handle both associative array (key => description) and numeric array
+            foreach ($placeholders as $key => $desc) {
+                $placeholderKey = is_string($key) ? $key : (string) $desc;
+                $description = is_string($key) ? $desc : null;
+
+                // Skip if it's auto-filled
+                if (isset($autoMap[$placeholderKey])) {
+                    $autoFields[] = [
+                        'name'        => $placeholderKey,
+                        'label'       => $autoMap[$placeholderKey]['label'],
+                        'source'      => $autoMap[$placeholderKey]['source'],
+                    ];
+                    continue;
+                }
+
+                // Skip common auto-filled fields that might not be in autoMap
+                if (in_array($placeholderKey, ['purpose'])) {
+                    // Purpose is handled separately in the main form
+                    continue;
+                }
+
+                // Determine input type based on placeholder name
+                $type = 'text';
+                if (str_ends_with($placeholderKey, '_date') || str_contains($placeholderKey, 'date')) {
+                    $type = 'date';
+                } elseif (str_ends_with($placeholderKey, '_time') || str_contains($placeholderKey, 'time')) {
+                    $type = 'time';
+                } elseif (in_array($placeholderKey, ['purpose', 'remarks', 'reason', 'description', 'notes'])) {
+                    $type = 'textarea';
+                } elseif (in_array($placeholderKey, ['verbal_request', 'is_verbal', 'request_type'])) {
+                    $type = 'select';
+                } elseif (str_contains($placeholderKey, 'income') || str_contains($placeholderKey, 'amount') || str_contains($placeholderKey, 'salary')) {
+                    $type = 'number';
+                }
+
+                $field = [
+                    'name'        => $placeholderKey,
+                    'label'       => $description ?: ucwords(str_replace(['_', '-'], ' ', $placeholderKey)),
+                    'type'        => $type,
+                    'required'    => true,
+                ];
+
+                // Add options for select fields
+                if ($type === 'select') {
+                    if ($placeholderKey === 'verbal_request' || $placeholderKey === 'is_verbal') {
+                        $field['options'] = [
+                            ['value' => 'verbal', 'label' => 'Verbal'],
+                            ['value' => 'written', 'label' => 'Written'],
+                        ];
+                    } else if ($placeholderKey === 'request_type') {
+                        $field['options'] = [
+                            ['value' => 'verbal', 'label' => 'Verbal'],
+                            ['value' => 'written', 'label' => 'Written'],
+                        ];
+                    }
+                }
+
+                // Add placeholder text for number fields
+                if ($type === 'number') {
+                    $field['placeholder'] = 'Enter amount';
+                    $field['min'] = 0;
+                    $field['step'] = 0.01;
+                }
+
+                $manualFields[] = $field;
+            }
+
+            return response()->json([
+                'id'               => $template->id,
+                'document_type'    => $template->document_type,
+                'auto_fields'      => $autoFields,
+                'manual_fields'    => $manualFields,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching template form config: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch template configuration'], 500);
+        }
+    }
+
     public function destroy($id)
     {
         try {

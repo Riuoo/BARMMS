@@ -20,16 +20,17 @@ class ResidentDashboardController
         }
 
         // Fetch comprehensive data for dashboard statistics
-        $totalBlotterRequests = BlotterRequest::where('resident_id', $userId)->count();
+        // Query blotters by complainant_name since residents see blotters they filed
+        $totalBlotterRequests = BlotterRequest::where('complainant_name', $resident->name)->count();
         $totalDocumentRequests = DocumentRequest::where('resident_id', $userId)->count();
         $totalCommunityConcerns = CommunityConcern::where('resident_id', $userId)->count();
         
         // Get status-based counts using more efficient queries
-        $pendingCounts = $this->getStatusCounts($userId, 'pending');
-        $completedCounts = $this->getStatusCounts($userId, 'completed');
+        $pendingCounts = $this->getStatusCounts($userId, $resident->name, 'pending');
+        $completedCounts = $this->getStatusCounts($userId, $resident->name, 'completed');
         
         // Fetch recent items for dashboard
-        $recentBlotterRequests = BlotterRequest::where('resident_id', $userId)->orderBy('created_at', 'desc')->take(1)->get();
+        $recentBlotterRequests = BlotterRequest::where('complainant_name', $resident->name)->orderBy('created_at', 'desc')->take(1)->get();
         $recentDocumentRequests = DocumentRequest::where('resident_id', $userId)->orderBy('created_at', 'desc')->take(1)->get();
         $recentCommunityConcerns = CommunityConcern::where('resident_id', $userId)->orderBy('created_at', 'desc')->take(1)->get();
 
@@ -49,10 +50,10 @@ class ResidentDashboardController
     /**
      * Get counts for a specific status across all request types
      */
-    private function getStatusCounts($userId, $status)
+    private function getStatusCounts($userId, $residentName, $status)
     {
         return [
-            'blotter' => BlotterRequest::where('resident_id', $userId)->where('status', $status)->count(),
+            'blotter' => BlotterRequest::where('complainant_name', $residentName)->where('status', $status)->count(),
             'document' => DocumentRequest::where('resident_id', $userId)->where('status', $status)->count(),
             'concern' => CommunityConcern::where('resident_id', $userId)->where('status', $status)->count(),
         ];

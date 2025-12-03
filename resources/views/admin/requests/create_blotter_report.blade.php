@@ -65,18 +65,34 @@
                     Complainant Information
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="complainant_name" class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="relative">
+                        <label for="complainantSearch" class="block text-sm font-medium text-gray-700 mb-2">
                             Complainant Name <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="complainant_name" 
-                               name="complainant_name" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200" 
-                               placeholder="Enter complainant name"
-                               value="{{ old('complainant_name') }}"
-                               required>
-                        <p class="mt-1 text-sm text-gray-500">Complainant name will be shown exactly as entered in reports.</p>
+                        <input
+                            type="text"
+                            id="complainantSearch"
+                            name="complainant_name"
+                            placeholder="Type to search for a registered resident or enter a custom name..."
+                            autocomplete="off"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                            aria-label="Search for a resident or enter custom name"
+                            value="{{ old('complainant_name') }}"
+                            required
+                        />
+                        <input type="hidden" id="complainant_resident_id" name="complainant_resident_id">
+                        <div id="complainantSearchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Search and select a registered resident, or type any name for non-registered residents.
+                        </p>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Selected Complainant
+                            </label>
+                            <div id="selectedComplainantDisplay" class="w-full px-3 py-2 border border-dashed border-green-300 rounded-lg text-sm text-gray-600">
+                                No selection yet
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -100,7 +116,7 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200"
                             aria-label="Search for a resident"
                         />
-                        <input type="hidden" id="resident_id" name="resident_id">
+                        <input type="hidden" id="respondent_id" name="respondent_id">
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
                         <p class="mt-1 text-sm text-gray-500">Search and select a registered resident to set as the respondent.</p>
                         <div class="mt-4">
@@ -388,9 +404,23 @@
             const formData = new FormData(form);
             const csrfToken = form.querySelector('input[name="_token"]').value;
 
-            const residentId = formData.get('resident_id');
-            if (!residentId) {
+            const respondentId = formData.get('respondent_id');
+            if (!respondentId) {
                 const message = 'Please select a registered resident as the respondent before submitting.';
+                if (typeof notify === 'function') {
+                    notify('error', message);
+                } else if (window.toast && typeof window.toast.error === 'function') {
+                    window.toast.error(message);
+                } else {
+                    alert(message);
+                }
+                return;
+            }
+
+            // Check if complainant and respondent are the same person
+            const complainantResidentId = formData.get('complainant_resident_id');
+            if (complainantResidentId && complainantResidentId === respondentId) {
+                const message = 'The complainant and respondent cannot be the same person. Please select different individuals.';
                 if (typeof notify === 'function') {
                     notify('error', message);
                 } else if (window.toast && typeof window.toast.error === 'function') {
@@ -477,7 +507,7 @@
     // Resident AJAX search for respondent
     const searchInput = document.getElementById('respondentSearch');
     const searchResults = document.getElementById('searchResults');
-    const residentIdInput = document.getElementById('resident_id');
+    const respondentIdInput = document.getElementById('respondent_id');
     const selectedRespondentDisplay = document.getElementById('selectedRespondentDisplay');
 
     function updateSelectedRespondentDisplay(name = null) {
@@ -498,8 +528,8 @@
     }
 
     function clearRespondentSelection() {
-        if (residentIdInput) {
-            residentIdInput.value = '';
+        if (respondentIdInput) {
+            respondentIdInput.value = '';
         }
         updateSelectedRespondentDisplay(null);
     }
@@ -511,15 +541,15 @@
     if (!searchResults) {
         console.error('Search results container not found');
     }
-    if (!residentIdInput) {
-        console.error('Resident ID input not found');
+    if (!respondentIdInput) {
+        console.error('Respondent ID input not found');
     }
-    if (!searchInput || !searchResults || !residentIdInput) {
+    if (!searchInput || !searchResults || !respondentIdInput) {
         return;
     }
 
     searchInput.addEventListener('input', () => {
-        if (residentIdInput.value && searchInput.value.trim() === '') {
+        if (respondentIdInput.value && searchInput.value.trim() === '') {
             clearRespondentSelection();
         }
     });
@@ -574,11 +604,23 @@
     searchResults.addEventListener('click', (event) => {
         const target = event.target.closest('[data-id]');
         if (target && target.dataset.id) {
-            residentIdInput.value = target.dataset.id;
+            respondentIdInput.value = target.dataset.id;
             searchInput.value = target.dataset.name;
             updateSelectedRespondentDisplay(target.dataset.name);
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
+            
+            // If complainant search is active, refresh it to disable the newly selected respondent
+            const complainantSearchInput = document.getElementById('complainantSearch');
+            const complainantSearchResults = document.getElementById('complainantSearchResults');
+            if (complainantSearchInput && complainantSearchResults && !complainantSearchResults.classList.contains('hidden')) {
+                // Trigger a refresh of complainant search results
+                const term = complainantSearchInput.value.trim();
+                if (term.length >= 2) {
+                    // Trigger input event to refresh search results
+                    complainantSearchInput.dispatchEvent(new Event('input'));
+                }
+            }
         }
     });
 
@@ -588,6 +630,170 @@
             searchResults.classList.add('hidden');
         }
     });
+
+    // Complainant AJAX search (allows both registered and non-registered)
+    const complainantSearchInput = document.getElementById('complainantSearch');
+    const complainantSearchResults = document.getElementById('complainantSearchResults');
+    const complainantResidentIdInput = document.getElementById('complainant_resident_id');
+    const selectedComplainantDisplay = document.getElementById('selectedComplainantDisplay');
+
+    function updateSelectedComplainantDisplay(name = null, isRegistered = false) {
+        if (!selectedComplainantDisplay) {
+            return;
+        }
+        if (name) {
+            if (isRegistered) {
+                selectedComplainantDisplay.textContent = `Selected: ${name} (Registered Resident)`;
+                selectedComplainantDisplay.classList.remove('text-gray-600', 'border-green-300');
+                selectedComplainantDisplay.classList.add('text-green-700', 'border-green-400', 'bg-green-50');
+            } else {
+                selectedComplainantDisplay.textContent = `Custom Name: ${name}`;
+                selectedComplainantDisplay.classList.remove('text-green-700', 'border-green-400', 'bg-green-50');
+                selectedComplainantDisplay.classList.add('text-gray-700', 'border-gray-300', 'bg-gray-50');
+            }
+        } else {
+            selectedComplainantDisplay.textContent = 'No selection yet';
+            selectedComplainantDisplay.classList.remove('text-green-700', 'border-green-400', 'bg-green-50', 'text-gray-700', 'border-gray-300', 'bg-gray-50');
+            selectedComplainantDisplay.classList.add('text-gray-600', 'border-green-300');
+        }
+    }
+
+    function clearComplainantSelection() {
+        if (complainantResidentIdInput) {
+            complainantResidentIdInput.value = '';
+        }
+        updateSelectedComplainantDisplay(null, false);
+    }
+
+    if (complainantSearchInput && complainantSearchResults) {
+        // Update display on input change
+        complainantSearchInput.addEventListener('input', () => {
+            const value = complainantSearchInput.value.trim();
+            if (value) {
+                // Check if there's a selected resident ID
+                if (complainantResidentIdInput && complainantResidentIdInput.value) {
+                    // Keep registered resident display
+                    const name = complainantSearchInput.value;
+                    updateSelectedComplainantDisplay(name, true);
+                } else {
+                    // Show as custom name
+                    updateSelectedComplainantDisplay(value, false);
+                }
+            } else {
+                clearComplainantSelection();
+            }
+        });
+
+        // Debounced search for registered residents
+        complainantSearchInput.addEventListener('input', debounce(async () => {
+            const term = complainantSearchInput.value.trim();
+            
+            if (term.length < 2) {
+                complainantSearchResults.innerHTML = '';
+                complainantSearchResults.classList.add('hidden');
+                // If cleared, update display
+                if (complainantResidentIdInput && !complainantResidentIdInput.value) {
+                    clearComplainantSelection();
+                }
+                return;
+            }
+            
+            try {
+                // Show loading state
+                complainantSearchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Searching registered residents...</div>';
+                complainantSearchResults.classList.remove('hidden');
+                
+                const searchUrl = `{{ route('admin.search.residents') }}?term=${encodeURIComponent(term)}`;
+                
+                const response = await fetch(searchUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const results = await response.json();
+                
+                if (results.length > 0) {
+                    // Get current respondent ID
+                    const currentRespondentIdInput = document.getElementById('respondent_id');
+                    const currentRespondentId = currentRespondentIdInput ? currentRespondentIdInput.value : null;
+                    
+                    // Filter out the respondent from complainant search results
+                    const filteredResults = results.filter(resident => {
+                        return !currentRespondentId || resident.id.toString() !== currentRespondentId.toString();
+                    });
+                    
+                    // Add option for custom name at the top
+                    complainantSearchResults.innerHTML = `
+                        <div class="p-3 hover:bg-gray-100 cursor-pointer border-b-2 border-green-300 bg-green-50" data-custom="true">
+                            <div class="font-medium text-gray-900">
+                                <i class="fas fa-plus-circle text-green-600 mr-2"></i>
+                                Use "${term}" as custom name
+                            </div>
+                            <div class="text-sm text-gray-500">For non-registered resident</div>
+                        </div>
+                        ${filteredResults.map(resident => `
+                            <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                                <div class="font-medium text-gray-900">${resident.name}</div>
+                                <div class="text-sm text-gray-500">${resident.email || 'N/A'} (Registered)</div>
+                            </div>
+                        `).join('')}
+                    `;
+                    complainantSearchResults.classList.remove('hidden');
+                } else {
+                    // No results - show option to use as custom name
+                    complainantSearchResults.innerHTML = `
+                        <div class="p-3 hover:bg-gray-100 cursor-pointer border-b-2 border-green-300 bg-green-50" data-custom="true">
+                            <div class="font-medium text-gray-900">
+                                <i class="fas fa-plus-circle text-green-600 mr-2"></i>
+                                Use "${term}" as custom name
+                            </div>
+                            <div class="text-sm text-gray-500">No registered resident found. Click to use this as a custom name.</div>
+                        </div>
+                    `;
+                    complainantSearchResults.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Complainant search error:', error);
+                complainantSearchResults.innerHTML = '<div class="p-3 text-red-500 text-center">Search error. You can still type a custom name.</div>';
+                complainantSearchResults.classList.remove('hidden');
+            }
+        }, 250));
+
+        // Handle selection from search results
+        complainantSearchResults.addEventListener('click', (event) => {
+            const target = event.target.closest('[data-id], [data-custom]');
+            if (target) {
+                if (target.dataset.custom === 'true') {
+                    // Use custom name
+                    const customName = complainantSearchInput.value.trim();
+                    if (complainantResidentIdInput) {
+                        complainantResidentIdInput.value = '';
+                    }
+                    updateSelectedComplainantDisplay(customName, false);
+                    complainantSearchResults.innerHTML = '';
+                    complainantSearchResults.classList.add('hidden');
+                } else if (target.dataset.id) {
+                    // Select registered resident
+                    if (complainantResidentIdInput) {
+                        complainantResidentIdInput.value = target.dataset.id;
+                    }
+                    complainantSearchInput.value = target.dataset.name;
+                    updateSelectedComplainantDisplay(target.dataset.name, true);
+                    complainantSearchResults.innerHTML = '';
+                    complainantSearchResults.classList.add('hidden');
+                }
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!complainantSearchInput.contains(event.target) && !complainantSearchResults.contains(event.target)) {
+                complainantSearchResults.innerHTML = '';
+                complainantSearchResults.classList.add('hidden');
+            }
+        });
+    }
 });
 </script>
 @endsection

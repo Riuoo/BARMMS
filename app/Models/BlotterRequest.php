@@ -11,7 +11,7 @@ class BlotterRequest extends Model
 
     protected $fillable = [
         'complainant_name',
-        'resident_id',
+        'respondent_id',
         'type',
         'description',
         'status',
@@ -27,9 +27,17 @@ class BlotterRequest extends Model
         'completed_at' => 'datetime',
     ];
 
+    public function respondent()
+    {
+        return $this->belongsTo(Residents::class, 'respondent_id');
+    }
+
+    /**
+     * Alias for backward compatibility
+     */
     public function resident()
     {
-        return $this->belongsTo(Residents::class, 'resident_id');
+        return $this->respondent();
     }
 
     /**

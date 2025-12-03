@@ -23,13 +23,14 @@ class BlotterReportController
         $completedCount = BlotterRequest::where('status', 'completed')->count();
 
         // For display (filtered)
-        $query = BlotterRequest::with('resident');
+        $query = BlotterRequest::with('respondent');
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
+                $q->where('complainant_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
                   ->orWhere('type', 'like', "%{$search}%")
-                  ->orWhereHas('resident', function($uq) use ($search) {
+                  ->orWhereHas('respondent', function($uq) use ($search) {
                       $uq->where('name', 'like', "%{$search}%");
                   });
             });
@@ -44,7 +45,7 @@ class BlotterReportController
     public function getDetails($id)
     {
         try {
-            $blotterRequest = BlotterRequest::with('resident')->findOrFail($id);
+            $blotterRequest = BlotterRequest::with('respondent')->findOrFail($id);
             
             // Prepare media files for response
             $mediaFiles = null;
@@ -62,7 +63,7 @@ class BlotterReportController
             
             return response()->json([
                 'user_name' => $blotterRequest->complainant_name ?? 'N/A',
-                'respondent_name' => $blotterRequest->resident ? $blotterRequest->resident->name : 'N/A',
+                'respondent_name' => $blotterRequest->respondent ? $blotterRequest->respondent->name : 'N/A',
                 'description' => $blotterRequest->description,
                 'status' => $blotterRequest->status,
                 'created_at' => $blotterRequest->created_at->format('M d, Y \a\t g:i A'),
@@ -77,7 +78,7 @@ class BlotterReportController
     public function approve(Request $request, $id)
     {
         $blotter = BlotterRequest::findOrFail($id);
-        $user = $blotter->resident;
+        $user = $blotter->respondent;
         if (!$user) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'This resident record no longer exists.'], 422);
@@ -226,20 +227,28 @@ class BlotterReportController
     {
         $validated = $request->validate([
             'complainant_name' => 'required|string|max:255',
-            'resident_id' => 'required|exists:residents,id',
+            'respondent_id' => 'required|exists:residents,id',
+            'complainant_resident_id' => 'nullable|exists:residents,id',
             'type' => 'required|string|max:255',
             'description' => 'required|string',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240',
             'summon_date' => 'required|date|after:today'
         ]);
+        
+        // Prevent same person from being both complainant and respondent
+        if (!empty($validated['complainant_resident_id']) && $validated['complainant_resident_id'] == $validated['respondent_id']) {
+            notify()->error('The complainant and respondent cannot be the same person. Please select different individuals.');
+            return back()->withInput();
+        }
+        
         // Validate user
-        $user = Residents::find($validated['resident_id']);
+        $user = Residents::find($validated['respondent_id']);
         if (!$user || !$user->active) {
             notify()->error('This user account is inactive and cannot make transactions.');
             return back()->withInput();
         }
         // Prevent multiple ongoing blotter requests
-        if (BlotterRequest::where('resident_id', $validated['resident_id'])
+        if (BlotterRequest::where('respondent_id', $validated['respondent_id'])
                 ->whereIn('status', ['pending', 'processing', 'approved'])
                 ->exists()) {
             notify()->error('Resident already has an ongoing blotter request. Complete it before creating a new one.');
@@ -248,7 +257,7 @@ class BlotterReportController
         try {
             $blotter = new BlotterRequest();
             $blotter->complainant_name = $validated['complainant_name'];
-            $blotter->resident_id = $validated['resident_id']; // This is the respondent
+            $blotter->respondent_id = $validated['respondent_id']; // This is the respondent
             $blotter->type = $validated['type'];
             $blotter->description = $validated['description'];
             $blotter->status = 'approved';
@@ -296,7 +305,7 @@ class BlotterReportController
     public function generateNewSummons(Request $request, $id)
     {
         $blotter = BlotterRequest::findOrFail($id);
-        $user = $blotter->resident;
+        $user = $blotter->respondent;
         if (!$user) {
             notify()->error('This resident record no longer exists.');
             return back();
@@ -345,14 +354,14 @@ class BlotterReportController
     public function checkActive($id)
     {
         $blotter = BlotterRequest::findOrFail($id);
-        $user = $blotter->resident;
+        $user = $blotter->respondent;
         return response()->json(['active' => $user && $user->active ? true : false]);
     }
 
     // Add this method to generate a filename for the PDF
     protected function generateFilename($blotterRequest, $type = 'blotter_report')
     {
-        $name = $blotterRequest->resident ? $blotterRequest->resident->name : 'unknown';
+        $name = $blotterRequest->respondent ? $blotterRequest->respondent->name : 'unknown';
         $name = preg_replace('/[^a-zA-Z0-9\s]/', '', $name); // Remove special chars
         $name = strtolower(str_replace(' ', '_', $name));
         $date = date('Y-m-d');

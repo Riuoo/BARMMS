@@ -226,7 +226,7 @@
                                 <div class="flex items-center">
                                     <div>
                                         <div class="text-sm font-medium text-gray-900">Blotter Report</div>
-                                        <div class="text-sm text-gray-500">{{ $request->resident->name ?? 'N/A' }}</div>
+                                        <div class="text-sm text-gray-500">{{ $request->respondent->name ?? 'N/A' }}</div>
                                         <!-- Progress Tracker -->
                                         <div class="flex items-center space-x-2 mt-1">
                                             <div class="flex items-center">

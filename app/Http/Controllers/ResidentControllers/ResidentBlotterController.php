@@ -9,7 +9,8 @@ class ResidentBlotterController extends BaseResidentRequestController
 {
     public function requestBlotter()
     {
-        return view('resident.request_blotter_report');
+        $userId = $this->getResidentId();
+        return view('resident.request_blotter_report', ['currentUserId' => $userId]);
     }
 
     public function storeBlotter(Request $request)
@@ -32,6 +33,12 @@ class ResidentBlotterController extends BaseResidentRequestController
             return redirect()->route('landing');
         }
 
+        // Prevent same person from being both complainant and respondent
+        if ($userId == $request->respondent_id) {
+            notify()->error('You cannot file a blotter report against yourself. Please select a different person as the respondent.');
+            return back()->withInput();
+        }
+
         // Prevent multiple ongoing requests (check by complainant_name since resident_id is now the respondent)
         $existing = BlotterRequest::where('complainant_name', $complainant->name)
             ->whereIn('status', ['pending', 'processing'])
@@ -44,7 +51,7 @@ class ResidentBlotterController extends BaseResidentRequestController
 
         $blotter = new BlotterRequest();
         $blotter->complainant_name = $complainant->name; // The person filing the report
-        $blotter->resident_id = $request->respondent_id; // The respondent (person being reported)
+        $blotter->respondent_id = $request->respondent_id; // The respondent (person being reported)
         $blotter->type = $request->type;
         $blotter->description = $request->description;
         $blotter->status = 'pending';
