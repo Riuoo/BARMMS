@@ -1,52 +1,68 @@
-## Laravel / PHP application Dockerfile for Render
+## Multi-stage Dockerfile for Laravel (BARMMS) on Render
 
-FROM composer:2.8 AS composer_base
+# Stage 1: Build frontend assets with Vite
+FROM node:20-alpine AS frontend-build
 
-FROM php:8.2-fpm-alpine AS php_base
+WORKDIR /app
 
-RUN apk add --no-cache \
-    nginx \
-    bash \
-    git \
-    curl \
-    zip \
-    unzip \
-    libzip-dev \
-    oniguruma-dev \
-    icu-dev \
-    linux-headers \
-    supervisor \
-    nodejs \
-    npm
+# Install frontend dependencies
+COPY package.json package-lock.json ./
+RUN npm install
 
-RUN docker-php-ext-configure zip && \
-    docker-php-ext-install pdo pdo_mysql pdo_pgsql zip intl
+# Copy only what Vite needs to build
+COPY vite.config.js ./
+COPY resources ./resources
+
+# Build assets (outputs to public/build by default in Laravel+Vite)
+RUN npm run build
+
+
+# Stage 2: PHP + Apache for Laravel
+FROM php:8.2-apache
 
 WORKDIR /var/www/html
 
-COPY --from=composer_base /usr/bin/composer /usr/bin/composer
+# Install system dependencies and PHP extensions commonly required by Laravel
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libicu-dev \
+    libpq-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    && docker-php-ext-install \
+        pdo \
+        pdo_mysql \
+        pdo_pgsql \
+        intl \
+        mbstring \
+        xml \
+        zip \
+    && a2enmod rewrite \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist --optimize-autoloader
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Copy full Laravel application
 COPY . .
 
-RUN npm ci && npm run build && \
-    php artisan config:clear && \
-    php artisan route:clear && \
-    php artisan view:clear
+# Copy built frontend assets from the Node build stage
+COPY --from=frontend-build /app/public/build ./public/build
 
+# Install PHP dependencies (no dev, optimized autoloader)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+# Set Apache DocumentRoot to public/
+RUN sed -i 's#/var/www/html#/var/www/html/public#g' /etc/apache2/sites-available/000-default.conf
+
+# Ensure correct permissions for storage and cache
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-RUN mkdir -p /run/nginx
+# Render will route traffic to the container's HTTP port (Apache defaults to 80)
+EXPOSE 80
 
-COPY nginx-configs/docker-nginx.conf /etc/nginx/nginx.conf
-
-COPY supervisor-configs/docker-supervisord.conf /etc/supervisord.conf
-
-ENV PORT=8080
-EXPOSE 8080
-
-CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
+CMD ["apache2-foreground"]
 
 
