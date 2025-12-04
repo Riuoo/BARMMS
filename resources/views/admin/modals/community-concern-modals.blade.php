@@ -71,6 +71,19 @@
                             <option value="closed">Closed</option>
                         </select>
                     </div>
+
+                    <div id="remarksWrapper" class="hidden">
+                        <label for="admin_remarks" class="block text-sm font-medium text-gray-700 mb-2">
+                            Reason / Remarks <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="admin_remarks" name="admin_remarks" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Briefly explain why this concern is resolved or closed..."></textarea>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Example for Closed: “Visited location, no issue requiring action was found.”<br>
+                            Example for Resolved: “Coordinated cleanup and cleared the reported obstruction.”
+                        </p>
+                    </div>
                 </div>
                 
                 <div class="mt-6 flex justify-end space-x-3">
@@ -104,6 +117,8 @@ function openUpdateStatusModal(id, currentStatus) { // Added currentStatus param
     
     // Get the status dropdown
     const statusSelect = document.getElementById('status');
+    const remarksWrapper = document.getElementById('remarksWrapper');
+    const remarksField = document.getElementById('admin_remarks');
     
     // Define the status order
     const statusOrder = ['pending', 'under_review', 'in_progress', 'resolved', 'closed'];
@@ -131,6 +146,24 @@ function openUpdateStatusModal(id, currentStatus) { // Added currentStatus param
             option.disabled = true;
         }
     }
+
+    // Helper to toggle remarks visibility based on selected status
+    function updateRemarksVisibility() {
+        const value = statusSelect.value;
+        const needsRemarks = value === 'resolved' || value === 'closed';
+        if (needsRemarks) {
+            remarksWrapper.classList.remove('hidden');
+            remarksField.setAttribute('required', 'required');
+        } else {
+            remarksWrapper.classList.add('hidden');
+            remarksField.removeAttribute('required');
+            remarksField.value = '';
+        }
+    }
+
+    // Attach change handler and initialize
+    statusSelect.addEventListener('change', updateRemarksVisibility);
+    updateRemarksVisibility();
 
     // Show the modal
     document.getElementById('updateStatusModal').classList.remove('hidden');
@@ -237,6 +270,14 @@ function viewComplaintDetails(id) {
             const title = (data && data.title) ? data.title : 'Concern';
             const location = (data && data.location) ? data.location : 'Not specified';
             const description = (data && data.description) ? data.description : 'No description provided.';
+            const status = (data && data.status) ? data.status : 'pending';
+            const createdAt = (data && data.created_at) ? data.created_at : 'N/A';
+            const assignedAt = (data && data.assigned_at) ? data.assigned_at : 'Not assigned';
+            const resolvedAt = (data && data.resolved_at) ? data.resolved_at : 'Not resolved';
+            const closedAt = (data && data.closed_at) ? data.closed_at : 'Not closed';
+            const remarks = (data && data.admin_remarks) ? data.admin_remarks : null;
+            const remarksTimestamp = (data && data.remarks_timestamp) ? data.remarks_timestamp : null;
+            const media = Array.isArray(data && data.media_files) ? data.media_files : [];
             content.innerHTML = `
                 <div class="space-y-4">
                     <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -272,6 +313,75 @@ function viewComplaintDetails(id) {
                             </div>
                         </div>
                     </div>
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs uppercase tracking-wide text-gray-500">Status & Timeline</div>
+                                <div class="mt-1 text-sm text-gray-700">
+                                    <div><span class="font-semibold">Current Status:</span> ${escapeHtml(status.replace('_',' ').replace(/\b\w/g, c=>c.toUpperCase()))}</div>
+                                    <div><span class="font-semibold">Filed:</span> ${escapeHtml(createdAt)}</div>
+                                    <div><span class="font-semibold">Assigned:</span> ${escapeHtml(assignedAt)}</div>
+                                    <div><span class="font-semibold">Resolved:</span> ${escapeHtml(resolvedAt)}</div>
+                                    <div><span class="font-semibold">Closed:</span> ${escapeHtml(closedAt)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${remarks ? `
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs uppercase tracking-wide text-gray-500">Admin Remarks</div>
+                                <div class="text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(remarks)}</div>
+                                ${remarksTimestamp ? `<div class="mt-1 text-xs text-gray-500">${escapeHtml(remarksTimestamp)}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                    ${media.length ? `
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-paperclip"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs uppercase tracking-wide text-gray-500">Attachments</div>
+                                <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    ${media.map(f => {
+                                        const safeName = escapeHtml(f.name || 'File');
+                                        const safeUrl = f.url || '#';
+                                        const type = (f.type || '').toLowerCase();
+                                        const isImage = type.startsWith('image/');
+                                        return isImage
+                                            ? `<div class="group border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                                                    <button type="button"
+                                                            class="w-full h-24 flex items-center justify-center bg-black/5"
+                                                            onclick="openConcernImageLightbox('${safeUrl.replace(/'/g, '&#039;')}', '${safeName}')">
+                                                        <img src="${safeUrl}" alt="${safeName}" class="max-h-24 w-full object-cover group-hover:opacity-90 transition" loading="lazy">
+                                                    </button>
+                                                    <div class="px-2 py-1 border-t border-gray-100">
+                                                        <p class="text-[11px] text-gray-600 truncate" title="${safeName}">
+                                                            <i class="fas fa-image mr-1 text-gray-400"></i>${safeName}
+                                                        </p>
+                                                    </div>
+                                               </div>`
+                                            : `<a href="${safeUrl}" target="_blank"
+                                                   class="flex items-center px-3 py-2 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition">
+                                                   <i class="fas fa-file mr-2 text-gray-500"></i>
+                                                   <span class="text-xs text-gray-700 truncate" title="${safeName}">${safeName}</span>
+                                               </a>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>`;
         })
         .catch(() => {
@@ -286,6 +396,53 @@ function escapeHtml(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+// Simple lightbox for concern images
+function openConcernImageLightbox(url, caption) {
+    const safeCaption = escapeHtml(caption || '');
+    const existing = document.getElementById('concernImageLightbox');
+    if (existing) existing.remove();
+    const html = `
+        <div id="concernImageLightbox" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]">
+            <div class="relative max-w-3xl w-11/12 md:w-3/4 lg:w-1/2">
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                        <div class="flex items-center space-x-2">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                                <i class="fas fa-image text-sm"></i>
+                            </span>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Attached Image</p>
+                                <p class="text-sm font-medium text-gray-900 truncate" title="${safeCaption}">${safeCaption || 'Preview'}</p>
+                            </div>
+                        </div>
+                        <button type="button"
+                                class="text-gray-400 hover:text-gray-600"
+                                onclick="closeConcernImageLightbox()">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="bg-black flex items-center justify-center">
+                        <img src="${url}" alt="${safeCaption}" class="max-h-[70vh] w-full object-contain bg-black">
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    document.body.insertAdjacentHTML('beforeend', html);
+    document.addEventListener('keydown', concernLightboxEscHandler);
+}
+
+function closeConcernImageLightbox() {
+    const lb = document.getElementById('concernImageLightbox');
+    if (lb) lb.remove();
+    document.removeEventListener('keydown', concernLightboxEscHandler);
+}
+
+function concernLightboxEscHandler(e) {
+    if (e.key === 'Escape') {
+        closeConcernImageLightbox();
+    }
 }
 
 // Mobile-specific modal for full complaint details
@@ -328,11 +485,13 @@ function viewComplaintDetailsMobile(id) {
             const location = data?.location || 'Not specified';
             const description = data?.description || 'No description provided.';
             const userName = data?.user_name || 'N/A';
-            const category = data?.category || 'N/A';
             const status = data?.status || 'pending';
             const createdAt = data?.created_at || 'N/A';
             const assignedAt = data?.assigned_at || 'Not assigned';
             const resolvedAt = data?.resolved_at || 'Not resolved';
+            const closedAt = data?.closed_at || 'Not closed';
+            const adminRemarks = data?.admin_remarks || null;
+            const remarksTimestamp = data?.remarks_timestamp || null;
             const media = Array.isArray(data?.media_files) ? data.media_files : [];
 
             const statusClass = (s => {
@@ -358,10 +517,6 @@ function viewComplaintDetailsMobile(id) {
                             <div class="text-sm text-gray-900">${escapeHtml(userName)}</div>
                         </div>
                         <div class="p-3 rounded-lg border border-gray-200">
-                            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fas fa-tag mr-1 text-pink-600"></i> Category</div>
-                            <div class="text-sm text-gray-900">${escapeHtml(category)}</div>
-                        </div>
-                        <div class="p-3 rounded-lg border border-gray-200">
                             <div class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fas fa-info-circle mr-1 text-teal-600"></i> Status</div>
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusClass}">
                                 <i class="fas fa-circle mr-1 text-[8px]"></i>
@@ -382,6 +537,10 @@ function viewComplaintDetailsMobile(id) {
                             <div class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fas fa-check-circle mr-1 text-green-600"></i> Resolved At</div>
                             <div class="text-sm text-gray-900">${escapeHtml(resolvedAt)}</div>
                         </div>
+                        <div class="p-3 rounded-lg border border-gray-200">
+                            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fas fa-door-closed mr-1 text-purple-600"></i> Closed At</div>
+                            <div class="text-sm text-gray-900">${escapeHtml(closedAt)}</div>
+                        </div>
                     </div>
                     <div class="p-3 rounded-lg border border-gray-200">
                         <div class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fas fa-map-marker-alt mr-1 text-green-600"></i> Location</div>
@@ -391,6 +550,12 @@ function viewComplaintDetailsMobile(id) {
                         <div class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fas fa-align-left mr-1 text-yellow-600"></i> Description</div>
                         <div class="text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(description)}</div>
                     </div>
+                    ${adminRemarks ? `
+                    <div class="p-3 rounded-lg border border-gray-200">
+                        <div class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fas fa-comment-dots mr-1 text-purple-600"></i> Admin Remarks</div>
+                        <div class="text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(adminRemarks)}</div>
+                        ${remarksTimestamp ? `<div class="mt-1 text-xs text-gray-500">Updated on ${escapeHtml(remarksTimestamp)}</div>` : ''}
+                    </div>` : ''}
                     ${media.length ? `
                     <div class="p-3 rounded-lg border border-gray-200">
                         <div class="text-xs uppercase tracking-wide text-gray-500 mb-2"><i class="fas fa-paperclip mr-1 text-gray-600"></i> Attachments</div>

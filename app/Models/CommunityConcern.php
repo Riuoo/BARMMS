@@ -12,7 +12,6 @@ class CommunityConcern extends Model
     protected $fillable = [
         'resident_id',
         'title',
-        'category',
         'description',
         'location',
         'status',
@@ -20,6 +19,8 @@ class CommunityConcern extends Model
         'is_read',
         'assigned_at',
         'resolved_at',
+        'closed_at',
+        'admin_remarks',
     ];
 
     protected $casts = [
@@ -27,6 +28,7 @@ class CommunityConcern extends Model
         'is_read' => 'boolean',
         'assigned_at' => 'datetime',
         'resolved_at' => 'datetime',
+        'closed_at' => 'datetime',
     ];
 
     public function resident()

@@ -81,39 +81,7 @@
                 </div>
             </div>
 
-            <!-- Category and Priority -->
-            <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-2">
-                    <i class="fas fa-tags mr-2 text-blue-600"></i>
-                    Category & Priority
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
-                            Category <span class="text-red-500">*</span>
-                        </label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
-                                id="category" 
-                                name="category" 
-                                required>
-                            <option value="">Select a category</option>
-                            <option value="Water Supply" {{ old('category') == 'Water Supply' ? 'selected' : '' }}>Water Supply</option>
-                            <option value="Electricity" {{ old('category') == 'Electricity' ? 'selected' : '' }}>Electricity</option>
-                            <option value="Roads & Infrastructure" {{ old('category') == 'Roads & Infrastructure' ? 'selected' : '' }}>Roads & Infrastructure</option>
-                            <option value="Garbage Collection" {{ old('category') == 'Garbage Collection' ? 'selected' : '' }}>Garbage Collection</option>
-                            <option value="Street Lighting" {{ old('category') == 'Street Lighting' ? 'selected' : '' }}>Street Lighting</option>
-                            <option value="Drainage & Sewage" {{ old('category') == 'Drainage & Sewage' ? 'selected' : '' }}>Drainage & Sewage</option>
-                            <option value="Noise Pollution" {{ old('category') == 'Noise Pollution' ? 'selected' : '' }}>Noise Pollution</option>
-                            <option value="Air Pollution" {{ old('category') == 'Air Pollution' ? 'selected' : '' }}>Air Pollution</option>
-                            <option value="Public Safety" {{ old('category') == 'Public Safety' ? 'selected' : '' }}>Public Safety</option>
-                            <option value="Health & Sanitation" {{ old('category') == 'Health & Sanitation' ? 'selected' : '' }}>Health & Sanitation</option>
-                            <option value="Transportation" {{ old('category') == 'Transportation' ? 'selected' : '' }}>Transportation</option>
-                            <option value="Other" {{ old('category') == 'Other' ? 'selected' : '' }}>Other</option>
-                        </select>
-                        <p class="mt-1 text-sm text-gray-500">Choose the most appropriate category for your concern</p>
-                    </div>
-                </div>
-            </div>
+            <!-- (Category removed as per updated requirements) -->
 
             <!-- Location -->
             <div class="border-b border-gray-200 pb-6">

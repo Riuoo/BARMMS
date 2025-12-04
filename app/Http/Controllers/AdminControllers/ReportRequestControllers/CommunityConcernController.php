@@ -46,7 +46,7 @@ class CommunityConcernController
         }
         // Only select needed columns for paginated concerns and eager load resident
         $concerns = $query->select([
-            'id', 'resident_id', 'title', 'category', 'status', 'created_at'
+            'id', 'resident_id', 'title', 'status', 'created_at'
         ])->with(['resident:id,name'])->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")
         ->orderByDesc('created_at')->paginate(10);
         $stats = [
@@ -84,16 +84,28 @@ class CommunityConcernController
                 }
             }
             
+            // Determine the status change timestamp relevant to the current status
+            $statusChangedAt = null;
+            if ($complaint->status === 'resolved' && $complaint->resolved_at) {
+                $statusChangedAt = $complaint->resolved_at;
+            } elseif ($complaint->status === 'closed' && $complaint->closed_at) {
+                $statusChangedAt = $complaint->closed_at;
+            } else {
+                $statusChangedAt = $complaint->updated_at ?? $complaint->created_at;
+            }
+
             return response()->json([
                 'user_name' => $complaint->resident->name ?? 'N/A',
+                'admin_remarks' => $complaint->admin_remarks,
+                'remarks_timestamp' => $statusChangedAt ? $statusChangedAt->format('M d, Y \a\t g:i A') : null,
                 'title' => $complaint->title,
-                'category' => $complaint->category,
                 'description' => $complaint->description,
                 'location' => $complaint->location,
                 'status' => $complaint->status,
                 'created_at' => $complaint->created_at->format('M d, Y \a\t g:i A'),
                 'assigned_at' => $complaint->assigned_at ? $complaint->assigned_at->format('M d, Y \a\t g:i A') : 'Not assigned',
                 'resolved_at' => $complaint->resolved_at ? $complaint->resolved_at->format('M d, Y \a\t g:i A') : 'Not resolved',
+                'closed_at' => $complaint->closed_at ? $complaint->closed_at->format('M d, Y \a\t g:i A') : 'Not closed',
                 'media_files' => $mediaFiles,
             ]);
         } catch (\Exception $e) {
@@ -106,6 +118,7 @@ class CommunityConcernController
     {
         $validated = $request->validate([
             'status' => 'required|in:pending,under_review,in_progress,resolved,closed',
+            'admin_remarks' => 'nullable|string|max:1000',
         ]);
         try {
             $complaint = CommunityConcern::findOrFail($id);
@@ -125,6 +138,13 @@ class CommunityConcernController
                 return redirect()->back();
             }
             
+            // Require remarks when marking as resolved or closed
+            if (in_array($validated['status'], ['resolved', 'closed'])) {
+                $request->validate([
+                    'admin_remarks' => 'required|string|max:1000',
+                ]);
+            }
+            
             $complaint->status = $validated['status'];
             
             // Set timestamps based on status
@@ -134,6 +154,15 @@ class CommunityConcernController
             
             if ($validated['status'] === 'resolved' && !$complaint->resolved_at) {
                 $complaint->resolved_at = now();
+            }
+
+            if ($validated['status'] === 'closed' && !$complaint->closed_at) {
+                $complaint->closed_at = now();
+            }
+
+            // Save admin remarks if provided
+            if (array_key_exists('admin_remarks', $validated)) {
+                $complaint->admin_remarks = $validated['admin_remarks'];
             }
             
             $complaint->save();

@@ -367,6 +367,7 @@ Route::middleware(['resident.role'])->prefix('resident')->group(function () {
     // Community Concerns
     Route::get('/request-community-concern', [ResidentCommunityConcernController::class, 'requestCommunityConcern'])->name('resident.request_community_concern');
     Route::post('/request-community-concern', [ResidentCommunityConcernController::class, 'storeCommunityConcern'])->middleware(['input.sanitize', 'rate.limit:10,5']);
+    Route::get('/community-concerns/{id}/details', [ResidentCommunityConcernController::class, 'getDetails'])->name('resident.community-concerns.details');
 
     // Document Requests
     Route::get('/request-document', [ResidentDocumentRequestController::class, 'requestDocument'])->name('resident.request_document_request');

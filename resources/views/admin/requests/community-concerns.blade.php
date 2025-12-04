@@ -215,12 +215,6 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
-                                    <i class="fas fa-tag mr-2"></i>
-                                    Category
-                                </div>
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center">
                                     <i class="fas fa-info-circle mr-2"></i>
                                     Status
                                 </div>
@@ -258,12 +252,7 @@
                                     View Details
                                 </button>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    <i class="fas fa-tag mr-1"></i>
-                                    {{ $concern->category }}
-                                </span>
-                            </td>
+                            
                             <td class="px-6 py-4">
                                 @php
                                     $statusColors = [
@@ -341,14 +330,7 @@
                     </div>
                 </div>
 
-                <!-- Category Section -->
-                <div class="mb-2 flex flex-wrap gap-2">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        <i class="fas fa-tag mr-1"></i>
-                        {{ $concern->category }}
-                    </span>
-                </div>
-
+                
                 <!-- Actions Section -->
                 <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
                     <button type="button" data-id="{{ $concern->id }}"
