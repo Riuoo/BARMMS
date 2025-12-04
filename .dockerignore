@@ -1,0 +1,15 @@
+node_modules
+vendor
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+.git
+.gitignore
+tests
+Dockerfile
+docker-compose.yml
+analytics_service/__pycache__
+analytics_service/models
+
+

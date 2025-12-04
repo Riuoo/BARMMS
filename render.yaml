@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: barmms-web
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: PYTHON_ANALYTICS_URL
+        value: "https://your-analytics-service-url.onrender.com"
+
+  - type: web
+    name: barmms-analytics
+    env: docker
+    plan: free
+    dockerfilePath: ./analytics_service/Dockerfile
+    autoDeploy: true
+
+
