@@ -251,7 +251,7 @@
                                 <div class="text-sm text-gray-900">{{ $resident->email }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $resident->contact_number ?: 'No contact provided' }}</div>
+                                <div class="text-sm text-gray-900">{{ $resident->getMaskedContactNumber() }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $resident->address ?: 'No address provided' }}</div>
@@ -270,6 +270,13 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
+                                    <button type="button"
+                                            data-resident-id="{{ $resident->id }}"
+                                            data-resident-name="{{ addslashes($resident->name) }}"
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 js-show-demographics"
+                                            title="View Demographics">
+                                        <i class="fas fa-user-friends"></i>
+                                    </button>
                                     @if($canPerformTransactions)
                                     <a href="{{ route('admin.residents.edit', $resident->id) }}" 
                                        class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
@@ -343,7 +350,7 @@
                                 <p class="text-sm text-gray-500 truncate">{{ $resident->email }}</p>
                                 <p class="text-sm text-gray-500 truncate">
                                     <i class="fas fa-phone mr-1 text-gray-400"></i>
-                                    {{ $resident->contact_number ?: 'No contact provided' }}
+                                    {{ $resident->getMaskedContactNumber() }}
                                 </p>
                                 <div class="flex items-center mt-1">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusBadgeClass }}">
@@ -385,6 +392,14 @@
 
                     <!-- Action buttons -->
                     <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
+                        <button type="button"
+                                data-resident-id="{{ $resident->id }}"
+                                data-resident-name="{{ addslashes($resident->name) }}"
+                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 js-show-demographics"
+                                title="View Demographics">
+                            <i class="fas fa-user-friends mr-1"></i>
+                            Demographics
+                        </button>
                         @if($canPerformTransactions)
                         <a href="{{ route('admin.residents.edit', $resident->id) }}" 
                            class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
@@ -671,14 +686,30 @@
         // Fetch demographics data via AJAX
         fetch('/admin/residents/' + residentId + '/demographics')
             .then(response => {
+                // If the route is protected by 2FA, the server may redirect to the 2FA page (HTML)
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return null;
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+
                 if (!response.ok) {
                     return response.text().then(text => { 
                         throw new Error('HTTP error! status: ' + response.status + ', message: ' + text); 
                     });
                 }
+
+                // If we didn't get JSON (likely an HTML page), surface a friendly error
+                if (!contentType.includes('application/json')) {
+                    throw new Error('Unexpected response (non-JSON). You may need to complete 2FA or re-login.');
+                }
+
                 return response.json();
             })
             .then(data => {
+                if (!data) return; // handled redirect above
+
                 let contentHtml = '';
                 if (Object.keys(data).length === 0 || Object.values(data).every(value => value === null || value === '')) {
                     contentHtml = '<p class="text-center text-gray-500">No demographic data available for this resident.</p>';

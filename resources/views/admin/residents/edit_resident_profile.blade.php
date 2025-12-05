@@ -266,6 +266,7 @@
                         $currentOccupation = old('occupation', $resident->occupation);
                         $occupationSelectValue = in_array($currentOccupation, $knownOccupations) ? $currentOccupation : '_other';
                     @endphp
+                    @if($resident->canViewField('occupation'))
                     <div class="mt-2">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Occupation <span class="text-red-500">*</span></label>
                         <select id="occupation_select" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
@@ -284,6 +285,7 @@
                                required
                                style="display: {{ $occupationSelectValue === '_other' ? 'block' : 'none' }};">
                 </div>
+                @endif
             </div>
 
                 <!-- Demographic Information -->
@@ -321,6 +323,7 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                    @if($resident->canViewField('education_level'))
                     <div>
                         <label for="education_level" class="block text-sm font-medium text-gray-700 mb-2">
                             Education Level <span class="text-red-500">*</span>
@@ -338,6 +341,8 @@
                             <option value="Post Graduate" {{ old('education_level', $resident->education_level) == 'Post Graduate' ? 'selected' : '' }}>Post Graduate</option>
                         </select>
                     </div>
+                    @endif
+                    @if($resident->canViewField('income_level'))
                     <div>
                         <label for="income_level" class="block text-sm font-medium text-gray-700 mb-2">
                             Income Level <span class="text-red-500">*</span>
@@ -354,6 +359,8 @@
                                 <option value="High" {{ old('income_level', $resident->income_level) == 'High' ? 'selected' : '' }}>High (₱80,001 and above)</option>
                         </select>
                         </div>
+                    @endif
+                    </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                         <div>
@@ -391,12 +398,14 @@
             </div>
 
                 <!-- Emergency Contact Information -->
+                @if($resident->canViewField('emergency_contact_name') || $resident->canViewField('emergency_contact_number') || $resident->canViewField('emergency_contact_relationship'))
                 <div class="border-b border-gray-200 pb-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-2">
                         <i class="fas fa-phone-alt mr-2 text-red-600"></i>
                         Emergency Contact Information
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        @if($resident->canViewField('emergency_contact_name'))
                         <div>
                             <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
                                 Name
@@ -407,6 +416,7 @@
                                    value="{{ old('emergency_contact_name', $resident->emergency_contact_name) }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
                         </div>
+                        @endif
                         @php
                             $knownRelationships = [
                                 'Spouse',
@@ -423,6 +433,7 @@
                             $currentRelationship = old('emergency_contact_relationship', $resident->emergency_contact_relationship);
                             $relationshipSelectValue = in_array($currentRelationship, $knownRelationships) ? $currentRelationship : '_other';
                         @endphp
+                        @if($resident->canViewField('emergency_contact_relationship'))
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Relationship
@@ -442,6 +453,8 @@
                                    placeholder="e.g., Spouse, Parent, Sibling"
                                    style="display: {{ $relationshipSelectValue === '_other' ? 'block' : 'none' }};">
                         </div>
+                        @endif
+                        @if($resident->canViewField('emergency_contact_number'))
                         <div>
                             <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">
                                 Contact Number
@@ -456,8 +469,10 @@
                                    pattern="[0-9]*" 
                                    inputmode="numeric">
                         </div>
+                        @endif
                     </div>
             </div>
+                @endif
 
             <!-- Form Actions -->
                 <div class="flex justify-between mt-2">

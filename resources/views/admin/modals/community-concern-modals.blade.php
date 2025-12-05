@@ -72,6 +72,18 @@
                         </select>
                     </div>
 
+                    <div id="statusHelpText" class="hidden mb-3">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-600 mt-0.5 mr-2 flex-shrink-0"></i>
+                                <div class="text-sm text-blue-800">
+                                    <p class="font-medium mb-1" id="statusHelpTitle"></p>
+                                    <p class="text-blue-700" id="statusHelpDescription"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="remarksWrapper" class="hidden">
                         <label for="admin_remarks" class="block text-sm font-medium text-gray-700 mb-2">
                             Reason / Remarks <span class="text-red-500">*</span>
@@ -79,10 +91,6 @@
                         <textarea id="admin_remarks" name="admin_remarks" rows="3"
                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                   placeholder="Briefly explain why this concern is resolved or closed..."></textarea>
-                        <p class="mt-1 text-xs text-gray-500">
-                            Example for Closed: “Visited location, no issue requiring action was found.”<br>
-                            Example for Resolved: “Coordinated cleanup and cleared the reported obstruction.”
-                        </p>
                     </div>
                 </div>
                 
@@ -147,10 +155,14 @@ function openUpdateStatusModal(id, currentStatus) { // Added currentStatus param
         }
     }
 
-    // Helper to toggle remarks visibility based on selected status
+    // Helper to toggle remarks visibility and help text based on selected status
     function updateRemarksVisibility() {
         const value = statusSelect.value;
         const needsRemarks = value === 'resolved' || value === 'closed';
+        const helpTextDiv = document.getElementById('statusHelpText');
+        const helpTitle = document.getElementById('statusHelpTitle');
+        const helpDescription = document.getElementById('statusHelpDescription');
+        
         if (needsRemarks) {
             remarksWrapper.classList.remove('hidden');
             remarksField.setAttribute('required', 'required');
@@ -158,6 +170,29 @@ function openUpdateStatusModal(id, currentStatus) { // Added currentStatus param
             remarksWrapper.classList.add('hidden');
             remarksField.removeAttribute('required');
             remarksField.value = '';
+        }
+        
+        // Show help text for specific statuses
+        if (value === 'closed') {
+            if (helpTextDiv) {
+                helpTextDiv.classList.remove('hidden');
+                if (helpTitle) helpTitle.textContent = 'When to use "Closed" status:';
+                if (helpDescription) {
+                    helpDescription.innerHTML = 'Use this status when the concern does not require action or cannot be addressed (e.g., false report, issue already resolved by others, outside barangay jurisdiction, or no valid issue found upon investigation).';
+                }
+            }
+        } else if (value === 'resolved') {
+            if (helpTextDiv) {
+                helpTextDiv.classList.remove('hidden');
+                if (helpTitle) helpTitle.textContent = 'When to use "Resolved" status:';
+                if (helpDescription) {
+                    helpDescription.innerHTML = 'Use this status when the concern has been successfully addressed and the reported issue has been fixed or resolved through barangay action.';
+                }
+            }
+        } else {
+            if (helpTextDiv) {
+                helpTextDiv.classList.add('hidden');
+            }
         }
     }
 
@@ -352,6 +387,7 @@ function viewComplaintDetails(id) {
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="text-xs uppercase tracking-wide text-gray-500">Attachments</div>
+                                <div class="text-xs text-gray-600 mt-1 mb-2">Supporting Documents</div>
                                 <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
                                     ${media.map(f => {
                                         const safeName = escapeHtml(f.name || 'File');
@@ -558,7 +594,8 @@ function viewComplaintDetailsMobile(id) {
                     </div>` : ''}
                     ${media.length ? `
                     <div class="p-3 rounded-lg border border-gray-200">
-                        <div class="text-xs uppercase tracking-wide text-gray-500 mb-2"><i class="fas fa-paperclip mr-1 text-gray-600"></i> Attachments</div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fas fa-paperclip mr-1 text-gray-600"></i> Attachments</div>
+                        <div class="text-xs text-gray-600 mb-2">Supporting Documents</div>
                         <div class="space-y-2">
                             ${media.map(f => `
                                 <a href="${f.url}" target="_blank" class="flex items-center p-2 border rounded hover:bg-gray-50">

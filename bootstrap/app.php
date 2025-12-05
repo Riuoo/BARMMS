@@ -9,6 +9,7 @@ use App\Http\Middleware\CheckAdminSecretaryAccess;
 use App\Http\Middleware\RateLimitingMiddleware;
 use App\Http\Middleware\LoginRateLimitMiddleware;
 use App\Http\Middleware\InputSanitizationMiddleware;
+use App\Http\Middleware\RequireTwoFactorAuth;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit' => RateLimitingMiddleware::class,
             'login.rate.limit' => LoginRateLimitMiddleware::class,
             'input.sanitize' => InputSanitizationMiddleware::class,
+            '2fa' => RequireTwoFactorAuth::class,
         ]);
 
         // Add security headers to all responses (temporarily disabled)

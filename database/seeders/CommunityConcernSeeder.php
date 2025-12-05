@@ -25,7 +25,6 @@ class CommunityConcernSeeder extends Seeder
                 'resident_id' => $resident->id,
                 'title' => 'Sample Community Concern for ' . $resident->first_name,
                 'description' => 'This is a sample community concern description for demonstration purposes.',
-                'category' => $this->getRandomCategory(),
                 'status' => $this->getRandomStatus(),
                 'location' => 'Barangay Lower Malinao',
                 'is_read' => rand(0, 1),
@@ -36,28 +35,6 @@ class CommunityConcernSeeder extends Seeder
             ]);
         }
     }
-
-    private function getRandomCategory(): string
-    {
-        $categories = [
-            'Water Supply',
-            'Electricity',
-            'Roads & Infrastructure',
-            'Garbage Collection',
-            'Street Lighting',
-            'Drainage & Sewage',
-            'Noise Pollution',
-            'Air Pollution',
-            'Public Safety',
-            'Health & Sanitation',
-            'Transportation',
-            'Other'
-        ];
-        
-        return $categories[array_rand($categories)];
-    }
-
-
 
     private function getRandomStatus(): string
     {

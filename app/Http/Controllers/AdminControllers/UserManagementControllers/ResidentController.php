@@ -68,22 +68,28 @@ class ResidentController
 
     public function getDemographics(Residents $resident) // Use the correct model name, e.g., Residents
     {
-        // Return all available demographic fields from the residents table
-        return response()->json([
-            'gender' => $resident->gender,
-            'contact_number' => $resident->contact_number,
-            'birth_date' => $resident->birth_date ? $resident->birth_date->format('Y-m-d') : null,
-            'marital_status' => $resident->marital_status,
-            'occupation' => $resident->occupation,
-            'age' => $resident->age,
-            'family_size' => $resident->family_size,
-            'education_level' => $resident->education_level,
-            'income_level' => $resident->income_level,
-            'employment_status' => $resident->employment_status,
-            'emergency_contact_name' => $resident->emergency_contact_name,
-            'emergency_contact_number' => $resident->emergency_contact_number,
-            'emergency_contact_relationship' => $resident->emergency_contact_relationship
-        ]);
+        // Get all demographic fields with field-level access control
+        $demographics = [
+            'gender' => $resident->canViewField('gender') ? $resident->gender : null,
+            'contact_number' => $resident->canViewField('contact_number') ? $resident->getMaskedContactNumber() : null,
+            'birth_date' => $resident->canViewField('birth_date') && $resident->birth_date ? $resident->birth_date->format('Y-m-d') : null,
+            'marital_status' => $resident->canViewField('marital_status') ? $resident->marital_status : null,
+            'occupation' => $resident->canViewField('occupation') ? $resident->occupation : null,
+            'age' => $resident->canViewField('age') ? $resident->age : null,
+            'family_size' => $resident->canViewField('family_size') ? $resident->family_size : null,
+            'education_level' => $resident->canViewField('education_level') ? $resident->education_level : null,
+            'income_level' => $resident->canViewField('income_level') ? $resident->income_level : null,
+            'employment_status' => $resident->canViewField('employment_status') ? $resident->employment_status : null,
+            'is_pwd' => $resident->canViewField('is_pwd') ? $resident->is_pwd : null,
+            'emergency_contact_name' => $resident->canViewField('emergency_contact_name') ? $resident->getMaskedEmergencyContactName() : null,
+            'emergency_contact_number' => $resident->canViewField('emergency_contact_number') ? $resident->getMaskedEmergencyContactNumber() : null,
+            'emergency_contact_relationship' => $resident->canViewField('emergency_contact_relationship') ? $resident->getMaskedEmergencyContactRelationship() : null
+        ];
+
+        // Remove null values (fields user cannot view)
+        return response()->json(array_filter($demographics, function($value) {
+            return $value !== null;
+        }));
     }
 
     public function create()
@@ -294,6 +300,31 @@ class ResidentController
             
         }
     }
+
+    /**
+     * Confirm and execute delete after 2FA verification
+     */
+    public function deleteConfirm($id)
+    {
+        try {
+            $resident = Residents::findOrFail($id);
+            $residentEmail = $resident->email;
+            
+            // Delete the resident
+            $resident->delete();
+            
+            // Also delete any account requests with the same email
+            AccountRequest::where('email', $residentEmail)->delete();
+            
+            notify()->success('Resident deleted successfully.');
+            return redirect()->route('admin.residents');
+            
+        } catch (\Exception $e) {
+            notify()->error('Error deleting Resident: ' . $e->getMessage());
+            return redirect()->route('admin.residents');
+            
+        }
+    }
     
     public function search(Request $request)
     {
@@ -330,16 +361,21 @@ class ResidentController
         try {
             $resident = Residents::findOrFail($id);
             
-            return response()->json([
+            $summary = [
                 'id'              => $resident->id,
-                'name'            => $resident->name,
-                'age'             => $resident->age,
-                'address'         => $resident->address,
-                'civil_status'    => $resident->marital_status ?? $resident->civil_status ?? null,
-                'contact_number'  => $resident->contact_number,
-                'birth_date'      => $resident->birth_date ? $resident->birth_date->format('Y-m-d') : null,
-                'gender'          => $resident->gender,
-            ]);
+                'name'            => $resident->canViewField('name') ? $resident->name : null,
+                'age'             => $resident->canViewField('age') ? $resident->age : null,
+                'address'         => $resident->canViewField('address') ? $resident->address : null,
+                'civil_status'    => $resident->canViewField('marital_status') ? ($resident->marital_status ?? $resident->civil_status ?? null) : null,
+                'contact_number'  => $resident->canViewField('contact_number') ? $resident->getMaskedContactNumber() : null,
+                'birth_date'      => $resident->canViewField('birth_date') && $resident->birth_date ? $resident->birth_date->format('Y-m-d') : null,
+                'gender'          => $resident->canViewField('gender') ? $resident->gender : null,
+            ];
+
+            // Remove null values
+            return response()->json(array_filter($summary, function($value) {
+                return $value !== null;
+            }));
         } catch (\Exception $e) {
             Log::error('Error fetching resident summary: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to fetch resident information'], 500);

@@ -76,6 +76,17 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name(
 // Authentication route
 Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware(['input.sanitize', 'login.rate.limit']);
 
+// Two-Factor Authentication routes
+Route::prefix('2fa')->name('2fa.')->group(function () {
+    Route::get('/setup', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'showSetup'])->name('setup');
+    Route::post('/enable', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'enable'])->name('enable');
+    Route::get('/verify', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'showVerification'])->name('verify');
+    Route::post('/verify', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'verify'])->name('verify.post');
+    Route::get('/verify-operation', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'showOperationVerification'])->name('verify-operation');
+    Route::post('/verify-operation', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'verifyOperation'])->name('verify-operation.post');
+    Route::post('/disable', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'disable'])->name('disable');
+});
+
 // Registration routes (accessible via token, not directly admin)
 Route::get('/register/{token}', [RegistrationController::class, 'showRegistrationForm'])->name('register.form');
 Route::post('/register', [RegistrationController::class, 'register'])->name('register')->middleware(['input.sanitize', 'rate.limit:10,15']);
@@ -108,7 +119,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/barangay-profiles', [BarangayProfileController::class, 'barangayProfile'])->name('admin.barangay-profiles');
         Route::get('/residents', [ResidentController::class, 'residentProfile'])->name('admin.residents');
         Route::get('/residents/check-email', [ResidentController::class, 'checkEmailRequest'])->name('admin.residents.check-email');
-        Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->name('admin.residents.demographics');
+        Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->middleware('2fa:view_demographics')->name('admin.residents.demographics');
 
         // Analytics - View routes (all can access)
         Route::get('/clustering', [ClusteringController::class, 'index'])->name('admin.clustering');
@@ -161,11 +172,12 @@ Route::prefix('admin')->group(function () {
 
         Route::get('/residents/create', [ResidentController::class, 'create'])->name('admin.residents.create');
         Route::post('/residents', [ResidentController::class, 'store'])->name('admin.residents.store')->middleware(['input.sanitize', 'rate.limit:20,1']);
-        Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('admin.residents.edit');
-        Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('admin.residents.update')->middleware(['input.sanitize', 'rate.limit:20,1']);
+        Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->middleware('2fa:edit_resident')->name('admin.residents.edit');
+        Route::put('/residents/{id}', [ResidentController::class, 'update'])->middleware(['2fa:edit_resident', 'input.sanitize', 'rate.limit:20,1'])->name('admin.residents.update');
         Route::put('/residents/{id}/activate', [ResidentController::class, 'activate'])->name('admin.residents.activate');
         Route::put('/residents/{id}/deactivate', [ResidentController::class, 'deactivate'])->name('admin.residents.deactivate');
-        Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->name('admin.residents.delete');
+        Route::delete('/residents/{id}', [ResidentController::class, 'delete'])->middleware('2fa:delete_resident')->name('admin.residents.delete');
+        Route::get('/residents/{id}/delete-confirm', [ResidentController::class, 'deleteConfirm'])->middleware('2fa:delete_resident')->name('admin.residents.delete.confirm');
 
         // Blotter Reports transactions
         Route::get('/blotter-reports/create', [BlotterReportController::class, 'create'])->name('admin.blotter-reports.create');

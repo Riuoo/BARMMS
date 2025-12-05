@@ -121,7 +121,7 @@
                             Contact Number
                         </label>
                         <input type="text" 
-                               value="{{ $resident->contact_number ?? 'Not provided' }}" 
+                               value="{{ $resident->getMaskedContactNumber() }}" 
                                disabled
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
                     </div>
@@ -321,7 +321,7 @@
                     Contact Name
                 </label>
                 <input type="text" 
-                       value="{{ $resident->emergency_contact_name ?? 'Not provided' }}" 
+                       value="{{ $resident->getMaskedEmergencyContactName() }}" 
                        disabled
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
             </div>
@@ -332,7 +332,7 @@
                     Contact Number
                 </label>
                 <input type="text" 
-                       value="{{ $resident->emergency_contact_number ?? 'Not provided' }}" 
+                       value="{{ $resident->getMaskedEmergencyContactNumber() }}" 
                        disabled
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
             </div>
@@ -343,7 +343,7 @@
                     Relationship
                 </label>
                 <input type="text" 
-                       value="{{ $resident->emergency_contact_relationship ?? 'Not provided' }}" 
+                       value="{{ $resident->getMaskedEmergencyContactRelationship() }}" 
                        disabled
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" />
             </div>
@@ -426,6 +426,79 @@
         </div>
     </div>
 
+    <!-- Two-Factor Authentication Card -->
+    <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-shield-alt text-green-600 text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <h2 class="text-xl font-semibold text-gray-900">Two-Factor Authentication</h2>
+                <p class="text-sm text-gray-500">Add an extra layer of security to your account</p>
+            </div>
+        </div>
+
+        @if($resident->hasTwoFactorEnabled())
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                    <span class="text-sm font-medium text-green-800">Two-factor authentication is enabled</span>
+                </div>
+                <p class="text-sm text-green-700 mt-2">
+                    Your account is protected with two-factor authentication. You'll need to enter a verification code from your authenticator app when logging in.
+                </p>
+                @if($resident->two_factor_enabled_at)
+                    <p class="text-xs text-green-600 mt-1">
+                        Enabled on {{ $resident->two_factor_enabled_at->format('F d, Y') }}
+                    </p>
+                @endif
+            </div>
+
+            <form method="POST" action="{{ route('2fa.disable') }}" class="space-y-4">
+                @csrf
+                <div>
+                    <label for="disable_password" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-key mr-2 text-gray-400"></i>
+                        Enter Password to Disable
+                    </label>
+                    <input type="password" 
+                           id="disable_password" 
+                           name="password" 
+                           required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200" 
+                           placeholder="Enter your password" />
+                    <p class="mt-1 text-xs text-gray-500">You must enter your password to disable two-factor authentication</p>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" 
+                            class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        Disable Two-Factor Authentication
+                    </button>
+                </div>
+            </form>
+        @else
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-2"></i>
+                    <span class="text-sm font-medium text-yellow-800">Two-factor authentication is not enabled</span>
+                </div>
+                <p class="text-sm text-yellow-700 mt-2">
+                    Enable two-factor authentication to add an extra layer of security to your account. You'll need an authenticator app (like Google Authenticator or Authy) to generate verification codes.
+                </p>
+            </div>
+
+            <div class="pt-4">
+                <a href="{{ route('2fa.setup') }}" 
+                   class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                    <i class="fas fa-shield-alt mr-2"></i>
+                    Enable Two-Factor Authentication
+                </a>
+            </div>
+        @endif
+    </div>
+
     <!-- Security Information -->
     <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <div class="flex">
@@ -438,6 +511,7 @@
                     <ul class="list-disc pl-5 space-y-1">
                         <li>Use a strong password with at least 8 characters</li>
                         <li>Include a mix of letters, numbers, and special characters</li>
+                        <li>Enable two-factor authentication for extra security</li>
                         <li>Never share your password with anyone</li>
                         <li>Log out when using shared computers</li>
                         <li>Contact barangay officials if you suspect unauthorized access</li>

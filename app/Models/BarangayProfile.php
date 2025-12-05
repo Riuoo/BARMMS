@@ -18,6 +18,9 @@ class BarangayProfile extends Authenticatable
         'address',
         'contact_number',
         'active',
+        'two_factor_secret',
+        'two_factor_enabled',
+        'two_factor_enabled_at',
     ];
 
     protected $hidden = [
@@ -30,6 +33,18 @@ class BarangayProfile extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_enabled' => 'boolean',
+            'two_factor_enabled_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Check if 2FA is enabled for this user
+     * 
+     * @return bool
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_enabled && !empty($this->two_factor_secret);
     }
 }
