@@ -22,7 +22,7 @@ class MedicineRequestController
         if ($request->filled('search')) {
             $search = $request->get('search');
             $query->whereHas('resident', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
+                $q->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"]);
             })->orWhereHas('medicine', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('generic_name', 'like', "%{$search}%");
@@ -90,7 +90,7 @@ class MedicineRequestController
     public function create(Request $request)
     {
         $medicines = Medicine::active()->orderBy('name')->get();
-        $residents = Residents::orderBy('name')->get();
+        $residents = Residents::orderByRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))")->get();
         $medicalRecords = MedicalRecord::with('resident')
             ->orderBy('consultation_datetime', 'desc')
             ->get();

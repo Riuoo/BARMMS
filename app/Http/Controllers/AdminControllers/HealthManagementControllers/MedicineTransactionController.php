@@ -29,7 +29,7 @@ class MedicineTransactionController
                 $q->whereHas('medicine', function ($mq) use ($search) {
                     $mq->where('name', 'like', "%{$search}%");
                 })->orWhereHas('resident', function ($rq) use ($search) {
-                    $rq->where('name', 'like', "%{$search}%");
+                    $rq->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"]);
                 });
             });
         }

@@ -7,6 +7,7 @@
             try {
                 var savedTheme = localStorage.getItem('theme') || 'light';
                 document.documentElement.setAttribute('data-theme', savedTheme);
+                document.documentElement.classList.toggle('dark', savedTheme === 'dark');
             } catch(e) {}
         })();
     </script>
@@ -150,6 +151,91 @@
 
         [data-theme="dark"] .shadow-md {
           box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color) !important;
+        }
+
+        /* Dark mode support for Tailwind dark: classes */
+        [data-theme="dark"] .dark\:bg-gray-800 {
+          background-color: var(--bg-secondary) !important;
+        }
+
+        [data-theme="dark"] .dark\:bg-gray-700 {
+          background-color: var(--bg-primary) !important;
+        }
+
+        [data-theme="dark"] .dark\:bg-gray-900 {
+          background-color: var(--bg-primary) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-white {
+          color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-gray-200 {
+          color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-gray-300 {
+          color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-gray-400 {
+          color: var(--text-muted) !important;
+        }
+
+        [data-theme="dark"] .dark\:border-gray-700 {
+          border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .dark\:from-green-900 {
+          --tw-gradient-from: rgba(20, 83, 45, 1) !important;
+        }
+
+        [data-theme="dark"] .dark\:to-green-800 {
+          --tw-gradient-to: rgba(22, 101, 52, 1) !important;
+        }
+
+        [data-theme="dark"] .dark\:bg-green-900 {
+          background-color: rgba(20, 83, 45, 0.3) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-green-200 {
+          color: rgba(187, 247, 208, 1) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-yellow-400 {
+          color: rgba(251, 191, 36, 1) !important;
+        }
+
+        [data-theme="dark"] .dark\:bg-blue-900 {
+          background-color: rgba(30, 58, 138, 0.3) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-blue-200 {
+          color: rgba(191, 219, 254, 1) !important;
+        }
+
+        [data-theme="dark"] .dark\:bg-yellow-900 {
+          background-color: rgba(113, 63, 18, 0.3) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-yellow-200 {
+          color: rgba(254, 240, 138, 1) !important;
+        }
+
+        [data-theme="dark"] .dark\:bg-red-900 {
+          background-color: rgba(127, 29, 29, 0.3) !important;
+        }
+
+        [data-theme="dark"] .dark\:text-red-200 {
+          color: rgba(254, 202, 202, 1) !important;
+        }
+
+        [data-theme="dark"] .dark\:bg-red-400 {
+          color: rgba(248, 113, 113, 1) !important;
+        }
+
+        [data-theme="dark"] .dark\:hover\:bg-gray-600:hover {
+          background-color: var(--hover-bg) !important;
         }
 
         [data-theme="dark"] .shadow-xl {
@@ -1302,14 +1388,14 @@
         // Global role helpers for layout and scripts
         $userRole = session('user_role');
         $isNurse = $userRole === 'nurse';
-        $isAdmin = $userRole === 'admin';
         $isTreasurer = $userRole === 'treasurer';
         $isSecretary = $userRole === 'secretary';
         $isCaptain = $userRole === 'captain';
         $isCouncilor = $userRole === 'councilor';
         
-        // Only admin and secretary can perform transactions (create, edit, delete)
-        $canPerformTransactions = $isAdmin || $isSecretary;
+        // Only secretary can perform transactions (create, edit, delete) for barangay side
+        // Nurse can perform transactions for health side
+        $canPerformTransactions = $isSecretary;
         
         // All non-nurse roles can view Reports & Requests sections
         $canViewReportsRequests = !$isNurse;
@@ -1537,7 +1623,7 @@
                             }
                         @endphp
                         @if($currentAdminUser)
-                            {{ $currentAdminUser->name }}
+                            {{ $currentAdminUser->full_name }}
                         @else
                             Admin
                         @endif
@@ -1695,7 +1781,7 @@
                     </section>
                     @endif
 
-                    @if($isTreasurer || $isAdmin)
+                    @if($isTreasurer)
                     <!-- Barangay Activities & Projects -->
                     <section class="mb-6" aria-label="Barangay Activities & Projects">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Barangay Activities & Projects</h3>
@@ -1710,7 +1796,7 @@
                     </section>
                     @endif
                     
-                    @if($isNurse || $isAdmin)
+                    @if($isNurse)
                     <!-- Main Health Section -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
@@ -1725,7 +1811,7 @@
                     </section>
                     @endif
 
-                    @if($isNurse || $isAdmin)
+                    @if($isNurse)
                     <!-- Health Management -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
@@ -1764,7 +1850,7 @@
                     </section>
                     @endif
 
-                    @if($isNurse || $isAdmin)
+                    @if($isNurse)
                     <!-- Main Health Section -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Activities</h3>
@@ -1779,7 +1865,7 @@
                     </section>
                     @endif
 
-                    @if($isNurse || $isAdmin || $isSecretary || $isCaptain || $isCouncilor)
+                    @if($isNurse || $isSecretary || $isCaptain || $isCouncilor)
                     <!-- QR Code & Attendance Section -->
                     <section class="mb-6" aria-label="QR Code & Attendance">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">QR Code & Attendance</h3>
@@ -1952,7 +2038,7 @@
                     </section>
                     @endif
 
-                    @if($isTreasurer || $isAdmin)
+                    @if($isTreasurer)
                     <!-- Barangay Activities & Projects -->
                     <section class="mb-6" aria-label="Barangay Activities & Projects">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Barangay Activities & Projects</h3>
@@ -1967,7 +2053,7 @@
                     </section>
                     @endif
 
-                    @if($isNurse || $isAdmin)
+                    @if($isNurse)
                     <!-- Main Health Section -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Main</h3>
@@ -1982,7 +2068,7 @@
                     </section>
                     @endif
 
-                    @if($isNurse || $isAdmin)
+                    @if($isNurse)
                     <!-- Health Management -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
@@ -2021,7 +2107,7 @@
                     </section>
                     @endif
 
-                    @if($isNurse || $isAdmin)
+                    @if($isNurse)
                     <!-- Main Health Section -->
                     <section class="mb-6" aria-label="Health Management">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Activities</h3>
@@ -2036,7 +2122,7 @@
                     </section>
                     @endif
 
-                    @if($isNurse || $isAdmin || $isSecretary || $isCaptain || $isCouncilor)
+                    @if($isNurse || $isSecretary || $isCaptain || $isCouncilor)
                     <!-- QR Code & Attendance Section -->
                     <section class="mb-6" aria-label="QR Code & Attendance">
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">QR Code & Attendance</h3>
@@ -2970,6 +3056,7 @@
         // Set theme function
         function setTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.toggle('dark', theme === 'dark');
             localStorage.setItem('theme', theme);
             updateToggleButtons(theme);
             console.log('Theme set to:', theme);

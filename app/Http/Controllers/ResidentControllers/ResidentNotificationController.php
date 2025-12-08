@@ -22,7 +22,7 @@ class ResidentNotificationController
         // (Reverted) No auto-mark as read here
 
         $resident = \App\Models\Residents::find($userId);
-        $complainantName = $resident ? $resident->name : null;
+        $complainantName = $resident ? $resident->full_name : null;
 
         $docs = DocumentRequest::where('resident_id', $userId)
             ->orderBy('updated_at', 'desc')
@@ -146,7 +146,7 @@ class ResidentNotificationController
 
         // Fetch unread blotter notifications
         $resident = \App\Models\Residents::find($userId);
-        $complainantName = $resident ? $resident->name : null;
+        $complainantName = $resident ? $resident->full_name : null;
         // Query blotters by complainant_name since residents see blotters they filed
         $blotterUnread = $complainantName ? BlotterRequest::where('complainant_name', $complainantName)
             ->where('status', 'approved')
@@ -185,7 +185,7 @@ class ResidentNotificationController
             
             // If not found, try blotter request
             $resident = \App\Models\Residents::find($userId);
-            $complainantName = $resident ? $resident->name : null;
+            $complainantName = $resident ? $resident->full_name : null;
             // Query blotters by complainant_name since residents see blotters they filed
             $blotter = $complainantName ? BlotterRequest::where('complainant_name', $complainantName)->where('id', $id)->first() : null;
             if ($blotter) {
@@ -213,7 +213,7 @@ class ResidentNotificationController
                 
             // Mark all approved blotter requests as read
             $resident = \App\Models\Residents::find($userId);
-            $complainantName = $resident ? $resident->name : null;
+            $complainantName = $resident ? $resident->full_name : null;
             // Query blotters by complainant_name since residents see blotters they filed
             if ($complainantName) {
                 BlotterRequest::where('complainant_name', $complainantName)

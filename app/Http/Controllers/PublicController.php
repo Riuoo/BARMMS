@@ -24,7 +24,7 @@ class PublicController
 
         foreach ($allProjects as $p) {
             $bulletinItems->push((object) [
-                'type' => 'project',
+                'type' => $p->type ?? 'project',
                 'title' => $p->title,
                 'description' => $p->description,
                 'date' => optional($p->completion_date),

@@ -37,36 +37,6 @@ class AdminNotificationController
         $accountQuery = AccountRequest::query();
         $complaintQuery = CommunityConcern::query();
 
-        // Apply search filter if provided
-        if ($request->filled('search')) {
-            $search = strtolower($request->get('search'));
-            
-            // Search in blotter reports
-            $blotterQuery->where(function($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%")
-                  ->orWhereHas('resident', function($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%");
-                  });
-            });
-            
-            // Search in document requests
-            $documentQuery->where(function($q) use ($search) {
-                $q->where('document_type', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-            
-            // Search in account requests
-            $accountQuery->where('email', 'like', "%{$search}%");
-            
-            // Search in community complaints
-            $complaintQuery->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
-            });
-        }
-
         // Apply read status filter if provided
         if ($request->filled('read_status')) {
             if ($request->read_status === 'unread') {
@@ -80,6 +50,23 @@ class AdminNotificationController
                 $accountQuery->where('is_read', true);
                 $complaintQuery->where('is_read', true);
             }
+        }
+
+        // Apply date range filter if provided
+        if ($request->filled('start_date')) {
+            $startDate = $request->get('start_date');
+            $blotterQuery->where('created_at', '>=', $startDate);
+            $documentQuery->where('created_at', '>=', $startDate);
+            $accountQuery->where('created_at', '>=', $startDate);
+            $complaintQuery->where('created_at', '>=', $startDate);
+        }
+        
+        if ($request->filled('end_date')) {
+            $endDate = $request->get('end_date');
+            $blotterQuery->where('created_at', '<=', $endDate);
+            $documentQuery->where('created_at', '<=', $endDate);
+            $accountQuery->where('created_at', '<=', $endDate);
+            $complaintQuery->where('created_at', '<=', $endDate);
         }
 
         // Get all results (not paginated yet)
@@ -135,6 +122,14 @@ class AdminNotificationController
             ]);
         }
 
+        // Apply type filter if provided
+        if ($request->filled('type')) {
+            $type = $request->get('type');
+            $notifications = $notifications->filter(function($notification) use ($type) {
+                return $notification->type === $type;
+            });
+        }
+
         // Sort notifications by date (latest first)
         $notifications = $notifications->sortByDesc('created_at');
 
@@ -175,7 +170,7 @@ class AdminNotificationController
                         $notificationsData[] = [
                             'id' => $report->id,
                             'type' => 'blotter_report',
-                            'message' => 'New blotter report from ' . ($report->resident->name ?? 'Unknown Resident'),
+                            'message' => 'New blotter report from ' . ($report->resident->full_name ?? 'Unknown Resident'),
                             'created_at' => Carbon::parse($report->created_at)->toDateTimeString(),
                             'link' => route('admin.blotter-reports'),
                             'priority' => 'high'
@@ -192,7 +187,7 @@ class AdminNotificationController
                         $notificationsData[] = [
                             'id' => $request->id,
                             'type' => 'document_request',
-                            'message' => 'Document request from ' . ($request->resident->name ?? 'Unknown Resident'),
+                            'message' => 'Document request from ' . ($request->resident->full_name ?? 'Unknown Resident'),
                             'created_at' => Carbon::parse($request->created_at)->toDateTimeString(),
                             'link' => route('admin.document-requests'),
                             'priority' => 'medium'
@@ -226,7 +221,7 @@ class AdminNotificationController
                         $notificationsData[] = [
                             'id' => $concern->id,
                             'type' => 'community_complaint',
-                            'message' => 'Community concern from ' . ($concern->resident->name ?? 'Unknown Resident'),
+                            'message' => 'Community concern from ' . ($concern->resident->full_name ?? 'Unknown Resident'),
                             'created_at' => Carbon::parse($concern->created_at)->toDateTimeString(),
                             'link' => route('admin.community-concerns'),
                             'priority' => 'medium'

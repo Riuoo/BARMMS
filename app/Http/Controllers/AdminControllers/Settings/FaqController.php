@@ -19,9 +19,16 @@ class FaqController
             $search = $request->search;
             $q->where(function($sub) use ($search) {
                 $sub->where('question','like',"%$search%")
-                    ->orWhere('answer','like',"%$search%")
-                    ->orWhere('category','like',"%$search%") ;
+                    ->orWhere('answer','like',"%$search%");
             });
+        }
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $q->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $q->where('is_active', false);
+            }
         }
         $faqs = $q->orderBy('category')->orderBy('order')->get();
         $categories = Faq::distinct()->pluck('category');

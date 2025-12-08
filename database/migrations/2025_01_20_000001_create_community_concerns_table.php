@@ -20,6 +20,7 @@ return new class extends Migration
             $table->boolean('is_read')->default(false);
             $table->dateTime('assigned_at')->nullable();
             $table->dateTime('resolved_at')->nullable();
+            $table->text('admin_remarks')->nullable();
             $table->timestamps();
             $table->index('created_at');
             $table->foreign('resident_id')->references('id')->on('residents')->onDelete('cascade');

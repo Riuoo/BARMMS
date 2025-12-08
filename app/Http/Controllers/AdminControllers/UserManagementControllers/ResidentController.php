@@ -29,13 +29,14 @@ class ResidentController
 
         // For display (filtered)
         $query = Residents::query();
-        // Search by name, email, or address
+        // Search by name, email, or contact number
+        // Use CONCAT to search across separate name fields
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"])
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('address', 'like', "%{$search}%");
+                  ->orWhere('contact_number', 'like', "%{$search}%");
             });
         }
         // Filter by status
@@ -46,10 +47,18 @@ class ResidentController
                 $query->where('active', false);
             }
         }
+        // Filter by purok
+        if ($request->filled('purok')) {
+            $purok = $request->get('purok');
+            $query->where('address', 'like', "%{$purok}%");
+        }
         // Only select needed columns for the residents list and demographics modal
         $residents = $query->select([
             'id',
-            'name',
+            'first_name',
+            'middle_name',
+            'last_name',
+            'suffix',
             'email',
             'contact_number',
             'address',
@@ -62,7 +71,9 @@ class ResidentController
             'income_level',
             'employment_status',
         ])
-        ->orderByDesc('active')->orderBy('name')->paginate(10);
+        ->orderByDesc('active')
+        ->orderByRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))")
+        ->paginate(10);
         return view('admin.residents.residents', compact('residents', 'totalResidents', 'activeResidents', 'recentResidents', 'withAddress'));
     }
 
@@ -122,7 +133,32 @@ class ResidentController
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'middle_name' => [
+                'nullable',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if ($value && !empty(trim($value))) {
+                        $trimmed = trim($value);
+                        // Check if it's a single letter
+                        if (strlen($trimmed) === 1) {
+                            $fail('Please enter your full middle name. Initials are not allowed.');
+                        }
+                        // Check if it's an initial with a period (e.g., "A." or "A. ")
+                        if (preg_match('/^[A-Za-z]\.\s*$/', $trimmed)) {
+                            $fail('Please enter your full middle name. Initials are not allowed.');
+                        }
+                        // Check if it's just an initial without period but only one character (already handled above)
+                        // Additional check: if it's less than 2 characters after removing periods and spaces
+                        $cleaned = preg_replace('/[.\s]+/', '', $trimmed);
+                        if (strlen($cleaned) < 2) {
+                            $fail('Please enter your full middle name. Initials are not allowed.');
+                        }
+                    }
+                },
+            ],
             'email' => [
                 'required',
                 'email',
@@ -152,10 +188,14 @@ class ResidentController
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_number' => 'nullable|string|max:255',
             'emergency_contact_relationship' => 'nullable|string|max:255',
+            'privacy_consent' => 'required|accepted',
         ]);
         try {
             Residents::create([
-                'name' => $validatedData['name'],
+                'first_name' => $request->first_name,
+                'middle_name' => !empty(trim($request->middle_name ?? '')) ? trim($request->middle_name) : null,
+                'last_name' => $request->last_name,
+                'suffix' => !empty(trim($request->suffix ?? '')) ? trim($request->suffix) : null,
                 'email' => $validatedData['email'],
                 'role' => 'resident',
                 'address' => $validatedData['address'],
@@ -338,13 +378,27 @@ class ResidentController
             $residents = Residents::query()
                 ->where('active', true)
                 ->where(function ($q) use ($term) {
-                    $q->where('name', 'like', "%{$term}%")
+                    $q->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$term}%"])
                       ->orWhere('email', 'like', "%{$term}%")
                       ->orWhere('address', 'like', "%{$term}%");
                 })
-                ->orderBy('name')
+                ->orderByRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))")
                 ->limit(10)
-                ->get(['id', 'name', 'email']);
+                ->get(['id', 'first_name', 'middle_name', 'last_name', 'suffix', 'email']);
+
+            // Add computed name field for each resident
+            $residents = $residents->map(function ($resident) {
+                $parts = array_filter([
+                    $resident->first_name,
+                    $resident->middle_name,
+                    $resident->last_name,
+                    $resident->suffix
+                ], function($part) {
+                    return !empty(trim($part ?? ''));
+                });
+                $resident->name = implode(' ', $parts) ?: 'N/A';
+                return $resident;
+            });
 
             return response()->json($residents);
         } catch (\Exception $e) {
@@ -363,7 +417,7 @@ class ResidentController
             
             $summary = [
                 'id'              => $resident->id,
-                'name'            => $resident->canViewField('name') ? $resident->name : null,
+                'name'            => $resident->canViewField('name') ? $resident->full_name : null,
                 'age'             => $resident->canViewField('age') ? $resident->age : null,
                 'address'         => $resident->canViewField('address') ? $resident->address : null,
                 'civil_status'    => $resident->canViewField('marital_status') ? ($resident->marital_status ?? $resident->civil_status ?? null) : null,

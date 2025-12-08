@@ -113,12 +113,12 @@
         </div>
     </section>
 
-    <!-- Community Bulletin Board (Projects + Health Activities) -->
+    <!-- Community Bulletin Board (Projects + Activities) -->
     <section class="py-16 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-6">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Community Bulletin Board</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Browse completed projects and health activities across our community</p>
+                <p class="text-gray-600 max-w-2xl mx-auto">Browse completed projects and barangay activities across our community</p>
             </div>
 
             <!-- Filter Buttons -->
@@ -128,8 +128,8 @@
                     All Projects
                 </button>
                 <button id="filter-activities" type="button" class="px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <i class="fas fa-heartbeat mr-2"></i>
-                    All Health Activities
+                    <i class="fas fa-bullhorn mr-2"></i>
+                    All Activities
                 </button>
             </div>
             

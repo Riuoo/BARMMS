@@ -15,6 +15,7 @@ class CreateDocumentRequestsTable extends Migration
             $table->foreignId('document_template_id')->nullable();
             $table->string('document_type');
             $table->text('description')->nullable();
+            $table->json('additional_data')->nullable();
             $table->enum('status', ['pending', 'approved', 'completed'])->default('pending');
             $table->boolean('is_read')->default(false);
             $table->boolean('resident_is_read')->default(true);

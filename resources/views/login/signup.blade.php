@@ -32,44 +32,86 @@
                     <!-- First Name -->
                     <div class="mb-2">
                         <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
-                        <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="First Name" required>
+                        @php
+                            // Autofill logic: If first_name exists, use it; otherwise parse from full_name
+                            // First name = all words except the last word
+                            $firstName = '';
+                            if (isset($accountRequest)) {
+                                if ($accountRequest->first_name) {
+                                    $firstName = $accountRequest->first_name;
+                                } elseif ($accountRequest->full_name) {
+                                    $nameParts = explode(' ', trim($accountRequest->full_name));
+                                    if (count($nameParts) > 1) {
+                                        // All words except the last are first name
+                                        $firstName = implode(' ', array_slice($nameParts, 0, -1));
+                                    } else {
+                                        $firstName = $nameParts[0] ?? '';
+                                    }
+                                }
+                            }
+                        @endphp
+                        <input type="text" id="first_name" name="first_name" value="{{ old('first_name', $firstName) }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md bg-gray-100 cursor-not-allowed sm:text-sm" placeholder="First Name" required readonly>
                     </div>
                     <!-- Middle Name (optional, can be disabled) -->
                     <div class="mb-2">
-                        <div class="flex items-center justify-between mb-1">
-                            <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-0">Middle Name</label>
-                            <label class="inline-flex items-center text-xs text-gray-600">
-                                <input type="checkbox" id="no_middle_name" class="mr-1">
-                                No middle name
-                            </label>
-                        </div>
-                        <input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Middle Name">
+                        <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
+                        @php
+                            // Autofill middle name from AccountRequest
+                            $middleName = '';
+                            if (isset($accountRequest) && $accountRequest->middle_name) {
+                                $middleName = $accountRequest->middle_name;
+                            }
+                        @endphp
+                        <input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name', $middleName) }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md bg-gray-100 cursor-not-allowed sm:text-sm" placeholder="Middle Name" readonly>
                     </div>
                     <!-- Last Name -->
                     <div class="mb-2">
                         <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
-                        <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Last Name" required>
+                        @php
+                            // Autofill logic: If last_name exists, use it; otherwise parse from full_name
+                            // Last name = last word
+                            $lastName = '';
+                            if (isset($accountRequest)) {
+                                if ($accountRequest->last_name) {
+                                    $lastName = $accountRequest->last_name;
+                                } elseif ($accountRequest->full_name) {
+                                    $nameParts = explode(' ', trim($accountRequest->full_name));
+                                    if (count($nameParts) > 0) {
+                                        $lastName = end($nameParts);
+                                    }
+                                }
+                            }
+                        @endphp
+                        <input type="text" id="last_name" name="last_name" value="{{ old('last_name', $lastName) }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md bg-gray-100 cursor-not-allowed sm:text-sm" placeholder="Last Name" required readonly>
                     </div>
                     <!-- Suffix (optional dropdown) -->
                     <div>
                         <label for="suffix" class="block text-sm font-medium text-gray-700 mb-1">Suffix</label>
-                        <select id="suffix" name="suffix" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
+                        @php
+                            // Autofill suffix from AccountRequest
+                            $suffixValue = '';
+                            if (isset($accountRequest) && $accountRequest->suffix) {
+                                $suffixValue = $accountRequest->suffix;
+                            }
+                            $suffixValue = old('suffix', $suffixValue);
+                        @endphp
+                        <select id="suffix" name="suffix" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md bg-gray-100 cursor-not-allowed sm:text-sm" disabled>
                             <option value="">None</option>
-                            <option value="Jr." {{ old('suffix') == 'Jr.' ? 'selected' : '' }}>Jr.</option>
-                            <option value="Sr." {{ old('suffix') == 'Sr.' ? 'selected' : '' }}>Sr.</option>
-                            <option value="II" {{ old('suffix') == 'II' ? 'selected' : '' }}>II</option>
-                            <option value="III" {{ old('suffix') == 'III' ? 'selected' : '' }}>III</option>
-                            <option value="IV" {{ old('suffix') == 'IV' ? 'selected' : '' }}>IV</option>
+                            <option value="Jr." {{ $suffixValue == 'Jr.' ? 'selected' : '' }}>Jr.</option>
+                            <option value="Sr." {{ $suffixValue == 'Sr.' ? 'selected' : '' }}>Sr.</option>
+                            <option value="II" {{ $suffixValue == 'II' ? 'selected' : '' }}>II</option>
+                            <option value="III" {{ $suffixValue == 'III' ? 'selected' : '' }}>III</option>
+                            <option value="IV" {{ $suffixValue == 'IV' ? 'selected' : '' }}>IV</option>
                         </select>
+                        <input type="hidden" name="suffix" value="{{ $suffixValue }}">
                     </div>
-                    <input type="hidden" id="name" name="name" value="{{ old('name') }}">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address <span class="text-red-500">*</span></label>
                         <input id="email" name="email" type="email" autocomplete="email" required
-                                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" disabled
-                            placeholder="Email address" value="{{ $accountRequest->email ?? old('email') }}" @if($accountRequest->email) readonly @endif>
+                                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
+                            placeholder="Email address" value="{{ $accountRequest->email ?? old('email') }}" readonly>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -287,6 +329,27 @@
                 </div>
             </div>
 
+            <!-- Privacy Consent Section -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <input type="checkbox" id="privacy_consent" name="privacy_consent" value="1" required
+                        class="mt-1 mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                        {{ old('privacy_consent') ? 'checked' : '' }}>
+                    <label for="privacy_consent" class="text-sm text-gray-700 flex-1">
+                        I acknowledge that I have read and agree to the 
+                        <a href="{{ route('public.privacy') }}" target="_blank" 
+                           class="text-blue-600 hover:text-blue-800 underline font-medium">
+                            Barangay Privacy Policy
+                        </a>
+                        regarding the collection, use, and storage of my personal data.
+                        <span class="text-red-500">*</span>
+                    </label>
+                </div>
+                <p class="text-xs text-gray-600 mt-2 ml-7">
+                    By checking this box, you consent to the processing of your personal information as described in our Privacy Policy.
+                </p>
+            </div>
+
             @if ($errors->any())
                 <div class="bg-red-50 border border-red-200 text-red-600 text-sm p-4 rounded-lg">
                     <ul class="list-disc list-inside">
@@ -298,8 +361,8 @@
             @endif
 
             <div>
-                <button type="submit"
-                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                <button type="submit" id="submitBtn"
+                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
                     <i class="fas fa-user-plus mr-2"></i>
                     Complete Registration
                 </button>
@@ -313,12 +376,10 @@
             const ageInput = document.getElementById('age');
             const purokSelect = document.getElementById('purok');
             const addressInput = document.getElementById('address');
+            // Name fields are read-only, no need for JavaScript manipulation
             const firstNameInput = document.getElementById('first_name');
             const middleNameInput = document.getElementById('middle_name');
-            const noMiddleCheckbox = document.getElementById('no_middle_name');
             const lastNameInput = document.getElementById('last_name');
-            const suffixInput = document.getElementById('suffix');
-            const fullNameInput = document.getElementById('name');
             const occupationSelect = document.getElementById('occupation_select');
             const occupationInput = document.getElementById('occupation');
             const relationshipSelect = document.getElementById('relationship_select');
@@ -354,33 +415,7 @@
                 addressInput.value = `${purok}, ${barangay}, ${city}, ${province}`;
             }
 
-            // Update full name from parts
-            function updateFullName() {
-                if (!firstNameInput || !lastNameInput || !fullNameInput) return;
-                const middle = (middleNameInput && !middleNameInput.disabled)
-                    ? middleNameInput.value.trim()
-                    : '';
-                const suffixVal = suffixInput ? suffixInput.value.trim() : '';
-                const parts = [
-                    firstNameInput.value.trim(),
-                    middle,
-                    lastNameInput.value.trim(),
-                    suffixVal,
-                ].filter(Boolean);
-                fullNameInput.value = parts.join(' ');
-            }
-
-            // Handle no middle name checkbox
-            function handleNoMiddleToggle() {
-                if (!middleNameInput || !noMiddleCheckbox) return;
-                if (noMiddleCheckbox.checked) {
-                    middleNameInput.value = '';
-                    middleNameInput.disabled = true;
-                } else {
-                    middleNameInput.disabled = false;
-                }
-                updateFullName();
-            }
+            // Name fields are read-only, no JavaScript manipulation needed
 
             // Handle occupation dropdown
             function handleOccupationChange() {
@@ -446,17 +481,8 @@
                 purokSelect.addEventListener('change', updateAddress);
                 updateAddress();
             }
-            if (firstNameInput && lastNameInput) {
-                firstNameInput.addEventListener('input', updateFullName);
-                lastNameInput.addEventListener('input', updateFullName);
-                if (middleNameInput) middleNameInput.addEventListener('input', updateFullName);
-                if (suffixInput) suffixInput.addEventListener('input', updateFullName);
-                updateFullName();
-            }
-            if (noMiddleCheckbox) {
-                noMiddleCheckbox.addEventListener('change', handleNoMiddleToggle);
-                handleNoMiddleToggle();
-            }
+            // No longer need to auto-update full name
+            // No middle name checkbox removed - fields are read-only
             if (occupationSelect) {
                 occupationSelect.addEventListener('change', handleOccupationChange);
                 handleOccupationChange();
@@ -466,12 +492,88 @@
                 handleRelationshipChange();
             }
 
+            // Middle name validation function
+            function validateMiddleName(value) {
+                if (!value || !value.trim()) {
+                    return true; // Empty is allowed (optional field)
+                }
+                const trimmed = value.trim();
+                // Check if it's a single letter
+                if (trimmed.length === 1) {
+                    return false;
+                }
+                // Check if it's an initial with a period (e.g., "A." or "A. ")
+                if (/^[A-Za-z]\.\s*$/.test(trimmed)) {
+                    return false;
+                }
+                // Check if it's less than 2 characters after removing periods and spaces
+                const cleaned = trimmed.replace(/[.\s]+/g, '');
+                if (cleaned.length < 2) {
+                    return false;
+                }
+                return true;
+            }
+
+            // Add validation on middle name input
+            if (middleNameInput) {
+                middleNameInput.addEventListener('blur', function() {
+                    const value = this.value;
+                    if (!validateMiddleName(value)) {
+                        this.setCustomValidity('Please enter your full middle name. Initials are not allowed.');
+                        this.classList.add('border-red-500');
+                    } else {
+                        this.setCustomValidity('');
+                        this.classList.remove('border-red-500');
+                    }
+                });
+
+                middleNameInput.addEventListener('input', function() {
+                    const value = this.value;
+                    if (validateMiddleName(value)) {
+                        this.setCustomValidity('');
+                        this.classList.remove('border-red-500');
+                    }
+                });
+            }
+
+            // Privacy consent checkbox validation
+            const privacyConsentCheckbox = document.getElementById('privacy_consent');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            function updateSubmitButton() {
+                if (privacyConsentCheckbox && submitBtn) {
+                    submitBtn.disabled = !privacyConsentCheckbox.checked;
+                }
+            }
+            
+            if (privacyConsentCheckbox) {
+                privacyConsentCheckbox.addEventListener('change', updateSubmitButton);
+                updateSubmitButton(); // Initial check
+            }
+
             // Form submit handler - ensure all fields are populated before submission
             const form = document.querySelector('form');
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    // Ensure name is populated
-                    updateFullName();
+                    // Validate privacy consent
+                    if (!privacyConsentCheckbox || !privacyConsentCheckbox.checked) {
+                        e.preventDefault();
+                        alert('Please acknowledge and agree to the Privacy Policy by checking the consent box.');
+                        if (privacyConsentCheckbox) privacyConsentCheckbox.focus();
+                        return false;
+                    }
+
+                    // Validate middle name before submission
+                    if (middleNameInput && !middleNameInput.disabled && middleNameInput.value.trim()) {
+                        if (!validateMiddleName(middleNameInput.value)) {
+                            e.preventDefault();
+                            alert('Please enter your full middle name. Initials are not allowed.');
+                            middleNameInput.focus();
+                            return false;
+                        }
+                    }
+
+                    // Name fields are already separate, no need to combine
                     
                     // Ensure address is populated
                     updateAddress();
@@ -508,11 +610,17 @@
                         }
                     }
                     
-                    // Validate name field
-                    if (!fullNameInput || !fullNameInput.value || fullNameInput.value.trim() === '') {
+                    // Validate name fields
+                    if (!firstNameInput || !firstNameInput.value || firstNameInput.value.trim() === '') {
                         e.preventDefault();
-                        alert('Please fill in at least First Name and Last Name.');
+                        alert('Please fill in First Name.');
                         if (firstNameInput) firstNameInput.focus();
+                        return false;
+                    }
+                    if (!lastNameInput || !lastNameInput.value || lastNameInput.value.trim() === '') {
+                        e.preventDefault();
+                        alert('Please fill in Last Name.');
+                        if (lastNameInput) lastNameInput.focus();
                         return false;
                     }
                     

@@ -9,6 +9,7 @@ use App\Http\Requests\LoginRequest;
 use App\Services\TwoFactorAuthService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class LoginController
 {
@@ -19,8 +20,91 @@ class LoginController
         $this->twoFactorService = $twoFactorService;
     }
 
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
+        // Check for remember token cookie and auto-login if valid
+        if ($request->hasCookie('remember_token')) {
+            $rememberToken = $request->cookie('remember_token');
+            
+            // Check BarangayProfile first
+            $users = BarangayProfile::whereNotNull('remember_token')->get();
+            foreach ($users as $user) {
+                if (Hash::check($rememberToken, $user->remember_token)) {
+                    if ($user->active) {
+                        // Check if 2FA is enabled
+                        if ($user->hasTwoFactorEnabled()) {
+                            $deviceId = $this->twoFactorService->generateDeviceId($request);
+                            if ($this->twoFactorService->isDeviceTrusted($user->id, $deviceId)) {
+                                $request->session()->regenerate();
+                                $deviceFingerprint = Session::get('device_fingerprint') 
+                                    ?? $this->twoFactorService->getDeviceFingerprint($request);
+                                
+                                session([
+                                    'user_id' => $user->id,
+                                    'user_role' => $user->role,
+                                    '2fa_device_id' => $deviceId,
+                                    'device_fingerprint' => $deviceFingerprint,
+                                ]);
+                                
+                                if ($user->role === 'nurse') {
+                                    return redirect()->intended(route('admin.health-reports'));
+                                }
+                                return redirect()->intended(route('admin.dashboard'));
+                            }
+                        } else {
+                            // No 2FA, auto-login
+                            $request->session()->regenerate();
+                            session([
+                                'user_id' => $user->id,
+                                'user_role' => $user->role
+                            ]);
+                            
+                            if ($user->role === 'nurse') {
+                                return redirect()->intended(route('admin.health-reports'));
+                            }
+                            return redirect()->intended(route('admin.dashboard'));
+                        }
+                    }
+                }
+            }
+            
+            // Check Residents
+            $residents = Residents::whereNotNull('remember_token')->get();
+            foreach ($residents as $user) {
+                if (Hash::check($rememberToken, $user->remember_token)) {
+                    if ($user->active) {
+                        // Check if 2FA is enabled
+                        if ($user->hasTwoFactorEnabled()) {
+                            $deviceId = $this->twoFactorService->generateDeviceId($request);
+                            if ($this->twoFactorService->isDeviceTrusted($user->id, $deviceId)) {
+                                $request->session()->regenerate();
+                                $deviceFingerprint = Session::get('device_fingerprint') 
+                                    ?? $this->twoFactorService->getDeviceFingerprint($request);
+                                
+                                session([
+                                    'user_id' => $user->id,
+                                    'user_role' => 'resident',
+                                    '2fa_device_id' => $deviceId,
+                                    'device_fingerprint' => $deviceFingerprint,
+                                ]);
+                                
+                                return redirect()->intended(route('resident.dashboard'));
+                            }
+                        } else {
+                            // No 2FA, auto-login
+                            $request->session()->regenerate();
+                            session([
+                                'user_id' => $user->id,
+                                'user_role' => 'resident'
+                            ]);
+                            
+                            return redirect()->intended(route('resident.dashboard'));
+                        }
+                    }
+                }
+            }
+        }
+        
         return view('login.landing');
     }
 
@@ -80,6 +164,25 @@ class LoginController
                         );
                     }
                     
+                    // Handle Remember Me
+                    if ($request->has('remember') && $request->remember) {
+                        $rememberToken = Str::random(60);
+                        $user->remember_token = Hash::make($rememberToken);
+                        $user->save();
+                        
+                        $response->cookie(
+                            'remember_token',
+                            $rememberToken,
+                            30 * 24 * 60, // 30 days in minutes
+                            '/',
+                            null,
+                            false, // secure (false for local HTTP)
+                            true, // httpOnly
+                            false, // raw
+                            'lax' // sameSite
+                        );
+                    }
+                    
                     return $response;
                 } else {
                     // Device not trusted, require 2FA verification
@@ -95,6 +198,7 @@ class LoginController
                         '2fa_pending_user_role' => $user->role,
                         '2fa_pending_device_id' => $deviceId,
                         '2fa_pending_device_fingerprint' => $deviceFingerprint,
+                        '2fa_pending_remember' => $request->has('remember') && $request->remember,
                     ]);
                     
                     return redirect()->route('2fa.verify');
@@ -107,12 +211,34 @@ class LoginController
                     'user_role' => $user->role
                 ]);
                 
-                // Redirect based on role
+                // Handle Remember Me
+                $response = null;
                 if ($user->role === 'nurse') {
-                    return redirect()->intended(route('admin.health-reports'));
+                    $response = redirect()->intended(route('admin.health-reports'));
+                } else {
+                    $response = redirect()->intended(route('admin.dashboard'));
                 }
-
-                return redirect()->intended(route('admin.dashboard'));
+                
+                // Set remember token if remember me is checked
+                if ($request->has('remember') && $request->remember) {
+                    $rememberToken = Str::random(60);
+                    $user->remember_token = Hash::make($rememberToken);
+                    $user->save();
+                    
+                    $response->cookie(
+                        'remember_token',
+                        $rememberToken,
+                        30 * 24 * 60, // 30 days in minutes
+                        '/',
+                        null,
+                        false, // secure (false for local HTTP)
+                        true, // httpOnly
+                        false, // raw
+                        'lax' // sameSite
+                    );
+                }
+                
+                return $response;
             }
         }
 
@@ -163,6 +289,25 @@ class LoginController
                         );
                     }
                     
+                    // Handle Remember Me
+                    if ($request->has('remember') && $request->remember) {
+                        $rememberToken = Str::random(60);
+                        $user->remember_token = Hash::make($rememberToken);
+                        $user->save();
+                        
+                        $response->cookie(
+                            'remember_token',
+                            $rememberToken,
+                            30 * 24 * 60, // 30 days in minutes
+                            '/',
+                            null,
+                            false, // secure (false for local HTTP)
+                            true, // httpOnly
+                            false, // raw
+                            'lax' // sameSite
+                        );
+                    }
+                    
                     return $response;
                 } else {
                     // Device not trusted, require 2FA verification
@@ -177,6 +322,7 @@ class LoginController
                         '2fa_pending_user_role' => 'resident',
                         '2fa_pending_device_id' => $deviceId,
                         '2fa_pending_device_fingerprint' => $deviceFingerprint,
+                        '2fa_pending_remember' => $request->has('remember') && $request->remember,
                     ]);
                     
                     return redirect()->route('2fa.verify');
@@ -189,7 +335,29 @@ class LoginController
                     'user_role' => 'resident'
                 ]);
                 
-                return redirect()->intended(route('resident.dashboard'));
+                // Handle Remember Me
+                $response = redirect()->intended(route('resident.dashboard'));
+                
+                // Set remember token if remember me is checked
+                if ($request->has('remember') && $request->remember) {
+                    $rememberToken = Str::random(60);
+                    $user->remember_token = Hash::make($rememberToken);
+                    $user->save();
+                    
+                    $response->cookie(
+                        'remember_token',
+                        $rememberToken,
+                        30 * 24 * 60, // 30 days in minutes
+                        '/',
+                        null,
+                        false, // secure (false for local HTTP)
+                        true, // httpOnly
+                        false, // raw
+                        'lax' // sameSite
+                    );
+                }
+                
+                return $response;
             }
         }
 
@@ -199,10 +367,28 @@ class LoginController
 
     public function logout(Request $request)
     {
+        // Clear remember token if exists
+        $userId = session('user_id');
+        $userRole = session('user_role');
+        
+        if ($userId) {
+            if ($userRole === 'resident') {
+                $user = Residents::find($userId);
+            } else {
+                $user = BarangayProfile::find($userId);
+            }
+            
+            if ($user) {
+                $user->remember_token = null;
+                $user->save();
+            }
+        }
+        
         // Clear all session data
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect('/');
+        // Clear remember token cookie
+        return redirect('/')->cookie('remember_token', null, -1);
     }
 }

@@ -14,13 +14,14 @@ class AccomplishedProjectRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'type' => 'required|string|in:project,activity',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'category' => 'required|string',
             'location' => 'nullable|string',
             'budget' => 'nullable|numeric|min:0',
             'start_date' => 'required|date',
-            'completion_date' => 'required|date|after:start_date',
+            'completion_date' => 'required|date|after_or_equal:start_date',
             'beneficiaries' => 'nullable|string',
             'impact' => 'nullable|string',
             'funding_source' => 'nullable|string',
@@ -34,12 +35,14 @@ class AccomplishedProjectRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'The project title is required.',
-            'description.required' => 'The project description is required.',
-            'category.required' => 'Please select a project category.',
+            'type.required' => 'Please choose if this is a project or activity.',
+            'type.in' => 'Type must be either project or activity.',
+            'title.required' => 'The title is required.',
+            'description.required' => 'The description is required.',
+            'category.required' => 'Please select a category.',
             'start_date.required' => 'The start date is required.',
             'completion_date.required' => 'The completion date is required.',
-            'completion_date.after' => 'The completion date must be after the start date.',
+            'completion_date.after_or_equal' => 'The completion date must be on or after the start date.',
             'budget.numeric' => 'The budget must be a valid number.',
             'budget.min' => 'The budget cannot be negative.',
             'image.image' => 'The file must be an image.',

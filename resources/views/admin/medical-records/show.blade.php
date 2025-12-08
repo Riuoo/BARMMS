@@ -32,7 +32,7 @@
                 </div>
                 <div class="ml-4">
                     <div class="text-sm text-gray-500">Record ID: #{{ $medicalRecord->id }}</div>
-                    <h2 class="text-xl font-semibold text-gray-900">{{ $medicalRecord->resident?->name ?? 'N/A' }}</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">{{ $medicalRecord->resident?->full_name ?? 'N/A' }}</h2>
                     <p class="text-sm text-gray-600">{{ $medicalRecord->resident?->role ?? 'Patient' }}</p>
                 </div>
             </div>
@@ -85,7 +85,7 @@
             <div class="space-y-4">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Name:</span>
-                    <span class="font-medium">{{ $medicalRecord->resident?->name ?? 'N/A' }}</span>
+                    <span class="font-medium">{{ $medicalRecord->resident?->full_name ?? 'N/A' }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Email:</span>

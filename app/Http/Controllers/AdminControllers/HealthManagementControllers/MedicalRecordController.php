@@ -18,7 +18,7 @@ class MedicalRecordController
         if ($request->filled('search')) {
             $search = $request->get('search');
             $query->whereHas('resident', function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"])
                   ->orWhere('email', 'like', "%{$search}%");
             })->orWhere('chief_complaint', 'like', "%{$search}%")
               ->orWhere('diagnosis', 'like', "%{$search}%");
@@ -37,7 +37,7 @@ class MedicalRecordController
         $medicalRecords = $query->select([
             'id', 'resident_id', 'attending_health_worker_id', 'created_at', 'consultation_datetime',
             'consultation_type', 'chief_complaint', 'diagnosis', 'follow_up_date'
-        ])->with(['resident:id,name,email', 'attendingHealthWorker:id,name'])
+        ])->with(['resident:id,first_name,middle_name,last_name,suffix,email', 'attendingHealthWorker:id,first_name,middle_name,last_name,suffix'])
         ->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.medical-records.index', compact('medicalRecords', 'stats'));
     }

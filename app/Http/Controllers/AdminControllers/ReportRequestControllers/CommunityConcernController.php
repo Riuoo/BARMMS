@@ -36,18 +36,26 @@ class CommunityConcernController
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
+                $q->where('location', 'like', "%{$search}%")
+                  ->orWhereHas('resident', function($uq) use ($search) {
+                      $uq->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"]);
+                  });
             });
         }
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
+        // Filter by purok
+        if ($request->filled('purok')) {
+            $purok = $request->get('purok');
+            $query->whereHas('resident', function($q) use ($purok) {
+                $q->where('address', 'like', "%{$purok}%");
+            });
+        }
         // Only select needed columns for paginated concerns and eager load resident
         $concerns = $query->select([
             'id', 'resident_id', 'title', 'status', 'created_at'
-        ])->with(['resident:id,name'])->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")
+        ])->with(['resident:id,first_name,middle_name,last_name,suffix'])->orderByRaw("FIELD(status, 'pending', 'under_review', 'in_progress', 'resolved', 'closed')")
         ->orderByDesc('created_at')->paginate(10);
         $stats = [
             'total' => $total,
@@ -95,7 +103,7 @@ class CommunityConcernController
             }
 
             return response()->json([
-                'user_name' => $complaint->resident->name ?? 'N/A',
+                'user_name' => $complaint->resident->full_name ?? 'N/A',
                 'admin_remarks' => $complaint->admin_remarks,
                 'remarks_timestamp' => $statusChangedAt ? $statusChangedAt->format('M d, Y \a\t g:i A') : null,
                 'title' => $complaint->title,

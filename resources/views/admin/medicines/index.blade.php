@@ -1,8 +1,8 @@
 @php
     $userRole = session('user_role');
-    $isAdmin = $userRole === 'admin';
     $isSecretary = $userRole === 'secretary';
-    $canPerformTransactions = $isAdmin || $isSecretary;
+    $isNurse = $userRole === 'nurse';
+    $canPerformTransactions = $isSecretary || $isNurse;
 @endphp
 @extends('admin.main.layout')
 

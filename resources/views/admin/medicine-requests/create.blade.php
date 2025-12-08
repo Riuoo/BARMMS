@@ -114,7 +114,7 @@
                         <option value="">Select medical record (if applicable)</option>
                         @foreach($medicalRecords as $record)
                             <option value="{{ $record->id }}" {{ $selectedMedicalRecordId == $record->id ? 'selected' : '' }}>
-                                {{ $record->resident->name ?? 'Unknown' }} - {{ $record->consultation_datetime->format('M d, Y') }} ({{ $record->diagnosis ?? 'No diagnosis' }})
+                                {{ $record->resident ? $record->resident->full_name : 'Unknown' }} - {{ $record->consultation_datetime->format('M d, Y') }} ({{ $record->diagnosis ?? 'No diagnosis' }})
                             </option>
                         @endforeach
                     </select>

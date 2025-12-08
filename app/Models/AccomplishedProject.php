@@ -10,6 +10,7 @@ class AccomplishedProject extends Model
     use HasFactory;
 
     protected $fillable = [
+        'type',
         'title',
         'description',
         'category',

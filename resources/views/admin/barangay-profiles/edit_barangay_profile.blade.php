@@ -69,13 +69,20 @@
                         Basic Information
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @php
+                            // Use separate name fields
+                            $firstName = $barangayProfile->first_name ?? '';
+                            $middleName = $barangayProfile->middle_name ?? '';
+                            $lastName = $barangayProfile->last_name ?? '';
+                            $suffix = $barangayProfile->suffix ?? '';
+                        @endphp
                         <!-- First Name -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 First Name <span class="text-gray-500">(Read Only)</span>
                             </label>
                             <input type="text" 
-                                   value="{{ old('first_name', isset($nameParts) ? $nameParts['first_name'] : '') }}" 
+                                   value="{{ old('first_name', $firstName) }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
                                    readonly>
                         </div>
@@ -85,7 +92,7 @@
                                 Middle Name <span class="text-gray-500">(Read Only)</span>
                             </label>
                             <input type="text" 
-                                   value="{{ old('middle_name', isset($nameParts) ? $nameParts['middle_name'] : '') }}" 
+                                   value="{{ old('middle_name', $middleName) }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
                                    readonly>
                         </div>
@@ -95,7 +102,7 @@
                                 Last Name <span class="text-gray-500">(Read Only)</span>
                             </label>
                             <input type="text" 
-                                   value="{{ old('last_name', isset($nameParts) ? $nameParts['last_name'] : '') }}" 
+                                   value="{{ old('last_name', $lastName) }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
                                    readonly>
                         </div>
@@ -105,7 +112,7 @@
                                 Suffix <span class="text-gray-500">(Read Only)</span>
                             </label>
                             <input type="text" 
-                                   value="{{ old('suffix', isset($nameParts) ? $nameParts['suffix'] : '') }}" 
+                                   value="{{ old('suffix', $suffix) }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed" 
                                    readonly>
                         </div>

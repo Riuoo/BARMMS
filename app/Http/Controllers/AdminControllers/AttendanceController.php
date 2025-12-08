@@ -15,12 +15,23 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class AttendanceController
 {
     /**
+     * Determine allowed event type based on user role.
+     * Barangay-side roles (secretary/captain/councilor/others) use barangay activities/projects ("event"),
+     * while health-side role (nurse) uses health center activities.
+     */
+    private function resolveEventTypeForRole(): string
+    {
+        $role = Session::get('user_role');
+        return $role === 'nurse' ? 'health_center_activity' : 'event';
+    }
+
+    /**
      * Show QR scanner interface
      */
     public function scanner(Request $request)
     {
         $eventId = $request->get('event_id');
-        $eventType = $request->get('event_type', 'event');
+        $eventType = $this->resolveEventTypeForRole();
         $event = null;
         $eventName = null;
 
@@ -35,16 +46,21 @@ class AttendanceController
             }
         }
 
-        // Barangay activities/projects for dropdown – show ONGOING only
-        $events = AccomplishedProject::whereIn('status', ['Ongoing', 'ongoing'])
-            ->orderBy('start_date', 'asc')
-            ->orderBy('completion_date', 'asc')
-            ->get();
+        // Barangay activities/projects for dropdown – show ONGOING only (activities only)
+        $events = $eventType === 'event'
+            ? AccomplishedProject::where('type', 'activity')
+                ->whereIn('status', ['Ongoing', 'ongoing'])
+                ->orderBy('start_date', 'asc')
+                ->orderBy('completion_date', 'asc')
+                ->get()
+            : collect();
 
         // Health activities for dropdown – show ONGOING only
-        $healthActivities = HealthCenterActivity::where('status', 'Ongoing')
-            ->orderBy('activity_date', 'asc')
-            ->get();
+        $healthActivities = $eventType === 'health_center_activity'
+            ? HealthCenterActivity::where('status', 'Ongoing')
+                ->orderBy('activity_date', 'asc')
+                ->get()
+            : collect();
 
         // Pre-format options for clean JavaScript (avoids Blade inside JS)
         $formattedEvents = $events->map(function ($e) {
@@ -110,9 +126,17 @@ class AttendanceController
             'event_type' => 'nullable|string|in:event,health_center_activity',
         ]);
 
+        $allowedEventType = $this->resolveEventTypeForRole();
+        if ($request->filled('event_type') && $request->input('event_type') !== $allowedEventType) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied for this event type.',
+            ], 403);
+        }
+
         $token = $request->input('token');
         $eventId = $request->input('event_id');
-        $eventType = $request->input('event_type', 'event');
+        $eventType = $allowedEventType;
         $scannedBy = Session::get('user_id');
         $notes = $request->input('notes');
 
@@ -133,6 +157,24 @@ class AttendanceController
             ], 403);
         }
 
+        // Validate event belongs to allowed type
+        if ($eventId) {
+            if ($eventType === 'event') {
+                $event = AccomplishedProject::where('id', $eventId)
+                    ->where('type', 'activity')
+                    ->first();
+            } else {
+                $event = HealthCenterActivity::find($eventId);
+            }
+
+            if (!$event) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Event not found or not accessible.',
+                ], 404);
+            }
+        }
+
         // Check for duplicate scan (only for residents with accounts)
         $existingLog = AttendanceLog::where('resident_id', $resident->id)
             ->where('event_id', $eventId)
@@ -146,7 +188,7 @@ class AttendanceController
                 'message' => 'Already attended. This resident has already been scanned for this event.',
                 'resident' => [
                     'id' => $resident->id,
-                    'name' => $resident->name,
+                    'name' => $resident->full_name,
                     'email' => $resident->email,
                 ],
                 'previous_scan' => $existingLog->scanned_at->format('Y-m-d H:i:s'),
@@ -181,7 +223,7 @@ class AttendanceController
                 'message' => 'Attendance logged successfully.',
                 'resident' => [
                     'id' => $resident->id,
-                    'name' => $resident->name,
+                    'name' => $resident->full_name,
                     'email' => $resident->email,
                 ],
                 'attendance_count' => $this->getAttendanceCount($eventId, $eventType),
@@ -207,8 +249,16 @@ class AttendanceController
             'notes' => 'nullable|string|max:1000',
         ]);
 
+        $allowedEventType = $this->resolveEventTypeForRole();
+        if ($request->filled('event_type') && $request->input('event_type') !== $allowedEventType) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied for this event type.',
+            ], 403);
+        }
+
         $eventId = $request->input('event_id');
-        $eventType = $request->input('event_type', 'event');
+        $eventType = $allowedEventType;
         $scannedBy = Session::get('user_id');
         $enteredName = trim($request->input('name'));
         $enteredContact = trim($request->input('contact', ''));
@@ -221,8 +271,27 @@ class AttendanceController
             ], 400);
         }
 
+        // Validate event belongs to allowed type
+        if ($eventType === 'event') {
+            $event = AccomplishedProject::where('id', $eventId)
+                ->where('type', 'activity')
+                ->first();
+        } else {
+            $event = HealthCenterActivity::find($eventId);
+        }
+
+        if (!$event) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Event not found or not accessible.',
+            ], 404);
+        }
+
         // Try to find matching resident by name (case-insensitive, trimmed)
-        $resident = Residents::whereRaw('LOWER(TRIM(name)) = ?', [strtolower(trim($enteredName))])
+        $resident = Residents::whereRaw(
+            "LOWER(TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')))) = ?",
+            [strtolower(trim($enteredName))]
+        )
             ->where('active', true)
             ->first();
 
@@ -241,7 +310,7 @@ class AttendanceController
                     'message' => 'Already attended. This resident has already been scanned for this event.',
                     'resident' => [
                         'id' => $resident->id,
-                        'name' => $resident->name,
+                        'name' => $resident->full_name,
                         'email' => $resident->email,
                     ],
                     'previous_scan' => $existingLog->scanned_at->format('Y-m-d H:i:s'),
@@ -277,7 +346,7 @@ class AttendanceController
                     'message' => 'Resident attendance logged successfully.',
                     'resident' => [
                         'id' => $resident->id,
-                        'name' => $resident->name,
+                        'name' => $resident->full_name,
                         'email' => $resident->email,
                     ],
                     'is_guest' => false,
@@ -369,13 +438,29 @@ class AttendanceController
     public function getAttendance(Request $request)
     {
         $eventId = $request->get('event_id');
-        $eventType = $request->get('event_type', 'event');
+        $eventType = $this->resolveEventTypeForRole();
 
         if (!$eventId) {
             return response()->json([
                 'count' => 0,
                 'attendees' => [],
             ]);
+        }
+
+        // Ensure event belongs to allowed type before returning data
+        if ($eventType === 'event') {
+            $event = AccomplishedProject::where('id', $eventId)
+                ->where('type', 'activity')
+                ->first();
+        } else {
+            $event = HealthCenterActivity::find($eventId);
+        }
+
+        if (!$event) {
+            return response()->json([
+                'count' => 0,
+                'attendees' => [],
+            ], 404);
         }
 
         $logs = AttendanceLog::with(['resident', 'event', 'healthCenterActivity'])
@@ -389,7 +474,7 @@ class AttendanceController
             'attendees' => $logs->map(function ($log) {
                 return [
                     'id' => $log->resident_id ?? null,
-                    'name' => $log->resident ? $log->resident->name : $log->guest_name,
+                    'name' => $log->resident ? $log->resident->full_name : $log->guest_name,
                     'email' => $log->resident ? $log->resident->email : ($log->guest_contact ?? 'N/A'),
                     'is_guest' => $log->guest_name !== null,
                     'scanned_at' => $log->scanned_at->format('Y-m-d H:i:s'),
@@ -405,15 +490,16 @@ class AttendanceController
     {
         $search = $request->get('search');
         $eventId = $request->get('event_id');
-        $eventType = $request->get('event_type');
+        $eventType = $this->resolveEventTypeForRole();
 
-        $query = AttendanceLog::with(['resident', 'event', 'healthCenterActivity', 'scanner']);
+        $query = AttendanceLog::with(['resident', 'event', 'healthCenterActivity', 'scanner'])
+            ->where('event_type', $eventType);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 // Search in residents
                 $q->whereHas('resident', function ($subQ) use ($search) {
-                    $subQ->where('name', 'like', "%{$search}%")
+                    $subQ->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"])
                           ->orWhere('email', 'like', "%{$search}%");
                 })
                 // Or search in guest names/contacts
@@ -426,17 +512,19 @@ class AttendanceController
             $query->where('event_id', $eventId);
         }
 
-        if ($eventType) {
-            $query->where('event_type', $eventType);
-        }
-
         $logs = $query->orderBy('scanned_at', 'desc')->paginate(20);
 
-        // For barangay activities/projects we now use AccomplishedProject
-        $events = AccomplishedProject::orderBy('completion_date', 'desc')
-            ->orderBy('start_date', 'desc')
-            ->get();
-        $healthActivities = HealthCenterActivity::orderBy('activity_date', 'desc')->get();
+        // Filter selectable lists based on allowed event type
+        $events = $eventType === 'event'
+            ? AccomplishedProject::where('type', 'activity')
+                ->orderBy('completion_date', 'desc')
+                ->orderBy('start_date', 'desc')
+                ->get()
+            : collect();
+
+        $healthActivities = $eventType === 'health_center_activity'
+            ? HealthCenterActivity::orderBy('activity_date', 'desc')->get()
+            : collect();
 
         return view('admin.attendance.logs', compact('logs', 'events', 'healthActivities', 'search', 'eventId', 'eventType'));
     }
@@ -447,7 +535,12 @@ class AttendanceController
     public function report(Request $request)
     {
         $eventId = $request->get('event_id');
-        $eventType = $request->get('event_type', 'event');
+        $allowedEventType = $this->resolveEventTypeForRole();
+        $eventType = $request->get('event_type', $allowedEventType);
+        if ($eventType !== $allowedEventType) {
+            notify()->error('Access denied for this event type.');
+            return back();
+        }
         $format = $request->get('format', 'pdf'); // pdf or excel
 
         if (!$eventId) {

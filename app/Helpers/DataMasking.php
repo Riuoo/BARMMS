@@ -112,8 +112,8 @@ class DataMasking
             return 'full';
         }
 
-        // Admin and secretary can see full data
-        if (in_array($userRole, ['admin', 'secretary'])) {
+        // Secretary can see full data
+        if ($userRole === 'secretary') {
             return 'none';
         }
 

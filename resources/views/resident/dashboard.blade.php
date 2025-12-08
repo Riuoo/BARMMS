@@ -13,7 +13,7 @@
     <div id="residentHeaderContent" class="mb-2" style="display: none;">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Welcome back, {{ $resident->name }}</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Welcome back, {{ $resident->full_name }}</h1>
                 <p class="text-sm md:text-base text-gray-600">Here's what's happening with your requests today</p>
             </div>
             <div class="mt-4 sm:mt-0">
@@ -122,7 +122,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-900">Blotter Report</p>
-                        <p class="text-sm text-gray-500">vs {{ $request->resident->name ?? 'N/A' }}</p>
+                        <p class="text-sm text-gray-500">vs {{ $request->resident ? $request->resident->full_name : 'N/A' }}</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">

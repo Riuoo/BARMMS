@@ -350,7 +350,7 @@ class PythonAnalyticsService
         foreach ($residents as $resident) {
             $formatted[] = [
                 'id' => $resident->id ?? null,
-                'name' => $resident->name ?? '',
+                'name' => $resident->full_name ?? '',
                 'age' => $resident->age ?? 0,
                 'family_size' => $resident->family_size ?? 0,
                 'education_level' => $resident->education_level ?? '',

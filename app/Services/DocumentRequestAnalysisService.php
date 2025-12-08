@@ -14,10 +14,12 @@ class DocumentRequestAnalysisService
         $requests = DocumentRequest::with('resident')->get();
         
         $purokCounts = $this->countByPurok($requests);
+        $purokTypeBreakdown = $this->getPurokTypeBreakdown($requests);
         $totalRequests = array_sum($purokCounts);
         
         return [
             'purokCounts' => $purokCounts,
+            'purokTypeBreakdown' => $purokTypeBreakdown,
             'totalRequests' => $totalRequests,
             'totalPuroks' => count($purokCounts),
             'analysis' => $this->generateInsights($purokCounts, $totalRequests)
@@ -84,6 +86,31 @@ class DocumentRequestAnalysisService
             ];
         }
         return $distribution;
+    }
+
+    /**
+     * Get breakdown of document types by purok
+     */
+    private function getPurokTypeBreakdown($requests): array
+    {
+        $breakdown = [];
+        
+        foreach ($requests as $request) {
+            $purok = $this->extractPurok(optional($request->resident)->address ?? '');
+            $documentType = $request->document_type ?? 'Unknown';
+            
+            if (!isset($breakdown[$purok])) {
+                $breakdown[$purok] = [];
+            }
+            
+            if (!isset($breakdown[$purok][$documentType])) {
+                $breakdown[$purok][$documentType] = 0;
+            }
+            
+            $breakdown[$purok][$documentType]++;
+        }
+        
+        return $breakdown;
     }
 }
 

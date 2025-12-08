@@ -27,7 +27,32 @@ class RegistrationController
     {
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'middle_name' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    function ($attribute, $value, $fail) {
+                        if ($value && !empty(trim($value))) {
+                            $trimmed = trim($value);
+                            // Check if it's a single letter
+                            if (strlen($trimmed) === 1) {
+                                $fail('Please enter your full middle name. Initials are not allowed.');
+                            }
+                            // Check if it's an initial with a period (e.g., "A." or "A. ")
+                            if (preg_match('/^[A-Za-z]\.\s*$/', $trimmed)) {
+                                $fail('Please enter your full middle name. Initials are not allowed.');
+                            }
+                            // Check if it's just an initial without period but only one character (already handled above)
+                            // Additional check: if it's less than 2 characters after removing periods and spaces
+                            $cleaned = preg_replace('/[.\s]+/', '', $trimmed);
+                            if (strlen($cleaned) < 2) {
+                                $fail('Please enter your full middle name. Initials are not allowed.');
+                            }
+                        }
+                    },
+                ],
                 'email' => 'required|email|max:255|unique:residents,email',
                 'address' => 'required|string|max:500',
                 'gender' => 'required|in:Male,Female',
@@ -46,6 +71,7 @@ class RegistrationController
                 'emergency_contact_relationship' => 'required|string|max:255',
                 'password' => 'required|string|min:8|confirmed',
                 'token' => 'required|string',
+                'privacy_consent' => 'required|accepted',
             ]);
 
             if ($validator->fails()) {
@@ -61,7 +87,10 @@ class RegistrationController
 
             // Create a new Residents user with all demographic information
             $user = Residents::create([
-                'name' => $request->name,
+                'first_name' => $request->first_name,
+                'middle_name' => !empty(trim($request->middle_name ?? '')) ? trim($request->middle_name) : null,
+                'last_name' => $request->last_name,
+                'suffix' => !empty(trim($request->suffix ?? '')) ? trim($request->suffix) : null,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => 'resident',
@@ -85,6 +114,17 @@ class RegistrationController
 
             $accountRequest->status = 'completed';
             $accountRequest->token = null;
+            // Update full_name for backward compatibility
+            $nameParts = array_filter([
+                $request->first_name,
+                $request->middle_name ?? '',
+                $request->last_name,
+                $request->suffix ?? ''
+            ], function($part) {
+                return !empty(trim($part ?? ''));
+            });
+            $accountRequest->full_name = implode(' ', $nameParts);
+            $accountRequest->address = $request->address;
             $accountRequest->save();
 
             notify()->success('Registration successful! You can now log in.');

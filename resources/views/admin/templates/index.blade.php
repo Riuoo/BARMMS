@@ -2,9 +2,8 @@
 
 @php
     $userRole = session('user_role');
-    $isAdmin = $userRole === 'admin';
     $isSecretary = $userRole === 'secretary';
-    $canPerformTransactions = $isAdmin || $isSecretary;
+    $canPerformTransactions = $isSecretary;
 @endphp
 
 @section('title', 'Document Templates')
@@ -76,7 +75,7 @@
                             type="text"
                             id="searchInput"
                             name="search"
-                            placeholder="Search by document type, description..."
+                            placeholder="Search by document type..."
                             value="{{ request('search') }}"
                             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                         >
@@ -95,8 +94,6 @@
                         <option value="clearances" {{ request('category') === 'clearances' ? 'selected' : '' }}>Clearances</option>
                         <option value="permits" {{ request('category') === 'permits' ? 'selected' : '' }}>Permits</option>
                         <option value="identifications" {{ request('category') === 'identifications' ? 'selected' : '' }}>Identifications</option>
-                        <option value="reports" {{ request('category') === 'reports' ? 'selected' : '' }}>Reports</option>
-                        <option value="other" {{ request('category') === 'other' ? 'selected' : '' }}>Other</option>
                     </select>
                 </div>
 

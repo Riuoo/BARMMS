@@ -12,10 +12,11 @@ class FeaturedItemsService
      */
     public function getTotalFeaturedCount(): int
     {
-        $featuredProjects = AccomplishedProject::where('is_featured', true)->count();
-        $featuredActivities = HealthCenterActivity::where('is_featured', true)->count();
+        $featuredProjects = AccomplishedProject::where('type', 'project')->where('is_featured', true)->count();
+        $featuredBarangayActivities = AccomplishedProject::where('type', 'activity')->where('is_featured', true)->count();
+        $featuredHealthActivities = HealthCenterActivity::where('is_featured', true)->count();
         
-        return $featuredProjects + $featuredActivities;
+        return $featuredProjects + $featuredBarangayActivities + $featuredHealthActivities;
     }
 
     /**
@@ -23,9 +24,15 @@ class FeaturedItemsService
      */
     public function getFeaturedCounts(): array
     {
+        $featuredProjects = AccomplishedProject::where('type', 'project')->where('is_featured', true)->count();
+        $featuredBarangayActivities = AccomplishedProject::where('type', 'activity')->where('is_featured', true)->count();
+        $featuredHealthActivities = HealthCenterActivity::where('is_featured', true)->count();
+
         return [
-            'projects' => AccomplishedProject::where('is_featured', true)->count(),
-            'activities' => HealthCenterActivity::where('is_featured', true)->count(),
+            'projects' => $featuredProjects,
+            'activities' => $featuredBarangayActivities,
+            'health_activities' => $featuredHealthActivities,
+            'activities_combined' => $featuredBarangayActivities + $featuredHealthActivities,
             'total' => $this->getTotalFeaturedCount(),
             'limit' => 6,
             'can_add_more' => $this->canAddMoreFeatured(),
@@ -102,13 +109,17 @@ class FeaturedItemsService
         $suggestions = [];
         
         // Get oldest featured projects
-        $oldProjects = AccomplishedProject::where('is_featured', true)
+        $oldProjects = AccomplishedProject::where('type', 'project')->where('is_featured', true)
             ->orderBy('completion_date', 'asc')
             ->take(3)
             ->get(['id', 'title', 'completion_date']);
             
         // Get oldest featured activities
-        $oldActivities = HealthCenterActivity::where('is_featured', true)
+        $oldActivities = AccomplishedProject::where('type', 'activity')->where('is_featured', true)
+            ->orderBy('completion_date', 'asc')
+            ->take(3)
+            ->get(['id', 'title', 'completion_date']);
+        $oldHealthActivities = HealthCenterActivity::where('is_featured', true)
             ->orderBy('activity_date', 'asc')
             ->take(3)
             ->get(['id', 'activity_name', 'activity_date']);
@@ -128,9 +139,20 @@ class FeaturedItemsService
             $suggestions['activities'] = $oldActivities->map(function($activity) {
                 return [
                     'id' => $activity->id,
+                    'name' => $activity->title,
+                    'date' => $activity->completion_date,
+                    'type' => 'activity'
+                ];
+            });
+        }
+
+        if ($oldHealthActivities->isNotEmpty()) {
+            $suggestions['health_activities'] = $oldHealthActivities->map(function($activity) {
+                return [
+                    'id' => $activity->id,
                     'name' => $activity->activity_name,
                     'date' => $activity->activity_date,
-                    'type' => 'activity'
+                    'type' => 'health_center_activity'
                 ];
             });
         }

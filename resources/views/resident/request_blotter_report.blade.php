@@ -221,7 +221,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Skeleton transition
     setTimeout(() => {
-        const fs = document.getElementById('residentRequestFormSkeleton');
+        const fs = document.getElementById('rbFormSkeleton');
         const content = document.getElementById('rbContent');
         if (fs) fs.style.display = 'none';
         if (content) content.style.display = 'block';

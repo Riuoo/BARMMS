@@ -28,15 +28,21 @@ class BlotterReportController
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('complainant_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
                   ->orWhere('type', 'like', "%{$search}%")
                   ->orWhereHas('respondent', function($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%");
+                      $uq->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"]);
                   });
             });
         }
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
+        }
+        // Filter by purok
+        if ($request->filled('purok')) {
+            $purok = $request->get('purok');
+            $query->whereHas('respondent', function($q) use ($purok) {
+                $q->where('address', 'like', "%{$purok}%");
+            });
         }
         $blotterRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")->orderByDesc('created_at')->paginate(10);
         return view('admin.requests.blotter-reports', compact('blotterRequests', 'totalReports', 'pendingCount', 'approvedCount', 'completedCount'));
@@ -63,7 +69,7 @@ class BlotterReportController
             
             return response()->json([
                 'user_name' => $blotterRequest->complainant_name ?? 'N/A',
-                'respondent_name' => $blotterRequest->respondent ? $blotterRequest->respondent->name : 'N/A',
+                'respondent_name' => $blotterRequest->respondent ? $blotterRequest->respondent->full_name : 'N/A',
                 'description' => $blotterRequest->description,
                 'status' => $blotterRequest->status,
                 'created_at' => $blotterRequest->created_at->format('M d, Y \a\t g:i A'),
@@ -111,7 +117,7 @@ class BlotterReportController
             if ($user && $user->email) {
                 try {
                     Mail::to($user->email)->queue(new BlotterSummonReadyMail(
-                        $user->name,
+                        $user->full_name,
                         $blotter->type,
                         $blotter->summon_date ? $blotter->summon_date->format('F d, Y h:i A') : 'N/A'
                     ));
@@ -247,11 +253,23 @@ class BlotterReportController
             notify()->error('This user account is inactive and cannot make transactions.');
             return back()->withInput();
         }
-        // Prevent multiple ongoing blotter requests
+        
+        // Prevent multiple ongoing blotter requests for the respondent
         if (BlotterRequest::where('respondent_id', $validated['respondent_id'])
-                ->whereIn('status', ['pending', 'processing', 'approved'])
+                ->whereIn('status', ['pending', 'approved'])
                 ->exists()) {
             notify()->error('Resident already has an ongoing blotter request. Complete it before creating a new one.');
+            return back()->withInput();
+        }
+        
+        // Prevent multiple ongoing blotter requests for the complainant
+        // Check by complainant_name (works for both registered and custom names)
+        $existingComplainantRequest = BlotterRequest::where('complainant_name', $validated['complainant_name'])
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+            
+        if ($existingComplainantRequest) {
+            notify()->error('The complainant already has an ongoing blotter request. Complete it before creating a new one.');
             return back()->withInput();
         }
         try {
@@ -361,7 +379,7 @@ class BlotterReportController
     // Add this method to generate a filename for the PDF
     protected function generateFilename($blotterRequest, $type = 'blotter_report')
     {
-        $name = $blotterRequest->respondent ? $blotterRequest->respondent->name : 'unknown';
+        $name = $blotterRequest->respondent ? $blotterRequest->respondent->full_name : 'unknown';
         $name = preg_replace('/[^a-zA-Z0-9\s]/', '', $name); // Remove special chars
         $name = strtolower(str_replace(' ', '_', $name));
         $date = date('Y-m-d');

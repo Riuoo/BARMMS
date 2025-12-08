@@ -2,9 +2,8 @@
 
 @php
     $userRole = session('user_role');
-    $isAdmin = $userRole === 'admin';
     $isSecretary = $userRole === 'secretary';
-    $canPerformTransactions = $isAdmin || $isSecretary;
+    $canPerformTransactions = $isSecretary;
 @endphp
 
 @section('title', 'Resident Information')
@@ -72,7 +71,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input type="text" name="search" id="searchInput" placeholder="Search residents by name, email, or address..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+                        <input type="text" name="search" id="searchInput" placeholder="Search residents by name, email, or contact number..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
                     </div>
                 </div>
                 <!-- Status Filter -->
@@ -81,6 +80,16 @@
                         <option value="">All Status</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                </div>
+                <!-- Purok Filter -->
+                <div class="sm:w-48">
+                    <select name="purok" id="purokFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                        <option value="">All Puroks</option>
+                        @for($i = 1; $i <= 7; $i++)
+                            @php $purokValue = 'Purok ' . $i; @endphp
+                            <option value="{{ $purokValue }}" {{ request('purok') == $purokValue ? 'selected' : '' }}>Purok {{ $i }}</option>
+                        @endfor
                     </select>
                 </div>
                 <div class="flex space-x-2">
@@ -243,7 +252,7 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     <div>
-                                        <div class="text-sm font-medium text-gray-900">{{ $resident->name }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $resident->full_name }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -272,7 +281,7 @@
                                 <div class="flex items-center justify-center space-x-2">
                                     <button type="button"
                                             data-resident-id="{{ $resident->id }}"
-                                            data-resident-name="{{ addslashes($resident->name) }}"
+                                            data-resident-name="{{ addslashes($resident->full_name) }}"
                                             class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 js-show-demographics"
                                             title="View Demographics">
                                         <i class="fas fa-user-friends"></i>
@@ -286,14 +295,14 @@
                                     <button type="button"
                                             data-action="{{ $resident->active ? 'deactivate' : 'activate' }}"
                                             data-resident-id="{{ $resident->id }}"
-                                            data-resident-name="{{ addslashes($resident->name) }}"
+                                            data-resident-name="{{ addslashes($resident->full_name) }}"
                                             class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-resident" 
                                             title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
                                         <i class="fas fa-toggle-{{ $toggleIcon }}"></i>
                                     </button>
                                     <button type="button"
                                             data-resident-id="{{ $resident->id }}"
-                                            data-resident-name="{{ addslashes($resident->name) }}"
+                                            data-resident-name="{{ addslashes($resident->full_name) }}"
                                             class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-resident"
                                             title="Delete">
                                         <i class="fas fa-trash-alt"></i>
@@ -346,7 +355,7 @@
                                 <i class="fas fa-user text-green-600"></i>
                             </div>
                             <div class="ml-3 flex-1 min-w-0">
-                                <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $resident->name }}</h3>
+                                <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $resident->full_name }}</h3>
                                 <p class="text-sm text-gray-500 truncate">{{ $resident->email }}</p>
                                 <p class="text-sm text-gray-500 truncate">
                                     <i class="fas fa-phone mr-1 text-gray-400"></i>
@@ -394,7 +403,7 @@
                     <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
                         <button type="button"
                                 data-resident-id="{{ $resident->id }}"
-                                data-resident-name="{{ addslashes($resident->name) }}"
+                                data-resident-name="{{ addslashes($resident->full_name) }}"
                                 class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 js-show-demographics"
                                 title="View Demographics">
                             <i class="fas fa-user-friends mr-1"></i>
@@ -410,7 +419,7 @@
                         <button type="button"
                                 data-action="{{ $resident->active ? 'deactivate' : 'activate' }}"
                                 data-resident-id="{{ $resident->id }}"
-                                data-resident-name="{{ addslashes($resident->name) }}"
+                                data-resident-name="{{ addslashes($resident->full_name) }}"
                                 class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md {{ $toggleBtnClass }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 js-toggle-resident" 
                                 title="{{ $resident->active ? 'Deactivate' : 'Activate' }}">
                             <i class="fas fa-toggle-{{ $toggleIcon }} mr-1"></i>
@@ -418,7 +427,7 @@
                         </button>
                         <button type="button"
                                 data-resident-id="{{ $resident->id }}"
-                                data-resident-name="{{ addslashes($resident->name) }}"
+                                data-resident-name="{{ addslashes($resident->full_name) }}"
                                 class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-resident"
                                 title="Delete">
                             <i class="fas fa-trash-alt mr-1"></i>

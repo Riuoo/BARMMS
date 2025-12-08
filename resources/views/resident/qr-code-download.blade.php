@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download QR Code - {{ $resident->name }}</title>
+    <title>Download QR Code - {{ $resident->full_name }}</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -44,7 +44,7 @@
 </head>
 <body>
     <div class="qr-container" id="qrContainer">
-        <h1>{{ $resident->name }}</h1>
+        <h1>{{ $resident->full_name }}</h1>
         <p>{{ $resident->email }}</p>
         <div class="qr-code-wrapper">
             <div id="qrcode"></div>
@@ -70,7 +70,7 @@
         function downloadQR() {
             html2canvas(document.getElementById('qrContainer')).then(function(canvas) {
                 const link = document.createElement('a');
-                link.download = 'qr-code-{{ str_replace(" ", "-", strtolower($resident->name)) }}.png';
+                link.download = 'qr-code-{{ str_replace(" ", "-", strtolower($resident->full_name)) }}.png';
                 link.href = canvas.toDataURL();
                 link.click();
             });

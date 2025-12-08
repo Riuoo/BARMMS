@@ -23,28 +23,32 @@
 
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <form method="GET" action="{{ route('admin.attendance.logs') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form method="GET" action="{{ route('admin.attendance.logs') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
                 <input type="text" name="search" value="{{ $search }}" placeholder="Name, email, or guest name" 
                        class="w-full px-3 py-2 border border-gray-300 rounded-md">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Event Type</label>
-                <select name="event_type" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    <option value="">All Types</option>
-                    <option value="event" {{ $eventType == 'event' ? 'selected' : '' }}>Barangay Activity / Project</option>
-                    <option value="health_center_activity" {{ $eventType == 'health_center_activity' ? 'selected' : '' }}>Health Activity</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Barangay Activity / Project</label>
-                <select name="event_id" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    <option value="">All Activities/Projects</option>
-                    @foreach($events as $evt)
-                        <option value="{{ $evt->id }}" {{ $eventId == $evt->id ? 'selected' : '' }}>{{ $evt->title }}</option>
-                    @endforeach
-                </select>
+                @if($eventType === 'health_center_activity')
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Health Activities</label>
+                    <select name="event_id" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="">All Health Activities</option>
+                        @foreach($healthActivities as $act)
+                            <option value="{{ $act->id }}" {{ $eventId == $act->id ? 'selected' : '' }}>
+                                {{ $act->activity_name }} @if($act->activity_date) - {{ $act->activity_date->format('M d, Y') }} @endif
+                            </option>
+                        @endforeach
+                    </select>
+                @else
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Barangay Activities / Projects</label>
+                    <select name="event_id" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="">All Activities/Projects</option>
+                        @foreach($events as $evt)
+                            <option value="{{ $evt->id }}" {{ $eventId == $evt->id ? 'selected' : '' }}>{{ $evt->title }}</option>
+                        @endforeach
+                    </select>
+                @endif
             </div>
             <div class="flex items-end">
                 <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
@@ -72,7 +76,7 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
-                                    {{ $log->resident ? $log->resident->name : $log->guest_name }}
+                                    {{ $log->resident ? $log->resident->full_name : $log->guest_name }}
                                     @if($log->guest_name)
                                         <span class="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">Guest</span>
                                     @endif

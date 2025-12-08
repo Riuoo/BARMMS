@@ -106,7 +106,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     <div class="relative">
                         <label for="respondentSearch" class="block text-sm font-medium text-gray-700 mb-2">
-                            Respondent (Registered Resident)
+                            Respondent (Registered Resident) <span class="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -115,8 +115,9 @@
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200"
                             aria-label="Search for a resident"
+                            required
                         />
-                        <input type="hidden" id="respondent_id" name="respondent_id">
+                        <input type="hidden" id="respondent_id" name="respondent_id" required>
                         <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
                         <p class="mt-1 text-sm text-gray-500">Search and select a registered resident to set as the respondent.</p>
                         <div class="mt-4">

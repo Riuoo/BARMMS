@@ -2,9 +2,8 @@
 
 @php
     $userRole = session('user_role');
-    $isAdmin = $userRole === 'admin';
     $isSecretary = $userRole === 'secretary';
-    $canPerformTransactions = $isAdmin || $isSecretary;
+    $canPerformTransactions = $isSecretary;
 @endphp
 
 @section('title', 'Community Concerns')
@@ -86,7 +85,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" id="concernSearchInput" placeholder="Search concerns..." 
+                    <input type="text" name="search" id="concernSearchInput" placeholder="Search by submitted by (resident name) or location..." 
                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                     value="{{ request('search') }}">
                 </div>
@@ -99,6 +98,16 @@
                     <option value="under_review" {{ request('status') == 'under_review' ? 'selected' : '' }}>Under Review</option>
                     <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
                     <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                </select>
+            </div>
+            <!-- Purok Filter -->
+            <div class="sm:w-48">
+                <select name="purok" id="purokFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Puroks</option>
+                    @for($i = 1; $i <= 7; $i++)
+                        @php $purokValue = 'Purok ' . $i; @endphp
+                        <option value="{{ $purokValue }}" {{ request('purok') == $purokValue ? 'selected' : '' }}>Purok {{ $i }}</option>
+                    @endfor
                 </select>
             </div>
             <div class="flex space-x-2">
@@ -269,7 +278,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $concern->resident->name ?? 'N/A' }}</div>
+                                <div class="text-sm text-gray-900">{{ $concern->resident ? $concern->resident->full_name : 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $concern->created_at->format('M d, Y') }}</div>
@@ -306,7 +315,7 @@
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
                             <h3 class="text-sm font-medium text-gray-900 truncate">{{ $concern->title }}</h3>
-                            <p class="text-sm text-gray-500 truncate">{{ $concern->resident->name ?? 'N/A' }}</p>
+                            <p class="text-sm text-gray-500 truncate">{{ $concern->resident ? $concern->resident->full_name : 'N/A' }}</p>
                             <div class="flex items-center mt-1">
                                 @php
                                     $statusColors = [

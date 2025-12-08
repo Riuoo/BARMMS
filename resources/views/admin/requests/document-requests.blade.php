@@ -2,9 +2,8 @@
 
 @php
     $userRole = session('user_role');
-    $isAdmin = $userRole === 'admin';
     $isSecretary = $userRole === 'secretary';
-    $canPerformTransactions = $isAdmin || $isSecretary;
+    $canPerformTransactions = $isSecretary;
 @endphp
 
 @section('title', 'Document Requests')
@@ -83,7 +82,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" id="searchInput" placeholder="Search requests..."
+                    <input type="text" name="search" id="searchInput" placeholder="Search by document type or resident name..."
                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                     value="{{ request('search') }}">
                 </div>
@@ -95,6 +94,16 @@
                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                     <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                </select>
+            </div>
+            <!-- Purok Filter -->
+            <div class="sm:w-48">
+                <select name="purok" id="purokFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Puroks</option>
+                    @for($i = 1; $i <= 7; $i++)
+                        @php $purokValue = 'Purok ' . $i; @endphp
+                        <option value="{{ $purokValue }}" {{ request('purok') == $purokValue ? 'selected' : '' }}>Purok {{ $i }}</option>
+                    @endfor
                 </select>
             </div>
             <div class="flex space-x-2">
@@ -237,7 +246,7 @@
                         <tr class="document-item hover:bg-gray-50 transition duration-150" data-status="{{ $request->status }}">
                             <td class="px-4 py-4 whitespace-nowrap">
                                 <div class="flex flex-row items-center gap-2">
-                                     <span class="text-sm font-medium text-gray-900">{{ $request->resident->name ?? 'N/A' }}</span>
+                                     <span class="text-sm font-medium text-gray-900">{{ $request->resident ? $request->resident->full_name : 'N/A' }}</span>
                                 </div>
                             </td>
                             <td class="px-4 py-4">
@@ -250,7 +259,7 @@
                                     </div>
                                     @if(strlen($request->description) > 40)
                                         <button data-description="{{ $request->description }}" 
-                                                 data-user-name="{{ $request->resident->name ?? 'N/A' }}"
+                                                 data-user-name="{{ $request->resident ? $request->resident->full_name : 'N/A' }}"
                                                 class="view-full-btn text-xs text-blue-600 hover:text-blue-800 underline mt-1">
                                             View Full
                                         </button>
@@ -327,7 +336,7 @@
                             <i class="fas fa-file-signature text-blue-600"></i>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
-                             <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->resident->name ?? 'N/A' }}</h3>
+                             <h3 class="text-sm font-medium text-gray-900 truncate">{{ $request->resident ? $request->resident->full_name : 'N/A' }}</h3>
                             <p class="text-sm text-gray-500 truncate">{{ $request->document_type }}</p>
                             <div class="flex items-center mt-1">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium

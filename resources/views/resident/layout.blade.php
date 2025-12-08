@@ -7,6 +7,7 @@
             try {
                 var savedTheme = localStorage.getItem('theme') || 'light';
                 document.documentElement.setAttribute('data-theme', savedTheme);
+                document.documentElement.classList.toggle('dark', savedTheme === 'dark');
             } catch(e) {}
         })();
     </script>
@@ -1223,7 +1224,7 @@
                     type="button"
                 >
                     <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
-                    <span class="font-semibold hidden sm:inline">{{ $currentUser->name ?? 'Resident' }}</span>
+                    <span class="font-semibold hidden sm:inline">{{ $currentUser->full_name ?? 'Resident' }}</span>
                 </button>
                 <div
                     x-show="open"
@@ -1695,6 +1696,7 @@
         // Set theme function
         function setTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.toggle('dark', theme === 'dark');
             localStorage.setItem('theme', theme);
             updateToggleButtons(theme);
             console.log('Theme set to:', theme);

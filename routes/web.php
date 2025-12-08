@@ -4,8 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
-use App\Http\Middleware\CheckAdminRole;
-use App\Http\Middleware\CheckResidentRole;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -44,7 +42,6 @@ use App\Http\Controllers\ResidentControllers\ResidentFaqController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\QRCodeController;
 use App\Http\Controllers\AdminControllers\AttendanceController;
-use App\Http\Controllers\AdminControllers\EventController;
 
 // Landing page route
 Route::get('/', function () {
@@ -93,7 +90,7 @@ Route::post('/register', [RegistrationController::class, 'register'])->name('reg
 
 Route::prefix('admin')->group(function () {
     // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
-    Route::middleware(['admin.role:admin,secretary,captain,treasurer,councilor,nurse'])->group(function () {
+    Route::middleware(['admin.role:secretary,captain,treasurer,councilor,nurse'])->group(function () {
         // Profile routes for viewing and updating profile
         Route::get('/profile', [AdminProfileController::class, 'profile'])->name('admin.profile');
         Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
@@ -110,8 +107,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/residents/{resident}/summary', [ResidentController::class, 'summary'])->name('admin.residents.summary');
     });
 
-    // Routes that all admin roles can view but only admin/secretary can modify
-    Route::middleware(['admin.role:admin,secretary,captain,treasurer,councilor'])->group(function () {
+    // Routes that all admin roles can view but only secretary can modify
+    Route::middleware(['admin.role:secretary,captain,treasurer,councilor'])->group(function () {
         // Admin Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -140,7 +137,7 @@ Route::prefix('admin')->group(function () {
     });
 
     // Reports & Requests - View routes (exclude treasurer)
-    Route::middleware(['admin.role:admin,secretary,captain,councilor'])->group(function () {
+    Route::middleware(['admin.role:secretary,captain,councilor'])->group(function () {
         Route::get('/blotter-reports', [BlotterReportController::class, 'blotterReport'])->name('admin.blotter-reports');
         Route::get('/blotter-reports/{id}/details', [BlotterReportController::class, 'getDetails'])->name('admin.blotter-reports.details');
         
@@ -216,6 +213,7 @@ Route::prefix('admin')->group(function () {
         
         // Account Requests transactions
         Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');
+        Route::post('/new-account-requests/{id}/reject', [AccountRequestController::class, 'rejectAccountRequest'])->name('admin.account-requests.reject');
 
         // Analytics transactions
         Route::post('/clustering/perform', [ClusteringController::class, 'performClustering'])->name('admin.clustering.perform');
@@ -224,7 +222,7 @@ Route::prefix('admin')->group(function () {
     });
 
     // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
-    Route::middleware(['admin.role:admin,nurse'])->group(function () {
+    Route::middleware(['admin.role:nurse'])->group(function () {
         // Health Reports Route
         Route::get('/health-reports', [HealthReportController::class, 'healthReport'])->name('admin.health-reports');
         Route::get('/health-reports/comprehensive', [HealthReportController::class, 'generateComprehensiveReport'])->name('admin.health-reports.comprehensive');
@@ -319,7 +317,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/qr/verify/{token}', [QRCodeController::class, 'verify'])->name('qr.verify');
     
     // QR Code & Attendance Routes (for admin/staff)
-    Route::middleware(['admin.role:admin,secretary,captain,councilor,nurse'])->group(function () {
+    Route::middleware(['admin.role:secretary,captain,councilor,nurse'])->group(function () {
         // Attendance Scanner
         Route::get('/attendance/scanner', [AttendanceController::class, 'scanner'])->name('admin.attendance.scanner');
         Route::post('/attendance/scan', [AttendanceController::class, 'scan'])->name('admin.attendance.scan');
@@ -338,7 +336,7 @@ Route::prefix('admin')->group(function () {
         // Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('admin.events.destroy');
     });
 
-    Route::middleware(['admin.role:admin,treasurer'])->group(function () {
+    Route::middleware(['admin.role:treasurer'])->group(function () {
 
         // Accomplished Projects Routes
         Route::get('/accomplished-projects', [AccomplishProjectController::class, 'accomplishProject'])->name('admin.accomplished-projects');

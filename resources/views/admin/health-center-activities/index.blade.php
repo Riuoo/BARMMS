@@ -110,12 +110,12 @@
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-clock text-yellow-600 text-sm"></i>
+                        <i class="fas fa-spinner text-yellow-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Planned</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $activities->where('status', 'Planned')->count() }}</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Ongoing Activities</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ \App\Models\HealthCenterActivity::where('status', 'Ongoing')->count() }}</p>
                 </div>
             </div>
         </div>

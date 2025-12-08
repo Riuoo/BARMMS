@@ -6,6 +6,12 @@
 @include('components.loading.scanner-skeleton')
 
 <div class="max-w-7xl mx-auto pt-2" id="scannerContent" style="display: none;">
+    <div id="scannerData" 
+         data-events='@json($formattedEvents)'
+         data-health='@json($formattedHealthActivities)'
+         data-initial-event="{{ $eventId ?? '' }}">
+    </div>
+
     <!-- Header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">QR Code Scanner</h1>
@@ -20,19 +26,24 @@
                 
                 <!-- Event Selection -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Barangay Activity / Health Activity</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <select id="eventType" class="block w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <option value="event">Barangay Activity / Project</option>
-                            <option value="health_center_activity">Health Activity</option>
-                        </select>
-                        <select id="eventId" class="block w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <option value="">Select...</option>
-                        </select>
-                    </div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        @if($eventType === 'health_center_activity')
+                            Select Ongoing Health Activity
+                        @else
+                            Select Ongoing Barangay Activity / Project
+                        @endif
+                    </label>
+                    <input type="hidden" id="eventType" value="{{ $eventType }}">
+                    <select id="eventId" class="block w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="">Select...</option>
+                    </select>
                     <p class="text-xs text-gray-500 mt-1">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Showing all barangay activities/projects and health activities
+                        @if($eventType === 'health_center_activity')
+                            Showing ongoing health activities only (health-side access)
+                        @else
+                            Showing ongoing barangay activities/projects only (barangay-side access)
+                        @endif
                     </p>
                 </div>
 
@@ -186,8 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
 
-    // Load events based on type
-    document.getElementById('eventType').addEventListener('change', loadEvents);
     loadEvents();
 
     // Check if camera is supported
@@ -214,11 +223,10 @@ function loadEvents() {
     eventSelect.innerHTML = '<option value="">Select...</option>';
 
     let firstEventId = null;
-    let firstOngoingId = null;
-
-    // Data prepared server-side for clean JS (no Blade helpers inside JS)
-    const barangayEvents = {!! $formattedEventsJson !!};
-    const healthActivities = {!! $formattedHealthActivitiesJson !!};
+    const dataEl = document.getElementById('scannerData');
+    const barangayEvents = JSON.parse(dataEl.dataset.events || '[]');
+    const healthActivities = JSON.parse(dataEl.dataset.health || '[]');
+    const initialEventId = dataEl.dataset.initialEvent ? parseInt(dataEl.dataset.initialEvent, 10) : null;
 
     if (eventType === 'event') {
         barangayEvents.forEach((evt, index) => {
@@ -231,9 +239,6 @@ function loadEvents() {
     } else if (eventType === 'health_center_activity') {
         healthActivities.forEach((act, index) => {
             if (firstEventId === null) firstEventId = act.id;
-            if (firstOngoingId === null && act.is_ongoing) {
-                firstOngoingId = act.id;
-            }
             const option = document.createElement('option');
             option.value = act.id;
             option.textContent = act.label;
@@ -241,14 +246,9 @@ function loadEvents() {
         });
     }
 
-    // Auto-select: prioritize URL-selected event, then ongoing event, then first event
-    const initialEventId = {{ $eventId ? (int) $eventId : 'null' }};
-
+    // Auto-select: prioritize URL-selected event, then first event
     if (initialEventId) {
         eventSelect.value = initialEventId;
-        refreshAttendance();
-    } else if (firstOngoingId) {
-        eventSelect.value = firstOngoingId;
         refreshAttendance();
     } else if (firstEventId) {
         eventSelect.value = firstEventId;

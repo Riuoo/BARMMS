@@ -12,13 +12,13 @@ use App\Models\VaccinationRecord;
 use App\Models\HealthCenterActivity;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 
 class AdminDashboardController
 {
     public function index()
     {
-        $barangay_profile = Auth::guard('barangay')->user();
+        $userId = Session::get('user_id');
+        $barangay_profile = $userId ? BarangayProfile::find($userId) : null;
         
         // --- Fetch Data for Dashboard Cards ---
         $totalResidents = Residents::count();

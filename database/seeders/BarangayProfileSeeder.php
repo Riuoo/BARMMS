@@ -13,15 +13,10 @@ class BarangayProfileSeeder extends Seeder
     public function run(): void
     {
         BarangayProfile::create([
-            'name' => 'Admin',
-            'email' => 'admin@lowermalinao.gov.ph',
-            'password' => bcrypt('password123'),
-            'role' => 'admin',
-            'address' => 'Purok 1, Lower Malinao, Padada City',
-            'contact_number' => '09191234500',
-        ]);
-        BarangayProfile::create([
-            'name' => 'Romeo I. Centina Jr.',
+            'first_name' => 'Romeo Ignacio',
+            'middle_name' => null,
+            'last_name' => 'Centina',
+            'suffix' => 'Jr.',
             'email' => 'brgy.captain@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'captain',
@@ -30,7 +25,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Prija P. Bancure',
+            'first_name' => 'Prija Patricia',
+            'middle_name' => null,
+            'last_name' => 'Bancure',
+            'suffix' => null,
             'email' => 'brgy.secretary@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'secretary',
@@ -39,7 +37,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Evelyn P. Villanueva',
+            'first_name' => 'Evelyn Patricia',
+            'middle_name' => null,
+            'last_name' => 'Villanueva',
+            'suffix' => null,
             'email' => 'brgy.treasurer@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'treasurer',
@@ -48,7 +49,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Joel R. Enghog',
+            'first_name' => 'Joel Roberto',
+            'middle_name' => null,
+            'last_name' => 'Enghog',
+            'suffix' => null,
             'email' => 'brgy.councilor1@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -57,7 +61,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Ariel S. Loro',
+            'first_name' => 'Ariel',
+            'middle_name' => 'Santos',
+            'last_name' => 'Loro',
+            'suffix' => null,
             'email' => 'brgy.councilor2@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -66,7 +73,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Raphy Chris V. Carpentero',
+            'first_name' => 'Raphy Chris',
+            'middle_name' => 'Villanueva',
+            'last_name' => 'Carpentero',
+            'suffix' => null,
             'email' => 'brgy.councilor3@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -75,7 +85,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Mary Jean E. Berjame',
+            'first_name' => 'Mary Jean Elena',
+            'middle_name' => null,
+            'last_name' => 'Berjame',
+            'suffix' => null,
             'email' => 'brgy.councilor4@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -84,7 +97,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Ivy S. Go',
+            'first_name' => 'Ivy',
+            'middle_name' => 'Santos',
+            'last_name' => 'Go',
+            'suffix' => null,
             'email' => 'brgy.councilor5@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -93,7 +109,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Marlown C. Cabongcal Sr.',
+            'first_name' => 'Marlown',
+            'middle_name' => 'Cruz',
+            'last_name' => 'Cabongcal',
+            'suffix' => 'Sr.',
             'email' => 'brgy.councilor6@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -102,7 +121,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Rey A. Abon',
+            'first_name' => 'Rey Antonio',
+            'middle_name' => null,
+            'last_name' => 'Abon',
+            'suffix' => null,
             'email' => 'brgy.councilor7@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'councilor',
@@ -111,7 +133,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Lourdes D. Tubalad',
+            'first_name' => 'Lourdes',
+            'middle_name' => 'Dela Cruz',
+            'last_name' => 'Tubalad',
+            'suffix' => null,
             'email' => 'brgy.nurse@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'nurse',
@@ -120,7 +145,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'Barangay Health Worker',
+            'first_name' => 'Barangay',
+            'middle_name' => null,
+            'last_name' => 'Health Worker',
+            'suffix' => null,
             'email' => 'brgy.bhw@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'bhw',
@@ -129,7 +157,10 @@ class BarangayProfileSeeder extends Seeder
         ]);
 
         BarangayProfile::create([
-            'name' => 'JC James C. Fernandez',
+            'first_name' => 'JC James',
+            'middle_name' => 'Cruz',
+            'last_name' => 'Fernandez',
+            'suffix' => null,
             'email' => 'sk.chair@lowermalinao.gov.ph',
             'password' => bcrypt('password123'),
             'role' => 'sk_chairman',

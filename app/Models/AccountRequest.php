@@ -12,8 +12,20 @@ class AccountRequest extends Model
     protected $fillable = [
         'barangay_profile_id',
         'email',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'suffix',
+        'full_name',
+        'address',
         'status',
+        'rejection_reason',
         'token',
         'is_read',
+        'verification_documents',
+    ];
+
+    protected $casts = [
+        'verification_documents' => 'array',
     ];
 }

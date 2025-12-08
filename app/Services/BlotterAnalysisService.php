@@ -15,11 +15,13 @@ class BlotterAnalysisService
         
         $purokCounts = $this->countByPurok($blotters);
         $respondentTypeCounts = $this->countByRespondentType($blotters);
+        $purokTypeBreakdown = $this->getPurokTypeBreakdown($blotters);
         $totalReports = array_sum($purokCounts);
         
         return [
             'purokCounts' => $purokCounts,
             'respondentTypeCounts' => $respondentTypeCounts,
+            'purokTypeBreakdown' => $purokTypeBreakdown,
             'totalReports' => $totalReports,
             'totalPuroks' => count($purokCounts),
             'analysis' => $this->generateInsights($purokCounts, $totalReports, $respondentTypeCounts)
@@ -127,6 +129,37 @@ class BlotterAnalysisService
             ];
         }
         return $distribution;
+    }
+
+    /**
+     * Get breakdown of case types by purok
+     */
+    private function getPurokTypeBreakdown($blotters): array
+    {
+        $breakdown = [];
+        
+        foreach ($blotters as $blotter) {
+            $purok = 'Unknown';
+            if ($blotter->respondent_id) {
+                $purok = $this->extractPurok($blotter->respondent->address ?? '');
+            } else {
+                $purok = 'Unregistered';
+            }
+            
+            $type = $blotter->type ?? 'Unknown';
+            
+            if (!isset($breakdown[$purok])) {
+                $breakdown[$purok] = [];
+            }
+            
+            if (!isset($breakdown[$purok][$type])) {
+                $breakdown[$purok][$type] = 0;
+            }
+            
+            $breakdown[$purok][$type]++;
+        }
+        
+        return $breakdown;
     }
 
     /**

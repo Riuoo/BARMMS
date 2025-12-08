@@ -15,8 +15,8 @@
     <div class="mb-2">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Barangay Activities</h1>
-                <p class="text-gray-600">Manage and showcase ongoing, upcoming, and completed barangay activities and projects</p>
+                <h1 class="text-3xl font-bold text-gray-900">Barangay Projects & Activities</h1>
+                <p class="text-gray-600">Manage and showcase ongoing, upcoming, and completed barangay projects and activities</p>
             </div>
             <div>
                 <a href="{{ route('admin.accomplished-projects.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
@@ -56,6 +56,15 @@
                 </select>
             </div>
             
+            <!-- Type Filter -->
+            <div class="sm:w-48">
+                <select name="type" id="typeFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Types</option>
+                    <option value="project" {{ request('type') == 'project' ? 'selected' : '' }}>Projects</option>
+                    <option value="activity" {{ request('type') == 'activity' ? 'selected' : '' }}>Activities</option>
+                </select>
+            </div>
+            
             <!-- Featured Filter -->
             <div class="sm:w-48">
                 <select name="featured" id="featuredFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
@@ -76,6 +85,14 @@
     </form>
 
     <!-- Statistics Cards -->
+    @php
+        $ongoingCount = \App\Models\AccomplishedProject::where('status', 'ongoing')->count();
+        $completedCount = \App\Models\AccomplishedProject::where(function($query) {
+            $query->where('status', 'completed')
+                  ->orWhereNull('status');
+        })->count();
+        $totalCount = $stats['total_projects'] + $stats['total_activities'];
+    @endphp
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-2">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
@@ -85,8 +102,8 @@
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Activities / Projects</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['total_projects'] }}</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Projects & Activities</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $totalCount }}</p>
                 </div>
             </div>
         </div>
@@ -94,12 +111,25 @@
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-money-bill-wave text-yellow-600 text-sm"></i>
+                        <i class="fas fa-project-diagram text-yellow-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Total Budget (All)</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900">₱ {{ number_format($stats['total_budget'], 2) }}</p>
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Projects</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['total_projects'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs lg:text-sm font-medium text-gray-500">Completed Projects</p>
+                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $completedCount }}</p>
                 </div>
             </div>
         </div>
@@ -116,19 +146,6 @@
                         {{ $featuredCounts['total'] }}/6
                     </p>
                     <p class="text-xs text-gray-500">{{ $featuredCounts['projects'] }} projects + {{ $featuredCounts['activities'] }} activities</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-clock text-green-600 text-sm"></i>
-                    </div>
-                </div>
-                <div class="ml-3">
-                    <p class="text-xs lg:text-sm font-medium text-gray-500">Recent Activities / Projects</p>
-                    <p class="text-lg lg:text-2xl font-bold text-gray-900">{{ $stats['recent_projects'] }}</p>
                 </div>
             </div>
         </div>
@@ -195,9 +212,12 @@
                 @endif
                 
                 <!-- Category Badge -->
-                <div class="absolute bottom-3 left-3">
+                <div class="absolute bottom-3 left-3 flex gap-2">
                     <span class="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                         {{ $project->category }}
+                    </span>
+                    <span class="bg-gray-900/80 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                        {{ ucfirst($project->type ?? 'project') }}
                     </span>
                 </div>
             </div>
@@ -253,7 +273,7 @@
                        class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition duration-300">
                         <i class="fas fa-edit mr-1"></i>Edit
                     </a>
-                    <button type="button" data-project-id="{{ $project->id }}"
+                    <button type="button" data-project-id="{{ $project->id }}" data-project-title="{{ addslashes($project->title) }}"
                             class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition duration-300 js-delete-project">
                         <i class="fas fa-trash mr-1"></i>Delete
                     </button>
@@ -412,35 +432,58 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteProjectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Delete Project or Activity</h3>
+                <p class="text-sm text-gray-500">This action cannot be undone.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to delete <span id="projectName" class="font-semibold"></span>? This will permanently remove it from the system.</p>
+        <form id="deleteProjectForm" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeleteProjectModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200">
+                    Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function closeDetailsModal() {
     document.getElementById('detailsModal').classList.add('hidden');
 }
 
-function deleteProject(projectId) {
-    if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-        // Create a form to submit the delete request
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/admin/accomplished-projects/' + projectId;
-        
-        // Add CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = csrfToken;
-        form.appendChild(csrfInput);
-        
-        // Add method spoofing for DELETE
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'DELETE';
-        form.appendChild(methodInput);
-        
-        document.body.appendChild(form);
-        form.submit();
+function openDeleteProjectModal(projectId, projectTitle) {
+    const nameTarget = document.getElementById('projectName');
+    if (nameTarget) nameTarget.textContent = projectTitle || 'this project or activity';
+
+    const form = document.getElementById('deleteProjectForm');
+    if (form) form.action = `/admin/accomplished-projects/${projectId}`;
+
+    const modal = document.getElementById('deleteProjectModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeDeleteProjectModal() {
+    const modal = document.getElementById('deleteProjectModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 }
 
@@ -449,8 +492,9 @@ document.addEventListener('click', function (event) {
     const button = event.target.closest('.js-delete-project');
     if (!button) return;
     const id = button.getAttribute('data-project-id');
+    const title = button.getAttribute('data-project-title');
     if (id) {
-        deleteProject(id);
+        openDeleteProjectModal(id, title);
     }
 });
 </script>

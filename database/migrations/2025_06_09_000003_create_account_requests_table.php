@@ -15,7 +15,15 @@ class CreateAccountRequestsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('barangay_profile_id')->nullable()->index();
             $table->string('email')->unique();
+            $table->string('first_name')->nullable();
+            $table->string('middle_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('suffix')->nullable();
             $table->string('status')->default('pending');
+            $table->text('rejection_reason')->nullable();
+            $table->string('full_name')->nullable();
+            $table->string('address')->nullable();
+            $table->json('verification_documents')->nullable();
             $table->boolean('is_read')->default(false);
             $table->string('token')->nullable();
             $table->timestamps();

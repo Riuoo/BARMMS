@@ -6,6 +6,7 @@
 @php
     // Data validation
     $purokCounts = $purokCounts ?? [];
+    $purokTypeBreakdown = $purokTypeBreakdown ?? [];
     $totalRequests = $totalRequests ?? 0;
     $totalPuroks = $totalPuroks ?? 0;
     $analysis = $analysis ?? [];
@@ -146,6 +147,32 @@
                 </div>
             </div>
 
+            <!-- Pie Chart Modal for Document Types Breakdown -->
+            <div id="pieChartModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                    <!-- Background overlay -->
+                    <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" onclick="closePieChart()"></div>
+
+                    <!-- Modal panel -->
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                        <div class="bg-white px-6 pt-5 pb-4 sm:p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900" id="pieChartTitle">
+                                    <i class="fas fa-chart-pie text-green-600 mr-2"></i>
+                                    Document Types Breakdown
+                                </h3>
+                                <button onclick="closePieChart()" class="text-gray-400 hover:text-gray-500 focus:outline-none focus:text-gray-500 transition-colors" title="Close modal">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                            <div class="chart-container" style="position: relative; height: 450px;">
+                                <canvas id="pieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Detailed Analysis -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Purok Analysis -->
@@ -263,67 +290,181 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Purok Chart
-const purokCtx = document.getElementById('purokChart').getContext('2d');
-const purokLabels = JSON.parse(`@json(array_keys($purokCounts))`);
-const purokValues = JSON.parse(`@json(array_values($purokCounts))`);
-const purokTotal = JSON.parse(`@json(array_sum($purokCounts))`);
-const purokChart = new Chart(purokCtx, {
-    type: 'bar',
-    data: {
-        labels: purokLabels,
-        datasets: [{
-            label: 'Document Requests',
-            data: purokValues,
-            backgroundColor: [
-                'rgba(34, 197, 94, 0.8)',
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(245, 158, 11, 0.8)',
-                'rgba(239, 68, 68, 0.8)',
-                'rgba(139, 92, 246, 0.8)',
-                'rgba(236, 72, 153, 0.8)',
-                'rgba(14, 165, 233, 0.8)',
-                'rgba(16, 185, 129, 0.8)',
-                'rgba(251, 146, 60, 0.8)',
-                'rgba(168, 85, 247, 0.8)'
-            ],
-            borderColor: [
-                'rgba(34, 197, 94, 1)',
-                'rgba(59, 130, 246, 1)',
-                'rgba(245, 158, 11, 1)',
-                'rgba(239, 68, 68, 1)',
-                'rgba(139, 92, 246, 1)',
-                'rgba(236, 72, 153, 1)',
-                'rgba(14, 165, 233, 1)',
-                'rgba(16, 185, 129, 1)',
-                'rgba(251, 146, 60, 1)',
-                'rgba(168, 85, 247, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
+const purokCtx = document.getElementById('purokChart');
+let purokChart = null;
+let pieChart = null;
+const purokTypeBreakdown = JSON.parse(`@json($purokTypeBreakdown ?? [])`);
+
+if (purokCtx) {
+    const purokLabels = JSON.parse(`@json(array_keys($purokCounts))`);
+    const purokValues = JSON.parse(`@json(array_values($purokCounts))`);
+    const purokTotal = JSON.parse(`@json(array_sum($purokCounts))`);
+
+    purokChart = new Chart(purokCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: purokLabels,
+            datasets: [{
+                label: 'Document Requests',
+                data: purokValues,
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(14, 165, 233, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(251, 146, 60, 0.8)',
+                    'rgba(168, 85, 247, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(236, 72, 153, 1)',
+                    'rgba(14, 165, 233, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(251, 146, 60, 1)',
+                    'rgba(168, 85, 247, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const percentage = purokTotal > 0 ? ((parseInt(context.parsed.y) / purokTotal) * 100).toFixed(1) : 0;
+                            return `${context.parsed.y} requests (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            onClick: function(event, elements) {
+                if (elements.length > 0) {
+                    const elementIndex = elements[0].index;
+                    const clickedPurok = purokLabels[elementIndex];
+                    showPieChart(clickedPurok);
                 }
             }
+        }
+    });
+}
+
+function showPieChart(purok) {
+    const breakdown = purokTypeBreakdown[purok] || {};
+    const typeLabels = Object.keys(breakdown);
+    const typeValues = Object.values(breakdown);
+    
+    if (typeLabels.length === 0) {
+        alert('No document type data available for ' + purok);
+        return;
+    }
+    
+    // Show the modal
+    const modal = document.getElementById('pieChartModal');
+    const title = document.getElementById('pieChartTitle');
+    title.innerHTML = `<i class="fas fa-chart-pie text-green-600 mr-2"></i>Document Types Breakdown - ${purok}`;
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    
+    // Destroy existing pie chart if it exists
+    const pieCtx = document.getElementById('pieChart');
+    if (pieChart) {
+        pieChart.destroy();
+    }
+    
+    // Generate colors for pie chart
+    const pieColors = [
+        'rgba(34, 197, 94, 0.8)',   // Green
+        'rgba(59, 130, 246, 0.8)',  // Blue
+        'rgba(245, 158, 11, 0.8)',  // Yellow
+        'rgba(239, 68, 68, 0.8)',   // Red
+        'rgba(139, 92, 246, 0.8)',  // Purple
+        'rgba(236, 72, 153, 0.8)', // Pink
+        'rgba(14, 165, 233, 0.8)', // Sky
+        'rgba(16, 185, 129, 0.8)',  // Emerald
+        'rgba(251, 146, 60, 0.8)', // Orange
+        'rgba(168, 85, 247, 0.8)'   // Violet
+    ];
+    
+    const borderColors = pieColors.map(color => color.replace('0.8', '1'));
+    
+    // Create new pie chart
+    pieChart = new Chart(pieCtx.getContext('2d'), {
+        type: 'pie',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                data: typeValues,
+                backgroundColor: pieColors.slice(0, typeLabels.length),
+                borderColor: borderColors.slice(0, typeLabels.length),
+                borderWidth: 2
+            }]
         },
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const percentage = purokTotal > 0 ? ((parseInt(context.parsed.y) / purokTotal) * 100).toFixed(1) : 0;
-                        return `${context.parsed.y} requests (${percentage}%)`;
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
                     }
                 }
             }
+        }
+    });
+}
+
+function closePieChart() {
+    const modal = document.getElementById('pieChartModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = ''; // Restore scrolling
+    if (pieChart) {
+        pieChart.destroy();
+        pieChart = null;
+    }
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('pieChartModal');
+        if (!modal.classList.contains('hidden')) {
+            closePieChart();
         }
     }
 });

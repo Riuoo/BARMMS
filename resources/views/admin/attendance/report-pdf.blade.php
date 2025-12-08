@@ -89,7 +89,7 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>
-                        {{ $log->resident ? $log->resident->name : $log->guest_name }}
+                        {{ $log->resident ? $log->resident->full_name : $log->guest_name }}
                         @if($log->guest_name)
                             (Guest)
                         @endif

@@ -30,7 +30,7 @@
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <div class="text-center">
             <div class="mb-4">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ $resident->name }}</h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ $resident->full_name }}</h2>
                 <p class="text-sm text-gray-500">{{ $resident->email }}</p>
             </div>
 

@@ -28,7 +28,7 @@
     <div class="box">
         <h2>Parties</h2>
         <div class="row"><strong>Complainant:</strong> {{ $blotter->complainant_name ?? 'N/A' }}</div>
-        <div class="row"><strong>Respondent:</strong> {{ optional($blotter->respondent)->name ?? 'N/A' }}</div>
+        <div class="row"><strong>Respondent:</strong> {{ optional($blotter->respondent)->full_name ?? 'N/A' }}</div>
     </div>
 
     <h2>Summary</h2>
@@ -45,7 +45,7 @@
     <div class="sig">
         <div class="line"></div>
         <div class="small">
-            Authorized Officer: {{ optional($adminUser)->name ?? 'Barangay Office' }}
+            Authorized Officer: {{ optional($adminUser)->full_name ?? 'Barangay Office' }}
         </div>
     </div>
 </body>

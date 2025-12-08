@@ -25,7 +25,7 @@ class ResidentRequestListController
 
         // Get logged-in resident for blotter queries
         $resident = \App\Models\Residents::find($userId);
-        $complainantName = $resident ? $resident->name : null;
+        $complainantName = $resident ? $resident->full_name : null;
 
         // Auto-mark all unread approved blotter notifications as read when visiting this page
         // Query by complainant_name since residents see blotters they filed, not blotters filed against them
@@ -48,22 +48,17 @@ class ResidentRequestListController
         if ($request->filled('search')) {
             $search = trim($request->get('search'));
             
-            $documentQuery->where(function ($q) use ($search) {
-                $q->where('document_type', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
+            $documentQuery->where('document_type', 'like', "%{$search}%");
             
             $blotterQuery->where(function ($q) use ($search) {
                 $q->where('type', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
                   ->orWhereHas('resident', function($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%");
+                      $uq->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"]);
                   });
             });
             
             $concernQuery->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
                   ->orWhere('location', 'like', "%{$search}%");
             });
         }

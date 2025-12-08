@@ -74,7 +74,6 @@
                                     <option value="IV" {{ old('suffix') == 'IV' ? 'selected' : '' }}>IV</option>
                                 </select>
                             </div>
-                            <input type="hidden" id="name" name="name" value="{{ old('name') }}">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -261,6 +260,42 @@
                     </div>
                 </div>
 
+                <!-- Security Section -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2">
+                    <h3 class="text-lg font-semibold mb-2 text-gray-700">Security</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+                            <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Password (minimum 6 characters)" required>
+                        </div>
+                        <div>
+                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password <span class="text-red-500">*</span></label>
+                            <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Confirm Password" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy Consent Section (Dark Mode) -->
+                <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 mb-2 shadow-lg">
+                    <div class="flex items-start">
+                        <input type="checkbox" id="privacy_consent" name="privacy_consent" value="1" required
+                            class="mt-1 mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 bg-gray-800 rounded"
+                            {{ old('privacy_consent') ? 'checked' : '' }}>
+                        <label for="privacy_consent" class="text-sm text-gray-100 flex-1">
+                            I confirm that the resident has been informed about and has consented to the 
+                            <a href="{{ route('public.privacy') }}" target="_blank" 
+                               class="text-blue-400 hover:text-blue-300 underline font-medium transition-colors">
+                                Barangay Privacy Policy
+                            </a>
+                            regarding the collection, use, and storage of their personal data.
+                            <span class="text-red-400">*</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3 ml-7 leading-relaxed">
+                        <strong class="text-gray-300">Note:</strong> As the Secretary filling out this form, you are confirming that the resident has been informed about the Privacy Policy and has provided their consent for the processing of their personal information as described in the policy.
+                    </p>
+                </div>
+
                 <!-- Form Actions -->
                 <div class="flex justify-between mt-2">
                     <a href="{{ route('admin.residents') }}" 
@@ -268,8 +303,8 @@
                         <i class="fas fa-times mr-2"></i>
                         Cancel
                     </a>
-                    <button type="submit" 
-                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                    <button type="submit" id="submitBtn"
+                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
                         <i class="fas fa-save mr-2"></i>
                         Add Resident
                     </button>
@@ -298,7 +333,6 @@
             const noMiddleCheckbox = document.getElementById('no_middle_name');
             const lastNameInput = document.getElementById('last_name');
             const suffixInput = document.getElementById('suffix');
-            const fullNameInput = document.getElementById('name');
             const occupationSelect = document.getElementById('occupation_select');
             const occupationInput = document.getElementById('occupation');
             const relationshipSelect = document.getElementById('relationship_select');
@@ -332,20 +366,7 @@
                 addressInput.value = `${purok}, ${barangay}, ${city}, ${province}`;
             }
 
-            function updateFullName() {
-                if (!firstNameInput || !lastNameInput || !fullNameInput) return;
-                const middle = (middleNameInput && !middleNameInput.disabled)
-                    ? middleNameInput.value.trim()
-                    : '';
-                const suffixVal = suffixInput ? suffixInput.value.trim() : '';
-                const parts = [
-                    firstNameInput.value.trim(),
-                    middle,
-                    lastNameInput.value.trim(),
-                    suffixVal,
-                ].filter(Boolean);
-                fullNameInput.value = parts.join(' ');
-            }
+            // No longer need to update full name - we store separate fields
 
             function handleNoMiddleToggle() {
                 if (!middleNameInput || !noMiddleCheckbox) return;
@@ -355,7 +376,6 @@
                 } else {
                     middleNameInput.disabled = false;
                 }
-                updateFullName();
             }
 
             function handleOccupationChange() {
@@ -421,13 +441,7 @@
                 purokSelect.addEventListener('change', updateAddress);
                 updateAddress();
             }
-            if (firstNameInput && lastNameInput) {
-                firstNameInput.addEventListener('input', updateFullName);
-                lastNameInput.addEventListener('input', updateFullName);
-                if (middleNameInput) middleNameInput.addEventListener('input', updateFullName);
-                if (suffixInput) suffixInput.addEventListener('input', updateFullName);
-                updateFullName();
-            }
+            // No longer need to auto-update full name
             if (noMiddleCheckbox) {
                 noMiddleCheckbox.addEventListener('change', handleNoMiddleToggle);
                 handleNoMiddleToggle();
@@ -439,6 +453,89 @@
             if (relationshipSelect) {
                 relationshipSelect.addEventListener('change', handleRelationshipChange);
                 handleRelationshipChange();
+            }
+
+            // Middle name validation function
+            function validateMiddleName(value) {
+                if (!value || !value.trim()) {
+                    return true; // Empty is allowed (optional field)
+                }
+                const trimmed = value.trim();
+                // Check if it's a single letter
+                if (trimmed.length === 1) {
+                    return false;
+                }
+                // Check if it's an initial with a period (e.g., "A." or "A. ")
+                if (/^[A-Za-z]\.\s*$/.test(trimmed)) {
+                    return false;
+                }
+                // Check if it's less than 2 characters after removing periods and spaces
+                const cleaned = trimmed.replace(/[.\s]+/g, '');
+                if (cleaned.length < 2) {
+                    return false;
+                }
+                return true;
+            }
+
+            // Add validation on middle name input
+            if (middleNameInput) {
+                middleNameInput.addEventListener('blur', function() {
+                    const value = this.value;
+                    if (!validateMiddleName(value)) {
+                        this.setCustomValidity('Please enter your full middle name. Initials are not allowed.');
+                        this.classList.add('border-red-500');
+                    } else {
+                        this.setCustomValidity('');
+                        this.classList.remove('border-red-500');
+                    }
+                });
+
+                middleNameInput.addEventListener('input', function() {
+                    const value = this.value;
+                    if (validateMiddleName(value)) {
+                        this.setCustomValidity('');
+                        this.classList.remove('border-red-500');
+                    }
+                });
+            }
+
+            // Privacy consent checkbox validation
+            const privacyConsentCheckbox = document.getElementById('privacy_consent');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            function updateSubmitButton() {
+                if (privacyConsentCheckbox && submitBtn) {
+                    submitBtn.disabled = !privacyConsentCheckbox.checked;
+                }
+            }
+            
+            if (privacyConsentCheckbox) {
+                privacyConsentCheckbox.addEventListener('change', updateSubmitButton);
+                updateSubmitButton(); // Initial check
+            }
+
+            // Form submission validation
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Validate privacy consent
+                    if (!privacyConsentCheckbox || !privacyConsentCheckbox.checked) {
+                        e.preventDefault();
+                        alert('Please acknowledge and agree to the Privacy Policy by checking the consent box.');
+                        if (privacyConsentCheckbox) privacyConsentCheckbox.focus();
+                        return false;
+                    }
+
+                    // Validate middle name before submission
+                    if (middleNameInput && !middleNameInput.disabled && middleNameInput.value.trim()) {
+                        if (!validateMiddleName(middleNameInput.value)) {
+                            e.preventDefault();
+                            alert('Please enter your full middle name. Initials are not allowed.');
+                            middleNameInput.focus();
+                            return false;
+                        }
+                    }
+                });
             }
         });
     </script>

@@ -14,7 +14,10 @@ class Residents extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'suffix',
         'email',
         'password',
         'role',
@@ -338,5 +341,54 @@ class Residents extends Authenticatable
         }
         
         return $filtered;
+    }
+
+    /**
+     * Get full name by combining first_name, middle_name, last_name, and suffix
+     * 
+     * @return string
+     */
+    public function getFullNameAttribute(): string
+    {
+            $parts = array_filter([
+                $this->first_name,
+                $this->middle_name,
+                $this->last_name,
+                $this->suffix
+            ], function($part) {
+                return !empty(trim($part ?? ''));
+            });
+            
+        return implode(' ', $parts) ?: 'N/A';
+        }
+        
+    /**
+     * Scope to search by full name (using CONCAT)
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWhereFullName($query, $search)
+    {
+        return $query->whereRaw(
+            "CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?",
+            ["%{$search}%"]
+        );
+    }
+
+    /**
+     * Scope to find exact full name match
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $fullName
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWhereFullNameExact($query, $fullName)
+    {
+        return $query->whereRaw(
+            "TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))) = ?",
+            [trim($fullName)]
+        );
     }
 }

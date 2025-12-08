@@ -149,7 +149,7 @@
                     @foreach($requests as $req)
                     <tr class="hover:bg-gray-50 transition duration-150">
                         <td class="px-6 py-4">{{ $req->request_date->format('M d, Y') }}</td>
-                        <td class="px-6 py-4">{{ $req->resident->name ?? 'Unknown' }}</td>
+                        <td class="px-6 py-4">{{ $req->resident ? $req->resident->full_name : 'Unknown' }}</td>
                         <td class="px-6 py-4">
                             <div class="text-sm font-medium text-gray-900">{{ $req->medicine->name ?? 'Unknown' }}</div>
                             @if($req->medicine && $req->medicine->category)
@@ -300,13 +300,13 @@
             <div class="flex items-start justify-between mb-2">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-900">{{ $req->medicine->name ?? 'Unknown' }}</h3>
-                    <p class="text-xs text-gray-500">{{ $req->resident->name ?? 'Unknown' }}</p>
+                    <p class="text-xs text-gray-500">{{ $req->resident ? $req->resident->full_name : 'Unknown' }}</p>
                 </div>
             </div>
             <div class="text-sm text-gray-600 mb-2">
                 <p><i class="fas fa-calendar-day mr-1 text-gray-400"></i> {{ $req->request_date->format('M d, Y') }}</p>
                 <p><i class="fas fa-sort-numeric-up mr-1 text-gray-400"></i> {{ $req->quantity_requested }}</p>
-                <p><i class="fas fa-user-md mr-1 text-gray-400"></i> {{ $req->approvedByUser->name ?? 'Unknown User' }}</p>
+                <p><i class="fas fa-user-md mr-1 text-gray-400"></i> {{ $req->approvedByUser->full_name ?? 'Unknown User' }}</p>
                 @if($req->medicine && $req->medicine->category)
                     <p><i class="fas fa-tag mr-1 text-gray-400"></i> {{ $req->medicine->category }}</p>
                 @endif

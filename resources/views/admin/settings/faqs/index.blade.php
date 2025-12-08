@@ -17,12 +17,17 @@
         <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-4 text-green-800">{{ session('success') }}</div>
     @endif
     <form method="GET" class="mb-3 flex flex-wrap gap-2 items-center">
-        <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}" class="px-3 py-2 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500">
+        <input type="text" name="search" placeholder="Search by question or answer..." value="{{ request('search') }}" class="px-3 py-2 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500">
         <select name="category" class="px-3 py-2 border border-gray-300 rounded">
             <option value="">All Categories</option>
             @foreach($categories as $cat)
                 <option value="{{ $cat }}" @if(request('category') === $cat) selected @endif>{{ $cat }}</option>
             @endforeach
+        </select>
+        <select name="status" class="px-3 py-2 border border-gray-300 rounded">
+            <option value="">All Status</option>
+            <option value="active" @if(request('status') === 'active') selected @endif>Active</option>
+            <option value="inactive" @if(request('status') === 'inactive') selected @endif>Inactive</option>
         </select>
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Filter</button>
     </form>

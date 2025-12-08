@@ -19,7 +19,7 @@ class VaccinationRecordController
         if ($request->filled('search')) {
             $search = $request->get('search');
             $query->whereHas('resident', function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
+                $q->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"]);
             })->orWhereHas('childProfile', function($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%");
@@ -74,7 +74,7 @@ class VaccinationRecordController
             ->when($request->filled('search'), function($q) use ($request) {
                 $search = $request->get('search');
                 $q->whereHas('resident', function($subQ) use ($search) {
-                    $subQ->where('name', 'like', "%{$search}%");
+                    $subQ->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"]);
                 })->orWhereHas('childProfile', function($subQ) use ($search) {
                     $subQ->where('first_name', 'like', "%{$search}%")
                           ->orWhere('last_name', 'like', "%{$search}%");
@@ -197,7 +197,7 @@ class VaccinationRecordController
             $search = trim($request->get('resident_search'));
             $matches = Residents::where('active', true)
                 ->where(function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
+                    $q->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"])
                       ->orWhere('email', 'like', "%{$search}%");
                 })->limit(2)->get();
             if ($matches->count() === 1) {
@@ -305,7 +305,7 @@ class VaccinationRecordController
                 $q->where('vaccine_name', 'like', '%' . $search . '%')
                     ->orWhere('vaccine_type', 'like', '%' . $search . '%')
                     ->orWhereHas('resident', function ($residentQuery) use ($search) {
-                        $residentQuery->where('name', 'like', '%' . $search . '%');
+                        $residentQuery->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ['%' . $search . '%']);
                     })
                     ->orWhereHas('childProfile', function ($childQuery) use ($search) {
                         $childQuery->where('first_name', 'like', '%' . $search . '%')

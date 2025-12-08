@@ -22,14 +22,21 @@
 
     <!-- Filters -->
     <form method="GET" action="{{ route('resident.faqs') }}" class="mb-4 flex flex-col md:flex-row md:items-center gap-2">
-        <div class="flex flex-wrap gap-2">
-            <a href="{{ route('resident.faqs') }}" class="px-3 py-2 rounded text-sm font-medium {{ !request('category') ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-gray-100 text-gray-800' }}">All</a>
-            @foreach($categories as $cat)
-                <a href="{{ route('resident.faqs',['category'=>$cat]) }}" class="px-3 py-2 rounded text-sm font-medium {{ request('category') === $cat ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-gray-100 text-gray-800' }}">{{ $cat }}</a>
-            @endforeach
-        </div>
         <div class="flex-1">
-            <input type="text" name="search" placeholder="Search FAQ or keywords..." class="mt-2 md:mt-0 block w-full px-3 py-2 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+            <input type="text" name="search" placeholder="Search FAQ or keywords..." class="block w-full px-3 py-2 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+        </div>
+        <div class="sm:w-48">
+            <select name="category" class="block w-full px-3 py-2 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500">
+                <option value="">All Categories</option>
+                @foreach($categories as $cat)
+                    <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                <i class="fas fa-search mr-2"></i>Search
+            </button>
         </div>
     </form>
 

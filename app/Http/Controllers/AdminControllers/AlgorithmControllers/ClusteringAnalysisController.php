@@ -31,6 +31,7 @@ class ClusteringAnalysisController extends Controller
             
             return view('admin.clustering.blotter-analysis', [
                 'purokCounts' => $analysis['purokCounts'],
+                'purokTypeBreakdown' => $analysis['purokTypeBreakdown'],
                 'totalReports' => $analysis['totalReports'],
                 'totalPuroks' => $analysis['totalPuroks'],
                 'analysis' => $analysis['analysis']
@@ -39,6 +40,7 @@ class ClusteringAnalysisController extends Controller
             return view('admin.clustering.blotter-analysis', [
                 'error' => 'Error performing analysis: ' . $e->getMessage(),
                 'purokCounts' => [],
+                'purokTypeBreakdown' => [],
                 'totalReports' => 0,
                 'totalPuroks' => 0,
                 'analysis' => []
@@ -53,6 +55,7 @@ class ClusteringAnalysisController extends Controller
             
             return view('admin.clustering.document-analysis', [
                 'purokCounts' => $analysis['purokCounts'],
+                'purokTypeBreakdown' => $analysis['purokTypeBreakdown'],
                 'totalRequests' => $analysis['totalRequests'],
                 'totalPuroks' => $analysis['totalPuroks'],
                 'analysis' => $analysis['analysis']
@@ -61,6 +64,7 @@ class ClusteringAnalysisController extends Controller
             return view('admin.clustering.document-analysis', [
                 'error' => 'Error performing analysis: ' . $e->getMessage(),
                 'purokCounts' => [],
+                'purokTypeBreakdown' => [],
                 'totalRequests' => 0,
                 'totalPuroks' => 0,
                 'analysis' => []

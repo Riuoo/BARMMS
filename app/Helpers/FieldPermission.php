@@ -9,40 +9,40 @@ class FieldPermission
      * 
      * Structure: 'field_name' => ['allowed_roles']
      * 
-     * Roles: admin, secretary, nurse, captain, councilor, treasurer, resident
+     * Roles: secretary, nurse, captain, councilor, treasurer, resident
      */
     private static array $permissionMatrix = [
         // Basic Information (most roles can see)
-        'name' => ['admin', 'secretary', 'nurse', 'captain', 'councilor', 'treasurer', 'resident'],
-        'email' => ['admin', 'secretary', 'nurse', 'captain', 'councilor'],
-        'address' => ['admin', 'secretary', 'nurse', 'captain', 'councilor', 'treasurer', 'resident'],
-        'gender' => ['admin', 'secretary', 'nurse', 'captain', 'councilor'],
-        'birth_date' => ['admin', 'secretary', 'nurse', 'captain', 'councilor'],
-        'age' => ['admin', 'secretary', 'nurse', 'captain', 'councilor', 'treasurer', 'resident'],
-        'marital_status' => ['admin', 'secretary', 'nurse', 'captain', 'councilor'],
+        'name' => ['secretary', 'nurse', 'captain', 'councilor', 'treasurer', 'resident'],
+        'email' => ['secretary', 'nurse', 'captain', 'councilor'],
+        'address' => ['secretary', 'nurse', 'captain', 'councilor', 'treasurer', 'resident'],
+        'gender' => ['secretary', 'nurse', 'captain', 'councilor'],
+        'birth_date' => ['secretary', 'nurse', 'captain', 'councilor'],
+        'age' => ['secretary', 'nurse', 'captain', 'councilor', 'treasurer', 'resident'],
+        'marital_status' => ['secretary', 'nurse', 'captain', 'councilor'],
         
         // Contact Information (restricted)
-        'contact_number' => ['admin', 'secretary', 'nurse', 'captain', 'councilor'],
+        'contact_number' => ['secretary', 'nurse', 'captain', 'councilor'],
         
         // Demographic Information
-        'occupation' => ['admin', 'secretary', 'captain', 'councilor'],
-        'family_size' => ['admin', 'secretary', 'captain', 'councilor', 'treasurer'],
-        'education_level' => ['admin', 'secretary', 'captain', 'councilor'],
-        'income_level' => ['admin', 'secretary'], // Highly sensitive - only top roles
-        'employment_status' => ['admin', 'secretary', 'captain', 'councilor'],
+        'occupation' => ['secretary', 'captain', 'councilor'],
+        'family_size' => ['secretary', 'captain', 'councilor', 'treasurer'],
+        'education_level' => ['secretary', 'captain', 'councilor'],
+        'income_level' => ['secretary'], // Highly sensitive - only secretary
+        'employment_status' => ['secretary', 'captain', 'councilor'],
         
         // Health Information (nurse-specific)
-        'is_pwd' => ['admin', 'secretary', 'nurse', 'captain', 'councilor'],
+        'is_pwd' => ['secretary', 'nurse', 'captain', 'councilor'],
         
         // Emergency Contact Information (restricted)
-        'emergency_contact_name' => ['admin', 'secretary', 'nurse'],
-        'emergency_contact_number' => ['admin', 'secretary', 'nurse'],
-        'emergency_contact_relationship' => ['admin', 'secretary', 'nurse'],
+        'emergency_contact_name' => ['secretary', 'nurse'],
+        'emergency_contact_number' => ['secretary', 'nurse'],
+        'emergency_contact_relationship' => ['secretary', 'nurse'],
         
         // System Fields
-        'active' => ['admin', 'secretary'],
-        'created_at' => ['admin', 'secretary', 'captain', 'councilor'],
-        'updated_at' => ['admin', 'secretary'],
+        'active' => ['secretary'],
+        'created_at' => ['secretary', 'captain', 'councilor'],
+        'updated_at' => ['secretary'],
     ];
 
     /**
@@ -56,11 +56,6 @@ class FieldPermission
     {
         if (empty($userRole)) {
             return false;
-        }
-
-        // Admin always has access to all fields
-        if ($userRole === 'admin') {
-            return true;
         }
 
         // Check permission matrix
@@ -79,11 +74,6 @@ class FieldPermission
     {
         if (empty($userRole)) {
             return [];
-        }
-
-        // Admin can view all fields
-        if ($userRole === 'admin') {
-            return array_keys(self::$permissionMatrix);
         }
 
         $viewableFields = [];
@@ -106,11 +96,6 @@ class FieldPermission
     {
         if (empty($userRole)) {
             return array_keys(self::$permissionMatrix);
-        }
-
-        // Admin can view all fields
-        if ($userRole === 'admin') {
-            return [];
         }
 
         $hiddenFields = [];

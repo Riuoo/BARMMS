@@ -101,7 +101,7 @@ class ClusteringController
         $k = (int)max(2, min((int)request('k', 3), 50));
         $useOptimalK = (bool)request('use_optimal_k', false);
         
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
+        $residents = Residents::select('id', 'first_name', 'middle_name', 'last_name', 'suffix', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $allResidents = $residents; // keep original list for purok stats
         
         // Pre-compute blotter report counts per resident for later clustering insights
@@ -404,7 +404,7 @@ class ClusteringController
         $linkage = $request->input('linkage', 'ward');
         
         $this->ensurePythonAvailable();
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
+        $residents = Residents::select('id', 'first_name', 'middle_name', 'last_name', 'suffix', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $samples = $this->pythonService->buildSamplesFromResidents($residents);
 
         $normalized = $this->performClusteringByType($samples, $type, [
@@ -455,7 +455,7 @@ class ClusteringController
         // Python service is required
         $this->ensurePythonAvailable();
         
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
+        $residents = Residents::select('id', 'first_name', 'middle_name', 'last_name', 'suffix', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $samples = $this->pythonService->buildSamplesFromResidents($residents);
         $optimalKResult = $this->pythonService->findOptimalK($samples, 10, 'silhouette');
         
@@ -484,7 +484,7 @@ class ClusteringController
         $type = $request->input('type', 'kmeans');
 
         $this->ensurePythonAvailable();
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
+        $residents = Residents::select('id', 'first_name', 'middle_name', 'last_name', 'suffix', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $samples = $this->pythonService->buildSamplesFromResidents($residents);
 
         $normalized = $this->performClusteringByType($samples, $type, ['k' => $k]);
@@ -551,7 +551,7 @@ class ClusteringController
                     fputcsv($file, [
                         $clusterId,
                         $resident->id,
-                        $resident->name,
+                        $resident->full_name,
                         $resident->age ?? 'N/A',
                         $resident->family_size ?? 'N/A',
                         $resident->education_level ?? 'N/A',
@@ -577,7 +577,7 @@ class ClusteringController
         $type = $request->input('type', 'kmeans');
 
         $this->ensurePythonAvailable();
-        $residents = Residents::select('id', 'name', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
+        $residents = Residents::select('id', 'first_name', 'middle_name', 'last_name', 'suffix', 'age', 'family_size', 'education_level', 'income_level', 'employment_status', 'is_pwd', 'address')->get();
         $samples = $this->pythonService->buildSamplesFromResidents($residents);
         $normalized = $this->performClusteringByType($samples, $type, ['k' => $k]);
         if (isset($normalized['error'])) {

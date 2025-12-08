@@ -67,17 +67,30 @@
         </div>
     @endif
 
-    <!-- Filters and Search -->
+    <!-- Filters -->
     <form method="GET" action="{{ route('admin.notifications') }}" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
-            <!-- Search Input -->
-            <div class="flex-1">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
-                    </div>
-                    <input type="text" name="search" id="search-notifications" placeholder="Search notifications..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
-                </div>
+            <!-- Type Filter -->
+            <div class="sm:w-48">
+                <select name="type" id="typeFilter" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
+                    <option value="">All Types</option>
+                    <option value="blotter_report" {{ request('type') == 'blotter_report' ? 'selected' : '' }}>Blotter</option>
+                    <option value="document_request" {{ request('type') == 'document_request' ? 'selected' : '' }}>Document Request</option>
+                    <option value="account_request" {{ request('type') == 'account_request' ? 'selected' : '' }}>Account Request</option>
+                    <option value="community_complaint" {{ request('type') == 'community_complaint' ? 'selected' : '' }}>Community Concern</option>
+                </select>
+            </div>
+
+            <!-- Date Range Filters -->
+            <div class="sm:w-48">
+                <input type="date" name="start_date" id="startDateFilter" 
+                       class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md"
+                       value="{{ request('start_date') }}" placeholder="Start Date">
+            </div>
+            <div class="sm:w-48">
+                <input type="date" name="end_date" id="endDateFilter" 
+                       class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md"
+                       value="{{ request('end_date') }}" placeholder="End Date">
             </div>
 
             <div class="sm:w-48">

@@ -56,7 +56,6 @@ class ResidentAnnouncementController
             $search = strtolower($request->get('search'));
             $bulletinItems = $bulletinItems->filter(function($item) use ($search) {
                 return strpos(strtolower($item->title), $search) !== false
-                    || strpos(strtolower($item->description), $search) !== false
                     || strpos(strtolower($item->category), $search) !== false;
             });
         }

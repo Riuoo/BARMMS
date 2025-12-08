@@ -15,7 +15,10 @@ class ResidentSeeder extends Seeder
     {
         // Senior Citizen - Low Income
         Residents::create([
-            'name' => 'Remedios Santos Dela Cruz',
+            'first_name' => 'Remedios',
+            'middle_name' => 'Santos',
+            'last_name' => 'Dela Cruz',
+            'suffix' => null,
             'email' => 'remedios.santos@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -39,7 +42,10 @@ class ResidentSeeder extends Seeder
 
         // Young Professional - Middle Income
         Residents::create([
-            'name' => 'Juan Carlos Dela Cruz Santos',
+            'first_name' => 'Juan Carlos',
+            'middle_name' => 'Dela Cruz',
+            'last_name' => 'Santos',
+            'suffix' => null,
             'email' => 'juan.santos@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -63,7 +69,10 @@ class ResidentSeeder extends Seeder
 
         // Unemployed Youth - Low Income
         Residents::create([
-            'name' => 'Ana Patricia Reyes Cruz',
+            'first_name' => 'Ana Patricia',
+            'middle_name' => 'Reyes',
+            'last_name' => 'Cruz',
+            'suffix' => null,
             'email' => 'ana.reyes@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -87,7 +96,10 @@ class ResidentSeeder extends Seeder
 
         // Self-employed Entrepreneur - Upper Middle Income
         Residents::create([
-            'name' => 'Pedro Antonio Martinez Flores',
+            'first_name' => 'Pedro Antonio',
+            'middle_name' => 'Martinez',
+            'last_name' => 'Flores',
+            'suffix' => null,
             'email' => 'pedro.martinez@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -111,7 +123,10 @@ class ResidentSeeder extends Seeder
 
         // Part-time Worker - Lower Middle Income
         Residents::create([
-            'name' => 'Luz Maria Garcia Santos',
+            'first_name' => 'Luz Maria',
+            'middle_name' => 'Garcia',
+            'last_name' => 'Santos',
+            'suffix' => null,
             'email' => 'luz.garcia@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -135,7 +150,10 @@ class ResidentSeeder extends Seeder
 
         // High-income Professional
         Residents::create([
-            'name' => 'Carlos Miguel Lopez Gonzales',
+            'first_name' => 'Carlos Miguel',
+            'middle_name' => 'Lopez',
+            'last_name' => 'Gonzales',
+            'suffix' => null,
             'email' => 'carlos.lopez@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -159,7 +177,10 @@ class ResidentSeeder extends Seeder
 
         // Middle-aged Parent - Middle Income
         Residents::create([
-            'name' => 'Sofia Isabel Rodriguez Torres',
+            'first_name' => 'Sofia Isabel',
+            'middle_name' => 'Rodriguez',
+            'last_name' => 'Torres',
+            'suffix' => null,
             'email' => 'sofia.rodriguez@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -183,7 +204,10 @@ class ResidentSeeder extends Seeder
 
         // Young Parent - Lower Middle Income
         Residents::create([
-            'name' => 'Rafael Jose Hernandez Cruz',
+            'first_name' => 'Rafael Jose',
+            'middle_name' => 'Hernandez',
+            'last_name' => 'Cruz',
+            'suffix' => null,
             'email' => 'rafael.hernandez@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -207,7 +231,10 @@ class ResidentSeeder extends Seeder
 
         // Senior Professional - Upper Middle Income
         Residents::create([
-            'name' => 'Elena Maria Santos Reyes',
+            'first_name' => 'Elena Maria',
+            'middle_name' => 'Santos',
+            'last_name' => 'Reyes',
+            'suffix' => null,
             'email' => 'elena.santos@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -231,7 +258,10 @@ class ResidentSeeder extends Seeder
 
         // Young Adult - Low Income
         Residents::create([
-            'name' => 'Roderick P. Tajos',
+            'first_name' => 'Roderick',
+            'middle_name' => 'Palacay',
+            'last_name' => 'Tajos',
+            'suffix' => null,
             'email' => 'rodericktajos02@gmail.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -255,7 +285,10 @@ class ResidentSeeder extends Seeder
 
         // Divorced Parent - Lower Middle Income
         Residents::create([
-            'name' => 'Maricel Ann Villanueva Torres',
+            'first_name' => 'Maricel Ann',
+            'middle_name' => 'Villanueva',
+            'last_name' => 'Torres',
+            'suffix' => null,
             'email' => 'maricel.villanueva@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -279,7 +312,10 @@ class ResidentSeeder extends Seeder
 
         // Separated Individual - Low Income
         Residents::create([
-            'name' => 'Roberto Manuel Alcantara Ramos',
+            'first_name' => 'Roberto Manuel',
+            'middle_name' => 'Alcantara',
+            'last_name' => 'Ramos',
+            'suffix' => null,
             'email' => 'roberto.alcantara@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -303,7 +339,10 @@ class ResidentSeeder extends Seeder
 
         // No Education - Low Income
         Residents::create([
-            'name' => 'Teresa Bautista Morales',
+            'first_name' => 'Teresa',
+            'middle_name' => 'Bautista',
+            'last_name' => 'Morales',
+            'suffix' => null,
             'email' => 'teresa.bautista@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -327,7 +366,10 @@ class ResidentSeeder extends Seeder
 
         // Critical Health Status - Low Income
         Residents::create([
-            'name' => 'Eduardo Santos Dela Rosa',
+            'first_name' => 'Eduardo',
+            'middle_name' => 'Santos',
+            'last_name' => 'Dela Rosa',
+            'suffix' => null,
             'email' => 'eduardo.santos@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -351,7 +393,10 @@ class ResidentSeeder extends Seeder
 
         // Poor Health Status - Lower Middle Income
         Residents::create([
-            'name' => 'Lourdes Fernandez Castro',
+            'first_name' => 'Lourdes',
+            'middle_name' => 'Fernandez',
+            'last_name' => 'Castro',
+            'suffix' => null,
             'email' => 'lourdes.fernandez@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',
@@ -373,7 +418,10 @@ class ResidentSeeder extends Seeder
             'active' => true,
         ]);
         Residents::create([
-            'name' => 'Kyo kusanagi',
+            'first_name' => 'Kyo',
+            'middle_name' => null,
+            'last_name' => 'Kusanagi',
+            'suffix' => null,
             'email' => 'kyo.kusanagi@email.com',
             'password' => bcrypt('password123'),
             'role' => 'resident',

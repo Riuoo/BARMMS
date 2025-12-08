@@ -29,7 +29,8 @@ class BlotterRequest extends Model
 
     public function respondent()
     {
-        return $this->belongsTo(Residents::class, 'respondent_id');
+        return $this->belongsTo(Residents::class, 'respondent_id')
+            ->select(['id', 'first_name', 'middle_name', 'last_name', 'suffix', 'email', 'active']);
     }
 
     /**

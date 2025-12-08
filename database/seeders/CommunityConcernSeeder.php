@@ -21,17 +21,30 @@ class CommunityConcernSeeder extends Seeder
         }
 
         foreach ($residents as $resident) {
+            $status = $this->getRandomStatus();
+            $createdAt = now()->subDays(rand(1, 30));
+            $assignedAt = in_array($status, ['under_review', 'in_progress', 'resolved', 'closed'])
+                ? $createdAt->copy()->addHours(rand(4, 24))
+                : null;
+            $resolvedAt = in_array($status, ['resolved', 'closed'])
+                ? $assignedAt?->copy()->addDays(rand(1, 7))
+                : null;
+            $adminRemarks = $resolvedAt
+                ? 'Concern resolved after site inspection and coordination with utilities.'
+                : null;
+
             CommunityConcern::create([
                 'resident_id' => $resident->id,
                 'title' => 'Sample Community Concern for ' . $resident->first_name,
                 'description' => 'This is a sample community concern description for demonstration purposes.',
-                'status' => $this->getRandomStatus(),
+                'status' => $status,
                 'location' => 'Barangay Lower Malinao',
                 'is_read' => rand(0, 1),
-                'assigned_at' => rand(0, 1) ? now()->subDays(rand(1, 20)) : null,
-                'resolved_at' => rand(0, 1) ? now()->subDays(rand(1, 10)) : null,
-                'created_at' => now()->subDays(rand(1, 30)),
-                'updated_at' => now()->subDays(rand(1, 30)),
+                'assigned_at' => $assignedAt,
+                'resolved_at' => $resolvedAt,
+                'admin_remarks' => $adminRemarks,
+                'created_at' => $createdAt,
+                'updated_at' => $resolvedAt ?? $assignedAt ?? $createdAt,
             ]);
         }
     }

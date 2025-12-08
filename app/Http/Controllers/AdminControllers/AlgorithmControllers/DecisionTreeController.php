@@ -214,9 +214,12 @@ class DecisionTreeController
             default => ['predicted_eligibility' => $result['predictions'][0]['predicted'] ?? 'N/A'],
         };
         
+        $residentData = $resident->only(['id', 'age', 'income_level', 'employment_status', 'education_level', 'is_pwd', 'family_size']);
+        $residentData['name'] = $resident->full_name;
+        
         return response()->json([
             'success' => true,
-            'resident' => $resident->only(['id', 'name', 'age', 'income_level', 'employment_status', 'education_level', 'is_pwd', 'family_size']),
+            'resident' => $residentData,
             'prediction' => $prediction,
             'type' => $type
         ]);
@@ -299,7 +302,7 @@ class DecisionTreeController
             foreach ($predictions as $pred) {
                 fputcsv($file, [
                     $pred['resident']->id ?? 'N/A',
-                    $pred['resident']->name ?? 'N/A',
+                    $pred['resident']->full_name ?? 'N/A',
                     $pred['predicted'] ?? 'N/A',
                     isset($pred['correct']) ? ($pred['correct'] ? 'Yes' : 'No') : 'N/A',
                     $type

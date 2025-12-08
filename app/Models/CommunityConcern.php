@@ -33,7 +33,8 @@ class CommunityConcern extends Model
 
     public function resident()
     {
-        return $this->belongsTo(Residents::class, 'resident_id');
+        return $this->belongsTo(Residents::class, 'resident_id')
+            ->select(['id', 'first_name', 'middle_name', 'last_name', 'suffix', 'email', 'active']);
     }
 
     /**

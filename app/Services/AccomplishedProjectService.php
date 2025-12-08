@@ -69,6 +69,11 @@ class AccomplishedProjectService
      */
     private function processProjectData(array $data): array
     {
+        // Normalize type and provide a safe default
+        $data['type'] = isset($data['type']) && in_array($data['type'], ['project', 'activity'])
+            ? $data['type']
+            : 'project';
+
         // Handle is_featured field properly
         $data['is_featured'] = isset($data['is_featured']) ? true : false;
         
@@ -109,10 +114,13 @@ class AccomplishedProjectService
     public function getProjectStats(): array
     {
         return [
-            'total_projects' => AccomplishedProject::count(),
-            'total_budget' => AccomplishedProject::sum('budget'),
-            'featured_projects' => AccomplishedProject::where('is_featured', true)->count(),
-            'recent_projects' => AccomplishedProject::orderBy('completion_date', 'desc')->take(5)->count(),
+            'total_projects' => AccomplishedProject::where('type', 'project')->count(),
+            'total_activities' => AccomplishedProject::where('type', 'activity')->count(),
+            'total_budget' => AccomplishedProject::where('type', 'project')->sum('budget'),
+            'featured_projects' => AccomplishedProject::where('type', 'project')->where('is_featured', true)->count(),
+            'featured_activities' => AccomplishedProject::where('type', 'activity')->where('is_featured', true)->count(),
+            'recent_projects' => AccomplishedProject::where('type', 'project')->orderBy('completion_date', 'desc')->take(5)->count(),
+            'recent_activities' => AccomplishedProject::where('type', 'activity')->orderBy('completion_date', 'desc')->take(5)->count(),
         ];
     }
 } 

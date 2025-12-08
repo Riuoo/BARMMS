@@ -26,11 +26,6 @@ class CheckAdminRole
             return redirect()->route('landing');
         }
 
-        if ($userRole === 'admin') {
-            // Admin can access everything
-            return $next($request);
-        }
-
         // Use passed roles if any; otherwise, use defaults
         if (empty($roles)) {
             $roles = ['secretary', 'captain', 'nurse', 'treasurer', 'councilor'];

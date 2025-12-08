@@ -173,7 +173,7 @@
                         <tr class="hover:bg-gray-50 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="items-center gap-2">
-                                        <div class="text-sm font-medium text-gray-900">{{ $record->resident->name }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $record->resident ? $record->resident->full_name : 'N/A' }}</div>
                                         <div class="text-sm text-gray-500">{{ $record->resident->email }}</div>
                                 </div>
                             </td>
@@ -188,7 +188,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $record->consultation_datetime->format('M d, Y') }}</div>
-                                <div class="text-xs text-gray-400">{{ optional($record->attendingHealthWorker)->name }}</div>
+                                <div class="text-xs text-gray-400">{{ optional($record->attendingHealthWorker)->full_name }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($record->follow_up_date)
@@ -231,7 +231,7 @@
                             <i class="fas fa-user text-blue-600"></i>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
-                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $record->resident->name }}</h3>
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $record->resident ? $record->resident->full_name : 'N/A' }}</h3>
                             <p class="text-sm text-gray-500 truncate">{{ $record->consultation_type }}</p>
                             <div class="flex items-center mt-1">
                                 <span class="text-xs text-gray-500">

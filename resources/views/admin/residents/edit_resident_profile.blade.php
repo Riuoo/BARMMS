@@ -70,19 +70,11 @@
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @php
-                        $nameParts = explode(' ', $resident->name);
-                        $firstName = $nameParts[0] ?? '';
-                        $lastName = $nameParts[1] ?? '';
-                        $middleName = '';
-                        $suffix = '';
-                        if (count($nameParts) === 3) {
-                            $middleName = $nameParts[1];
-                            $lastName = $nameParts[2];
-                        } elseif (count($nameParts) >= 4) {
-                            $middleName = $nameParts[1];
-                            $lastName = $nameParts[2];
-                            $suffix = implode(' ', array_slice($nameParts, 3));
-                        }
+                        // Use separate fields if they exist, otherwise fall back to name field (for backward compatibility)
+                        $firstName = $resident->first_name ?? '';
+                        $middleName = $resident->middle_name ?? '';
+                        $lastName = $resident->last_name ?? '';
+                        $suffix = $resident->suffix ?? '';
                     @endphp
                     <!-- First Name -->
                     <div class="mb-2">
@@ -397,82 +389,80 @@
                 </div>
             </div>
 
-                <!-- Emergency Contact Information -->
-                @if($resident->canViewField('emergency_contact_name') || $resident->canViewField('emergency_contact_number') || $resident->canViewField('emergency_contact_relationship'))
-                <div class="border-b border-gray-200 pb-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">
-                        <i class="fas fa-phone-alt mr-2 text-red-600"></i>
-                        Emergency Contact Information
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        @if($resident->canViewField('emergency_contact_name'))
-                        <div>
-                            <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Name
-                            </label>
-                            <input type="text" 
-                                   id="emergency_contact_name" 
-                                   name="emergency_contact_name" 
-                                   value="{{ old('emergency_contact_name', $resident->emergency_contact_name) }}" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        </div>
-                        @endif
-                        @php
-                            $knownRelationships = [
-                                'Spouse',
-                                'Mother',
-                                'Father',
-                                'Parent',
-                                'Sibling',
-                                'Child',
-                                'Relative',
-                                'Neighbor',
-                                'Friend',
-                                'Guardian',
-                            ];
-                            $currentRelationship = old('emergency_contact_relationship', $resident->emergency_contact_relationship);
-                            $relationshipSelectValue = in_array($currentRelationship, $knownRelationships) ? $currentRelationship : '_other';
-                        @endphp
-                        @if($resident->canViewField('emergency_contact_relationship'))
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Relationship
-                            </label>
-                            <select id="relationship_select" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                <option value="">Select Relationship</option>
-                                @foreach($knownRelationships as $rel)
-                                    <option value="{{ $rel }}" {{ $relationshipSelectValue === $rel ? 'selected' : '' }}>{{ $rel }}</option>
-                                @endforeach
-                                <option value="_other" {{ $relationshipSelectValue === '_other' ? 'selected' : '' }}>Other (specify)</option>
-                            </select>
-                            <input type="text" 
-                                   id="emergency_contact_relationship" 
-                                   name="emergency_contact_relationship" 
-                                   value="{{ $currentRelationship }}" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                   placeholder="e.g., Spouse, Parent, Sibling"
-                                   style="display: {{ $relationshipSelectValue === '_other' ? 'block' : 'none' }};">
-                        </div>
-                        @endif
-                        @if($resident->canViewField('emergency_contact_number'))
-                        <div>
-                            <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">
-                                Contact Number
-                            </label>
-                            <input type="number" 
-                                   id="emergency_contact_number" 
-                                   name="emergency_contact_number" 
-                                   value="{{ old('emergency_contact_number', $resident->emergency_contact_number) }}" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                   placeholder="e.g., 9191234567"
-                                   min="0" 
-                                   pattern="[0-9]*" 
-                                   inputmode="numeric">
-                        </div>
-                        @endif
+            <!-- Emergency Contact Information -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    <i class="fas fa-phone-alt mr-2 text-red-600"></i>
+                    Emergency Contact Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @if($resident->canViewField('emergency_contact_name'))
+                    <div>
+                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Name
+                        </label>
+                        <input type="text" 
+                               id="emergency_contact_name" 
+                               name="emergency_contact_name" 
+                               value="{{ old('emergency_contact_name', $resident->emergency_contact_name) }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
+                    @endif
+                    @php
+                        $knownRelationships = [
+                            'Spouse',
+                            'Mother',
+                            'Father',
+                            'Parent',
+                            'Sibling',
+                            'Child',
+                            'Relative',
+                            'Neighbor',
+                            'Friend',
+                            'Guardian',
+                        ];
+                        $currentRelationship = old('emergency_contact_relationship', $resident->emergency_contact_relationship);
+                        $relationshipSelectValue = in_array($currentRelationship, $knownRelationships) ? $currentRelationship : '_other';
+                    @endphp
+                    @if($resident->canViewField('emergency_contact_relationship'))
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Relationship
+                        </label>
+                        <select id="relationship_select" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="">Select Relationship</option>
+                            @foreach($knownRelationships as $rel)
+                                <option value="{{ $rel }}" {{ $relationshipSelectValue === $rel ? 'selected' : '' }}>{{ $rel }}</option>
+                            @endforeach
+                            <option value="_other" {{ $relationshipSelectValue === '_other' ? 'selected' : '' }}>Other (specify)</option>
+                        </select>
+                        <input type="text" 
+                               id="emergency_contact_relationship" 
+                               name="emergency_contact_relationship" 
+                               value="{{ $currentRelationship }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                               placeholder="e.g., Spouse, Parent, Sibling"
+                               style="display: {{ $relationshipSelectValue === '_other' ? 'block' : 'none' }};">
+                    </div>
+                    @endif
+                    @if($resident->canViewField('emergency_contact_number'))
+                    <div>
+                        <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">
+                            Contact Number
+                        </label>
+                        <input type="number" 
+                               id="emergency_contact_number" 
+                               name="emergency_contact_number" 
+                               value="{{ old('emergency_contact_number', $resident->emergency_contact_number) }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                               placeholder="e.g., 9191234567"
+                               min="0" 
+                               pattern="[0-9]*" 
+                               inputmode="numeric">
+                    </div>
+                    @endif
+                </div>
             </div>
-                @endif
 
             <!-- Form Actions -->
                 <div class="flex justify-between mt-2">
@@ -486,7 +476,7 @@
                         <i class="fas fa-save mr-2"></i>
                     Update Resident
                     </button>
-            </div>
+                </div>
         </form>
         </div>
     </div>

@@ -15,10 +15,7 @@ class DocumentTemplateController
         $query = DocumentTemplate::query();
 
         if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('document_type', 'like', '%' . $search . '%')
-                    ->orWhere('description', 'like', '%' . $search . '%');
-            });
+            $query->where('document_type', 'like', '%' . $search . '%');
         }
 
         $category = strtolower($request->input('category', ''));
@@ -28,18 +25,9 @@ class DocumentTemplateController
                 'clearances' => ['clearance'],
                 'permits' => ['permit'],
                 'identifications' => ['identification', 'id'],
-                'reports' => ['report'],
             ];
 
-            if ($category === 'other') {
-                $query->where(function ($q) use ($categoryKeywords) {
-                    foreach ($categoryKeywords as $keywords) {
-                        foreach ($keywords as $keyword) {
-                            $q->whereRaw('LOWER(document_type) NOT LIKE ?', ['%' . $keyword . '%']);
-                        }
-                    }
-                });
-            } elseif (isset($categoryKeywords[$category])) {
+            if (isset($categoryKeywords[$category])) {
                 $keywords = $categoryKeywords[$category];
                 $query->where(function ($q) use ($keywords) {
                     foreach ($keywords as $keyword) {

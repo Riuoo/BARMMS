@@ -22,7 +22,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         // Define a gate for dashboard access
         Gate::define('access-dashboard', function ($user) {
-            return in_array(session('user_role'), ['admin', 'secretary', 'captain']);
+            return in_array(session('user_role'), ['secretary', 'captain']);
         });        
     }
 }

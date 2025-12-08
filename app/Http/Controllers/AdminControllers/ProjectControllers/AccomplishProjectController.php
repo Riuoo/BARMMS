@@ -38,6 +38,11 @@ class AccomplishProjectController
             $query->where('category', $request->get('category'));
         }
 
+        // Filter by type (project vs activity)
+        if ($request->filled('type')) {
+            $query->where('type', $request->get('type'));
+        }
+
         // Filter by featured
         if ($request->filled('featured')) {
             if ($request->get('featured') === 'featured') {
@@ -47,7 +52,7 @@ class AccomplishProjectController
             }
         }
 
-        $projects = $query->orderBy('completion_date', 'desc')->paginate(9);
+        $projects = $query->orderBy('completion_date', 'desc')->paginate(6);
         $stats = $this->projectService->getProjectStats();
         $featuredProjects = AccomplishedProject::where('is_featured', true)->get();
         $featuredCounts = $this->featuredService->getFeaturedCounts();

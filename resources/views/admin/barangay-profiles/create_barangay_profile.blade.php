@@ -74,7 +74,6 @@
                                 <option value="IV" {{ old('suffix') == 'IV' ? 'selected' : '' }}>IV</option>
                             </select>
                         </div>
-                        <input type="hidden" id="name" name="name" value="{{ old('name') }}">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                         <div>
@@ -91,7 +90,6 @@
                             <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role <span class="text-red-500">*</span></label>
                             <select id="role" name="role" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
                                 <option value="">Select a role</option>
-                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                                 <option value="captain" {{ old('role') == 'captain' ? 'selected' : '' }}>Barangay Captain</option>
                                 <option value="councilor" {{ old('role') == 'councilor' ? 'selected' : '' }}>Barangay Councilor</option>
                                 <option value="secretary" {{ old('role') == 'secretary' ? 'selected' : '' }}>Barangay Secretary</option>
@@ -104,11 +102,36 @@
                                 <option value="sk_secretary" {{ old('role') == 'sk_secretary' ? 'selected' : '' }}>SK Secretary</option>
                             </select>
                         </div>
+                    </div>
+                    @php
+                        $defaultBarangay = config('app.default_barangay', 'Lower Malinao');
+                        $defaultCity = config('app.default_city', 'Padada');
+                        $defaultProvince = config('app.default_province', 'Davao Del Sur');
+                    @endphp
+                    <div class="mt-2 grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
-                            <input type="text" id="address" name="address" value="{{ old('address') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
+                            <input type="text" value="{{ $defaultBarangay }}" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">City/Municipality</label>
+                            <input type="text" value="{{ $defaultCity }}" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                            <input type="text" value="{{ $defaultProvince }}" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600" readonly>
+                        </div>
+                        <div>
+                            <label for="purok" class="block text-sm font-medium text-gray-700 mb-1">Purok <span class="text-red-500">*</span></label>
+                            <select id="purok" name="purok" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                <option value="">Select Purok</option>
+                                @for($i = 1; $i <= 7; $i++)
+                                    <option value="Purok {{ $i }}" {{ old('purok') == 'Purok '.$i ? 'selected' : '' }}>Purok {{ $i }}</option>
+                                @endfor
+                            </select>
                         </div>
                     </div>
+                    <input type="hidden" id="address" name="address" value="{{ old('address') }}">
                 </div>
 
                 <!-- Credentials Section -->
@@ -160,22 +183,8 @@
             const noMiddleCheckbox = document.getElementById('no_middle_name');
             const lastNameInput = document.getElementById('last_name');
             const suffixInput = document.getElementById('suffix');
-            const fullNameInput = document.getElementById('name');
 
-            function updateFullName() {
-                if (!firstNameInput || !lastNameInput || !fullNameInput) return;
-                const middle = (middleNameInput && !middleNameInput.disabled)
-                    ? middleNameInput.value.trim()
-                    : '';
-                const suffixVal = suffixInput ? suffixInput.value.trim() : '';
-                const parts = [
-                    firstNameInput.value.trim(),
-                    middle,
-                    lastNameInput.value.trim(),
-                    suffixVal,
-                ].filter(Boolean);
-                fullNameInput.value = parts.join(' ');
-            }
+            // No longer need to update full name - we store separate fields
 
             function handleNoMiddleToggle() {
                 if (!middleNameInput || !noMiddleCheckbox) return;
@@ -185,19 +194,33 @@
                 } else {
                     middleNameInput.disabled = false;
                 }
-                updateFullName();
             }
 
-            if (firstNameInput && lastNameInput) {
-                firstNameInput.addEventListener('input', updateFullName);
-                lastNameInput.addEventListener('input', updateFullName);
-                if (middleNameInput) middleNameInput.addEventListener('input', updateFullName);
-                if (suffixInput) suffixInput.addEventListener('change', updateFullName);
-                updateFullName();
+            // Address update logic
+            const purokSelect = document.getElementById('purok');
+            const addressInput = document.getElementById('address');
+            
+            function updateAddress() {
+                if (!purokSelect || !addressInput) return;
+                const purok = purokSelect.value || '';
+                const barangay = "{{ $defaultBarangay }}";
+                const city = "{{ $defaultCity }}";
+                const province = "{{ $defaultProvince }}";
+                if (!purok) {
+                    addressInput.value = '';
+                    return;
+                }
+                addressInput.value = `${purok}, ${barangay}, ${city}, ${province}`;
             }
+
+            // No longer need to auto-update full name
             if (noMiddleCheckbox) {
                 noMiddleCheckbox.addEventListener('change', handleNoMiddleToggle);
                 handleNoMiddleToggle();
+            }
+            if (purokSelect) {
+                purokSelect.addEventListener('change', updateAddress);
+                updateAddress();
             }
         });
     </script>

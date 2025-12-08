@@ -3,7 +3,7 @@
 @section('title', 'Project Details')
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+<div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
     <!-- Unified Show Skeleton -->
     <div id="apShowSkeleton">
         @include('components.loading.show-entity-skeleton', ['type' => 'accomplished-project', 'buttonCount' => 1])
@@ -14,8 +14,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">Project Details</h1>
-            <p class="text-gray-600 mt-2">View detailed information about this accomplished project</p>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Project Details</h1>
+            <p class="text-gray-600 dark:text-gray-300 mt-2">View detailed information about this accomplished project</p>
         </div>
         <a href="{{ route('admin.accomplished-projects') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
@@ -29,54 +29,54 @@
         <div class="lg:col-span-2 space-y-6">
             <!-- Project Image -->
             @if($project->image)
-            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                 <img src="{{ asset($project->image) }}" alt="{{ $project->title }}" class="w-full h-64 object-cover">
             </div>
             @endif
             <!-- Project Title and Category -->
-            <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6">
+            <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold text-gray-900">{{ $project->title }}</h2>
-                    <span class="px-3 py-1 rounded-full text-sm font-medium {{ $project->category_color }}">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $project->title }}</h2>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium {{ $project->category_color }} dark:bg-gray-700 dark:text-gray-200">
                         {{ $project->category }}
                     </span>
                 </div>
                 @if($project->is_featured)
-                    <div class="flex items-center text-yellow-600 mb-4">
+                    <div class="flex items-center text-yellow-600 dark:text-yellow-400 mb-4">
                         <i class="fas fa-star mr-2"></i>
                         <span class="font-medium">Featured Project</span>
                     </div>
                 @endif
-                <p class="text-gray-700 leading-relaxed">{{ $project->description }}</p>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ $project->description }}</p>
             </div>
 
             <!-- Project Details -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Project Information</h3>
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Project Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Location</h4>
-                        <p class="text-gray-600">{{ $project->location ?? 'N/A' }}</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 mb-2">Location</h4>
+                        <p class="text-gray-600 dark:text-gray-300">{{ $project->location ?? 'N/A' }}</p>
                     </div>
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Budget</h4>
-                        <p class="text-gray-600">{{ $project->formatted_budget }}</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 mb-2">Budget</h4>
+                        <p class="text-gray-600 dark:text-gray-300">{{ $project->formatted_budget }}</p>
                     </div>
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Start Date</h4>
-                        <p class="text-gray-600">{{ $project->start_date->format('F j, Y') }}</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 mb-2">Start Date</h4>
+                        <p class="text-gray-600 dark:text-gray-300">{{ $project->start_date->format('F j, Y') }}</p>
                     </div>
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Completion Date</h4>
-                        <p class="text-gray-600">{{ $project->completion_date->format('F j, Y') }}</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 mb-2">Completion Date</h4>
+                        <p class="text-gray-600 dark:text-gray-300">{{ $project->completion_date->format('F j, Y') }}</p>
                     </div>
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Duration</h4>
-                        <p class="text-gray-600">{{ $project->duration }} days</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 mb-2">Duration</h4>
+                        <p class="text-gray-600 dark:text-gray-300">{{ $project->duration }} days</p>
                     </div>
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Status</h4>
-                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 mb-2">Status</h4>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                             {{ ucfirst($project->status) }}
                         </span>
                     </div>
@@ -85,19 +85,19 @@
 
             <!-- Impact and Beneficiaries -->
             @if($project->impact || $project->beneficiaries)
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Impact & Beneficiaries</h3>
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Impact & Beneficiaries</h3>
                 <div class="space-y-4">
                     @if($project->impact)
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Community Impact</h4>
-                        <p class="text-gray-600">{{ $project->impact }}</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 mb-2">Community Impact</h4>
+                        <p class="text-gray-600 dark:text-gray-300">{{ $project->impact }}</p>
                     </div>
                     @endif
                     @if($project->beneficiaries)
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Beneficiaries</h4>
-                        <p class="text-gray-600">{{ $project->beneficiaries }}</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 mb-2">Beneficiaries</h4>
+                        <p class="text-gray-600 dark:text-gray-300">{{ $project->beneficiaries }}</p>
                     </div>
                     @endif
                 </div>
@@ -108,27 +108,27 @@
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- Funding Information -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Funding Details</h3>
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Funding Details</h3>
                 <div class="space-y-3">
                     @if($project->funding_source)
                     <div>
-                        <h4 class="font-medium text-gray-900 text-sm">Funding Source</h4>
-                        <p class="text-gray-600 text-sm">{{ $project->funding_source }}</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 text-sm">Funding Source</h4>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm">{{ $project->funding_source }}</p>
                     </div>
                     @endif
                     @if($project->implementing_agency)
                     <div>
-                        <h4 class="font-medium text-gray-900 text-sm">Implementing Agency</h4>
-                        <p class="text-gray-600 text-sm">{{ $project->implementing_agency }}</p>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-200 text-sm">Implementing Agency</h4>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm">{{ $project->implementing_agency }}</p>
                     </div>
                     @endif
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Actions</h3>
                 <div class="space-y-3">
                     <a href="{{ route('admin.accomplished-projects.edit', $project->id) }}" 
                        class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center justify-center">

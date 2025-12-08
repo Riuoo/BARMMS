@@ -53,7 +53,7 @@ class QRCodeController
             'success' => true,
             'resident' => [
                 'id' => $resident->id,
-                'name' => $resident->name,
+                'name' => $resident->full_name,
                 'email' => $resident->email,
             ],
         ]);

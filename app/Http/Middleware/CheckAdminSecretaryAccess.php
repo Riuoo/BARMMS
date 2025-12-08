@@ -13,7 +13,7 @@ class CheckAdminSecretaryAccess
     /**
      * Handle an incoming request.
      *
-     * This middleware restricts access to only admin and secretary roles.
+     * This middleware restricts access to only secretary role.
      * Other roles (captain, councilor, treasurer, nurse) will be denied access.
      */
     public function handle(Request $request, Closure $next): Response
@@ -26,8 +26,8 @@ class CheckAdminSecretaryAccess
             return redirect()->route('landing');
         }
 
-        // Only admin and secretary can access
-        if (!in_array($userRole, ['admin', 'secretary'])) {
+        // Only secretary can access
+        if ($userRole !== 'secretary') {
             // Log unauthorized access attempt
             Log::warning('Unauthorized access attempt', [
                 'user_role' => $userRole,
@@ -92,7 +92,7 @@ class CheckAdminSecretaryAccess
         }
         
         // Generic access denied message
-        notify()->error('Access denied. Only administrators and secretaries can access this section.');
+        notify()->error('Access denied. Only secretaries can access this section.');
     }
 
     /**

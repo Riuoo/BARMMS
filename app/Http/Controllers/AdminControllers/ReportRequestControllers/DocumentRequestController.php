@@ -28,14 +28,20 @@ class DocumentRequestController
             $search = trim($request->get('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('document_type', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
                   ->orWhereHas('resident', function($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%");
+                      $uq->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"]);
                   });
             });
         }
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
+        }
+        // Filter by purok
+        if ($request->filled('purok')) {
+            $purok = $request->get('purok');
+            $query->whereHas('resident', function($q) use ($purok) {
+                $q->where('address', 'like', "%{$purok}%");
+            });
         }
         $documentRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed')")->orderByDesc('created_at')->paginate(10);
         return view('admin.requests.document-requests', compact('documentRequests', 'totalRequests', 'pendingCount', 'approvedCount', 'completedCount'));
@@ -47,7 +53,7 @@ class DocumentRequestController
             $documentRequest = DocumentRequest::with('resident')->findOrFail($id);
             
             return response()->json([
-                'user_name' => $documentRequest->resident->name ?? 'N/A',
+                'user_name' => $documentRequest->resident->full_name ?? 'N/A',
                 'document_type' => $documentRequest->document_type,
                 'purpose' => $documentRequest->description,
                 'status' => $documentRequest->status,
@@ -63,10 +69,10 @@ class DocumentRequestController
     protected function processTemplatePlaceholders($html, $documentRequest, $adminUser)
     {
         $replacements = [
-            '{{user_name}}' => $documentRequest->resident ? $documentRequest->resident->name : '',
+            '{{user_name}}' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
             '{{document_type}}' => $documentRequest->document_type,
             '{{purpose}}' => $documentRequest->description,
-            '{{admin_name}}' => $adminUser ? $adminUser->name : '',
+            '{{admin_name}}' => $adminUser ? $adminUser->full_name : '',
         ];
         return strtr($html, $replacements);
     }
@@ -112,7 +118,7 @@ class DocumentRequestController
 
             // Prepare values for placeholders
             $values = [
-                'resident_name' => $documentRequest->resident ? $documentRequest->resident->name : '',
+                'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
                 'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
                 'purpose' => $documentRequest->description,
@@ -122,7 +128,7 @@ class DocumentRequestController
                 'barangay_name' => $adminUser ? $adminUser->barangay_name : '',
                 'municipality_name' => $adminUser ? $adminUser->municipality_name : '',
                 'province_name' => $adminUser ? $adminUser->province_name : '',
-                'official_name' => $adminUser ? $adminUser->name : '',
+                'official_name' => $adminUser ? $adminUser->full_name : '',
                 'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
             ];
 
@@ -161,7 +167,7 @@ class DocumentRequestController
             // Send email synchronously for now to ensure it works
             if ($user && $user->email) {
                 try {
-                    Mail::to($user->email)->queue(new DocumentReadyForPickupMail($user->name, $documentRequest->document_type));
+                    Mail::to($user->email)->queue(new DocumentReadyForPickupMail($user->full_name, $documentRequest->document_type));
                     Log::info('Approve: Email queued for background processing', ['elapsed' => microtime(true) - $start]);
                 } catch (\Exception $e) {
                     Log::error('Failed to queue DocumentReadyForPickupMail: ' . $e->getMessage());
@@ -213,7 +219,7 @@ class DocumentRequestController
 
             // Prepare values for placeholders
             $values = [
-                'resident_name' => $documentRequest->resident ? $documentRequest->resident->name : '',
+                'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
                 'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
                 'purpose' => $documentRequest->description,
@@ -223,7 +229,7 @@ class DocumentRequestController
                 'barangay_name' => $adminUser ? $adminUser->barangay_name : '',
                 'municipality_name' => $adminUser ? $adminUser->municipality_name : '',
                 'province_name' => $adminUser ? $adminUser->province_name : '',
-                'official_name' => $adminUser ? $adminUser->name : '',
+                'official_name' => $adminUser ? $adminUser->full_name : '',
                 'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
             ];
 
@@ -406,7 +412,7 @@ class DocumentRequestController
             )->firstOrFail();
 
         $values = [
-            'resident_name' => $documentRequest->resident?->name ?? '',
+            'resident_name' => $documentRequest->resident?->full_name ?? '',
             'resident_address' => $documentRequest->resident?->address ?? '',
             'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
             'purpose' => $documentRequest->description,
@@ -416,7 +422,7 @@ class DocumentRequestController
             'barangay_name' => $adminUser->barangay_name ?? '',
             'municipality_name' => $adminUser->municipality_name ?? '',
             'province_name' => $adminUser->province_name ?? '',
-            'official_name' => $adminUser->name ?? '',
+            'official_name' => $adminUser->full_name ?? '',
             'official_position' => $adminUser->position ?? '',
         ];
 
@@ -533,7 +539,7 @@ class DocumentRequestController
     // Add this method to generate a filename for the PDF
     protected function generateFilename($documentRequest)
     {
-        $name = $documentRequest->resident ? $documentRequest->resident->name : 'unknown';
+        $name = $documentRequest->resident ? $documentRequest->resident->full_name : 'unknown';
         $name = preg_replace('/[^a-zA-Z0-9\s]/', '', $name); // Remove special chars
         $name = strtolower(str_replace(' ', '_', $name));
         $date = date('Y-m-d');
@@ -559,7 +565,7 @@ class DocumentRequestController
             ->where('active', true)
             ->first();
         
-        $preparedByName = $secretary ? $secretary->name : ($adminUser ? $adminUser->name : '');
+        $preparedByName = $secretary ? $secretary->full_name : ($adminUser ? $adminUser->full_name : '');
         
         // Get current Punong Barangay (captain)
         $captain = BarangayProfile::where('role', 'captain')
@@ -568,7 +574,7 @@ class DocumentRequestController
         
         return [
             'prepared_by_name' => $preparedByName,
-            'captain_name' => $captain ? $captain->name : '',
+            'captain_name' => $captain ? $captain->full_name : '',
         ];
     }
 }

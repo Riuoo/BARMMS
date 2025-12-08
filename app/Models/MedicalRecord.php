@@ -35,12 +35,14 @@ class MedicalRecord extends Model
 
     public function resident()
     {
-        return $this->belongsTo(Residents::class, 'resident_id');
+        return $this->belongsTo(Residents::class, 'resident_id')
+            ->select(['id', 'first_name', 'middle_name', 'last_name', 'suffix', 'email', 'active']);
     }
 
     public function attendingHealthWorker()
     {
-        return $this->belongsTo(BarangayProfile::class, 'attending_health_worker_id');
+        return $this->belongsTo(BarangayProfile::class, 'attending_health_worker_id')
+            ->select(['id', 'first_name', 'middle_name', 'last_name', 'suffix', 'email', 'active']);
     }
 
     public function medicineRequests()

@@ -351,7 +351,7 @@
                                                 @if(!empty($resident->is_outlier))
                                                     <span class="inline-block w-2 h-2 mr-2 rounded-full bg-red-500" title="Outlier"></span>
                                                 @endif
-                                                {{ $resident->name ?? 'N/A' }}
+                                                {{ $resident->full_name }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->age ?? 'N/A' }}</td>

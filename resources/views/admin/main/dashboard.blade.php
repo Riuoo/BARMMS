@@ -12,7 +12,7 @@
     <div id="dashboardHeaderContent" class="mb-3 hidden">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ $barangay_profile->name ?? 'Admin' }}</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ $barangay_profile?->full_name ?? 'Admin' }}</h1>
                 <p class="text-sm md:text-base text-gray-600">Here's what's happening in your barangay today</p>
             </div>
             <div class="mt-4 sm:mt-0">

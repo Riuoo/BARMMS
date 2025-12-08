@@ -61,7 +61,7 @@ class VaccinationRecord extends Model
     public function getPatientNameAttribute()
     {
         if ($this->resident) {
-            return $this->resident->name;
+            return $this->resident->full_name;
         }
         if ($this->childProfile) {
             return $this->childProfile->first_name . ' ' . $this->childProfile->last_name;

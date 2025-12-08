@@ -252,16 +252,21 @@ class TwoFactorAuthController
         Session::put('user_id', $userId);
         $userRole = Session::get('2fa_pending_user_role') ?? ($user->role ?? 'resident');
         Session::put('user_role', $userRole);
+        
+        // Check if remember me was checked during login
+        $rememberMe = Session::get('2fa_pending_remember', false);
+        
         Session::forget('2fa_pending_user_id');
         Session::forget('2fa_pending_user_role');
         Session::forget('2fa_pending_device_id');
         Session::forget('2fa_pending_device_fingerprint');
+        Session::forget('2fa_pending_remember');
 
         notify()->success('Login successful.');
 
         // Prepare response with cookie if device is being remembered
         $response = null;
-        $userRole = Session::get('2fa_pending_user_role') ?? $user->role;
+        $userRole = Session::get('user_role') ?? $user->role;
         
         if ($userRole === 'resident') {
             $response = redirect()->intended(route('resident.dashboard'));
@@ -290,6 +295,34 @@ class TwoFactorAuthController
             } catch (\Exception $e) {
                 // Log error but don't fail the login
                 Log::error('Failed to set device fingerprint cookie', [
+                    'user_id' => $userId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+        
+        // Handle Remember Me token
+        if ($rememberMe) {
+            try {
+                $rememberToken = Str::random(60);
+                $user->remember_token = Hash::make($rememberToken);
+                $user->save();
+                
+                $cookie = \Illuminate\Support\Facades\Cookie::make(
+                    'remember_token',
+                    $rememberToken,
+                    30 * 24 * 60, // 30 days in minutes
+                    '/',
+                    null,
+                    false, // secure (false for local HTTP)
+                    true, // httpOnly
+                    false, // raw
+                    'lax' // sameSite
+                );
+                $response->cookie($cookie);
+            } catch (\Exception $e) {
+                // Log error but don't fail the login
+                Log::error('Failed to set remember token cookie', [
                     'user_id' => $userId,
                     'error' => $e->getMessage(),
                 ]);

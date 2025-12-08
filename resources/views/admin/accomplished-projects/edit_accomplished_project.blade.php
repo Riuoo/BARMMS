@@ -37,6 +37,19 @@
                 @enderror
             </div>
 
+            <!-- Type -->
+            <div>
+                <label for="type" class="block text-sm font-medium text-gray-700 mb-2">Type *</label>
+                <select name="type" id="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('type') border-red-500 @enderror" required>
+                    <option value="">Select Type</option>
+                    <option value="project" {{ old('type', $project->type) == 'project' ? 'selected' : '' }}>Project</option>
+                    <option value="activity" {{ old('type', $project->type) == 'activity' ? 'selected' : '' }}>Activity</option>
+                </select>
+                @error('type')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Project Image -->
             <div class="md:col-span-2">
                 <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Project Image</label>
@@ -112,7 +125,7 @@
             </div>
 
             <!-- Budget -->
-            <div>
+            <div class="js-project-only">
                 <label for="budget" class="block text-sm font-medium text-gray-700 mb-2">Budget (₱)</label>
                 <input type="number" id="budget" name="budget" value="{{ old('budget', $project->budget) }}" step="0.01"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('budget') border-red-500 @enderror" 
@@ -123,7 +136,7 @@
             </div>
 
             <!-- Funding Source -->
-            <div>
+            <div class="js-project-only">
                 <label for="funding_source" class="block text-sm font-medium text-gray-700 mb-2">Funding Source</label>
                 <input type="text" id="funding_source" name="funding_source" value="{{ old('funding_source', $project->funding_source) }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('funding_source') border-red-500 @enderror" 
@@ -154,7 +167,7 @@
             </div>
 
             <!-- Implementing Agency -->
-            <div>
+            <div class="js-project-only">
                 <label for="implementing_agency" class="block text-sm font-medium text-gray-700 mb-2">Implementing Agency</label>
                 <input type="text" id="implementing_agency" name="implementing_agency" value="{{ old('implementing_agency', $project->implementing_agency) }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('implementing_agency') border-red-500 @enderror" 
@@ -261,6 +274,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
+
+    const typeSelect = document.getElementById('type');
+    const projectOnlyFields = document.querySelectorAll('.js-project-only');
+
+    function toggleTypeFields() {
+        const isProject = typeSelect.value === 'project';
+        projectOnlyFields.forEach((field) => {
+            field.style.display = isProject ? 'block' : 'none';
+        });
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', toggleTypeFields);
+        toggleTypeFields();
+    }
 });
 </script>
 @endpush 
