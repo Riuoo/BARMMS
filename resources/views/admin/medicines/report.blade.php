@@ -90,7 +90,13 @@
                     <span class="text-xs text-gray-500">Qty</span>
                 </div>
                 <div class="h-48">
-                    <canvas id="chartTopDispensed"></canvas>
+                    @if(!empty($topDispensed) && count($topDispensed) > 0)
+                        <canvas id="chartTopDispensed"></canvas>
+                    @else
+                        <div class="text-center text-gray-500 mt-8">
+                            <p>No dispensing data available for the selected range</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

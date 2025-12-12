@@ -29,8 +29,19 @@ class BlotterRequest extends Model
 
     public function respondent()
     {
+        // Include address so analysis features (e.g., blotter clustering) can
+        // extract the purok instead of falling back to "Unknown".
         return $this->belongsTo(Residents::class, 'respondent_id')
-            ->select(['id', 'first_name', 'middle_name', 'last_name', 'suffix', 'email', 'active']);
+            ->select([
+                'id',
+                'first_name',
+                'middle_name',
+                'last_name',
+                'suffix',
+                'email',
+                'active',
+                'address',
+            ]);
     }
 
     /**
