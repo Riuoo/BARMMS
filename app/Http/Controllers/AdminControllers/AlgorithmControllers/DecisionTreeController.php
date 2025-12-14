@@ -91,7 +91,7 @@ class DecisionTreeController
         $blotterCountsMap = BlotterRequest::selectRaw('respondent_id, COUNT(*) as cnt')
             ->whereNotNull('respondent_id')
             ->groupBy('respondent_id')
-            ->pluck('cnt', 'resident_id');
+            ->pluck('cnt', 'respondent_id');
         foreach ($residents as $resident) {
             $resident->blotter_count = (int) ($blotterCountsMap[$resident->id] ?? 0);
         }

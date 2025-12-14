@@ -3,7 +3,7 @@
 @section('title', 'Project Details')
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+<div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
     <!-- Unified Show Skeleton -->
     <div id="apShowSkeleton">
         @include('components.loading.show-entity-skeleton', ['type' => 'accomplished-project', 'buttonCount' => 1])

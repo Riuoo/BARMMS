@@ -162,11 +162,11 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-tasks text-yellow-700 text-sm"></i>
+                    <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-tasks text-orange-600 text-sm"></i>
                     </div>
                 </div>
                 <div class="ml-3">
@@ -267,7 +267,7 @@
                                     $statusColors = [
                                         'pending' => 'bg-yellow-100 text-yellow-800',
                                         'under_review' => 'bg-blue-100 text-blue-800',
-                                        'in_progress' => 'bg-yellow-100 text-yellow-800',
+                                        'in_progress' => 'bg-orange-100 text-orange-800',
                                         'resolved' => 'bg-green-100 text-green-800',
                                         'closed' => 'bg-purple-100 text-purple-800'
                                     ];
@@ -321,7 +321,7 @@
                                     $statusColors = [
                                         'pending' => 'bg-yellow-100 text-yellow-800',
                                         'under_review' => 'bg-blue-100 text-blue-800',
-                                        'in_progress' => 'bg-yellow-100 text-yellow-800',
+                                        'in_progress' => 'bg-orange-100 text-orange-800',
                                         'resolved' => 'bg-green-100 text-green-800',
                                         'closed' => 'bg-purple-100 text-purple-800'
                                     ];

@@ -3,7 +3,7 @@
 @section('title', 'Health Center Activity Details')
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+<div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
     <!-- Skeleton Component -->
     <div id="hcaShowSkeleton">
         @include('components.loading.show-entity-skeleton', ['type' => 'health-activity', 'buttonCount' => 1])

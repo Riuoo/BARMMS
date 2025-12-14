@@ -11,7 +11,9 @@ class BlotterAnalysisService
      */
     public function getAnalysis(): array
     {
-        $blotters = BlotterRequest::with('respondent')->get();
+        $blotters = BlotterRequest::with(['respondent' => function($query) {
+            $query->select('id', 'first_name', 'middle_name', 'last_name', 'suffix', 'email', 'active', 'address');
+        }])->get();
         
         $purokCounts = $this->countByPurok($blotters);
         $respondentTypeCounts = $this->countByRespondentType($blotters);
@@ -74,6 +76,9 @@ class BlotterAnalysisService
      */
     private function extractPurok($address): string
     {
+        if (empty($address)) {
+            return 'Unknown';
+        }
         if (preg_match('/Purok\s*\d+/i', $address, $matches)) {
             return $matches[0];
         }
@@ -139,7 +144,7 @@ class BlotterAnalysisService
         $breakdown = [];
         
         foreach ($blotters as $blotter) {
-            $purok = 'Unknown';
+            $purok = 'N/A';
             if ($blotter->respondent_id) {
                 $purok = $this->extractPurok($blotter->respondent->address ?? '');
             } else {

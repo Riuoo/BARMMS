@@ -52,33 +52,34 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        @if(isset($error))
-            <div class="mb-3 bg-red-50 border border-red-200 rounded-lg p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-red-400"></i>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800">Analysis Error</h3>
-                        <div class="mt-2 text-sm text-red-700">
-                            {{ $error }}
-                        </div>
+    @if(isset($error))
+        <div class="mb-3 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Analysis Error</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        {{ $error }}
                     </div>
                 </div>
             </div>
-        @elseif(empty($purokCounts))
-            <div class="text-center py-12">
+        </div>
+    @elseif(empty($purokCounts))
+        <div class="text-center py-12">
                 <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                     <i class="fas fa-chart-bar text-gray-400 text-2xl"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No data available for analysis</h3>
-                <p class="text-gray-500">No blotter reports found. Please add some reports first.</p>
-            </div>
-        @else
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No data available for analysis</h3>
+            <p class="text-gray-500">No blotter reports found. Please add some reports first.</p>
+        </div>
+    @else
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-3">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-4">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -278,8 +279,7 @@
                     </div>
                 </div>
             </div>
-        @endif
-    </div>
+    @endif
 </div>
 
 <!-- Chart.js -->
