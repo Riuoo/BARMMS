@@ -318,7 +318,7 @@
                     @foreach(safeTake($recentConsultations, 4) as $consultation)
                     <div class="border-l-4 border-blue-500 pl-4">
                         <p class="text-sm font-medium text-gray-900">{{ $consultation->resident ? $consultation->resident->full_name : 'N/A' }}</p>
-                        <p class="text-xs text-gray-500">{{ Str::limit($consultation->chief_complaint, 50) }}</p>
+                        <p class="text-xs text-gray-500">{{ Str::limit($consultation->complaint, 50) }}</p>
                         <p class="text-xs text-gray-400">{{ $consultation->consultation_datetime->format('M d, Y') }}</p>
                     </div>
                     @endforeach

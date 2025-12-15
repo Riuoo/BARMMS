@@ -131,7 +131,11 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-4 cursor-pointer hover:bg-yellow-50 transition"
+             role="button"
+             tabindex="0"
+             onclick="openExpiringSoonModal()"
+             onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); openExpiringSoonModal(); }">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-full flex items-center justify-center">
@@ -178,9 +182,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center"><i class="fas fa-box mr-2"></i>Stock</div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center"><i class="fas fa-calendar-day mr-2"></i>Expiry</div>
-                            </th>
                             @if($canPerformTransactions)
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center justify-center"><i class="fas fa-cogs mr-2"></i>Actions</div>
@@ -205,16 +206,24 @@
                                     <span class="text-xs px-2 py-1 rounded {{ $status==='low' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">{{ ucfirst($status) }}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">
-                                @if(!$med->expiry_date)
-                                    <span class="text-gray-400">N/A</span>
-                                @else
-                                    {{ $med->expiry_date->format('M d, Y') }}
-                                @endif
-                            </td>
                             @if($canPerformTransactions)
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
+                                    <button type="button"
+                                            class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
+                                            data-name="{{ $med->name }}"
+                                            data-generic="{{ $med->generic_name }}"
+                                            data-category="{{ $med->category }}"
+                                            data-stock="{{ $med->current_stock }}"
+                                            data-minimum="{{ $med->minimum_stock }}"
+                                            data-expiry="{{ $med->expiry_date ? $med->expiry_date->format('Y-m-d') : '' }}"
+                                            data-manufacturer="{{ $med->manufacturer }}"
+                                            data-dosage="{{ $med->dosage_form }}"
+                                            data-description="{{ $med->description }}"
+                                            onclick="openMedicineDetailModal(this)"
+                                            title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                     <a href="{{ route('admin.medicines.edit', $med) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -250,10 +259,23 @@
                 <div class="text-sm text-gray-600 mb-2">
                     <p><i class="fas fa-tags mr-1 text-gray-400"></i> {{ $med->category }}</p>
                     <p><i class="fas fa-box mr-1 text-gray-400"></i> Stock: <span class="font-medium">{{ $med->current_stock }}</span></p>
-                    <p><i class="fas fa-calendar-day mr-1 text-gray-400"></i> Expiry: {{ $med->expiry_date ? $med->expiry_date->format('M d, Y') : 'N/A' }}</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
                     @if($canPerformTransactions)
+                    <button type="button"
+                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition duration-200"
+                        data-name="{{ $med->name }}"
+                        data-generic="{{ $med->generic_name }}"
+                        data-category="{{ $med->category }}"
+                        data-stock="{{ $med->current_stock }}"
+                        data-minimum="{{ $med->minimum_stock }}"
+                        data-expiry="{{ $med->expiry_date ? $med->expiry_date->format('Y-m-d') : '' }}"
+                        data-manufacturer="{{ $med->manufacturer }}"
+                        data-dosage="{{ $med->dosage_form }}"
+                        data-description="{{ $med->description }}"
+                        onclick="openMedicineDetailModal(this)">
+                        <i class="fas fa-eye mr-1"></i> View
+                    </button>
                     <a href="{{ route('admin.medicines.edit', $med) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none transition duration-200">
                         <i class="fas fa-edit mr-1"></i> Edit
                     </a>
@@ -265,6 +287,81 @@
     @endif
 </div>
 </div>
+<!-- Medicine Detail Modal -->
+<div id="medicineDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Medicine Details</h3>
+            <button type="button" id="closeMedicineDetailModal" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 space-y-3 text-sm text-gray-800">
+            <div class="flex justify-between"><span class="text-gray-600">Name</span><span class="font-medium" id="mdm_name">-</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Generic</span><span class="font-medium" id="mdm_generic">-</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Category</span><span class="font-medium" id="mdm_category">-</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Dosage Form</span><span class="font-medium" id="mdm_dosage">-</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Manufacturer</span><span class="font-medium" id="mdm_manufacturer">-</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Stock</span><span class="font-medium" id="mdm_stock">-</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Minimum Stock</span><span class="font-medium" id="mdm_min_stock">-</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Expiry</span><span class="font-medium" id="mdm_expiry">-</span></div>
+            <div>
+                <div class="text-gray-600 mb-1">Description</div>
+                <div class="text-gray-900" id="mdm_description">-</div>
+            </div>
+        </div>
+        <div class="flex justify-end space-x-3 px-4 py-3 border-t border-gray-200">
+            <button type="button" id="dismissMedicineDetailModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Expiring Soon Modal -->
+<div id="expiringSoonModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Medicines Expiring Soon</h3>
+            <button type="button" id="closeExpiringSoonModal" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 text-sm text-gray-800 max-h-[60vh] overflow-y-auto">
+            @if(isset($expiringSoonMedicines) && $expiringSoonMedicines->isNotEmpty())
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Medicine</th>
+                            <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Generic</th>
+                            <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                            <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($expiringSoonMedicines as $expMed)
+                            <tr>
+                                <td class="px-4 py-2 font-medium text-gray-900">{{ $expMed->name }}</td>
+                                <td class="px-4 py-2 text-gray-700">{{ $expMed->generic_name ?? '—' }}</td>
+                                <td class="px-4 py-2 text-gray-700">{{ $expMed->current_stock }}</td>
+                                <td class="px-4 py-2 text-gray-700">
+                                    {{ optional($expMed->expiry_date)->format('M d, Y') ?? 'N/A' }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <p class="text-gray-600">No medicines are expiring in the next 30 days.</p>
+            @endif
+        </div>
+        <div class="flex justify-end space-x-3 px-4 py-3 border-t border-gray-200">
+            <button type="button" id="dismissExpiringSoonModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+@endsection
 
 @push('scripts')
 <script>
@@ -279,6 +376,44 @@ document.addEventListener('DOMContentLoaded', function() {
         if (content) content.style.display = 'block';
     }, 1000);
 });
+
+function openMedicineDetailModal(button) {
+    const get = (attr) => button.getAttribute(attr) || '—';
+    document.getElementById('mdm_name').textContent = get('data-name');
+    document.getElementById('mdm_generic').textContent = get('data-generic') || '—';
+    document.getElementById('mdm_category').textContent = get('data-category') || '—';
+    document.getElementById('mdm_dosage').textContent = get('data-dosage') || '—';
+    document.getElementById('mdm_manufacturer').textContent = get('data-manufacturer') || '—';
+    document.getElementById('mdm_stock').textContent = get('data-stock');
+    document.getElementById('mdm_min_stock').textContent = get('data-minimum');
+    document.getElementById('mdm_expiry').textContent = get('data-expiry') || 'N/A';
+    document.getElementById('mdm_description').textContent = get('data-description') || '—';
+
+    const modal = document.getElementById('medicineDetailModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+function closeMedicineDetailModal() {
+    const modal = document.getElementById('medicineDetailModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+document.getElementById('closeMedicineDetailModal')?.addEventListener('click', closeMedicineDetailModal);
+document.getElementById('dismissMedicineDetailModal')?.addEventListener('click', closeMedicineDetailModal);
+
+function openExpiringSoonModal() {
+    const modal = document.getElementById('expiringSoonModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+function closeExpiringSoonModal() {
+    const modal = document.getElementById('expiringSoonModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+document.getElementById('closeExpiringSoonModal')?.addEventListener('click', closeExpiringSoonModal);
+document.getElementById('dismissExpiringSoonModal')?.addEventListener('click', closeExpiringSoonModal);
 </script>
 @endpush
-@endsection

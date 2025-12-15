@@ -67,8 +67,8 @@
             </div>
         </form>
 
-        <!-- Charts Row 1: Top Requested by Purok (Chart) / Top Dispensed -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <!-- Charts Row 1: Top Requested by Purok (Chart) -->
+        <div class="grid grid-cols-1 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="font-semibold text-gray-900">Top Requests by Purok</h3>
@@ -84,25 +84,10 @@
                     @endif
                 </div>
             </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-semibold text-gray-900">Top Dispensed</h3>
-                    <span class="text-xs text-gray-500">Qty</span>
-                </div>
-                <div class="h-48">
-                    @if(!empty($topDispensed) && count($topDispensed) > 0)
-                        <canvas id="chartTopDispensed"></canvas>
-                    @else
-                        <div class="text-center text-gray-500 mt-8">
-                            <p>No dispensing data available for the selected range</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
         </div>
 
-        <!-- Charts Row 2: Category / Monthly / Age Bracket -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <!-- Charts Row 2: Category / Age Bracket -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="font-semibold text-gray-900">Most Requested</h3>
@@ -110,15 +95,6 @@
                 </div>
                 <div class="h-56">
                     <canvas id="chartTopRequested"></canvas>
-                </div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-semibold text-gray-900">Monthly Dispensing</h3>
-                    <span class="text-xs text-gray-500">Last 6 months</span>
-                </div>
-                <div class="h-56">
-                    <canvas id="chartMonthly"></canvas>
                 </div>
             </div>
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
@@ -145,19 +121,43 @@
             </div>
         </div>
 
-        <!-- Optimization Summary -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <!-- Modal: Request Distribution Pie -->
+        <div id="requestPieModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="requestPieChartTitle" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" onclick="closeRequestPieChart()"></div>
+
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                    <div class="bg-white px-6 pt-5 pb-4 sm:p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold text-gray-900" id="requestPieChartTitle">
+                                <i class="fas fa-chart-pie text-green-600 mr-2"></i>
+                                Request Distribution
+                            </h3>
+                            <button onclick="closeRequestPieChart()" class="text-gray-400 hover:text-gray-500 focus:outline-none focus:text-gray-500 transition-colors" title="Close modal">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div class="chart-container" style="position: relative; height: 450px;">
+                            <canvas id="requestPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights & Guidance -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <i class="fas fa-info-circle text-blue-400 mt-1"></i>
+                    <i class="fas fa-lightbulb text-yellow-500 mt-1"></i>
                 </div>
                 <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">Report Optimization</h3>
-                    <div class="mt-2 text-sm text-blue-700">
-                        <p>✅ <strong>Eliminated redundant data:</strong> Consolidated 3 separate request queries into 1 comprehensive query</p>
-                        <p>✅ <strong>Improved performance:</strong> Reduced database calls from 3 to 1 for request analytics</p>
-                        <p>✅ <strong>Maintained functionality:</strong> All views (purok-based, overall) still available</p>
-                        <p>✅ <strong>Cleaner interface:</strong> Removed overlapping cluster-based section</p>
+                    <h3 class="text-sm font-medium text-gray-900">Insights & Guidance</h3>
+                    <div class="mt-2 text-sm text-gray-700 space-y-1">
+                        <p>• Click any purok bar to see its most requested medicines in a pie view.</p>
+                        <p>• Use age distribution to confirm coverage across all brackets starting at age 1.</p>
+                        <p>• Category distribution highlights stock planning needs—watch for categories approaching limits.</p>
+                        <p>• For anomalies or spikes, narrow the date range above and re-check the request mix.</p>
                     </div>
                 </div>
             </div>
@@ -181,34 +181,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    /* eslint-disable */
     document.addEventListener('DOMContentLoaded', function() {
         const palette = [
             '#16a34a', '#059669', '#14b8a6', '#22c55e', '#4ade80', '#86efac', '#10b981', '#34d399', '#2dd4bf', '#a7f3d0',
             '#f59e42', '#f43f5e', '#6366f1', '#eab308', '#f472b6', '#a21caf', '#0ea5e9', '#facc15', '#64748b', '#e11d48'
         ];
 
-        @php
-            $__tr = collect($requestAnalytics['overall'] ?? [])->map(function ($r) { return [data_get($r, 'medicine.name', 'Unknown'), (int) data_get($r, 'requests', 0)]; })->values();
-            $__td = collect($topDispensed ?? [])->map(function ($r) { return [data_get($r, 'medicine.name', 'Unknown'), (int) data_get($r, 'total_qty', 0)]; })->values();
-            $__cats = collect($categoryCounts ?? [])->map(function ($r) { return [data_get($r, 'category', 'Unknown'), (int) data_get($r, 'count', 0)]; })->values();
-            $__mons = collect($monthlyDispensed ?? [])->map(function ($r) { return [data_get($r, 'month', 'Unknown'), (int) data_get($r, 'qty', 0)]; })->values();
-            $__ages = collect($requestsByAgeBracket ?? [])->map(function ($r) { return [data_get($r, 'bracket', 'Unknown'), (int) data_get($r, 'count', 0)]; })->values();
-            // For purok people chart
-            $__purokPeopleLabels = collect($topRequestedPeopleByPurok ?? [])->pluck('purok')->values();
-            $__purokPeopleData = collect($topRequestedPeopleByPurok ?? [])->pluck('people')->values();
-        @endphp
-        const topRequested = @json($__tr);
-        const topDispensed = @json($__td);
-        const categoryCounts = @json($__cats);
-        const monthlyDispensed = @json($__mons);
-        const requestsByAge = @json($__ages);
+        const topRequested = JSON.parse(`{!! json_encode(
+            collect($requestAnalytics['overall'] ?? [])->map(function ($r) {
+                return [data_get($r, "medicine.name", "Unknown"), (int) data_get($r, "requests", 0)];
+            })->values()
+        ) !!}`);
+        const purokMedicineBreakdown = JSON.parse(`{!! json_encode($requestAnalytics['by_purok'] ?? []) !!}`);
+        const categoryCounts = JSON.parse(`{!! json_encode(
+            collect($categoryCounts ?? [])->map(function ($r) {
+                return [data_get($r, "category", "Unknown"), (int) data_get($r, "count", 0)];
+            })->values()
+        ) !!}`);
+        const requestsByAge = JSON.parse(`{!! json_encode(
+            collect($requestsByAgeBracket ?? [])->map(function ($r) {
+                return [data_get($r, "bracket", "Unknown"), (int) data_get($r, "count", 0)];
+            })->values()
+        ) !!}`);
         // For purok people chart
-        const purokPeopleLabels = @json($__purokPeopleLabels);
-        const purokPeopleData = @json($__purokPeopleData);
+        const purokPeopleLabels = JSON.parse(`{!! json_encode(collect($topRequestedPeopleByPurok ?? [])->pluck("purok")->values()) !!}`);
+        const purokPeopleData = JSON.parse(`{!! json_encode(collect($topRequestedPeopleByPurok ?? [])->pluck("people")->values()) !!}`);
 
-        function makeBarChart(canvas, labels, values, label) {
+        function makeBarChart(canvas, labels, values, label, onClick) {
             if (!canvas) return;
-            new Chart(canvas, {
+            return new Chart(canvas, {
                 type: 'bar',
                 data: {
                     labels,
@@ -226,7 +228,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     scales: {
                         x: { ticks: { color: '#6b7280' } },
                         y: { ticks: { color: '#6b7280' }, beginAtZero: true }
-                    }
+                    },
+                    onClick
                 }
             });
         }
@@ -254,25 +257,130 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Build charts
         const tr = topRequested || [];
-        makeBarChart(document.getElementById('chartTopRequested'), tr.map(r => r[0]), tr.map(r => r[1]), 'Requests');
-
-        const td = topDispensed || [];
-        makeBarChart(document.getElementById('chartTopDispensed'), td.map(r => r[0]), td.map(r => r[1]), 'Quantity');
+        makeBarChart(
+            document.getElementById('chartTopRequested'),
+            tr.map(r => r[0]),
+            tr.map(r => r[1]),
+            'Requests'
+        );
 
 
 
         const cat = categoryCounts || [];
         makeDoughnut(document.getElementById('chartCategory'), cat.map(r => r[0]), cat.map(r => r[1]));
 
-        const m = monthlyDispensed || [];
-        makeBarChart(document.getElementById('chartMonthly'), m.map(r => r[0]), m.map(r => r[1]), 'Qty');
+        const defaultAgeBrackets = [
+            ['1-5', 0],
+            ['6-12', 0],
+            ['13-17', 0],
+            ['18-59', 0],
+            ['60+', 0],
+        ];
+        const age = (requestsByAge || []).map(([label, value]) => [label || 'Unknown', value || 0]);
+        const mergedAge = defaultAgeBrackets.map(([label, _]) => {
+            const found = age.find(a => a[0] === label);
+            return [label, found ? found[1] : 0];
+        });
+        const remaining = age.filter(a => !defaultAgeBrackets.find(([label]) => label === a[0]));
+        const finalAge = [...mergedAge, ...remaining];
+        makeDoughnut(document.getElementById('chartAge'), finalAge.map(r => r[0]), finalAge.map(r => r[1]));
 
-        const age = requestsByAge || [];
-        makeDoughnut(document.getElementById('chartAge'), age.map(r => r[0]), age.map(r => r[1]));
-
-        // Render the purok people chart
+        // Render the purok people chart with modal pie on click
         if (purokPeopleLabels.length && purokPeopleData.length) {
-            makeBarChart(document.getElementById('chartTopRequestedByPurok'), purokPeopleLabels, purokPeopleData, 'People');
+            makeBarChart(
+                document.getElementById('chartTopRequestedByPurok'),
+                purokPeopleLabels,
+                purokPeopleData,
+                'People',
+                function(event, elements) {
+                    if (elements && elements.length) {
+                        const index = elements[0].index;
+                        const purok = purokPeopleLabels[index];
+                        showRequestPieChartForPurok(purok);
+                    }
+                }
+            );
         }
+
+        let requestPieChart = null;
+        function showRequestPieChartForPurok(purok) {
+            const breakdown = purokMedicineBreakdown[purok] || [];
+            if (!breakdown.length) {
+                alert('No medicine data available for ' + purok);
+                return;
+            }
+
+            const labels = breakdown.map(r => r.medicine_name || 'Unknown');
+            const values = breakdown.map(r => r.requests || 0);
+
+            const modal = document.getElementById('requestPieModal');
+            const title = document.getElementById('requestPieChartTitle');
+            title.innerHTML = `<i class="fas fa-chart-pie text-green-600 mr-2"></i>Request Distribution - ${purok}`;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            const pieCtx = document.getElementById('requestPieChart');
+            if (requestPieChart) {
+                requestPieChart.destroy();
+            }
+
+            const colors = labels.map((_, i) => palette[i % palette.length]);
+
+            requestPieChart = new Chart(pieCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function closeRequestPieChart() {
+            const modal = document.getElementById('requestPieModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            if (requestPieChart) {
+                requestPieChart.destroy();
+                requestPieChart = null;
+            }
+        }
+
+        // Expose modal handlers for inline triggers
+        window.closeRequestPieChart = closeRequestPieChart;
+        window.showRequestPieChartForPurok = showRequestPieChartForPurok;
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('requestPieModal');
+                if (!modal.classList.contains('hidden')) {
+                    closeRequestPieChart();
+                }
+            }
+        });
     });
 </script>

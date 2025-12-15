@@ -65,6 +65,26 @@
     <link rel="icon" href="{{ asset('lower malinao logo.ico') }}" type="image/x-icon">
     @vite(['resources/css/app.css'])
     @notifyCss
+    <!-- Tom Select for searchable dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" defer></script>
+    <style>
+        /* Match Tom Select appearance with Tailwind form controls */
+        .ts-wrapper {
+            width: 100%;
+        }
+        .ts-wrapper.single .ts-control {
+            border-radius: 0.375rem; /* rounded */
+            border-color: #d1d5db;  /* gray-300 */
+            padding: 0.5rem 0.75rem; /* px-3 py-2 */
+            min-height: 2.5rem;
+            box-shadow: none;
+        }
+        .ts-wrapper.single .ts-control input {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
     <style type="text/css">
         /* Dark Mode CSS Variables */
         :root {
@@ -372,6 +392,14 @@
           background-color: var(--bg-secondary) !important;
           border-color: var(--border-color) !important;
           color: var(--text-primary) !important;
+        }
+
+        /* Ensure read-only inputs remain high-contrast in dark mode */
+        [data-theme="dark"] input[readonly],
+        [data-theme="dark"] textarea[readonly] {
+          background-color: var(--bg-secondary) !important;
+          color: var(--text-primary) !important;
+          opacity: 1 !important;
         }
 
         [data-theme="dark"] input::placeholder,
@@ -2228,11 +2256,7 @@
                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-green-500 focus:border-green-500"
                                placeholder="Example: Juan Dela Cruz"
                                oninput="searchPatientProfileByName()">
-<<<<<<< HEAD
                         <div id="patientProfileSuggestions" class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto hidden"></div>
-=======
-                        <div id="patientProfileSuggestions" class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto hidden"></div>
->>>>>>> 6509a6ef5d7569f4e395d0cc8c58d0c0a8a5876f
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Select a result to open the profile.</p>
                 </div>
@@ -2297,38 +2321,22 @@
                 .then(res => res.json())
                 .then((data) => {
                     if (!Array.isArray(data) || data.length === 0) {
-<<<<<<< HEAD
                         suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500 bg-white">No matches found</div>`;
-=======
-                        suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500">No matches found</div>`;
->>>>>>> 6509a6ef5d7569f4e395d0cc8c58d0c0a8a5876f
                         suggestions.classList.remove('hidden');
                         return;
                     }
                     suggestions.innerHTML = data.map(item => `
-<<<<<<< HEAD
                         <button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm transition-colors bg-white"
                                 data-id="${item.id}"
                                 onclick="selectPatientProfile(${item.id}, '${(item.name || '').replace(/'/g, "\\'")}', '', '')">
                             <div class="font-medium text-gray-900">${item.name || 'Unknown'}</div>
                             <div class="text-xs text-gray-500">${item.email || ''}</div>
-=======
-                        <button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm transition-colors"
-                                data-id="${item.id}"
-                                onclick="selectPatientProfile(${item.id}, '${(item.name || '').replace(/'/g, "\\'")}', '', '')">
-                            <div class="font-medium text-gray-900 dark:text-gray-100">${item.name || 'Unknown'}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">${item.email || ''}</div>
->>>>>>> 6509a6ef5d7569f4e395d0cc8c58d0c0a8a5876f
                         </button>
                     `).join('');
                     suggestions.classList.remove('hidden');
                 })
                 .catch(() => {
-<<<<<<< HEAD
                     suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500 bg-white">Search failed</div>`;
-=======
-                    suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500">Search failed</div>`;
->>>>>>> 6509a6ef5d7569f4e395d0cc8c58d0c0a8a5876f
                     suggestions.classList.remove('hidden');
                 });
             }, 250);

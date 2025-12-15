@@ -180,7 +180,7 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900"> 
                                     <div class="font-medium">{{ $record->consultation_type }}</div>
-                                    <div class="text-gray-500">{{ Str::limit($record->chief_complaint, 50) }}</div>
+                                    <div class="text-gray-500">{{ Str::limit($record->complaint, 50) }}</div>
                                     @if($record->diagnosis)
                                     <div class="text-xs text-gray-400 mt-1">Diagnosis: {{ Str::limit($record->diagnosis, 40) }}</div>
                                     @endif
@@ -248,9 +248,9 @@
                     <div class="description-container">
                         <p class="text-sm text-gray-600 leading-relaxed description-text" id="medical-description-{{ $record->id }}">
                             <i class="fas fa-align-left mr-1 text-gray-400"></i>
-                            <span class="description-short">{{ Str::limit($record->chief_complaint, 80) }}</span>
-                            @if(strlen($record->chief_complaint) > 80)
-                                <span class="description-full hidden">{{ $record->chief_complaint }}</span>
+                            <span class="description-short">{{ Str::limit($record->complaint, 80) }}</span>
+                            @if(strlen($record->complaint) > 80)
+                                <span class="description-full hidden">{{ $record->complaint }}</span>
                                 <button onclick="toggleDescription('medical-{{ $record->id }}')" 
                                         class="text-blue-600 hover:text-blue-800 underline text-xs ml-1 toggle-desc-btn">
                                     Read More

@@ -20,7 +20,7 @@ class MedicalRecordController
             $query->whereHas('resident', function($q) use ($search) {
                 $q->whereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')) LIKE ?", ["%{$search}%"])
                   ->orWhere('email', 'like', "%{$search}%");
-            })->orWhere('chief_complaint', 'like', "%{$search}%")
+            })->orWhere('complaint', 'like', "%{$search}%")
               ->orWhere('diagnosis', 'like', "%{$search}%");
         }
 
@@ -36,7 +36,7 @@ class MedicalRecordController
         // Only select needed columns for paginated medical records and eager load relationships
         $medicalRecords = $query->select([
             'id', 'resident_id', 'attending_health_worker_id', 'created_at', 'consultation_datetime',
-            'consultation_type', 'chief_complaint', 'diagnosis', 'follow_up_date'
+            'consultation_type', 'complaint', 'diagnosis', 'follow_up_date'
         ])->with(['resident:id,first_name,middle_name,last_name,suffix,email', 'attendingHealthWorker:id,first_name,middle_name,last_name,suffix'])
         ->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.medical-records.index', compact('medicalRecords', 'stats'));
@@ -56,8 +56,8 @@ class MedicalRecordController
             'consultation_datetime' => 'required|date|before_or_equal:now',
             'consultation_type' => 'required|string|max:100',
             'consultation_type_other' => 'nullable|string|max:100',
-            'chief_complaint' => 'nullable|string|max:1000',
-            'symptoms' => 'nullable|string|max:1000',
+            'complaint' => 'required|string|max:255',
+            'complaint_other' => 'nullable|string|max:1000',
             'diagnosis' => 'nullable|string|max:1000',
             'prescribed_medications' => 'nullable|string|max:1000',
             'temperature' => 'nullable|numeric|min:30|max:45',
@@ -80,6 +80,16 @@ class MedicalRecordController
 
         // Remove the consultation_type_other field as it's not needed in the database
         unset($validated['consultation_type_other']);
+
+        // Normalize complaint value
+        if ($validated['complaint'] === 'Other') {
+            if (empty($request->input('complaint_other'))) {
+                notify()->error('Please specify the complaint when selecting "Other".');
+                return back()->withInput();
+            }
+            $validated['complaint'] = $request->input('complaint_other');
+        }
+        unset($validated['complaint_other']);
 
         $user = Residents::find($validated['resident_id']);
         if (!$user) {

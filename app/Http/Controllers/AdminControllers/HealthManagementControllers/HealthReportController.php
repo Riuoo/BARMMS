@@ -160,7 +160,7 @@ class HealthReportController
             'total' => $consultations->count(),
             'by_type' => $consultations->groupBy('consultation_type')->map->count(),
             'by_status' => $consultations->groupBy('status')->map->count(),
-            'common_complaints' => $consultations->groupBy('chief_complaint')->map->count()->sortDesc()->take(10),
+            'common_complaints' => $consultations->groupBy('complaint')->map->count()->sortDesc()->take(10),
         ];
 
         // Health Center Activities Summary

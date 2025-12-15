@@ -99,13 +99,13 @@
         </div>
     </div>
 
-    <!-- Chief Complaint -->
+    <!-- Complaint -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
         <div class="flex items-center mb-4">
             <i class="fas fa-exclamation-triangle text-orange-600 mr-2"></i>
-            <h3 class="text-lg font-semibold text-gray-900">Chief Complaint</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Complaint</h3>
         </div>
-        <p class="text-gray-700">{{ $medicalRecord->chief_complaint }}</p>
+        <p class="text-gray-700">{{ $medicalRecord->complaint }}</p>
     </div>
 
     <!-- Vital Signs -->

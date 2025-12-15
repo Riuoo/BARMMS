@@ -77,18 +77,20 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Resident <span class="text-red-500">*</span></label>
-                        <input
-                            type="text"
-                            id="residentSearch"
-                            placeholder="Search residents..."
-                            autocomplete="off"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
-                            aria-label="Search for a resident"
+                        <select
+                            id="resident-select"
+                            name="resident_id"
+                            class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
                             required
-                        />
-                        <input type="hidden" id="resident_id" name="resident_id" required>
-                        <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
-                        <p class="mt-1 text-sm text-gray-500">Search and select the resident for this request</p>
+                        >
+                            <option value="">Select resident...</option>
+                            @foreach($residents as $resident)
+                                <option value="{{ $resident->id }}" {{ old('resident_id') == $resident->id ? 'selected' : '' }}>
+                                    {{ $resident->full_name ?? ($resident->first_name . ' ' . $resident->last_name) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">Select the resident for this request</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Medicine <span class="text-red-500">*</span></label>
@@ -99,26 +101,6 @@
                         </select>
                         <p class="mt-1 text-sm text-gray-500">Select the medicine to dispense</p>
                     </div>
-                </div>
-            </div>
-
-            <!-- Optional Medical Record -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-notes-medical mr-3 text-purple-600 text-2xl"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Medical Record (Optional)</h2>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Medical Record</label>
-                    <select name="medical_record_id" class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
-                        <option value="">Select medical record (if applicable)</option>
-                        @foreach($medicalRecords as $record)
-                            <option value="{{ $record->id }}" {{ $selectedMedicalRecordId == $record->id ? 'selected' : '' }}>
-                                {{ $record->resident ? $record->resident->full_name : 'Unknown' }} - {{ $record->consultation_datetime->format('M d, Y') }} ({{ $record->diagnosis ?? 'No diagnosis' }})
-                            </option>
-                        @endforeach
-                    </select>
-                    <p class="mt-1 text-sm text-gray-500">Link to a medical record if this request is based on a consultation</p>
                 </div>
             </div>
 
@@ -169,73 +151,24 @@ document.addEventListener('DOMContentLoaded', function() {
         if (headerSkeleton) headerSkeleton.style.display = 'none';
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
+
+        // Initialize Tom Select for searchable resident dropdown
+        if (typeof TomSelect !== 'undefined') {
+            const residentSelect = document.getElementById('resident-select');
+            if (residentSelect && !residentSelect.tomselect) {
+                new TomSelect(residentSelect, {
+                    maxItems: 1,
+                    sortField: {
+                        field: 'text',
+                        direction: 'asc'
+                    },
+                    allowEmptyOption: true,
+                    placeholder: 'Select resident...'
+                });
+            }
+        }
     }, 1000);
 });
 </script>
 @endpush
 @endsection
-
-@section('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    function debounce(func, delay) {
-        let timeoutId;
-        return function(...args) {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func.apply(this, args), delay);
-        };
-    }
-    const searchInput = document.getElementById('residentSearch');
-    const searchResults = document.getElementById('searchResults');
-    const residentIdInput = document.getElementById('resident_id');
-    searchInput.addEventListener('input', debounce(async () => {
-        const term = searchInput.value.trim();
-        if (term.length < 2) {
-            searchResults.innerHTML = '';
-            searchResults.classList.add('hidden');
-            return;
-        }
-        searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Searching…</div>';
-        searchResults.classList.remove('hidden');
-        try {
-            const response = await fetch(`{{ route('admin.search.residents') }}?term=${encodeURIComponent(term)}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-            });
-            const results = await response.json();
-            if (Array.isArray(results) && results.length > 0) {
-                searchResults.innerHTML = results.map(resident => `
-                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
-                        <div class="font-medium text-gray-900">${resident.name}</div>
-                        <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
-                    </div>
-                `).join('');
-                searchResults.classList.remove('hidden');
-            } else {
-                searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
-                searchResults.classList.remove('hidden');
-            }
-        } catch (e) {
-            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">Search unavailable</div>';
-            searchResults.classList.remove('hidden');
-        }
-    }, 250));
-    searchResults.addEventListener('click', (event) => {
-        const target = event.target.closest('[data-id]');
-        if (target && target.dataset.id) {
-            residentIdInput.value = target.dataset.id;
-            searchInput.value = target.dataset.name;
-            searchResults.innerHTML = '';
-            searchResults.classList.add('hidden');
-        }
-    });
-    document.addEventListener('click', (event) => {
-        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-            searchResults.innerHTML = '';
-            searchResults.classList.add('hidden');
-        }
-    });
-});
-</script>
-@endsection
-
-

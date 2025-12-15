@@ -103,8 +103,9 @@
                     <div>
                         <label for="consultation_datetime" class="block text-sm font-medium text-gray-700 mb-2">Consultation Date & Time <span class="text-red-500">*</span></label>
                         <input type="datetime-local" name="consultation_datetime" id="consultation_datetime" 
-                               value="{{ old('consultation_datetime') }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" required>
+                               value="{{ old('consultation_datetime', now()->format('Y-m-d\\TH:i')) }}" 
+                               class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100" required readonly>
+                        <p class="mt-1 text-sm text-gray-500">Auto-set to current date and time</p>
                     </div>
                     <div>
                         <label for="consultation_type" class="block text-sm font-medium text-gray-700 mb-2">Consultation Type <span class="text-red-500">*</span></label>
@@ -128,14 +129,79 @@
                 </div>
                 <div class="mt-6 grid grid-cols-1 gap-6">
                     <div>
-                        <label for="symptoms" class="block text-sm font-medium text-gray-700 mb-2">Symptoms</label>
-                        <textarea name="symptoms" id="symptoms" rows="3" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="List symptoms...">{{ old('symptoms') }}</textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Complaint <span class="text-red-500">*</span></label>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-3 sm:space-y-0">
+                            <input type="text" name="complaint" id="complaint_display"
+                                   value="{{ old('complaint') }}"
+                                   class="flex-1 w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+                                   placeholder="Select a complaint" required readonly>
+                            <button type="button" id="openComplaintModal"
+                                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                <i class="fas fa-list mr-2"></i>Choose Complaint
+                            </button>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Choose the primary complaint for this visit</p>
                     </div>
-                    <div>
-                        <label for="chief_complaint" class="block text-sm font-medium text-gray-700 mb-2">Chief Complaint</label>
-                        <textarea name="chief_complaint" id="chief_complaint" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Primary reason for visit...">{{ old('chief_complaint') }}</textarea>
+                </div>
+            </div>
+
+            <!-- Complaint Modal -->
+            @php
+                $complaintOptions = [
+                    'Fever',
+                    'Headache',
+                    'Cough',
+                    'Cold/Congestion',
+                    'Sore Throat',
+                    'Stomach Pain',
+                    'Body Pain',
+                    'Dizziness',
+                    'Skin Rash',
+                    'Hypertension Follow-up',
+                    'Diabetes Follow-up',
+                    'Prescription Refill',
+                    'Prenatal Check-up',
+                    'General Check-up',
+                    'Other',
+                ];
+                $selectedComplaint = old('complaint');
+            @endphp
+            <div id="complaintModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-lg mx-4">
+                    <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+                        <h3 class="text-lg font-semibold text-gray-900">Select Complaint</h3>
+                        <button type="button" id="closeComplaintModal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        <div>
+                            <label for="complaint_modal_select" class="block text-sm font-medium text-gray-700 mb-2">Common Complaints</label>
+                            <select id="complaint_modal_select" class="w-full border border-gray-300 rounded px-3 py-2">
+                                <option value="">Select complaint...</option>
+                                @foreach ($complaintOptions as $option)
+                                    <option value="{{ $option }}" {{ $selectedComplaint === $option ? 'selected' : '' }}>{{ $option }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div id="complaint_modal_other" class="{{ $selectedComplaint === 'Other' ? '' : 'hidden' }}">
+                            <label for="complaint_other_input" class="block text-sm font-medium text-gray-700 mb-2">Specify Complaint <span class="text-red-500">*</span></label>
+                            <input type="text" name="complaint_other" id="complaint_other_input"
+                                   value="{{ old('complaint_other') }}"
+                                   class="w-full border border-gray-300 rounded px-3 py-2"
+                                   placeholder="Enter complaint or symptoms when selecting Other">
+                            <p class="mt-1 text-sm text-gray-500">Provide details when selecting "Other"</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-4 py-3 border-t border-gray-200">
+                        <button type="button" id="cancelComplaintSelection"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="button" id="saveComplaintSelection"
+                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition duration-200">
+                            Save Complaint
+                        </button>
                     </div>
                 </div>
             </div>
@@ -281,6 +347,72 @@ document.addEventListener('DOMContentLoaded', () => {
     if (consultationTypeSelect.value === 'Other') {
         otherContainer.classList.remove('hidden');
         otherInput.required = true;
+    }
+
+    // Auto-set current datetime and prevent edits
+    const consultationDatetimeInput = document.getElementById('consultation_datetime');
+    if (consultationDatetimeInput && !consultationDatetimeInput.value) {
+        const now = new Date();
+        const pad = (n) => n.toString().padStart(2, '0');
+        const local = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        consultationDatetimeInput.value = local;
+    }
+    consultationDatetimeInput.addEventListener('keydown', (e) => e.preventDefault());
+    consultationDatetimeInput.addEventListener('paste', (e) => e.preventDefault());
+
+    // Complaint modal logic
+    const complaintModal = document.getElementById('complaintModal');
+    const openComplaintModalBtn = document.getElementById('openComplaintModal');
+    const closeComplaintModalBtn = document.getElementById('closeComplaintModal');
+    const cancelComplaintSelectionBtn = document.getElementById('cancelComplaintSelection');
+    const saveComplaintSelectionBtn = document.getElementById('saveComplaintSelection');
+    const complaintSelect = document.getElementById('complaint_modal_select');
+    const complaintDisplay = document.getElementById('complaint_display');
+    const complaintOtherContainer = document.getElementById('complaint_modal_other');
+    const complaintOtherInput = document.getElementById('complaint_other_input');
+
+    const showComplaintModal = () => {
+        complaintModal.classList.remove('hidden');
+        complaintModal.classList.add('flex');
+    };
+
+    const hideComplaintModal = () => {
+        complaintModal.classList.add('hidden');
+        complaintModal.classList.remove('flex');
+    };
+
+    const toggleComplaintOther = (value) => {
+        const isOther = value === 'Other';
+        complaintOtherContainer.classList.toggle('hidden', !isOther);
+        complaintOtherInput.required = isOther;
+        if (!isOther) {
+            complaintOtherInput.value = '';
+        }
+    };
+
+    const applyComplaintSelection = () => {
+        const selectedValue = complaintSelect.value;
+        complaintDisplay.value = selectedValue === 'Other' && complaintOtherInput.value
+            ? complaintOtherInput.value
+            : selectedValue;
+        toggleComplaintOther(selectedValue);
+        hideComplaintModal();
+    };
+
+    openComplaintModalBtn?.addEventListener('click', showComplaintModal);
+    closeComplaintModalBtn?.addEventListener('click', hideComplaintModal);
+    cancelComplaintSelectionBtn?.addEventListener('click', hideComplaintModal);
+    saveComplaintSelectionBtn?.addEventListener('click', applyComplaintSelection);
+    complaintSelect?.addEventListener('change', (e) => toggleComplaintOther(e.target.value));
+
+    // Initialize complaint modal state using existing values
+    toggleComplaintOther(complaintSelect.value);
+    if (complaintDisplay.value && !complaintSelect.value) {
+        // If display has value (e.g., from validation errors), mirror it into the select when possible
+        const optionMatch = Array.from(complaintSelect.options).find(opt => opt.value === complaintDisplay.value);
+        if (optionMatch) {
+            complaintSelect.value = optionMatch.value;
+        }
     }
 
     // Resident AJAX search for patient records

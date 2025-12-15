@@ -17,8 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('attending_health_worker_id')->index();
             $table->dateTime('consultation_datetime')->useCurrent()->index();
             $table->string('consultation_type');
-            $table->text('symptoms')->nullable();
-            $table->text('chief_complaint')->nullable();
+            $table->text('complaint')->nullable();
             $table->string('blood_pressure')->nullable();
             $table->decimal('temperature', 4, 1)->nullable();
             $table->integer('pulse_rate')->nullable();

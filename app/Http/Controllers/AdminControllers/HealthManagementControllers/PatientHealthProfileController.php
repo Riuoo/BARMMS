@@ -97,7 +97,7 @@ class PatientHealthProfileController
                     'type' => 'consultation',
                     'date' => $record->consultation_datetime,
                     'title' => $record->consultation_type ?? 'Consultation',
-                    'details' => $record->chief_complaint ?? 'Consultation recorded',
+                    'details' => $record->complaint ?? 'Consultation recorded',
                     'link' => route('admin.medical-records.show', $record->id),
                 ];
             }))

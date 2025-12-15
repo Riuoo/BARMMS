@@ -24,8 +24,7 @@ class MedicalRecordSeeder extends Seeder
         $records = [
             [
                 'consultation_type' => 'Prenatal Check-up',
-                'chief_complaint' => 'Routine prenatal visit at 24 weeks',
-                'symptoms' => 'No alarming symptoms reported',
+                'complaint' => 'Routine prenatal visit at 24 weeks',
                 'diagnosis' => 'Normal pregnancy, 24 weeks gestation',
                 'prescribed_medications' => 'Prenatal vitamins; Iron supplements as needed',
                 'temperature' => 36.7,

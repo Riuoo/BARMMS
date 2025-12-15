@@ -36,25 +36,43 @@ class MedicineController
         }
 
         // Only select needed columns for paginated medicines
+        // Auto-deduct expired stock and log transactions once per request
+        $this->deductExpiredStock();
+
         $medicines = $query->select([
-            'id', 'name', 'generic_name', 'category', 'current_stock', 'minimum_stock', 'expiry_date'
+            'id', 'name', 'generic_name', 'category', 'current_stock', 'minimum_stock', 'expiry_date', 'description', 'manufacturer', 'dosage_form'
         ])
         ->orderBy('current_stock', 'asc')  // Sort by low stock to highest stock
         ->orderBy('expiry_date', 'asc')    // Sort by shortest expiry to longest expiry
         ->paginate(10)
         ->withQueryString();
 
-        // Use caching for stats (5 min)
+        // Detailed list for expiring-soon modal (also drives the expiring_soon stat)
+        $today = now()->toDateString();
+        $limit = now()->addDays(30)->toDateString();
+
+        $expiringSoonMedicines = Medicine::select([
+            'id',
+            'name',
+            'generic_name',
+            'current_stock',
+            'expiry_date',
+        ])
+            ->whereNotNull('expiry_date')
+            ->whereBetween('expiry_date', [$today, $limit])
+            ->orderBy('expiry_date')
+            ->get();
+
+        // Use caching for aggregate stats where safe (5 min)
         $stats = [
-            'total_medicines' => \Cache::remember('total_medicines', 300, function() {
+            'total_medicines' => \Illuminate\Support\Facades\Cache::remember('total_medicines', 300, function () {
                 return Medicine::count();
             }),
-            'low_stock' => \Cache::remember('low_stock_medicines', 300, function() {
+            'low_stock' => \Illuminate\Support\Facades\Cache::remember('low_stock_medicines', 300, function () {
                 return Medicine::whereColumn('current_stock', '<=', 'minimum_stock')->count();
             }),
-            'expiring_soon' => \Cache::remember('expiring_soon_medicines', 300, function() {
-                return Medicine::whereNotNull('expiry_date')->where('expiry_date', '<=', now()->addDays(30))->count();
-            }),
+            // Keep expiring_soon in sync with the modal by deriving from the same collection (no cache)
+            'expiring_soon' => $expiringSoonMedicines->count(),
         ];
 
         // Only select needed columns for top requested/dispensed
@@ -76,7 +94,7 @@ class MedicineController
             ->limit(5)
             ->get();
 
-        return view('admin.medicines.index', compact('medicines', 'stats', 'topRequested', 'topDispensed'));
+        return view('admin.medicines.index', compact('medicines', 'stats', 'topRequested', 'topDispensed', 'expiringSoonMedicines'));
     }
 
     public function create()
@@ -121,7 +139,7 @@ class MedicineController
                 'transaction_type' => 'IN',
                 'quantity' => (int) $medicine->current_stock,
                 'transaction_date' => now(),
-                'notes' => 'Initial stock on creation',
+                'notes' => 'Initial stock on creation (expiry: ' . ($medicine->expiry_date ? $medicine->expiry_date->format('Y-m-d') : 'N/A') . ')',
             ]);
         }
 
@@ -144,9 +162,6 @@ class MedicineController
             'description' => 'nullable|string',
             'dosage_form' => 'required|string|max:100',
             'manufacturer' => 'required|string|max:255',
-            'current_stock' => 'required|integer|min:0',
-            'minimum_stock' => 'required|integer|min:0',
-            'expiry_date' => 'required|date',
             'is_active' => 'nullable|boolean',
         ]);
 
@@ -179,10 +194,15 @@ class MedicineController
     {
         $validated = $request->validate([
             'quantity' => 'required|integer|min:1',
+            'restock_expiry_date' => 'required|date',
             'notes' => 'nullable|string',
         ]);
 
         $medicine->current_stock += (int) $validated['quantity'];
+        // Keep the soonest expiry as the medicine's expiry_date reference
+        if (empty($medicine->expiry_date) || $validated['restock_expiry_date'] < $medicine->expiry_date) {
+            $medicine->expiry_date = $validated['restock_expiry_date'];
+        }
         $medicine->save();
 
         MedicineTransaction::create([
@@ -190,11 +210,38 @@ class MedicineController
             'transaction_type' => 'IN',
             'quantity' => (int) $validated['quantity'],
             'transaction_date' => now(),
-            'notes' => $validated['notes'] ?? null,
+            'notes' => ($validated['notes'] ?? 'Restock') . ' (expiry: ' . $validated['restock_expiry_date'] . ')',
         ]);
 
         notify()->success('Stock updated.');
         return back();
+    }
+
+    /**
+     * Deduct expired stock and log as EXPIRED transactions.
+     */
+    private function deductExpiredStock(): void
+    {
+        $today = now()->toDateString();
+        $expired = Medicine::whereNotNull('expiry_date')
+            ->where('expiry_date', '<', $today)
+            ->where('current_stock', '>', 0)
+            ->get(['id', 'current_stock', 'expiry_date']);
+
+        foreach ($expired as $med) {
+            $qty = (int) $med->current_stock;
+            if ($qty <= 0) {
+                continue;
+            }
+            Medicine::where('id', $med->id)->update(['current_stock' => 0]);
+            MedicineTransaction::create([
+                'medicine_id' => $med->id,
+                'transaction_type' => 'EXPIRED',
+                'quantity' => $qty,
+                'transaction_date' => now(),
+                'notes' => 'Auto-deducted expired stock (expiry: ' . ($med->expiry_date ? $med->expiry_date->format('Y-m-d') : 'N/A') . ')',
+            ]);
+        }
     }
 
     public function report(Request $request)

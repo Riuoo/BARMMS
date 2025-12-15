@@ -6,7 +6,6 @@ use App\Models\Medicine;
 use App\Models\MedicineRequest;
 use App\Models\MedicineTransaction;
 use App\Models\Residents;
-use App\Models\MedicalRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
@@ -36,16 +35,6 @@ class MedicineRequestController
         
         if ($request->filled('end_date')) {
             $query->where('request_date', '<=', $request->get('end_date'));
-        }
-
-        // Approval status filter (based on whether quantity_approved is set)
-        if ($request->filled('approval_status')) {
-            $status = $request->get('approval_status');
-            if ($status === 'approved') {
-                $query->whereNotNull('quantity_approved');
-            } elseif ($status === 'pending') {
-                $query->whereNull('quantity_approved');
-            }
         }
 
         // Medicine category filter
@@ -91,15 +80,7 @@ class MedicineRequestController
     {
         $medicines = Medicine::active()->orderBy('name')->get();
         $residents = Residents::orderByRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))")->get();
-        $medicalRecords = MedicalRecord::with('resident')
-            ->orderBy('consultation_datetime', 'desc')
-            ->get();
-        
-        // Pre-select values if coming from medical record
-        $selectedMedicalRecordId = $request->get('medical_record_id');
-        $selectedResidentId = $request->get('resident_id');
-        
-        return view('admin.medicine-requests.create', compact('medicines', 'residents', 'medicalRecords', 'selectedMedicalRecordId', 'selectedResidentId'));
+        return view('admin.medicine-requests.create', compact('medicines', 'residents'));
     }
 
     public function store(Request $request)
@@ -107,7 +88,6 @@ class MedicineRequestController
         $validated = $request->validate([
             'medicine_id' => 'required|exists:medicines,id',
             'resident_id' => 'required|exists:residents,id',
-            'medical_record_id' => 'nullable|exists:medical_records,id',
             'quantity_requested' => 'required|integer|min:1',
             'notes' => 'nullable|string',
         ]);
@@ -135,7 +115,6 @@ class MedicineRequestController
         $medicineRequest = MedicineRequest::create([
             'medicine_id' => $validated['medicine_id'],
             'resident_id' => $validated['resident_id'],
-            'medical_record_id' => $validated['medical_record_id'] ?? null,
             'quantity_requested' => (int) $validated['quantity_requested'],
             'quantity_approved' => (int) $validated['quantity_requested'],
             'approved_by' => $approvedBy,
@@ -150,7 +129,6 @@ class MedicineRequestController
         MedicineTransaction::create([
             'medicine_id' => $medicine->id,
             'resident_id' => $validated['resident_id'],
-            'medical_record_id' => $validated['medical_record_id'] ?? null,
             'transaction_type' => 'OUT',
             'quantity' => (int) $validated['quantity_requested'],
             'transaction_date' => now(),

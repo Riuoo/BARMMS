@@ -36,7 +36,7 @@
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Medicine Name <span class="text-red-500">*</span></label>
                         <input name="name" id="name" value="{{ old('name', $medicine->name) }}" 
                                placeholder="Example: Paracetamol, Amoxicillin" 
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
+                               class="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed" readonly required>
                         <p class="mt-1 text-sm text-gray-500">Enter the brand name or trade name of the medicine</p>
                     </div>
                     
@@ -44,13 +44,13 @@
                         <label for="generic_name" class="block text-sm font-medium text-gray-700 mb-2">Generic Name</label>
                         <input name="generic_name" id="generic_name" value="{{ old('generic_name', $medicine->generic_name) }}" 
                                placeholder="Example: Acetaminophen, Amoxicillin trihydrate" 
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
+                               class="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed" readonly>
                         <p class="mt-1 text-sm text-gray-500">The generic or chemical name of the medicine (optional)</p>
                     </div>
                     
                     <div>
                         <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
-                        <select name="category" id="category" class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
+                        <select name="category" id="category" class="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" required>
                             <option value="">Select category...</option>
                             @foreach(['Antibiotic','Pain Relief','Vitamins','Chronic','Emergency','Antihypertensive','Antidiabetic','Antihistamine','Other'] as $cat)
                                 <option value="{{ $cat }}" @selected(old('category', $medicine->category) === $cat)>{{ $cat }}</option>
@@ -63,7 +63,7 @@
                         <label for="category_other" class="block text-sm font-medium text-gray-700 mb-2">Specify Category <span class="text-red-500">*</span></label>
                         <input name="category_other" id="category_other" placeholder="Example: Antifungal, Antiviral" 
                                value="{{ old('category_other') }}"
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
+                               class="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed" readonly>
                         <p class="mt-1 text-sm text-gray-500">Please specify the category when selecting "Other"</p>
                     </div>
                     
@@ -71,7 +71,7 @@
                         <label for="dosage_form" class="block text-sm font-medium text-gray-700 mb-2">Dosage Form <span class="text-red-500">*</span></label>
                         <input name="dosage_form" id="dosage_form" value="{{ old('dosage_form', $medicine->dosage_form) }}" 
                                placeholder="Example: Tablet, Syrup, Capsule, Injection" 
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
+                               class="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed" readonly required>
                         <p class="mt-1 text-sm text-gray-500">The physical form of the medicine (tablet, syrup, etc.)</p>
                     </div>
                     
@@ -79,42 +79,8 @@
                         <label for="manufacturer" class="block text-sm font-medium text-gray-700 mb-2">Manufacturer <span class="text-red-500">*</span></label>
                         <input name="manufacturer" id="manufacturer" value="{{ old('manufacturer', $medicine->manufacturer) }}" 
                                placeholder="Example: Pfizer, GSK, Sanofi" 
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
+                               class="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed" readonly required>
                         <p class="mt-1 text-sm text-gray-500">The pharmaceutical company that produces this medicine</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Stock Information Section -->
-            <div class="border-b border-gray-200 pb-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
-                    <i class="fas fa-boxes mr-2 text-blue-600"></i>
-                    Stock Information
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label for="current_stock" class="block text-sm font-medium text-gray-700 mb-2">Current Stock</label>
-                        <input name="current_stock" id="current_stock" type="number" min="0" 
-                               value="{{ old('current_stock', $medicine->current_stock) }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" readonly>
-                        <p class="mt-1 text-sm text-gray-500">Current stock level (use restock form below to add stock)</p>
-                    </div>
-                    
-                    <div>
-                        <label for="minimum_stock" class="block text-sm font-medium text-gray-700 mb-2">Minimum Stock Level <span class="text-red-500">*</span></label>
-                        <input name="minimum_stock" id="minimum_stock" type="number" min="0" 
-                               value="{{ old('minimum_stock', $medicine->minimum_stock) }}" 
-                               placeholder="0" 
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
-                        <p class="mt-1 text-sm text-gray-500">Alert threshold - when stock falls below this level</p>
-                    </div>
-                    
-                    <div>
-                        <label for="expiry_date" class="block text-sm font-medium text-gray-700 mb-2">Expiry Date <span class="text-red-500">*</span></label>
-                        <input name="expiry_date" id="expiry_date" type="date" 
-                               value="{{ old('expiry_date', optional($medicine->expiry_date)->format('Y-m-d')) }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
-                        <p class="mt-1 text-sm text-gray-500">The expiration date of the medicine batch</p>
                     </div>
                 </div>
             </div>
@@ -167,13 +133,19 @@
                 <div>
                     <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity <span class="text-red-500">*</span></label>
                     <input type="number" min="1" name="quantity" id="quantity" 
-                           class="w-32 border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" 
+                           class="w-32 border border-gray-300 dark:border-gray-700 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" 
                            placeholder="Qty" required>
+                </div>
+                <div>
+                    <label for="restock_expiry_date" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Expiry Date <span class="text-red-500">*</span></label>
+                    <input type="date" name="restock_expiry_date" id="restock_expiry_date"
+                           class="w-48 border border-gray-300 dark:border-gray-700 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                           required>
                 </div>
                 <div class="flex-1">
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
                     <input type="text" name="notes" id="notes" 
-                           class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" 
+                           class="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" 
                            placeholder="Example: New batch, donation">
                 </div>
                 <div class="flex items-end">

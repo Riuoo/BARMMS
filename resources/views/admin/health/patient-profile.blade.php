@@ -30,6 +30,9 @@
             </div>
         </div>
         <div class="mt-3 sm:mt-0 flex space-x-2">
+            <button type="button" id="openPatientInfoModal" class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-200 border border-gray-200">
+                <i class="fas fa-id-card mr-2"></i> Patient Info
+            </button>
             <a href="{{ route('admin.medical-records.create') }}" class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700">
                 <i class="fas fa-stethoscope mr-2"></i> New Consultation
             </a>
@@ -127,7 +130,7 @@
                         <tr>
                             <th class="px-4 py-2 text-left text-gray-500">Date</th>
                             <th class="px-4 py-2 text-left text-gray-500">Type</th>
-                            <th class="px-4 py-2 text-left text-gray-500">Chief Complaint</th>
+                            <th class="px-4 py-2 text-left text-gray-500">Complaint</th>
                             <th class="px-4 py-2 text-left text-gray-500">Attending</th>
                             <th class="px-4 py-2 text-left text-gray-500">Action</th>
                         </tr>
@@ -137,7 +140,7 @@
                             <tr>
                                 <td class="px-4 py-2 text-gray-900">{{ optional($record->consultation_datetime)->format('M d, Y') }}</td>
                                 <td class="px-4 py-2 text-gray-700">{{ $record->consultation_type ?? '-' }}</td>
-                                <td class="px-4 py-2 text-gray-700">{{ Str::limit($record->chief_complaint, 60) ?? '-' }}</td>
+                                <td class="px-4 py-2 text-gray-700">{{ Str::limit($record->complaint, 60) ?? '-' }}</td>
                                 <td class="px-4 py-2 text-gray-700">{{ optional($record->attendingHealthWorker)->full_name ?? 'N/A' }}</td>
                                 <td class="px-4 py-2">
                                     <a href="{{ route('admin.medical-records.show', $record->id) }}" class="text-green-700 hover:text-green-900 font-medium">View</a>
@@ -242,5 +245,54 @@
         </div>
     </div>
 </div>
+<!-- Patient Info Modal -->
+<div id="patientInfoModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Patient Information</h3>
+            <button type="button" id="closePatientInfoModal" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 space-y-3 text-sm text-gray-800">
+            <div class="flex justify-between"><span class="text-gray-600">Name</span><span class="font-medium">{{ $resident->full_name ?? 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Email</span><span class="font-medium">{{ $resident->email ?? 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Contact</span><span class="font-medium">{{ $resident->contact_number ?? 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Purok</span><span class="font-medium">{{ $displayPurok ?? 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Consultations</span><span class="font-medium">{{ $stats['total_consultations'] ?? 0 }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Vaccinations</span><span class="font-medium">{{ $stats['total_vaccinations'] ?? 0 }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Medicine Requests</span><span class="font-medium">{{ $stats['total_requests'] ?? 0 }}</span></div>
+        </div>
+        <div class="flex justify-end space-x-3 px-4 py-3 border-t border-gray-200">
+            <button type="button" id="dismissPatientInfoModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
 @endsection
 
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('patientInfoModal');
+    const openBtn = document.getElementById('openPatientInfoModal');
+    const closeBtn = document.getElementById('closePatientInfoModal');
+    const dismissBtn = document.getElementById('dismissPatientInfoModal');
+
+    const showModal = () => {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    };
+
+    const hideModal = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    };
+
+    openBtn?.addEventListener('click', showModal);
+    closeBtn?.addEventListener('click', hideModal);
+    dismissBtn?.addEventListener('click', hideModal);
+});
+</script>
+@endpush
