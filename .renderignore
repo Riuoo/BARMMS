@@ -1,0 +1,66 @@
+# Render ignore file - files/folders to exclude from deployment
+
+# Development files
+.env
+.env.local
+.env.*.local
+*.log
+*.cache
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Node modules (will be installed during build)
+node_modules/
+
+# Vendor (will be installed during build, but keep for faster builds)
+# vendor/
+
+# Storage and cache (will be created on server)
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+!storage/logs/.gitkeep
+!storage/framework/cache/.gitkeep
+!storage/framework/sessions/.gitkeep
+!storage/framework/views/.gitkeep
+
+# Test files
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Documentation
+*.md
+!README.md
+
+# Build artifacts
+public/build/
+public/hot
+public/storage
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database files (using PostgreSQL on Render)
+database/*.sqlite
+database/*.sqlite-journal
+
+# Supervisor configs (not needed on Render)
+supervisor-configs/
+
