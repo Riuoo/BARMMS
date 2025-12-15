@@ -16,8 +16,8 @@
         <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Blotter Report</h1>
-                    <p class="text-gray-600">Submit an incident report for barangay resolution</p>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Blotter Report</h1>
+                    <p class="text-gray-600">File incident report</p>
                 </div>
             </div>
         </div>
@@ -62,18 +62,18 @@
             <div class="border-b border-gray-200 pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-user mr-2 text-green-600"></i>
-                    Complainant Information
+                    Complainant
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
                     <div class="relative">
                         <label for="complainantSearch" class="block text-sm font-medium text-gray-700 mb-2">
-                            Complainant Name <span class="text-red-500">*</span>
+                            Complainant <span class="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
                             id="complainantSearch"
                             name="complainant_name"
-                            placeholder="Type to search for a registered resident or enter a custom name..."
+                            placeholder="Search residents or enter custom name..."
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                             aria-label="Search for a resident or enter custom name"
@@ -90,7 +90,7 @@
                                 Selected Complainant
                             </label>
                             <div id="selectedComplainantDisplay" class="w-full px-3 py-2 border border-dashed border-green-300 rounded-lg text-sm text-gray-600">
-                                No selection yet
+                                No selection
                             </div>
                         </div>
                     </div>
@@ -101,17 +101,17 @@
             <div class="border-b border-gray-200 pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-user-tag mr-2 text-red-600"></i>
-                    Respondent Information
+                    Respondent
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
                     <div class="relative">
                         <label for="respondentSearch" class="block text-sm font-medium text-gray-700 mb-2">
-                            Respondent (Registered Resident) <span class="text-red-500">*</span>
+                            Respondent <span class="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
                             id="respondentSearch"
-                            placeholder="Type to search for a resident..."
+                            placeholder="Search residents..."
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200"
                             aria-label="Search for a resident"
@@ -125,7 +125,7 @@
                                 Selected Respondent
                             </label>
                             <div id="selectedRespondentDisplay" class="w-full px-3 py-2 border border-dashed border-red-300 rounded-lg text-sm text-gray-600">
-                                No resident selected yet
+                                No resident selected
                             </div>
                         </div>
                     </div>
@@ -141,7 +141,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     <div>
                         <label for="type" class="block text-sm font-medium text-gray-700 mb-2">
-                            Report Type <span class="text-red-500">*</span>
+                            Type <span class="text-red-500">*</span>
                         </label>
                         <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200" 
                                 id="type" 
@@ -156,13 +156,13 @@
 
                     <div>
                         <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                            Detailed Description <span class="text-red-500">*</span>
+                            Description <span class="text-red-500">*</span>
                         </label>
                         <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200" 
                                   id="description" 
                                   name="description" 
                                   rows="6" 
-                                  placeholder="Provide a detailed description of the incident, including date, time, location, and any relevant details..."
+                                  placeholder="Enter incident description"
                                   required>{{ old('description') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Include specific details about what happened, when it occurred, and any witnesses</p>
                     </div>
@@ -173,12 +173,12 @@
             <div class="border-b border-gray-200 pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-paperclip mr-2 text-red-600"></i>
-                    Supporting Documents
+                    Attachments
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
                     <div>
                         <label for="media" class="block text-sm font-medium text-gray-700 mb-2">
-                            Attach Evidence (Optional)
+                            Attachments (Optional)
                         </label>
                         <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-red-400 transition duration-200" id="uploadArea">
                             <div class="space-y-1 text-center">
@@ -209,7 +209,7 @@
             <div class="border-b border-gray-200 pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>
-                    Summon Information
+                    Summon Details
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
                     <div>
@@ -231,7 +231,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
                 <div class="text-sm text-gray-500">
                     <i class="fas fa-info-circle mr-1"></i>
-                    The report will be created and can be managed from the blotter reports list
+                    Report will be created and available in reports list
                 </div>
                 <div class="flex space-x-3">
                     <a href="{{ route('admin.blotter-reports') }}" 
@@ -515,12 +515,12 @@
             return;
         }
         if (name) {
-            selectedRespondentDisplay.textContent = `Selected: ${name}`;
+            selectedRespondentDisplay.textContent = `${name}`;
             selectedRespondentDisplay.classList.remove('text-gray-600');
             selectedRespondentDisplay.classList.add('text-green-700', 'border-green-300');
             selectedRespondentDisplay.classList.remove('border-red-300');
         } else {
-            selectedRespondentDisplay.textContent = 'No resident selected yet';
+            selectedRespondentDisplay.textContent = 'No resident selected';
             selectedRespondentDisplay.classList.add('text-gray-600');
             selectedRespondentDisplay.classList.remove('text-green-700', 'border-green-300');
             selectedRespondentDisplay.classList.add('border-red-300');
@@ -643,16 +643,16 @@
         }
         if (name) {
             if (isRegistered) {
-                selectedComplainantDisplay.textContent = `Selected: ${name} (Registered Resident)`;
+                selectedComplainantDisplay.textContent = `${name} (Registered)`;
                 selectedComplainantDisplay.classList.remove('text-gray-600', 'border-green-300');
                 selectedComplainantDisplay.classList.add('text-green-700', 'border-green-400', 'bg-green-50');
             } else {
-                selectedComplainantDisplay.textContent = `Custom Name: ${name}`;
+                selectedComplainantDisplay.textContent = `${name} (Custom)`;
                 selectedComplainantDisplay.classList.remove('text-green-700', 'border-green-400', 'bg-green-50');
                 selectedComplainantDisplay.classList.add('text-gray-700', 'border-gray-300', 'bg-gray-50');
             }
         } else {
-            selectedComplainantDisplay.textContent = 'No selection yet';
+            selectedComplainantDisplay.textContent = 'No selection';
             selectedComplainantDisplay.classList.remove('text-green-700', 'border-green-400', 'bg-green-50', 'text-gray-700', 'border-gray-300', 'bg-gray-50');
             selectedComplainantDisplay.classList.add('text-gray-600', 'border-green-300');
         }

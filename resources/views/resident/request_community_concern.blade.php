@@ -74,7 +74,7 @@
                            id="title" 
                            name="title" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
-                           placeholder="e.g., Water shortage in Purok 3, Street light not working"
+                           placeholder="Example: Water shortage in Purok 3, Street light not working"
                            value="{{ old('title') }}"
                            required>
                     <p class="mt-1 text-sm text-gray-500">Provide a clear, concise title for your concern</p>
@@ -97,7 +97,7 @@
                            id="location" 
                            name="location" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
-                           placeholder="e.g., Purok 3, Near the basketball court, Street name"
+                           placeholder="Example: Purok 3, Near the basketball court, Street name"
                            value="{{ old('location') }}" required>
                     <p class="mt-1 text-sm text-gray-500">Provide specific location details to help identify the issue</p>
                 </div>
@@ -117,7 +117,7 @@
                               id="description" 
                               name="description" 
                               rows="6" 
-                              placeholder="Please provide a detailed description of the issue, including when it started, how it affects the community, and any other relevant details..."
+                              placeholder="Enter description"
                               required>{{ old('description') }}</textarea>
                     <p class="mt-1 text-sm text-gray-500">Include specific details about the problem, its impact, and when it started</p>
                 </div>

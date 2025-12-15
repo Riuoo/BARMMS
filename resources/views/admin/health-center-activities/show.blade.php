@@ -1,6 +1,6 @@
 @extends('admin.main.layout')
 
-@section('title', 'Health Center Activity Details')
+@section('title', 'Activity Details')
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
@@ -14,8 +14,8 @@
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Health Activity Details</h1>
-                <p class="text-gray-600 mt-2">View detailed information about this health center activity</p>
+                <h1 class="text-3xl font-bold text-gray-900">Activity Details</h1>
+                <p class="text-gray-600 mt-2">View activity details</p>
             </div>
             <a href="{{ route('admin.health-center-activities.index') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                 <i class="fas fa-arrow-left mr-2"></i>
@@ -136,7 +136,7 @@
 
             @if($activity->notes)
             <div class="bg-white border border-gray-200 rounded-xl p-6">
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Additional Notes</h3>
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">Notes</h3>
                 <p class="text-gray-600">{{ $activity->notes }}</p>
             </div>
             @endif
@@ -165,7 +165,7 @@
                         @csrf
                         <button type="submit" class="w-full inline-flex items-center px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-200 flex items-center justify-center">
                             <i class="fas fa-star mr-2"></i>
-                            {{ $activity->is_featured ? 'Unfeature' : 'Feature' }} Activity
+                            {{ $activity->is_featured ? 'Remove Feature' : 'Feature' }} Activity
                         </button>
                     </form>
                     <button type="button" 

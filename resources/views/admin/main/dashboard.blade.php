@@ -12,8 +12,8 @@
     <div id="dashboardHeaderContent" class="mb-3 hidden">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ $barangay_profile?->full_name ?? 'Admin' }}</h1>
-                <p class="text-sm md:text-base text-gray-600">Here's what's happening in your barangay today</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+                <p class="text-sm md:text-base text-gray-600">Overview</p>
             </div>
             <div class="mt-4 sm:mt-0">
                 <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
@@ -40,7 +40,7 @@
                         </div>
                         <div class="mt-2">
                             <a href="{{ route('admin.residents') }}" class="text-blue-100 hover:text-white text-xs font-medium flex items-center">
-                                View all <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                                View All <i class="fas fa-arrow-right ml-1 text-xs"></i>
                             </a>
                         </div>
                     </div>

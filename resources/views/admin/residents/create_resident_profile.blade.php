@@ -44,7 +44,7 @@
                             <!-- First Name -->
                             <div class="mb-2">
                                 <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
-                                <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="First Name" required>
+                                <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter first name" required>
                             </div>
                             <!-- Middle Name (optional, can be disabled) -->
                             <div class="mb-2">
@@ -55,12 +55,12 @@
                                         No middle name
                                     </label>
                                 </div>
-                                <input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Middle Name (optional)">
+                                <input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter middle name (optional)">
                             </div>
                             <!-- Last Name -->
                             <div class="mb-2">
                                 <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
-                                <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Last Name" required>
+                                <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter last name" required>
                             </div>
                             <!-- Suffix (optional dropdown) -->
                             <div>
@@ -93,7 +93,7 @@
                         </div>
                         <div>
                             <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
-                            <input type="number" id="contact_number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., 9191234567" min="0" pattern="[0-9]*" inputmode="numeric" required>
+                            <input type="number" id="contact_number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Example: 9191234567" min="0" pattern="[0-9]*" inputmode="numeric" required>
                         </div>
                     </div>
                     @php
@@ -163,7 +163,7 @@
                             <option value="Driver">Driver</option>
                             <option value="_other">Other (specify)</option>
                         </select>
-                        <input type="text" id="occupation" name="occupation" value="{{ old('occupation') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Start typing occupation" required style="display: none;">
+                        <input type="text" id="occupation" name="occupation" value="{{ old('occupation') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter occupation" required style="display: none;">
                     </div>
                 </div>
 
@@ -251,11 +251,11 @@
                                 <option value="Guardian">Guardian</option>
                                 <option value="_other">Other (specify)</option>
                             </select>
-                            <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{ old('emergency_contact_relationship') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Start typing (e.g., Spouse, Parent)" style="display: none;">
+                            <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{ old('emergency_contact_relationship') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter relationship (Example: Spouse, Parent)" style="display: none;">
                         </div>
                         <div>
                             <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-                            <input type="number" id="emergency_contact_number" name="emergency_contact_number" value="{{ old('emergency_contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g., 9191234567" min="0" pattern="[0-9]*" inputmode="numeric">
+                            <input type="number" id="emergency_contact_number" name="emergency_contact_number" value="{{ old('emergency_contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Example: 9191234567" min="0" pattern="[0-9]*" inputmode="numeric">
                         </div>
                     </div>
                 </div>
@@ -266,11 +266,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
-                            <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Password (minimum 6 characters)" required>
+                            <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter password" required>
                         </div>
                         <div>
                             <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password <span class="text-red-500">*</span></label>
-                            <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Confirm Password" required>
+                            <input type="password" id="password_confirmation" name="password_confirmation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter confirm password" required>
                         </div>
                     </div>
                 </div>

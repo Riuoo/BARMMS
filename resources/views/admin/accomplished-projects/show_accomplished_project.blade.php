@@ -15,7 +15,7 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Project Details</h1>
-            <p class="text-gray-600 mt-2">View detailed information about this accomplished project</p>
+            <p class="text-gray-600 mt-2">View project details</p>
         </div>
         <a href="{{ route('admin.accomplished-projects') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
@@ -151,7 +151,7 @@
                         @csrf
                         <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300 flex items-center justify-center">
                             <i class="fas fa-star mr-2"></i>
-                            {{ $project->is_featured ? 'Unfeature' : 'Feature' }} Project
+                            {{ $project->is_featured ? 'Remove Feature' : 'Feature' }} Project
                         </button>
                     </form>
                     <form action="{{ route('admin.accomplished-projects.destroy', $project->id) }}" method="POST" class="w-full" onsubmit="return confirm('Are you sure you want to delete this project? This action cannot be undone.')">

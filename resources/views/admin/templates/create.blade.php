@@ -91,7 +91,7 @@
                 </label>
                         <input type="text" id="custom_document_type" name="custom_document_type" 
                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                               placeholder="e.g., Certificate of Employment, Special Permit">
+                               placeholder="Example: Certificate of Employment, Special Permit">
                         <p class="mt-1 text-sm text-gray-500">Enter the name of your custom document type</p>
             </div>
 

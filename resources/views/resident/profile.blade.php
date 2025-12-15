@@ -224,7 +224,7 @@
                            name="password_confirmation" 
                            autocomplete="new-password"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
-                           placeholder="Confirm new password" />
+                           placeholder="Enter confirm password" />
                     <p class="mt-1 text-xs text-gray-500">Re-enter your new password to confirm</p>
                 </div>
 
@@ -466,7 +466,7 @@
                            name="password" 
                            required
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200" 
-                           placeholder="Enter your password" />
+                           placeholder="Enter password" />
                     <p class="mt-1 text-xs text-gray-500">You must enter your password to disable two-factor authentication</p>
                 </div>
 

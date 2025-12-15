@@ -1,6 +1,6 @@
 @extends('admin.main.layout')
 
-@section('title', 'Medicine Dispense Report')
+@section('title', 'Dispensing Report')
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
@@ -14,8 +14,8 @@
         <div class="mb-3">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Medicine Dispense Report</h1>
-                    <p class="text-sm md:text-base text-gray-600">Analyze medicine requests and dispensing trends</p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Dispensing Report</h1>
+                    <p class="text-sm md:text-base text-gray-600">Medicine request analysis</p>
                 </div>
                 <a href="{{ route('admin.medicines.index') }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                     <i class="fas fa-arrow-left mr-2"></i>Back to Inventory
@@ -71,7 +71,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-semibold text-gray-900">Top Requested by Purok (People)</h3>
+                    <h3 class="font-semibold text-gray-900">Top Requests by Purok</h3>
                     <span class="text-xs text-gray-500">People</span>
                 </div>
                 <div class="h-64">
@@ -86,7 +86,7 @@
             </div>
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-semibold text-gray-900">Top Dispensed (30 days)</h3>
+                    <h3 class="font-semibold text-gray-900">Top Dispensed</h3>
                     <span class="text-xs text-gray-500">Qty</span>
                 </div>
                 <div class="h-48">
@@ -105,7 +105,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-semibold text-gray-900">Overall Top Requested</h3>
+                    <h3 class="font-semibold text-gray-900">Most Requested</h3>
                     <span class="text-xs text-gray-500">Count</span>
                 </div>
                 <div class="h-56">
@@ -114,7 +114,7 @@
             </div>
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-semibold text-gray-900">Monthly Dispensed</h3>
+                    <h3 class="font-semibold text-gray-900">Monthly Dispensing</h3>
                     <span class="text-xs text-gray-500">Last 6 months</span>
                 </div>
                 <div class="h-56">
@@ -123,7 +123,7 @@
             </div>
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-semibold text-gray-900">Requests by Age Bracket</h3>
+                    <h3 class="font-semibold text-gray-900">Requests by Age</h3>
                 </div>
                 <div class="h-56">
                     <canvas id="chartAge"></canvas>

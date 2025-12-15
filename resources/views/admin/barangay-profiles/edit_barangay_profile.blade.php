@@ -137,7 +137,7 @@
                                    name="contact_number" 
                                    value="{{ old('contact_number', $barangayProfile->contact_number) }}" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                   placeholder="e.g., 09191234567"
+                                   placeholder="Example: 09191234567"
                                    required>
                             <p class="mt-1 text-sm text-gray-500">Official contact number</p>
                         </div>
@@ -183,7 +183,7 @@
                                    id="password" 
                                    name="password" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                   placeholder="Leave blank to keep current password">
+                                   placeholder="Enter new password (optional)">
                             <p class="mt-1 text-sm text-gray-500">Only fill if you want to change the password</p>
                         </div>
                         <div>
@@ -194,7 +194,7 @@
                                    id="password_confirmation" 
                                    name="password_confirmation" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                   placeholder="Confirm the new password">
+                                   placeholder="Enter confirm password (optional)">
                         </div>
                     </div>
                 </div>

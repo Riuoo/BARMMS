@@ -60,7 +60,7 @@
                        name="category" 
                        value="{{ old('category', $faq->category ?? '') }}"
                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 @error('category') border-red-500 @enderror"
-                       placeholder="e.g., General, How-to Guides, Hotlines"
+                       placeholder="Example: General, How-to Guides, Hotlines"
                        list="category-suggestions"
                        required>
                 <datalist id="category-suggestions">

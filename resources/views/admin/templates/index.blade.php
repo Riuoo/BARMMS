@@ -75,7 +75,7 @@
                             type="text"
                             id="searchInput"
                             name="search"
-                            placeholder="Search by document type..."
+                            placeholder="Search templates..."
                             value="{{ request('search') }}"
                             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                         >

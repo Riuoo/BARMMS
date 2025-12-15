@@ -75,7 +75,7 @@
                         <input
                             type="text"
                             id="residentSearch"
-                            placeholder="Type to search for a resident..."
+                            placeholder="Search residents..."
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                             aria-label="Search for a resident"
@@ -154,7 +154,7 @@
                                   id="description" 
                                   name="description" 
                                   rows="3" 
-                                  placeholder="Please specify the purpose of the document request (e.g., For job application, school enrollment, financial assistance, government transaction, etc.)"
+                                  placeholder="Enter purpose (Example: Job application, school enrollment, financial assistance)"
                                   required>{{ old('description') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Provide a clear and specific purpose for the document request</p>
                     </div>

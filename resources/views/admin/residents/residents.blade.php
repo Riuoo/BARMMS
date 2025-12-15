@@ -6,7 +6,7 @@
     $canPerformTransactions = $isSecretary;
 @endphp
 
-@section('title', 'Resident Information')
+@section('title', 'Residents')
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-2">
@@ -21,14 +21,14 @@
         <div class="mb-2">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="mb-2 sm:mb-0">
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Resident Information</h1>
-                    <p class="text-sm md:text-base text-gray-600">Manage resident profiles and information</p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Residents</h1>
+                    <p class="text-sm md:text-base text-gray-600">Manage residents</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
                     @if($canPerformTransactions)
                     <a href="{{ route('admin.residents.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                         <i class="fas fa-plus mr-2"></i>
-                        Add New Resident
+                        Add Resident
                     </a>
                     @endif
                 </div>
@@ -71,7 +71,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input type="text" name="search" id="searchInput" placeholder="Search residents by name, email, or contact number..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+                        <input type="text" name="search" id="searchInput" placeholder="Search residents..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
                     </div>
                 </div>
                 <!-- Status Filter -->

@@ -102,7 +102,7 @@
                                   id="description" 
                                   name="description" 
                                   rows="4" 
-                                  placeholder="Please specify the purpose of your document request (e.g., For job application, school enrollment, financial assistance, government transaction, etc.)"
+                                  placeholder="Enter purpose (Example: Job application, school enrollment, financial assistance)"
                                   required>{{ old('description') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Provide a clear and specific purpose for your document request</p>
                     </div>
@@ -115,7 +115,7 @@
                                   id="additional_requirements" 
                                   name="additional_requirements" 
                                   rows="3" 
-                                  placeholder="Mention any specific requirements or special instructions for your document request">{{ old('additional_requirements') }}</textarea>
+                                  placeholder="Enter additional requirements">{{ old('additional_requirements') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Include any special requirements or additional information needed</p>
                     </div>
                 </div>

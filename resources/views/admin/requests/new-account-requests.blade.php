@@ -63,7 +63,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" id="searchInput" placeholder="Search by email..."
+                    <input type="text" name="search" id="searchInput" placeholder="Search account requests..."
                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                     value="{{ request('search') }}">
                 </div>
@@ -696,7 +696,7 @@ function openRejectModal(requestId, email) {
                                 name="rejection_reason" 
                                 rows="4" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" 
-                                placeholder="Enter rejection reason..." 
+                                placeholder="Enter rejection reason" 
                                 required 
                                 minlength="10" 
                                 maxlength="500"></textarea>

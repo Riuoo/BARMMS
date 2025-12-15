@@ -77,7 +77,7 @@
                         <input
                             type="text"
                             id="residentSearch"
-                            placeholder="Type to search for a resident..."
+                            placeholder="Search residents..."
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                             aria-label="Search for a resident"
@@ -122,7 +122,7 @@
                         <input type="text" name="consultation_type_other" id="consultation_type_other" 
                                value="{{ old('consultation_type_other') }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., Dental, Mental Health, Prenatal, etc.">
+                               placeholder="Example: Dental, Mental Health, Prenatal">
                         <p class="mt-1 text-sm text-gray-500">Please specify the type of consultation</p>
                     </div>
                 </div>
@@ -152,28 +152,28 @@
                         <input type="text" name="blood_pressure" id="blood_pressure" 
                                value="{{ old('blood_pressure') }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., 120/80">
+                               placeholder="Example: 120/80">
                     </div>
                     <div>
                         <label for="temperature" class="block text-sm font-medium text-gray-700 mb-2">Temperature (°C)</label>
                         <input type="number" name="temperature" id="temperature" 
                                value="{{ old('temperature') }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., 36.5" step="0.1" min="30" max="45">
+                               placeholder="Example: 36.5" step="0.1" min="30" max="45">
                     </div>
                     <div>
                         <label for="pulse_rate" class="block text-sm font-medium text-gray-700 mb-2">Pulse Rate (bpm)</label>
                         <input type="number" name="pulse_rate" id="pulse_rate" 
                                value="{{ old('pulse_rate') }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., 72" min="40" max="200">
+                               placeholder="Example: 72" min="40" max="200">
                     </div>
                     <div>
                         <label for="respiratory_rate" class="block text-sm font-medium text-gray-700 mb-2">Respiratory Rate</label>
                         <input type="number" name="respiratory_rate" id="respiratory_rate" 
                                value="{{ old('respiratory_rate') }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., 16" min="8" max="50">
+                               placeholder="Example: 16" min="8" max="50">
                     </div>
                 </div>
             </div>
@@ -200,7 +200,7 @@
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
                     <textarea name="notes" id="notes" rows="3" 
                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                              placeholder="Any additional notes or observations...">{{ old('notes') }}</textarea>
+                              placeholder="Enter notes">{{ old('notes') }}</textarea>
                 </div>
             </div>
 

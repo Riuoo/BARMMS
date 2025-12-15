@@ -39,7 +39,7 @@
                         <input type="text" name="activity_name" id="activity_name" 
                                value="{{ old('activity_name', $activity->activity_name) }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., Vaccination Drive, Health Check-up" required>
+                               placeholder="Example: Vaccination Drive, Health Check-up" required>
                     </div>
 
                     <div>
@@ -89,7 +89,7 @@
                         <input type="text" name="location" id="location" 
                                value="{{ old('location', $activity->location) }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., Health Center, Barangay Hall" required>
+                               placeholder="Example: Health Center, Barangay Hall" required>
                     </div>
                 </div>
 
@@ -98,7 +98,7 @@
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
                     <textarea name="description" id="description" rows="4" 
                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                              placeholder="Detailed description of the activity..." required>{{ old('description', $activity->description) }}</textarea>
+                              placeholder="Enter activity description" required>{{ old('description', $activity->description) }}</textarea>
                 </div>
 
                 <!-- Image Upload -->
@@ -119,7 +119,7 @@
                     <label for="objectives" class="block text-sm font-medium text-gray-700 mb-2">Objectives</label>
                     <textarea name="objectives" id="objectives" rows="3" 
                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                              placeholder="Goals and objectives of the activity...">{{ old('objectives', $activity->objectives) }}</textarea>
+                              placeholder="Enter objectives">{{ old('objectives', $activity->objectives) }}</textarea>
                 </div>
 
                 <!-- Target Population -->
@@ -144,7 +144,7 @@
                         <input type="number" name="expected_participants" id="expected_participants" 
                                value="{{ old('expected_participants', $activity->expected_participants) }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="Estimated number of participants" min="1">
+                               placeholder="Enter expected participants" min="1">
                     </div>
                 </div>
 
@@ -154,14 +154,14 @@
                         <label for="required_resources" class="block text-sm font-medium text-gray-700 mb-2">Required Resources</label>
                     <textarea name="required_resources" id="required_resources" rows="3" 
                                   class="w-full border border-gray-300 rounded px-3 py-2" 
-                              placeholder="Equipment, supplies, materials needed...">{{ old('required_resources', $activity->required_resources) }}</textarea>
+                              placeholder="Enter required resources">{{ old('required_resources', $activity->required_resources) }}</textarea>
                     </div>
 
                     <div>
                         <label for="staff_involved" class="block text-sm font-medium text-gray-700 mb-2">Staff Involved</label>
                         <textarea name="staff_involved" id="staff_involved" rows="3" 
                                   class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Healthcare staff, volunteers, etc...">{{ old('staff_involved', $activity->staff_involved) }}</textarea>
+                                  placeholder="Enter staff involved">{{ old('staff_involved', $activity->staff_involved) }}</textarea>
                     </div>
                 </div>
 
@@ -182,7 +182,7 @@
                         <input type="text" name="organizer" id="organizer" 
                                value="{{ old('organizer', $activity->organizer) }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="Name of organizer">
+                               placeholder="Enter organizer name">
                     </div>
                 </div>
                 <div class="mb-6">
@@ -197,7 +197,7 @@
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
                     <textarea name="notes" id="notes" rows="3" 
                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                              placeholder="Any additional notes or special instructions...">{{ old('notes', $activity->notes) }}</textarea>
+                              placeholder="Enter notes">{{ old('notes', $activity->notes) }}</textarea>
                 </div>
 
                 <!-- Submit Button -->

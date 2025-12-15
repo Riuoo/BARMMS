@@ -42,7 +42,7 @@
                             <input
                                 type="text"
                                 id="residentSearch"
-                                placeholder="Type to search for a resident..."
+                                placeholder="Search residents..."
                                 autocomplete="off"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                 aria-label="Search for a resident"
@@ -70,7 +70,7 @@
                         <label for="vaccine_name" class="block text-sm font-medium text-gray-700 mb-2">Vaccine Name <span class="text-red-500">*</span></label>
                         <input type="text" name="vaccine_name" id="vaccine_name" value="{{ old('vaccine_name') }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="e.g., Pfizer-BioNTech COVID-19 Vaccine" required>
+                               placeholder="Example: Pfizer-BioNTech COVID-19 Vaccine" required>
                     </div>
                     <div>
                         <label for="vaccine_type" class="block text-sm font-medium text-gray-700 mb-2">Vaccine Type <span class="text-red-500">*</span></label>

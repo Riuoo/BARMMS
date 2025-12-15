@@ -74,7 +74,7 @@
                         <input
                             type="text"
                             id="respondentSearch"
-                            placeholder="Type to search for a resident..."
+                            placeholder="Search residents..."
                             autocomplete="off"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200"
                             aria-label="Search for a resident"
@@ -130,7 +130,7 @@
                                   id="description" 
                                   name="description" 
                                   rows="6" 
-                                  placeholder="Provide a detailed description of the incident, including date, time, location, and any relevant details..."
+                                  placeholder="Enter incident description"
                                   required>{{ old('description') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Include specific details about what happened, when it occurred, and any witnesses</p>
                     </div>

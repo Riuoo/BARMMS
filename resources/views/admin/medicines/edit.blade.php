@@ -35,7 +35,7 @@
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Medicine Name <span class="text-red-500">*</span></label>
                         <input name="name" id="name" value="{{ old('name', $medicine->name) }}" 
-                               placeholder="e.g., Paracetamol, Amoxicillin" 
+                               placeholder="Example: Paracetamol, Amoxicillin" 
                                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
                         <p class="mt-1 text-sm text-gray-500">Enter the brand name or trade name of the medicine</p>
                     </div>
@@ -43,7 +43,7 @@
                     <div>
                         <label for="generic_name" class="block text-sm font-medium text-gray-700 mb-2">Generic Name</label>
                         <input name="generic_name" id="generic_name" value="{{ old('generic_name', $medicine->generic_name) }}" 
-                               placeholder="e.g., Acetaminophen, Amoxicillin trihydrate" 
+                               placeholder="Example: Acetaminophen, Amoxicillin trihydrate" 
                                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
                         <p class="mt-1 text-sm text-gray-500">The generic or chemical name of the medicine (optional)</p>
                     </div>
@@ -61,7 +61,7 @@
                     
                     <div id="category_other_container" class="hidden">
                         <label for="category_other" class="block text-sm font-medium text-gray-700 mb-2">Specify Category <span class="text-red-500">*</span></label>
-                        <input name="category_other" id="category_other" placeholder="e.g., Antifungal, Antiviral, etc." 
+                        <input name="category_other" id="category_other" placeholder="Example: Antifungal, Antiviral" 
                                value="{{ old('category_other') }}"
                                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
                         <p class="mt-1 text-sm text-gray-500">Please specify the category when selecting "Other"</p>
@@ -70,7 +70,7 @@
                     <div>
                         <label for="dosage_form" class="block text-sm font-medium text-gray-700 mb-2">Dosage Form <span class="text-red-500">*</span></label>
                         <input name="dosage_form" id="dosage_form" value="{{ old('dosage_form', $medicine->dosage_form) }}" 
-                               placeholder="e.g., Tablet, Syrup, Capsule, Injection" 
+                               placeholder="Example: Tablet, Syrup, Capsule, Injection" 
                                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
                         <p class="mt-1 text-sm text-gray-500">The physical form of the medicine (tablet, syrup, etc.)</p>
                     </div>
@@ -78,7 +78,7 @@
                     <div>
                         <label for="manufacturer" class="block text-sm font-medium text-gray-700 mb-2">Manufacturer <span class="text-red-500">*</span></label>
                         <input name="manufacturer" id="manufacturer" value="{{ old('manufacturer', $medicine->manufacturer) }}" 
-                               placeholder="e.g., Pfizer, GSK, Sanofi" 
+                               placeholder="Example: Pfizer, GSK, Sanofi" 
                                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
                         <p class="mt-1 text-sm text-gray-500">The pharmaceutical company that produces this medicine</p>
                     </div>
@@ -128,7 +128,7 @@
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
                     <textarea name="description" id="description" rows="3" 
-                              placeholder="Enter any additional notes about this medicine (e.g., special storage requirements, contraindications, etc.)" 
+                              placeholder="Enter notes (Example: Special storage requirements, contraindications)" 
                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">{{ old('description', $medicine->description) }}</textarea>
                     <p class="mt-1 text-sm text-gray-500">Optional notes about storage, usage, or special instructions</p>
                 </div>
@@ -174,7 +174,7 @@
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
                     <input type="text" name="notes" id="notes" 
                            class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" 
-                           placeholder="e.g., New batch, donation, etc.">
+                           placeholder="Example: New batch, donation">
                 </div>
                 <div class="flex items-end">
                     <button type="submit" 

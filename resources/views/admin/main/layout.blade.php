@@ -1739,7 +1739,7 @@
                     @if(!$isNurse)
                     <!-- User Management --> 
                     <section class="mb-6" aria-label="User management">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User management</h3>
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">User Management</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.barangay-profiles') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.barangay-profiles*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.barangay-profiles*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
@@ -1750,7 +1750,7 @@
                             <li>
                                 <a href="{{ route('admin.residents') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.residents*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.residents*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-home fa-fw mr-3 {{ request()->routeIs('admin.residents*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Resident Information</span>
+                                    <span>Residents</span>
                                 </a>
                             </li>
                         </ul>
@@ -1793,7 +1793,7 @@
                     @if($isTreasurer)
                     <!-- Barangay Activities & Projects -->
                     <section class="mb-6" aria-label="Barangay Activities & Projects">
-                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Barangay Activities & Projects</h3>
+                        <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Projects & Activities</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
                                 <a href="{{ route('admin.accomplished-projects') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.accomplished-projects*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.accomplished-projects*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
@@ -2226,7 +2226,7 @@
                     <div class="relative mt-1">
                         <input id="patientProfileNameInput" type="text" autocomplete="off"
                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-green-500 focus:border-green-500"
-                               placeholder="e.g., Juan Dela Cruz"
+                               placeholder="Example: Juan Dela Cruz"
                                oninput="searchPatientProfileByName()">
 <<<<<<< HEAD
                         <div id="patientProfileSuggestions" class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto hidden"></div>

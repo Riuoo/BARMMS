@@ -54,7 +54,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="activity_name" class="block text-sm font-medium text-gray-700 mb-2">Activity Name <span class="text-red-500">*</span></label>
-                        <input type="text" name="activity_name" id="activity_name" value="{{ old('activity_name') }}" placeholder="e.g., Vaccination Drive, Health Check-up" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="text" name="activity_name" id="activity_name" value="{{ old('activity_name') }}" placeholder="Example: Vaccination Drive, Health Check-up" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
                         <label for="activity_type" class="block text-sm font-medium text-gray-700 mb-2">Activity Type <span class="text-red-500">*</span></label>
@@ -97,7 +97,7 @@
                     </div>
                     <div>
                         <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location <span class="text-red-500">*</span></label>
-                        <input type="text" name="location" id="location" value="{{ old('location') }}" placeholder="e.g., Health Center, Barangay Hall" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="text" name="location" id="location" value="{{ old('location') }}" placeholder="Example: Health Center, Barangay Hall" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                 </div>
             </div>
@@ -111,11 +111,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
-                        <textarea name="description" id="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Detailed description of the activity...">{{ old('description') }}</textarea>
+                        <textarea name="description" id="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter activity description">{{ old('description') }}</textarea>
                     </div>
                     <div>
                         <label for="objectives" class="block text-sm font-medium text-gray-700 mb-2">Objectives</label>
-                        <textarea name="objectives" id="objectives" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Goals and objectives of the activity...">{{ old('objectives') }}</textarea>
+                        <textarea name="objectives" id="objectives" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter objectives">{{ old('objectives') }}</textarea>
                     </div>
                 </div>
             </div>
@@ -158,7 +158,7 @@
                     </div>
                     <div>
                         <label for="expected_participants" class="block text-sm font-medium text-gray-700 mb-2">Expected Participants</label>
-                        <input type="number" name="expected_participants" id="expected_participants" value="{{ old('expected_participants') }}" min="1" placeholder="Estimated number of participants" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        <input type="number" name="expected_participants" id="expected_participants" value="{{ old('expected_participants') }}" min="1" placeholder="Enter expected participants" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                     </div>
                 </div>
             </div>
@@ -172,11 +172,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="required_resources" class="block text-sm font-medium text-gray-700 mb-2">Required Resources</label>
-                        <textarea name="required_resources" id="required_resources" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Equipment, supplies, materials needed...">{{ old('required_resources') }}</textarea>
+                        <textarea name="required_resources" id="required_resources" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter required resources">{{ old('required_resources') }}</textarea>
                     </div>
                     <div>
                         <label for="staff_involved" class="block text-sm font-medium text-gray-700 mb-2">Staff Involved</label>
-                        <textarea name="staff_involved" id="staff_involved" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Healthcare staff, volunteers, etc...">{{ old('staff_involved') }}</textarea>
+                        <textarea name="staff_involved" id="staff_involved" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter staff involved">{{ old('staff_involved') }}</textarea>
                     </div>
                 </div>
             </div>
@@ -200,7 +200,7 @@
                     </div>
                     <div>
                         <label for="organizer" class="block text-sm font-medium text-gray-700 mb-2">Organizer</label>
-                        <input type="text" name="organizer" id="organizer" value="{{ old('organizer') }}" placeholder="Name of organizer" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="text" name="organizer" id="organizer" value="{{ old('organizer') }}" placeholder="Enter organizer name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
                 <div class="mt-4">
@@ -214,7 +214,7 @@
             <!-- Notes -->
             <div>
                 <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                <textarea name="notes" id="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500" placeholder="Any additional notes or special instructions...">{{ old('notes') }}</textarea>
+                <textarea name="notes" id="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500" placeholder="Enter notes">{{ old('notes') }}</textarea>
             </div>
 
             <!-- Actions -->

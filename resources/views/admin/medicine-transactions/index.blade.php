@@ -16,7 +16,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="mb-4 sm:mb-0">
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Medicine Transactions</h1>
-                    <p class="text-sm md:text-base text-gray-600">Track stock movements and dispensing</p>
+                    <p class="text-sm md:text-base text-gray-600">Stock movements</p>
                 </div>
             </div>
         </div>
@@ -30,7 +30,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input type="text" name="query" placeholder="Search medicine name..." 
+                        <input type="text" name="query" placeholder="Search transactions..." 
                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500" 
                                value="{{ request('query') }}">
                     </div>
@@ -117,7 +117,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-calendar-day mr-2 text-gray-400"></i>Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-pills mr-2 text-gray-400"></i>Medicine</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-exchange-alt mr-2 text-gray-400"></i>Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sort-numeric-up mr-2 text-gray-400"></i>Qty</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sort-numeric-up mr-2 text-gray-400"></i>Quantity</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-user mr-2 text-gray-400"></i>Resident</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><i class="fas fa-sticky-note mr-2 text-gray-400"></i>Notes</th>
                         </tr>

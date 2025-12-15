@@ -75,7 +75,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium mb-2">Contact Number</label>
-                                            <input type="number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border rounded px-3 py-2" placeholder="e.g., 9191234567" min="0" pattern="[0-9]*" inputmode="numeric">
+                                            <input type="number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border rounded px-3 py-2" placeholder="Example: 9191234567" min="0" pattern="[0-9]*" inputmode="numeric">
                 </div>
                 
                 <div>

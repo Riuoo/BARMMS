@@ -42,7 +42,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input type="text" name="search" id="searchInput" placeholder="Search officials by name, email, or contact..." 
+                        <input type="text" name="search" id="searchInput" placeholder="Search officials..." 
                             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                             value="{{ request('search') }}">
                     </div>

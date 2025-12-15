@@ -42,7 +42,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900">Community Concerns</h1>
-                <p class="text-gray-600">Manage and track community concerns from residents</p>
+                <p class="text-gray-600">Manage community concerns</p>
             </div>
         </div>
     </div>
@@ -85,7 +85,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" id="concernSearchInput" placeholder="Search by submitted by (resident name) or location..." 
+                    <input type="text" name="search" id="concernSearchInput" placeholder="Search community concerns..." 
                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                     value="{{ request('search') }}">
                 </div>

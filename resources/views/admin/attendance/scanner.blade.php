@@ -106,7 +106,7 @@
                         </div>
                         <div>
                             <label class="block text-xs text-gray-600 mb-1">Contact Number (Optional)</label>
-                            <input type="text" id="guestContact" placeholder="Phone number" 
+                            <input type="text" id="guestContact" placeholder="Enter phone number" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                         </div>
                         <button onclick="addGuestAttendance()" 

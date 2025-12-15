@@ -83,7 +83,7 @@
                                value="{{ old('first_name', $firstName) }}" 
                                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed" 
                                readonly
-                               placeholder="First Name">
+                               placeholder="Enter first name">
                     </div>
                     <!-- Middle Name (optional, can be disabled) -->
                     <div class="mb-2">
@@ -94,7 +94,7 @@
                                value="{{ old('middle_name', $middleName) }}" 
                                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed" 
                                readonly
-                               placeholder="Middle Name (optional)">
+                               placeholder="Enter middle name (optional)">
                     </div>
                     <!-- Last Name -->
                     <div class="mb-2">
@@ -103,7 +103,7 @@
                                value="{{ old('last_name', $lastName) }}" 
                                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed" 
                                readonly
-                               placeholder="Last Name">
+                               placeholder="Enter last name">
                     </div>
                     <!-- Suffix (optional dropdown) -->
                     <div>
@@ -273,7 +273,7 @@
                                name="occupation" 
                                value="{{ $currentOccupation }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                               placeholder="Start typing occupation"
+                               placeholder="Enter occupation"
                                required
                                style="display: {{ $occupationSelectValue === '_other' ? 'block' : 'none' }};">
                 </div>
@@ -441,7 +441,7 @@
                                name="emergency_contact_relationship" 
                                value="{{ $currentRelationship }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                               placeholder="e.g., Spouse, Parent, Sibling"
+                               placeholder="Enter relationship (Example: Spouse, Parent, Sibling)"
                                style="display: {{ $relationshipSelectValue === '_other' ? 'block' : 'none' }};">
                     </div>
                     @endif
@@ -455,7 +455,7 @@
                                name="emergency_contact_number" 
                                value="{{ old('emergency_contact_number', $resident->emergency_contact_number) }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                               placeholder="e.g., 9191234567"
+                               placeholder="Example: 9191234567"
                                min="0" 
                                pattern="[0-9]*" 
                                inputmode="numeric">

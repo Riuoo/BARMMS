@@ -23,7 +23,7 @@
     <!-- Filters -->
     <form method="GET" action="{{ route('resident.faqs') }}" class="mb-4 flex flex-col md:flex-row md:items-center gap-2">
         <div class="flex-1">
-            <input type="text" name="search" placeholder="Search FAQ or keywords..." class="block w-full px-3 py-2 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
+            <input type="text" name="search" placeholder="Search FAQs..." class="block w-full px-3 py-2 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" value="{{ request('search') }}">
         </div>
         <div class="sm:w-48">
             <select name="category" class="block w-full px-3 py-2 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500">

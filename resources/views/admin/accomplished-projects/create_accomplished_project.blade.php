@@ -127,7 +127,7 @@
                 <label for="funding_source" class="block text-sm font-medium text-gray-700 mb-2">Funding Source</label>
                 <input type="text" id="funding_source" name="funding_source" value="{{ old('funding_source') }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('funding_source') border-red-500 @enderror" 
-                    placeholder="e.g., Department of Health" />
+                    placeholder="Example: Department of Health" />
                 @error('funding_source')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -158,7 +158,7 @@
                 <label for="implementing_agency" class="block text-sm font-medium text-gray-700 mb-2">Implementing Agency</label>
                 <input type="text" id="implementing_agency" name="implementing_agency" value="{{ old('implementing_agency') }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('implementing_agency') border-red-500 @enderror" 
-                    placeholder="e.g., Barangay Council" />
+                    placeholder="Example: Barangay Council" />
                 @error('implementing_agency')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -169,7 +169,7 @@
                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Project Description <span class="text-red-500">*</span></label>
                 <textarea id="description" name="description" rows="4" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('description') border-red-500 @enderror" 
-                    placeholder="Describe the project in detail..." required>{{ old('description') }}</textarea>
+                    placeholder="Enter project description" required>{{ old('description') }}</textarea>
                 @error('description')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -180,7 +180,7 @@
                 <label for="beneficiaries" class="block text-sm font-medium text-gray-700 mb-2">Beneficiaries</label>
                 <textarea id="beneficiaries" name="beneficiaries" rows="3" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('beneficiaries') border-red-500 @enderror" 
-                    placeholder="Who benefited from this project?">{{ old('beneficiaries') }}</textarea>
+                    placeholder="Enter beneficiaries">{{ old('beneficiaries') }}</textarea>
                 @error('beneficiaries')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -191,7 +191,7 @@
                 <label for="impact" class="block text-sm font-medium text-gray-700 mb-2">Impact</label>
                 <textarea id="impact" name="impact" rows="3" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('impact') border-red-500 @enderror" 
-                    placeholder="What was the impact of this project on the community?">{{ old('impact') }}</textarea>
+                    placeholder="Enter project impact">{{ old('impact') }}</textarea>
                 @error('impact')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
