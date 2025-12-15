@@ -150,7 +150,6 @@
                             <option value="">Select a report type</option>
                             <option value="Complaint" {{ old('type') == 'Complaint' ? 'selected' : '' }}>Complaint</option>
                             <option value="Incident" {{ old('type') == 'Incident' ? 'selected' : '' }}>Incident</option>
-                            <option value="Dispute" {{ old('type') == 'Dispute' ? 'selected' : '' }}>Dispute</option>
                         </select>
                         <p class="mt-1 text-sm text-gray-500">Choose the most appropriate category for the report</p>
                     </div>

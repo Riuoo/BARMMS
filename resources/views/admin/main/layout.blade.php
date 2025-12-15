@@ -194,6 +194,15 @@
           --tw-gradient-to: rgba(22, 101, 52, 1) !important;
         }
 
+        [data-theme="dark"] .dark\:from-green-900 {
+          --tw-gradient-from: rgba(20, 83, 45, 1) !important;
+        }
+
+        [data-theme="dark"] .bg-gradient-to-r.from-green-50.to-green-100,
+        [data-theme="dark"] .bg-gradient-to-r.dark\:from-green-900.dark\:to-green-800 {
+          background: linear-gradient(to right, rgba(20, 83, 45, 1), rgba(22, 101, 52, 1)) !important;
+        }
+
         [data-theme="dark"] .dark\:bg-green-900 {
           background-color: rgba(20, 83, 45, 0.3) !important;
         }
@@ -1817,6 +1826,12 @@
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
+                                <button type="button" onclick="openPatientProfileModal()" class="w-full text-left flex items-center px-4 py-3 rounded hover:bg-gray-300 transition duration-300 text-base">
+                                    <i class="fas fa-user-md fa-fw mr-3 text-green-600" aria-hidden="true"></i>
+                                    <span>Patient Profile Lookup</span>
+                                </button>
+                            </li>
+                            <li>
                                 <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.vaccination-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.vaccination-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Vaccination Records</span>
@@ -2074,6 +2089,12 @@
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Health Management</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
+                                <button type="button" onclick="promptPatientProfile()" class="w-full text-left flex items-center px-4 py-3 rounded hover:bg-gray-300 transition duration-300 text-base">
+                                    <i class="fas fa-user-md fa-fw mr-3 text-green-600" aria-hidden="true"></i>
+                                    <span>Patient Profile Lookup</span>
+                                </button>
+                            </li>
+                            <li>
                                 <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.vaccination-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Vaccination Records</span>
@@ -2187,8 +2208,125 @@
             @yield('content')
         </main>
     </div>
+    <!-- Patient Profile Lookup Modal -->
+    <div id="patientProfileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[9999]" aria-modal="true" role="dialog">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Patient Profile Lookup</h3>
+                    <p class="text-sm text-gray-600">Search by name or use Resident ID to open the patient profile.</p>
+                </div>
+                <button type="button" aria-label="Close" class="text-gray-400 hover:text-gray-600" onclick="closePatientProfileModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="patientProfileNameInput" class="block text-sm font-medium text-gray-700">Search by name</label>
+                    <div class="relative mt-1">
+                        <input id="patientProfileNameInput" type="text" autocomplete="off"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-green-500 focus:border-green-500"
+                               placeholder="e.g., Juan Dela Cruz"
+                               oninput="searchPatientProfileByName()">
+                        <div id="patientProfileSuggestions" class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto hidden"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Select a result to open the profile.</p>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" onclick="closePatientProfileModal()">Cancel</button>
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700" onclick="submitPatientProfileModal()">Open</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Custom notification auto-removal system -->
     <script>
+        // Patient Profile modal helpers
+        function openPatientProfileModal() {
+            const modal = document.getElementById('patientProfileModal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            const nameInput = document.getElementById('patientProfileNameInput');
+            const suggestions = document.getElementById('patientProfileSuggestions');
+            if (nameInput) { nameInput.value = ''; nameInput.focus(); }
+            if (suggestions) { suggestions.innerHTML = ''; suggestions.classList.add('hidden'); }
+        }
+        function closePatientProfileModal() {
+            const modal = document.getElementById('patientProfileModal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        function submitPatientProfileModal() {
+            const nameInput = document.getElementById('patientProfileNameInput');
+            const residentId = (nameInput?.dataset.selectedId || '').trim();
+            if (!residentId) {
+                window.toast?.error ? window.toast.error('Please select a patient from the list.') : alert('Please select a patient from the list.');
+                return;
+            }
+            window.location.href = `/admin/health/patient/${residentId}`;
+        }
+
+        // Debounced search for patient name
+        let patientSearchTimer = null;
+        function searchPatientProfileByName() {
+            const input = document.getElementById('patientProfileNameInput');
+            const suggestions = document.getElementById('patientProfileSuggestions');
+            if (!input || !suggestions) return;
+
+            const q = input.value.trim();
+            input.removeAttribute('data-selected-id');
+            input.dataset.selectedId = '';
+
+            if (q.length < 2) {
+                suggestions.innerHTML = '';
+                suggestions.classList.add('hidden');
+                return;
+            }
+
+            clearTimeout(patientSearchTimer);
+            patientSearchTimer = setTimeout(() => {
+                fetch(`{{ route('admin.search.residents') }}?term=${encodeURIComponent(q)}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then((data) => {
+                    if (!Array.isArray(data) || data.length === 0) {
+                        suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500 bg-white">No matches found</div>`;
+                        suggestions.classList.remove('hidden');
+                        return;
+                    }
+                    suggestions.innerHTML = data.map(item => `
+                        <button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm transition-colors bg-white"
+                                data-id="${item.id}"
+                                onclick="selectPatientProfile(${item.id}, '${(item.name || '').replace(/'/g, "\\'")}', '', '')">
+                            <div class="font-medium text-gray-900">${item.name || 'Unknown'}</div>
+                            <div class="text-xs text-gray-500">${item.email || ''}</div>
+                        </button>
+                    `).join('');
+                    suggestions.classList.remove('hidden');
+                })
+                .catch(() => {
+                    suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500 bg-white">Search failed</div>`;
+                    suggestions.classList.remove('hidden');
+                });
+            }, 250);
+        }
+
+        function selectPatientProfile(id, name, purok, age) {
+            const input = document.getElementById('patientProfileNameInput');
+            const suggestions = document.getElementById('patientProfileSuggestions');
+            if (input) {
+                input.value = name || `ID ${id}`;
+                input.dataset.selectedId = id;
+            }
+            if (suggestions) {
+                suggestions.innerHTML = '';
+                suggestions.classList.add('hidden');
+            }
+        }
+
         // Auto-remove notifications after timeout (non-conflicting with Alpine.js)
         document.addEventListener('DOMContentLoaded', function() {
             const notifications = document.querySelectorAll('.notify');

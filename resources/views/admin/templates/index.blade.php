@@ -245,14 +245,13 @@
                                 </button>
                             </form>
 
-                            <form action="{{ route('admin.templates.destroy', $template) }}" method="POST" class="inline" onsubmit="return confirm('Delete this template? This action cannot be undone.')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
-                                    <i class="fas fa-trash mr-1"></i>
-                                    Delete
-                                </button>
-                            </form>
+                            <button type="button" 
+                                    data-template-id="{{ $template->id }}"
+                                    data-template-name="{{ addslashes($template->document_type) }}"
+                                    class="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200 js-delete-template">
+                                <i class="fas fa-trash mr-1"></i>
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -277,6 +276,34 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteTemplateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Delete Template</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 dark:text-gray-300 mb-6">Are you sure you want to delete <span id="templateName" class="font-semibold"></span>? This will permanently remove the template from the system.</p>
+        <form id="deleteTemplateForm" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeleteTemplateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200">
+                    Delete Template
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Preview Modal -->
 <div id="previewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
@@ -298,7 +325,30 @@
 
 @push('scripts')
 <script>
+function deleteTemplate(id, name) {
+    document.getElementById('templateName').textContent = name;
+    document.getElementById('deleteTemplateForm').action = `/admin/templates/${id}`;
+    document.getElementById('deleteTemplateModal').classList.remove('hidden');
+    document.getElementById('deleteTemplateModal').classList.add('flex');
+}
+
+function closeDeleteTemplateModal() {
+    document.getElementById('deleteTemplateModal').classList.add('hidden');
+    document.getElementById('deleteTemplateModal').classList.remove('flex');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete button clicks
+    document.addEventListener('click', function(event) {
+        const deleteBtn = event.target.closest('.js-delete-template');
+        if (deleteBtn) {
+            const templateId = deleteBtn.dataset.templateId;
+            const templateName = deleteBtn.dataset.templateName;
+            deleteTemplate(templateId, templateName);
+            return;
+        }
+    });
+
     // Preview link functionality
     document.addEventListener('click', function(e) {
         const link = e.target.closest('a.preview-link');

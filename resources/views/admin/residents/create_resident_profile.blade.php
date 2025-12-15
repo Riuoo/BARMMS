@@ -275,24 +275,24 @@
                     </div>
                 </div>
 
-                <!-- Privacy Consent Section (Dark Mode) -->
-                <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 mb-2 shadow-lg">
+                <!-- Privacy Consent Section -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2 shadow-lg">
                     <div class="flex items-start">
                         <input type="checkbox" id="privacy_consent" name="privacy_consent" value="1" required
-                            class="mt-1 mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 bg-gray-800 rounded"
+                            class="mt-1 mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 bg-white rounded"
                             {{ old('privacy_consent') ? 'checked' : '' }}>
-                        <label for="privacy_consent" class="text-sm text-gray-100 flex-1">
+                        <label for="privacy_consent" class="text-sm text-gray-700 flex-1">
                             I confirm that the resident has been informed about and has consented to the 
                             <a href="{{ route('public.privacy') }}" target="_blank" 
-                               class="text-blue-400 hover:text-blue-300 underline font-medium transition-colors">
+                               class="text-blue-600 hover:text-blue-700 underline font-medium transition-colors">
                                 Barangay Privacy Policy
                             </a>
                             regarding the collection, use, and storage of their personal data.
-                            <span class="text-red-400">*</span>
+                            <span class="text-red-500">*</span>
                         </label>
                     </div>
-                    <p class="text-xs text-gray-400 mt-3 ml-7 leading-relaxed">
-                        <strong class="text-gray-300">Note:</strong> As the Secretary filling out this form, you are confirming that the resident has been informed about the Privacy Policy and has provided their consent for the processing of their personal information as described in the policy.
+                    <p class="text-xs text-gray-600 mt-3 ml-7 leading-relaxed">
+                        <strong class="text-gray-700">Note:</strong> As the Secretary filling out this form, you are confirming that the resident has been informed about the Privacy Policy and has provided their consent for the processing of their personal information as described in the policy.
                     </p>
                 </div>
 
