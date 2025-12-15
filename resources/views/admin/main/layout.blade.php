@@ -2228,7 +2228,11 @@
                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-green-500 focus:border-green-500"
                                placeholder="e.g., Juan Dela Cruz"
                                oninput="searchPatientProfileByName()">
+<<<<<<< HEAD
                         <div id="patientProfileSuggestions" class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto hidden"></div>
+=======
+                        <div id="patientProfileSuggestions" class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto hidden"></div>
+>>>>>>> 6509a6ef5d7569f4e395d0cc8c58d0c0a8a5876f
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Select a result to open the profile.</p>
                 </div>
@@ -2293,22 +2297,38 @@
                 .then(res => res.json())
                 .then((data) => {
                     if (!Array.isArray(data) || data.length === 0) {
+<<<<<<< HEAD
                         suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500 bg-white">No matches found</div>`;
+=======
+                        suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500">No matches found</div>`;
+>>>>>>> 6509a6ef5d7569f4e395d0cc8c58d0c0a8a5876f
                         suggestions.classList.remove('hidden');
                         return;
                     }
                     suggestions.innerHTML = data.map(item => `
+<<<<<<< HEAD
                         <button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm transition-colors bg-white"
                                 data-id="${item.id}"
                                 onclick="selectPatientProfile(${item.id}, '${(item.name || '').replace(/'/g, "\\'")}', '', '')">
                             <div class="font-medium text-gray-900">${item.name || 'Unknown'}</div>
                             <div class="text-xs text-gray-500">${item.email || ''}</div>
+=======
+                        <button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm transition-colors"
+                                data-id="${item.id}"
+                                onclick="selectPatientProfile(${item.id}, '${(item.name || '').replace(/'/g, "\\'")}', '', '')">
+                            <div class="font-medium text-gray-900 dark:text-gray-100">${item.name || 'Unknown'}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">${item.email || ''}</div>
+>>>>>>> 6509a6ef5d7569f4e395d0cc8c58d0c0a8a5876f
                         </button>
                     `).join('');
                     suggestions.classList.remove('hidden');
                 })
                 .catch(() => {
+<<<<<<< HEAD
                     suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500 bg-white">Search failed</div>`;
+=======
+                    suggestions.innerHTML = `<div class="px-3 py-2 text-sm text-gray-500">Search failed</div>`;
+>>>>>>> 6509a6ef5d7569f4e395d0cc8c58d0c0a8a5876f
                     suggestions.classList.remove('hidden');
                 });
             }, 250);

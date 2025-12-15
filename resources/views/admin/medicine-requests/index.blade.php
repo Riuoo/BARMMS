@@ -157,7 +157,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4">{{ $req->quantity_requested }}</td>
-                        <td class="px-6 py-4">{{ $req->approvedByUser->name ?? 'Unknown User' }}</td>
+                        <td class="px-6 py-4">{{ $req->approvedByUser->full_name ?? 'Unknown User' }}</td>
                         <td class="px-6 py-4">
                             @if($req->notes)
                                 <button type="button" 

@@ -6,6 +6,7 @@ use App\Services\PythonAnalyticsService;
 use Illuminate\Http\Request;
 use App\Models\Residents;
 use App\Models\BlotterRequest;
+use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringController;
 
 /**
  * DecisionTreeController - Refactored to remove redundancies
@@ -96,6 +97,19 @@ class DecisionTreeController
             $resident->blotter_count = (int) ($blotterCountsMap[$resident->id] ?? 0);
         }
 
+        // NEW: Get clustering assignments and attach to residents
+        $clusteringController = app(ClusteringController::class);
+        $clusteringData = $clusteringController->getClusteringForDecisionTree($residents, 3);
+        
+        // Attach cluster labels to residents
+        $clusterMap = $clusteringData['cluster_map'] ?? [];
+        $clusterLabels = $clusteringData['cluster_labels'] ?? [];
+        foreach ($residents as $resident) {
+            $clusterId = $clusterMap[$resident->id] ?? null;
+            $resident->cluster_id = $clusterId;
+            $resident->cluster_label = $clusterId !== null ? ($clusterLabels[$clusterId] ?? 'Cluster ' . ($clusterId + 1)) : null;
+        }
+
         $this->ensurePythonAvailable();
         $formattedResidents = $this->pythonService->formatResidentsForPython($residents);
         
@@ -149,6 +163,8 @@ class DecisionTreeController
             'featureNames' => config('decision_tree.feature_display_names', []),
             'programDescriptions' => config('decision_tree.program_descriptions', []),
             'statusColors' => config('decision_tree.status_colors', []),
+            'clusteringData' => $clusteringData, // NEW: Pass clustering data to view
+            'clusterLabels' => $clusterLabels, // NEW: Pass cluster labels for display
         ]);
     }
 
@@ -300,9 +316,25 @@ class DecisionTreeController
             
             $predictions = $result['testing_predictions'] ?? $result['predictions'] ?? [];
             foreach ($predictions as $pred) {
+                // Safely get resident ID and name - convert to array to avoid property access errors
+                $residentId = 'N/A';
+                $residentName = 'N/A';
+                
+                if (isset($pred['resident'])) {
+                    $resident = $pred['resident'];
+                    if (is_object($resident)) {
+                        $residentArray = (array)$resident;
+                        $residentId = $residentArray['id'] ?? $residentArray['resident_id'] ?? 'N/A';
+                        $residentName = $residentArray['full_name'] ?? $residentArray['name'] ?? 'N/A';
+                    } elseif (is_array($resident)) {
+                        $residentId = $resident['id'] ?? $resident['resident_id'] ?? 'N/A';
+                        $residentName = $resident['full_name'] ?? $resident['name'] ?? 'N/A';
+                    }
+                }
+                
                 fputcsv($file, [
-                    $pred['resident']->id ?? 'N/A',
-                    $pred['resident']->full_name ?? 'N/A',
+                    $residentId,
+                    $residentName,
                     $pred['predicted'] ?? 'N/A',
                     isset($pred['correct']) ? ($pred['correct'] ? 'Yes' : 'No') : 'N/A',
                     $type

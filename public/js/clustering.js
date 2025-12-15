@@ -147,23 +147,76 @@ function fullscreenChart() {
     }
 }
 
-// Toggle functions
-function toggleDetails() {
-    const details = document.getElementById('detailedAnalysisSection');
-    const toggleBtn = document.getElementById('toggleDetailsBtn');
-    const icon = toggleBtn.querySelector('i');
-    const btnText = toggleBtn.querySelector('.btn-text') || toggleBtn.querySelector('span');
+// Show Resident Details Modal
+function showResidentDetailsModal() {
+    const modal = document.getElementById('residentDetailsModal');
+    const modalContent = document.getElementById('residentDetailsModalContent');
+    const detailsSection = document.getElementById('detailedAnalysisSection');
+    
+    if (modal && modalContent && detailsSection) {
+        // Get the inner content from the hidden section
+        const innerContent = detailsSection.querySelector('div');
+        if (innerContent) {
+            // Clone the content
+            const contentClone = innerContent.cloneNode(true);
+            
+            // Clear and populate modal
+            modalContent.innerHTML = '';
+            modalContent.appendChild(contentClone);
+            
+            // Show modal
+            modal.classList.remove('hidden');
+            
+            // Initialize table features in the modal after a short delay
+            setTimeout(() => {
+                initializeTableFeatures();
+            }, 150);
+        }
+    }
+}
 
-    if (details.classList.contains('hidden')) {
-        details.classList.remove('hidden');
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
-        if (btnText) btnText.textContent = ' Hide Details';
-    } else {
-        details.classList.add('hidden');
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
-        if (btnText) btnText.textContent = ' Show Details';
+// Close Resident Details Modal
+function closeResidentDetailsModal() {
+    const modal = document.getElementById('residentDetailsModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Show Cluster Details Modal
+function showClusterDetailsModal(clusterId, expandedView) {
+    const modal = document.getElementById('clusterDetailsModal');
+    const modalContent = document.getElementById('clusterDetailsModalContent');
+    const modalTitle = document.getElementById('clusterDetailsModalTitle');
+    
+    if (modal && modalContent && expandedView) {
+        // Get the cluster label from the card
+        const clusterCard = expandedView.closest('.cluster-card');
+        const clusterLabel = clusterCard?.querySelector('.bg-purple-600')?.textContent?.trim() || `Cluster ${parseInt(clusterId) + 1}`;
+        
+        // Clone the expanded view content
+        const contentClone = expandedView.cloneNode(true);
+        contentClone.classList.remove('hidden');
+        
+        // Update modal title
+        if (modalTitle) {
+            modalTitle.innerHTML = `<i class="fas fa-layer-group text-purple-600 mr-2"></i>${clusterLabel} - Details`;
+        }
+        
+        // Clear and populate modal
+        modalContent.innerHTML = '';
+        modalContent.appendChild(contentClone);
+        
+        // Show modal
+        modal.classList.remove('hidden');
+    }
+}
+
+// Close Cluster Details Modal
+function closeClusterDetailsModal() {
+    const modal = document.getElementById('clusterDetailsModal');
+    if (modal) {
+        modal.classList.add('hidden');
     }
 }
 
@@ -182,21 +235,13 @@ function closeModal() {
 
 // Event handlers for expandable sections
 document.addEventListener('click', function(e) {
-    if (e.target.closest('[data-action="toggle-cluster-details"]')) {
-        const clusterId = e.target.closest('[data-action="toggle-cluster-details"]').dataset.clusterId;
+    if (e.target.closest('[data-action="show-cluster-details-modal"]')) {
+        const button = e.target.closest('[data-action="show-cluster-details-modal"]');
+        const clusterId = button.dataset.clusterId;
         const expandedView = document.getElementById(`expanded-cluster-${clusterId}`);
-        const icon = document.getElementById(`cluster-icon-${clusterId}`);
         
-        if (expandedView && icon) {
-            if (expandedView.classList.contains('hidden')) {
-                expandedView.classList.remove('hidden');
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
-            } else {
-                expandedView.classList.add('hidden');
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
-            }
+        if (expandedView) {
+            showClusterDetailsModal(clusterId, expandedView);
         }
     }
     
@@ -239,7 +284,7 @@ function generateClusterModalContent(payload) {
     function formatOneDecimal(value) {
         const num = Number(value);
         if (!isFinite(num)) return 'N/A';
-        return (Math.round(num * 10) / 10).toFixed(1);
+        return Math.round(num).toString();
     }
 
     const total = (typeof insights.total === 'number') ? insights.total : (cluster.size || 0);

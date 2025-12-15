@@ -135,7 +135,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">{{ (int) $tx->quantity }}</td>
-                            <td class="px-6 py-4">{{ data_get($tx, 'resident.name', '—') }}</td>
+                            <td class="px-6 py-4">{{ data_get($tx, 'resident.full_name', '—') }}</td>
                             <td class="px-6 py-4">{{ $tx->notes }}</td>
                         </tr>
                         @endforeach

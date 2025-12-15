@@ -357,7 +357,8 @@ class PythonAnalyticsService
                 'income_level' => $resident->income_level ?? '',
                 'employment_status' => $resident->employment_status ?? '',
                 'is_pwd' => $resident->is_pwd ?? false,
-                'address' => $resident->address ?? ''
+                'address' => $resident->address ?? '',
+                'cluster_id' => $resident->cluster_id ?? null, // NEW: Include cluster ID for decision tree
             ];
         }
         
@@ -425,6 +426,159 @@ class PythonAnalyticsService
     private function encodePWD(bool $isPWD): float
     {
         return $isPWD ? 1.0 : 0.0;
+    }
+
+    /**
+     * Build samples from blotter data for clustering
+     * Features: total count, type distribution, status distribution
+     */
+    public function buildSamplesFromBlotterData($residents, $blotterData): array
+    {
+        $samples = [];
+        
+        foreach ($residents as $resident) {
+            $residentId = $resident->id;
+            $blotterInfo = $blotterData[$residentId] ?? [
+                'total_count' => 0,
+                'type_distribution' => [],
+                'status_distribution' => []
+            ];
+            
+            // Encode blotter type (common types)
+            $typeEncoding = [
+                'Theft' => 1,
+                'Assault' => 2,
+                'Domestic Violence' => 3,
+                'Trespassing' => 4,
+                'Noise Complaint' => 5,
+                'Property Damage' => 6,
+                'Other' => 7,
+            ];
+            
+            // Get most common type or default
+            $mostCommonType = 'Other';
+            if (!empty($blotterInfo['type_distribution'])) {
+                arsort($blotterInfo['type_distribution']);
+                $mostCommonType = array_key_first($blotterInfo['type_distribution']) ?? 'Other';
+            }
+            
+            // Encode status distribution
+            $statusEncoding = [
+                'pending' => 0,
+                'approved' => 1,
+                'completed' => 2,
+            ];
+            
+            $pendingCount = $blotterInfo['status_distribution']['pending'] ?? 0;
+            $approvedCount = $blotterInfo['status_distribution']['approved'] ?? 0;
+            $completedCount = $blotterInfo['status_distribution']['completed'] ?? 0;
+            
+            $samples[] = [
+                floatval($blotterInfo['total_count']),
+                floatval($typeEncoding[$mostCommonType] ?? 7),
+                floatval($pendingCount),
+                floatval($approvedCount),
+                floatval($completedCount),
+            ];
+        }
+        
+        return $samples;
+    }
+
+    /**
+     * Build samples from document requests data for clustering
+     * Features: total count, document type distribution, status distribution
+     */
+    public function buildSamplesFromDocumentRequestsData($residents, $documentData): array
+    {
+        $samples = [];
+        
+        foreach ($residents as $resident) {
+            $residentId = $resident->id;
+            $docInfo = $documentData[$residentId] ?? [
+                'total_count' => 0,
+                'type_distribution' => [],
+                'status_distribution' => []
+            ];
+            
+            // Encode document type (common types)
+            $typeEncoding = [
+                'Barangay Clearance' => 1,
+                'Certificate of Indigency' => 2,
+                'Certificate of Residency' => 3,
+                'Business Permit' => 4,
+                'Barangay ID' => 5,
+                'Other' => 6,
+            ];
+            
+            // Get most common type or default
+            $mostCommonType = 'Other';
+            if (!empty($docInfo['type_distribution'])) {
+                arsort($docInfo['type_distribution']);
+                $mostCommonType = array_key_first($docInfo['type_distribution']) ?? 'Other';
+            }
+            
+            // Encode status distribution
+            $pendingCount = $docInfo['status_distribution']['pending'] ?? 0;
+            $approvedCount = $docInfo['status_distribution']['approved'] ?? 0;
+            $completedCount = $docInfo['status_distribution']['completed'] ?? 0;
+            
+            $samples[] = [
+                floatval($docInfo['total_count']),
+                floatval($typeEncoding[$mostCommonType] ?? 6),
+                floatval($pendingCount),
+                floatval($approvedCount),
+                floatval($completedCount),
+            ];
+        }
+        
+        return $samples;
+    }
+
+    /**
+     * Build samples from medical records data for clustering
+     * Features: total count, consultation type distribution, recent activity
+     */
+    public function buildSamplesFromMedicalRecordsData($residents, $medicalData): array
+    {
+        $samples = [];
+        
+        foreach ($residents as $resident) {
+            $residentId = $resident->id;
+            $medicalInfo = $medicalData[$residentId] ?? [
+                'total_count' => 0,
+                'type_distribution' => [],
+                'recent_count' => 0, // Last 30 days
+                'has_follow_up' => 0,
+            ];
+            
+            // Encode consultation type (common types)
+            $typeEncoding = [
+                'General Check-up' => 1,
+                'Emergency' => 2,
+                'Follow-up' => 3,
+                'Vaccination' => 4,
+                'Chronic Disease Management' => 5,
+                'Prenatal' => 6,
+                'Other' => 7,
+            ];
+            
+            // Get most common type or default
+            $mostCommonType = 'Other';
+            if (!empty($medicalInfo['type_distribution'])) {
+                arsort($medicalInfo['type_distribution']);
+                $mostCommonType = array_key_first($medicalInfo['type_distribution']) ?? 'Other';
+            }
+            
+            $samples[] = [
+                floatval($medicalInfo['total_count']),
+                floatval($typeEncoding[$mostCommonType] ?? 7),
+                floatval($medicalInfo['recent_count']),
+                floatval($medicalInfo['has_follow_up']),
+            ];
+        }
+        
+        return $samples;
     }
 }
 

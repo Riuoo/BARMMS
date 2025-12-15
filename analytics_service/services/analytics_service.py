@@ -190,6 +190,13 @@ class AnalyticsService:
                 self._encode_employment(resident.get('employment_status', '')),
             ]
             
+            # NEW: Add cluster_id as a feature if available
+            cluster_id = resident.get('cluster_id')
+            if cluster_id is not None:
+                features.append(float(cluster_id))
+            else:
+                features.append(0.0)  # Default to 0 if no cluster assigned
+            
             # Extract label (PWD status)
             is_pwd = resident.get('is_pwd', False)
             label = 1.0 if (is_pwd == True or is_pwd == 1 or is_pwd == '1') else 0.0
@@ -215,6 +222,13 @@ class AnalyticsService:
                 self._encode_employment(resident.get('employment_status', '')),
                 1.0 if (resident.get('is_pwd', False) == True or resident.get('is_pwd', False) == 1 or resident.get('is_pwd', False) == '1') else 0.0
             ]
+            
+            # NEW: Add cluster_id as a feature if available
+            cluster_id = resident.get('cluster_id')
+            if cluster_id is not None:
+                features.append(float(cluster_id))
+            else:
+                features.append(0.0)  # Default to 0 if no cluster assigned
             
             # Determine eligibility based on income and age
             income_level = resident.get('income_level', '')
@@ -419,6 +433,13 @@ class AnalyticsService:
                 self._encode_employment(resident.get('employment_status', '')),
             ]
             
+            # NEW: Add cluster_id as a feature if available
+            cluster_id = resident.get('cluster_id')
+            if cluster_id is not None:
+                features.append(float(cluster_id))
+            else:
+                features.append(0.0)  # Default to 0 if no cluster assigned
+            
             # Extract label (PWD status) and categorize
             is_pwd = resident.get('is_pwd', False)
             if is_pwd == True or is_pwd == 1 or is_pwd == '1':
@@ -447,6 +468,13 @@ class AnalyticsService:
                 self._encode_employment(resident.get('employment_status', '')),
                 1.0 if (resident.get('is_pwd', False) == True or resident.get('is_pwd', False) == 1 or resident.get('is_pwd', False) == '1') else 0.0
             ]
+            
+            # NEW: Add cluster_id as a feature if available
+            cluster_id = resident.get('cluster_id')
+            if cluster_id is not None:
+                features.append(float(cluster_id))
+            else:
+                features.append(0.0)  # Default to 0 if no cluster assigned
             
             # Determine program recommendation based on multiple factors
             age = float(resident.get('age', 0))

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Residents;
 use App\Models\BlotterRequest;
+use App\Models\DocumentRequest;
+use App\Models\MedicalRecord;
+use App\Http\Controllers\AdminControllers\AlgorithmControllers\DecisionTreeController;
 
 class ClusteringController
 {
@@ -112,6 +115,82 @@ class ClusteringController
         $totalBlotterReports = array_sum($blotterCountsMap->all());
         $residentsWithBlotter = $blotterCountsMap->count();
         
+        // Collect detailed blotter data for clustering
+        $blotterData = [];
+        $blotterRecords = BlotterRequest::whereNotNull('respondent_id')
+            ->select('respondent_id', 'type', 'status')
+            ->get()
+            ->groupBy('respondent_id');
+        
+        foreach ($blotterRecords as $residentId => $records) {
+            $typeDistribution = [];
+            $statusDistribution = [];
+            foreach ($records as $record) {
+                $type = $record->type ?? 'Other';
+                $status = $record->status ?? 'pending';
+                $typeDistribution[$type] = ($typeDistribution[$type] ?? 0) + 1;
+                $statusDistribution[$status] = ($statusDistribution[$status] ?? 0) + 1;
+            }
+            $blotterData[$residentId] = [
+                'total_count' => $records->count(),
+                'type_distribution' => $typeDistribution,
+                'status_distribution' => $statusDistribution,
+            ];
+        }
+        
+        // Collect document requests data for clustering
+        $documentData = [];
+        $documentRecords = DocumentRequest::whereNotNull('resident_id')
+            ->select('resident_id', 'document_type', 'status')
+            ->get()
+            ->groupBy('resident_id');
+        
+        foreach ($documentRecords as $residentId => $records) {
+            $typeDistribution = [];
+            $statusDistribution = [];
+            foreach ($records as $record) {
+                $type = $record->document_type ?? 'Other';
+                $status = $record->status ?? 'pending';
+                $typeDistribution[$type] = ($typeDistribution[$type] ?? 0) + 1;
+                $statusDistribution[$status] = ($statusDistribution[$status] ?? 0) + 1;
+            }
+            $documentData[$residentId] = [
+                'total_count' => $records->count(),
+                'type_distribution' => $typeDistribution,
+                'status_distribution' => $statusDistribution,
+            ];
+        }
+        
+        // Collect medical records data for clustering
+        $medicalData = [];
+        $medicalRecords = MedicalRecord::whereNotNull('resident_id')
+            ->select('resident_id', 'consultation_type', 'follow_up_date', 'consultation_datetime')
+            ->get()
+            ->groupBy('resident_id');
+        
+        $thirtyDaysAgo = now()->subDays(30);
+        foreach ($medicalRecords as $residentId => $records) {
+            $typeDistribution = [];
+            $hasFollowUp = 0;
+            $recentCount = 0;
+            foreach ($records as $record) {
+                $type = $record->consultation_type ?? 'Other';
+                $typeDistribution[$type] = ($typeDistribution[$type] ?? 0) + 1;
+                if ($record->follow_up_date) {
+                    $hasFollowUp = 1;
+                }
+                if ($record->consultation_datetime && $record->consultation_datetime >= $thirtyDaysAgo) {
+                    $recentCount++;
+                }
+            }
+            $medicalData[$residentId] = [
+                'total_count' => $records->count(),
+                'type_distribution' => $typeDistribution,
+                'recent_count' => $recentCount,
+                'has_follow_up' => $hasFollowUp,
+            ];
+        }
+        
         // Measure processing time
         $t0 = microtime(true);
 
@@ -143,7 +222,7 @@ class ClusteringController
             ]);
         }
         
-        // Find optimal K if requested
+        // Find optimal K if requested (using demographic data)
         if ($useOptimalK) {
             $samples = $this->pythonService->buildSamplesFromResidents($residents);
             $optimalKResult = $this->pythonService->findOptimalK($samples, 10, 'silhouette');
@@ -152,12 +231,28 @@ class ClusteringController
             }
         }
         
-        // Perform K-Means clustering using Python
-        $samples = $this->pythonService->buildSamplesFromResidents($residents);
-        $pythonResult = $this->pythonService->kmeansClustering($samples, $k, 100, 3);
-        if (isset($pythonResult['error'])) {
+        // Perform 4 separate clustering analyses
+        
+        // 1. Demographic clustering (main)
+        $demographicSamples = $this->pythonService->buildSamplesFromResidents($residents);
+        $demographicResult = $this->pythonService->kmeansClustering($demographicSamples, $k, 100, 3);
+        
+        // 2. Blotter-based clustering
+        $blotterSamples = $this->pythonService->buildSamplesFromBlotterData($residents, $blotterData);
+        $blotterResult = $this->pythonService->kmeansClustering($blotterSamples, $k, 100, 3);
+        
+        // 3. Document requests-based clustering
+        $documentSamples = $this->pythonService->buildSamplesFromDocumentRequestsData($residents, $documentData);
+        $documentResult = $this->pythonService->kmeansClustering($documentSamples, $k, 100, 3);
+        
+        // 4. Medical records-based clustering
+        $medicalSamples = $this->pythonService->buildSamplesFromMedicalRecordsData($residents, $medicalData);
+        $medicalResult = $this->pythonService->kmeansClustering($medicalSamples, $k, 100, 3);
+        
+        // Check for errors in main demographic clustering
+        if (isset($demographicResult['error'])) {
             return view('admin.clustering.index', [
-                'error' => 'Python clustering failed: ' . $pythonResult['error'],
+                'error' => 'Python clustering failed: ' . $demographicResult['error'],
                 'clusteringResult' => ['clusters' => [], 'residents' => []],
                 'clusters' => [],
                 'characteristics' => [],
@@ -177,16 +272,35 @@ class ClusteringController
                 'hierSummary' => [],
                 'incomeColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981', '#3B82F6'],
                 'employmentColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'],
+                'blotterClustering' => null,
+                'documentClustering' => null,
+                'medicalClustering' => null,
             ]);
         }
         
-        // Convert Python result to PHP format
-        $globalResult = $this->convertPythonResultToPhpFormat($pythonResult, $residents);
-        $globalCharacteristics = $this->extractCharacteristicsFromPythonResult($pythonResult, $residents);
+        // Convert Python results to PHP format
+        $globalResult = $this->convertPythonResultToPhpFormat($demographicResult, $residents);
+        $globalCharacteristics = $this->extractCharacteristicsFromPythonResult($demographicResult, $residents);
         $globalSummary = [
             'sizes' => array_map(fn($c) => $c['size'], $globalCharacteristics),
             'silhouette' => $globalResult['silhouette'] ?? null,
             'k' => $k,
+        ];
+        
+        // Process other clustering results
+        $blotterClustering = isset($blotterResult['error']) ? null : [
+            'result' => $this->convertPythonResultToPhpFormat($blotterResult, $residents),
+            'characteristics' => $this->extractCharacteristicsFromPythonResult($blotterResult, $residents),
+        ];
+        
+        $documentClustering = isset($documentResult['error']) ? null : [
+            'result' => $this->convertPythonResultToPhpFormat($documentResult, $residents),
+            'characteristics' => $this->extractCharacteristicsFromPythonResult($documentResult, $residents),
+        ];
+        
+        $medicalClustering = isset($medicalResult['error']) ? null : [
+            'result' => $this->convertPythonResultToPhpFormat($medicalResult, $residents),
+            'characteristics' => $this->extractCharacteristicsFromPythonResult($medicalResult, $residents),
         ];
         
         // Clusters-only view (no hierarchical/purok mode)
@@ -239,8 +353,12 @@ class ClusteringController
         
         // Optional: fetch program recommendations to display per-resident predicted program
         $programMap = [];
+        $riskMap = [];
+        $eligibilityMap = [];
         try {
             $formattedResidents = $this->pythonService->formatResidentsForPython($allResidents);
+            
+            // Get program recommendations
             $programResult = $this->pythonService->analyzeProgramRecommendation($formattedResidents, 'random_forest');
             if (!isset($programResult['error'])) {
                 foreach (($programResult['predictions'] ?? []) as $p) {
@@ -248,8 +366,26 @@ class ClusteringController
                     if ($rid !== null) { $programMap[$rid] = $p['predicted'] ?? null; }
                 }
             }
+            
+            // NEW: Get health risk predictions
+            $healthRiskResult = $this->pythonService->analyzeHealthRisk($formattedResidents, 'random_forest');
+            if (!isset($healthRiskResult['error'])) {
+                foreach (($healthRiskResult['predictions'] ?? []) as $p) {
+                    $rid = $p['resident_id'] ?? null;
+                    if ($rid !== null) { $riskMap[$rid] = $p['predicted'] ?? null; }
+                }
+            }
+            
+            // NEW: Get service eligibility predictions
+            $eligibilityResult = $this->pythonService->analyzeServiceEligibility($formattedResidents, 'decision_tree');
+            if (!isset($eligibilityResult['error'])) {
+                foreach (($eligibilityResult['predictions'] ?? []) as $p) {
+                    $rid = $p['resident_id'] ?? null;
+                    if ($rid !== null) { $eligibilityMap[$rid] = $p['predicted'] ?? null; }
+                }
+            }
         } catch (\Throwable $e) {
-            // ignore program prediction errors; table will show N/A
+            // ignore prediction errors; table will show N/A
         }
 
         // Build $residents collection for the table
@@ -263,8 +399,21 @@ class ClusteringController
                     $resident = $point['resident'];
                     $resident->cluster_id = $clusterId + 1; // 1-based for display
 
+                    // Safely get resident ID - convert to array to avoid property access errors
+                    $residentId = null;
+                    if (is_object($resident)) {
+                        $residentArray = (array)$resident;
+                        $residentId = $residentArray['id'] ?? $residentArray['resident_id'] ?? null;
+                    } elseif (is_array($resident)) {
+                        $residentId = $resident['id'] ?? $resident['resident_id'] ?? null;
+                    }
+
                     // Attach pre-computed blotter report count to resident
-                    $resident->blotter_count = (int) ($blotterCountsMap[$resident->id] ?? 0);
+                    if ($residentId !== null) {
+                        $resident->blotter_count = (int) ($blotterCountsMap[$residentId] ?? 0);
+                    } else {
+                        $resident->blotter_count = 0;
+                    }
 
                     // Initialize cluster-level blotter stats bucket
                     if (!isset($clusterBlotterStats[$clusterId])) {
@@ -280,8 +429,16 @@ class ClusteringController
                         $clusterBlotterStats[$clusterId]['residents_with_reports']++;
                     }
 
-                    if (isset($programMap[$resident->id])) {
-                        $resident->predicted_program = $programMap[$resident->id];
+                    if ($residentId !== null) {
+                        if (isset($programMap[$residentId])) {
+                            $resident->predicted_program = $programMap[$residentId];
+                        }
+                        if (isset($riskMap[$residentId])) {
+                            $resident->predicted_risk = $riskMap[$residentId];
+                        }
+                        if (isset($eligibilityMap[$residentId])) {
+                            $resident->predicted_eligibility = $eligibilityMap[$residentId];
+                        }
                     }
 
                     // Aggregate per-cluster counts for insights
@@ -381,6 +538,9 @@ class ClusteringController
             ],
             'incomeColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981', '#3B82F6'],
             'employmentColors' => ['#EF4444', '#F59E0B', '#8B5CF6', '#10B981'],
+            'blotterClustering' => $blotterClustering,
+            'documentClustering' => $documentClustering,
+            'medicalClustering' => $medicalClustering,
         ]);
     }
 
@@ -547,11 +707,24 @@ class ClusteringController
             // Write data
             foreach ($result['clusters'] as $clusterId => $cluster) {
                 foreach ($cluster as $point) {
+                    if (!isset($point['resident'])) {
+                        continue;
+                    }
                     $resident = $point['resident'];
+                    
+                    // Safely get resident ID - convert to array to avoid property access errors
+                    $residentId = 'N/A';
+                    if (is_object($resident)) {
+                        $residentArray = (array)$resident;
+                        $residentId = $residentArray['id'] ?? $residentArray['resident_id'] ?? 'N/A';
+                    } elseif (is_array($resident)) {
+                        $residentId = $resident['id'] ?? $resident['resident_id'] ?? 'N/A';
+                    }
+                    
                     fputcsv($file, [
                         $clusterId,
-                        $resident->id,
-                        $resident->full_name,
+                        $residentId,
+                        $resident->full_name ?? 'N/A',
                         $resident->age ?? 'N/A',
                         $resident->family_size ?? 'N/A',
                         $resident->education_level ?? 'N/A',
@@ -622,7 +795,21 @@ class ClusteringController
     {
         $distribution = [];
         foreach ($residents as $point) {
-            $value = $point['resident']->$field ?? 'Unknown';
+            if (!isset($point['resident'])) {
+                continue;
+            }
+            
+            $resident = $point['resident'];
+            $value = 'Unknown';
+            
+            // Safely get field value - convert to array to avoid property access errors
+            if (is_object($resident)) {
+                $residentArray = (array)$resident;
+                $value = $residentArray[$field] ?? 'Unknown';
+            } elseif (is_array($resident)) {
+                $value = $resident[$field] ?? 'Unknown';
+            }
+            
             $distribution[$value] = ($distribution[$value] ?? 0) + 1;
         }
         return $distribution;
@@ -645,8 +832,18 @@ class ClusteringController
             
             if (isset($residentsArray[$index])) {
                 $resident = $residents->get($index);
+                
+                // Safely get resident ID - convert to array to avoid property access errors
+                $residentId = null;
+                if (is_object($resident)) {
+                    $residentArray = (array)$resident;
+                    $residentId = $residentArray['id'] ?? $residentArray['resident_id'] ?? null;
+                } elseif (is_array($resident)) {
+                    $residentId = $resident['id'] ?? $resident['resident_id'] ?? null;
+                }
+                
                 $clusters[$clusterId][] = [
-                    'id' => $resident->id,
+                    'id' => $residentId,
                     'features' => [],
                     'resident' => $resident
                 ];
@@ -674,6 +871,75 @@ class ClusteringController
             'residents' => $residents,
             'python_metrics' => $pythonResult['metrics'] ?? []
         ];
+    }
+
+    /**
+     * Get cluster assignments for decision tree integration
+     * This method can be called by DecisionTreeController to get cluster labels for residents
+     */
+    public function getClusteringForDecisionTree($residents, int $k = 3): array
+    {
+        try {
+            $this->ensurePythonAvailable();
+            
+            // Build samples and perform clustering
+            $samples = $this->pythonService->buildSamplesFromResidents($residents);
+            $clusteringResult = $this->performClusteringByType($samples, 'kmeans', ['k' => $k]);
+            
+            if (isset($clusteringResult['error'])) {
+                return [
+                    'error' => $clusteringResult['error'],
+                    'cluster_map' => [],
+                    'cluster_labels' => []
+                ];
+            }
+            
+            // Map resident IDs to cluster IDs
+            $clusterMap = [];
+            $clusterLabels = [];
+            $labels = $clusteringResult['labels'] ?? [];
+            $characteristics = $clusteringResult['characteristics'] ?? [];
+            
+            // Create cluster map
+            foreach ($residents as $index => $resident) {
+                if (isset($labels[$index])) {
+                    $clusterId = $labels[$index];
+                    $clusterMap[$resident->id] = $clusterId;
+                    
+                    // Get cluster label from characteristics
+                    if (isset($characteristics[$clusterId])) {
+                        $char = $characteristics[$clusterId];
+                        $emp = $char['most_common_employment'] ?? 'N/A';
+                        $incomeCounts = $char['income_distribution'] ?? [];
+                        $income = 'N/A';
+                        if (!empty($incomeCounts)) {
+                            arsort($incomeCounts);
+                            $income = array_key_first($incomeCounts);
+                        }
+                        $label = trim(implode(' • ', array_filter([
+                            $emp !== 'N/A' ? $emp : null,
+                            $income !== 'N/A' ? $income : null,
+                        ]))) ?: ('Cluster ' . ($clusterId + 1));
+                        $clusterLabels[$clusterId] = $label;
+                    } else {
+                        $clusterLabels[$clusterId] = 'Cluster ' . ($clusterId + 1);
+                    }
+                }
+            }
+            
+            return [
+                'cluster_map' => $clusterMap,
+                'cluster_labels' => $clusterLabels,
+                'k' => $k,
+                'clustering_result' => $clusteringResult
+            ];
+        } catch (\Exception $e) {
+            return [
+                'error' => 'Failed to get clustering: ' . $e->getMessage(),
+                'cluster_map' => [],
+                'cluster_labels' => []
+            ];
+        }
     }
 
     /**

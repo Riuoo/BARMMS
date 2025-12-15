@@ -24,6 +24,7 @@ use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthRepo
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\VaccinationRecordController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicalRecordController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthCenterActivityController;
+use App\Http\Controllers\AdminControllers\HealthManagementControllers\PatientHealthProfileController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineRequestController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineTransactionController;
@@ -227,6 +228,11 @@ Route::prefix('admin')->group(function () {
         Route::get('/health-reports', [HealthReportController::class, 'healthReport'])->name('admin.health-reports');
         Route::get('/health-reports/comprehensive', [HealthReportController::class, 'generateComprehensiveReport'])->name('admin.health-reports.comprehensive');
         Route::get('/health-reports/export', [HealthReportController::class, 'exportReport'])->name('admin.health-reports.export');
+        Route::get('/health/patient-search', [PatientHealthProfileController::class, 'search'])
+            ->name('admin.health.patient-search');
+        Route::get('/health/patient/{resident}', [PatientHealthProfileController::class, 'show'])
+            ->whereNumber('resident')
+            ->name('admin.health.patient-profile');
 
         // Resident search (needed by vaccination forms) - allow nurse access
         // Note: This route is now in the admin,secretary,captain,councilor group for blotter forms
