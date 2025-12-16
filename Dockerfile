@@ -69,7 +69,8 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 # Render will route traffic to the container's HTTP port (Apache defaults to 80)
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+# Run database migrations on container start, then start Apache
+CMD ["sh", "-c", "php artisan migrate --force && apache2-foreground"]
 
 
 
