@@ -31,6 +31,11 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    # Libraries needed for PHP GD extension
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         pdo \
         pdo_mysql \
@@ -39,6 +44,7 @@ RUN apt-get update && apt-get install -y \
         mbstring \
         xml \
         zip \
+        gd \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
