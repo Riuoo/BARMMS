@@ -9,7 +9,8 @@
     <div id="scannerData" 
          data-events='@json($formattedEvents)'
          data-health='@json($formattedHealthActivities)'
-         data-initial-event="{{ $eventId ?? '' }}">
+         data-initial-event="{{ $eventId ?? '' }}"
+         data-strict="{{ $strictAudience ? '1' : '0' }}">
     </div>
 
     <!-- Header -->
@@ -45,6 +46,10 @@
                             Showing ongoing barangay activities/projects only (barangay-side access)
                         @endif
                     </p>
+                    <div id="audienceInfo" class="mt-2 text-xs text-blue-800 bg-blue-50 border border-blue-200 rounded px-3 py-2 hidden">
+                        <i class="fas fa-users mr-1"></i>
+                        <span id="audienceInfoText"></span>
+                    </div>
                 </div>
 
                 <!-- Video/Camera -->
@@ -227,21 +232,26 @@ function loadEvents() {
     const barangayEvents = JSON.parse(dataEl.dataset.events || '[]');
     const healthActivities = JSON.parse(dataEl.dataset.health || '[]');
     const initialEventId = dataEl.dataset.initialEvent ? parseInt(dataEl.dataset.initialEvent, 10) : null;
+    const isStrict = dataEl.dataset.strict === '1';
 
     if (eventType === 'event') {
-        barangayEvents.forEach((evt, index) => {
+        barangayEvents.forEach((evt) => {
             if (firstEventId === null) firstEventId = evt.id;
             const option = document.createElement('option');
             option.value = evt.id;
             option.textContent = evt.label;
+            option.dataset.audienceScope = evt.audience_scope || 'all';
+            option.dataset.audiencePurok = evt.audience_purok || '';
             eventSelect.appendChild(option);
         });
     } else if (eventType === 'health_center_activity') {
-        healthActivities.forEach((act, index) => {
+        healthActivities.forEach((act) => {
             if (firstEventId === null) firstEventId = act.id;
             const option = document.createElement('option');
             option.value = act.id;
             option.textContent = act.label;
+            option.dataset.audienceScope = act.audience_scope || 'all';
+            option.dataset.audiencePurok = act.audience_purok || '';
             eventSelect.appendChild(option);
         });
     }
@@ -249,11 +259,46 @@ function loadEvents() {
     // Auto-select: prioritize URL-selected event, then first event
     if (initialEventId) {
         eventSelect.value = initialEventId;
+        updateAudienceInfo(isStrict);
         refreshAttendance();
     } else if (firstEventId) {
         eventSelect.value = firstEventId;
+        updateAudienceInfo(isStrict);
         refreshAttendance();
     }
+
+    eventSelect.addEventListener('change', function () {
+        updateAudienceInfo(isStrict);
+        refreshAttendance();
+    });
+}
+
+function updateAudienceInfo(isStrict) {
+    const select = document.getElementById('eventId');
+    const audienceBox = document.getElementById('audienceInfo');
+    const audienceText = document.getElementById('audienceInfoText');
+    if (!select || !audienceBox || !audienceText) return;
+
+    const selected = select.options[select.selectedIndex];
+    if (!selected || !selected.value) {
+        audienceBox.classList.add('hidden');
+        audienceText.textContent = '';
+        return;
+    }
+
+    const scope = selected.dataset.audienceScope || 'all';
+    const purok = selected.dataset.audiencePurok || '';
+
+    if (scope === 'purok' && purok) {
+        audienceText.textContent = isStrict
+            ? `Target audience: Purok ${purok}. Out-of-audience scans will be blocked.`
+            : `Target audience: Purok ${purok}`;
+    } else {
+        audienceText.textContent = isStrict
+            ? 'Target audience: All Residents. (Open to all)'
+            : 'Target audience: All Residents';
+    }
+    audienceBox.classList.remove('hidden');
 }
 
 function startCamera() {
@@ -520,7 +565,11 @@ function scanToken(token) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showResult(`✓ ${data.resident.name} - Attendance logged!`, 'success');
+            let message = `✓ ${data.resident.name} - Attendance logged!`;
+            if (data.warning) {
+                message += ` ${data.warning}`;
+            }
+            showResult(message, data.warning ? 'warning' : 'success');
             refreshAttendance();
         } else {
             showResult(`✗ ${data.message}`, 'error');
@@ -543,8 +592,14 @@ function scanManual() {
 
 function showResult(message, type) {
     const resultDiv = document.getElementById('scanResult');
-    resultDiv.className = type === 'success' ? 'bg-green-50 border border-green-200 rounded-lg p-4' : 'bg-red-50 border border-red-200 rounded-lg p-4';
-    resultDiv.innerHTML = `<p class="text-sm ${type === 'success' ? 'text-green-800' : 'text-red-800'}">${message}</p>`;
+    let bgClass = 'bg-green-50 border border-green-200 text-green-800';
+    if (type === 'error') {
+        bgClass = 'bg-red-50 border border-red-200 text-red-800';
+    } else if (type === 'warning') {
+        bgClass = 'bg-yellow-50 border border-yellow-200 text-yellow-800';
+    }
+    resultDiv.className = `${bgClass} rounded-lg p-4`;
+    resultDiv.innerHTML = `<p class="text-sm">${message}</p>`;
     resultDiv.classList.remove('hidden');
     
     setTimeout(() => {
@@ -584,13 +639,18 @@ function addGuestAttendance() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            let message;
+            let type = 'success';
             if (data.is_guest === false) {
-                // Matched a resident
-                showResult(`✓ ${data.resident.name} - Resident attendance logged!`, 'success');
+                message = `✓ ${data.resident.name} - Resident attendance logged!`;
             } else {
-                // No match - logged as guest
-                showResult(`✓ ${data.guest.name} - Guest attendance logged!`, 'success');
+                message = `✓ ${data.guest.name} - Guest attendance logged!`;
             }
+            if (data.warning) {
+                message += ` ${data.warning}`;
+                type = 'warning';
+            }
+            showResult(message, type);
             document.getElementById('guestName').value = '';
             document.getElementById('guestContact').value = '';
             refreshAttendance();

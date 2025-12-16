@@ -334,6 +334,7 @@ class DocumentRequestController
             'document_template_id' => 'nullable|exists:document_templates,id',
             'template_fields' => 'nullable|array',
             'template_fields.*' => 'nullable|string|max:1000',
+            'privacy_consent' => 'required|accepted',
         ]);
 
         $user = Residents::find($validated['resident_id']);

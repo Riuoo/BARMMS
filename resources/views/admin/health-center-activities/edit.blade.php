@@ -35,7 +35,7 @@
                 <!-- Activity Information -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label for="activity_name" class="block text-sm font-medium text-gray-700 mb-2">Activity Name *</label>
+                        <label for="activity_name" class="block text-sm font-medium text-gray-700 mb-2">Activity Name <span class="text-red-500">*</span></label>
                         <input type="text" name="activity_name" id="activity_name" 
                                value="{{ old('activity_name', $activity->activity_name) }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
@@ -43,7 +43,7 @@
                     </div>
 
                     <div>
-                        <label for="activity_type" class="block text-sm font-medium text-gray-700 mb-2">Activity Type *</label>
+                        <label for="activity_type" class="block text-sm font-medium text-gray-700 mb-2">Activity Type <span class="text-red-500">*</span></label>
                         <select name="activity_type" id="activity_type" class="w-full border border-gray-300 rounded px-3 py-2" required>
                             <option value="">Select activity type...</option>
                             <option value="Vaccination" {{ old('activity_type', $activity->activity_type) == 'Vaccination' ? 'selected' : '' }}>Vaccination</option>
@@ -62,7 +62,7 @@
                 <!-- Date and Time -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label for="activity_date" class="block text-sm font-medium text-gray-700 mb-2">Activity Date *</label>
+                        <label for="activity_date" class="block text-sm font-medium text-gray-700 mb-2">Activity Date <span class="text-red-500">*</span></label>
                         <input type="date" name="activity_date" id="activity_date" 
                                value="{{ old('activity_date', $activity->activity_date->format('Y-m-d')) }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" required>
@@ -85,7 +85,7 @@
                     </div>
 
                     <div>
-                        <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location *</label>
+                        <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location <span class="text-red-500">*</span></label>
                         <input type="text" name="location" id="location" 
                                value="{{ old('location', $activity->location) }}" 
                                class="w-full border border-gray-300 rounded px-3 py-2" 
@@ -95,7 +95,7 @@
 
                 <!-- Description -->
                 <div class="mb-6">
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
                     <textarea name="description" id="description" rows="4" 
                               class="w-full border border-gray-300 rounded px-3 py-2" 
                               placeholder="Enter activity description" required>{{ old('description', $activity->description) }}</textarea>
@@ -110,41 +110,61 @@
                             <img src="{{ $activity->image_url }}" alt="Current activity image" class="w-32 h-24 object-cover rounded border">
                         </div>
                     @endif
-                    <input type="file" name="image" id="image" accept="image/*" class="w-full border border-gray-300 rounded px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    <p class="mt-1 text-sm text-gray-500">Upload a new image (JPG, PNG, GIF). Max size: 2MB. Leave empty to keep current image.</p>
+                    <input type="file" name="image" id="image" accept="image/*" class="w-full border border-gray-300 rounded px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 bg-gray-100 cursor-not-allowed" disabled>
+                    <p class="mt-1 text-sm text-gray-500">Image uploads are locked for this form.</p>
                 </div>
 
                 <!-- Objectives -->
                 <div class="mb-6">
                     <label for="objectives" class="block text-sm font-medium text-gray-700 mb-2">Objectives</label>
                     <textarea name="objectives" id="objectives" rows="3" 
-                              class="w-full border border-gray-300 rounded px-3 py-2" 
-                              placeholder="Enter objectives">{{ old('objectives', $activity->objectives) }}</textarea>
+                              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" 
+                              placeholder="Enter objectives" readonly>{{ old('objectives', $activity->objectives) }}</textarea>
                 </div>
 
-                <!-- Target Population -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="target_population" class="block text-sm font-medium text-gray-700 mb-2">Target Population</label>
-                        <select name="target_population" id="target_population" class="w-full border border-gray-300 rounded px-3 py-2">
-                            <option value="">Select target population...</option>
-                            <option value="All Residents" {{ old('target_population', $activity->target_population) == 'All Residents' ? 'selected' : '' }}>All Residents</option>
-                            <option value="Children (0-12 years)" {{ old('target_population', $activity->target_population) == 'Children (0-12 years)' ? 'selected' : '' }}>Children (0-12 years)</option>
-                            <option value="Adolescents (13-19 years)" {{ old('target_population', $activity->target_population) == 'Adolescents (13-19 years)' ? 'selected' : '' }}>Adolescents (13-19 years)</option>
-                            <option value="Adults (20-59 years)" {{ old('target_population', $activity->target_population) == 'Adults (20-59 years)' ? 'selected' : '' }}>Adults (20-59 years)</option>
-                            <option value="Seniors (60+ years)" {{ old('target_population', $activity->target_population) == 'Seniors (60+ years)' ? 'selected' : '' }}>Seniors (60+ years)</option>
-                            <option value="Pregnant Women" {{ old('target_population', $activity->target_population) == 'Pregnant Women' ? 'selected' : '' }}>Pregnant Women</option>
-                            <option value="Infants" {{ old('target_population', $activity->target_population) == 'Infants' ? 'selected' : '' }}>Infants</option>
-                            <option value="Other" {{ old('target_population', $activity->target_population) == 'Other' ? 'selected' : '' }}>Other</option>
-                        </select>
+                <!-- Target Audience & Target Participants -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Target Audience *</label>
+                        @php
+                            $currentAudienceScope = old('audience_scope', $activity->audience_scope ?? 'all');
+                        @endphp
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="audience_scope" value="all"
+                                       {{ $currentAudienceScope === 'all' ? 'checked' : '' }}
+                                       class="h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-500">
+                                <span class="ml-2 text-sm text-gray-700">All Residents</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="audience_scope" value="purok"
+                                       {{ $currentAudienceScope === 'purok' ? 'checked' : '' }}
+                                       class="h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-500">
+                                <span class="ml-2 text-sm text-gray-700">Specific Purok</span>
+                            </label>
+                            <div id="audiencePurokWrapperEdit" class="mt-2 {{ $currentAudienceScope === 'purok' ? '' : 'hidden' }}">
+                                <label for="audience_purok" class="block text-sm font-medium text-gray-700 mb-1">Select Purok</label>
+                                @php
+                                    $currentAudiencePurok = old('audience_purok', $activity->audience_purok);
+                                @endphp
+                                <select name="audience_purok" id="audience_purok"
+                                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                                    <option value="">Select Purok...</option>
+                                    @for($i = 1; $i <= 10; $i++)
+                                        <option value="{{ $i }}" {{ (string)$currentAudiencePurok === (string)$i ? 'selected' : '' }}>Purok {{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">This activity will primarily target residents from the selected Purok.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
-                        <label for="expected_participants" class="block text-sm font-medium text-gray-700 mb-2">Expected Participants</label>
-                        <input type="number" name="expected_participants" id="expected_participants" 
-                               value="{{ old('expected_participants', $activity->expected_participants) }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="Enter expected participants" min="1">
+                        <label for="target_participants" class="block text-sm font-medium text-gray-700 mb-2">Target Participants</label>
+                        <input type="number" name="target_participants" id="target_participants" 
+                               value="{{ old('target_participants', $activity->target_participants) }}" 
+                               class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" 
+                               placeholder="e.g. 50" min="1" readonly>
                     </div>
                 </div>
 
@@ -153,36 +173,44 @@
                     <div>
                         <label for="required_resources" class="block text-sm font-medium text-gray-700 mb-2">Required Resources</label>
                     <textarea name="required_resources" id="required_resources" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
+                                  class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" 
                               placeholder="Enter required resources">{{ old('required_resources', $activity->required_resources) }}</textarea>
                     </div>
 
                     <div>
                         <label for="staff_involved" class="block text-sm font-medium text-gray-700 mb-2">Staff Involved</label>
                         <textarea name="staff_involved" id="staff_involved" rows="3" 
-                                  class="w-full border border-gray-300 rounded px-3 py-2" 
-                                  placeholder="Enter staff involved">{{ old('staff_involved', $activity->staff_involved) }}</textarea>
+                                  class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" 
+                                  placeholder="Enter staff involved" readonly>{{ old('staff_involved', $activity->staff_involved) }}</textarea>
                     </div>
                 </div>
 
-                <!-- Status & Organizer -->
+                <!-- Organizer & Status -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                        <select name="status" id="status" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                            <option value="">Select status...</option>
-                            <option value="Planned" {{ old('status', $activity->status) == 'Planned' ? 'selected' : '' }}>Planned</option>
-                            <option value="Ongoing" {{ old('status', $activity->status) == 'Ongoing' ? 'selected' : '' }}>Ongoing</option>
-                            <option value="Completed" {{ old('status', $activity->status) == 'Completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="Cancelled" {{ old('status', $activity->status) == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <div class="flex items-center gap-2">
+                            @php
+                                $statusStyles = [
+                                    'Planned' => 'bg-blue-100 text-blue-800',
+                                    'Ongoing' => 'bg-yellow-100 text-yellow-800',
+                                    'Completed' => 'bg-green-100 text-green-800',
+                                    'Cancelled' => 'bg-red-100 text-red-800',
+                                ];
+                                $statusClass = $statusStyles[$activity->status] ?? 'bg-gray-100 text-gray-800';
+                            @endphp
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold {{ $statusClass }}">
+                                {{ $activity->status }}
+                            </span>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500">Status updates automatically based on the activity date and time.</p>
                     </div>
                     <div>
                         <label for="organizer" class="block text-sm font-medium text-gray-700 mb-2">Organizer</label>
                         <input type="text" name="organizer" id="organizer" 
                                value="{{ old('organizer', $activity->organizer) }}" 
-                               class="w-full border border-gray-300 rounded px-3 py-2" 
-                               placeholder="Enter organizer name">
+                               class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" 
+                               placeholder="Enter organizer name" readonly>
                     </div>
                 </div>
                 <div class="mb-6">
@@ -196,8 +224,8 @@
                 <div class="mb-6">
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
                     <textarea name="notes" id="notes" rows="3" 
-                              class="w-full border border-gray-300 rounded px-3 py-2" 
-                              placeholder="Enter notes">{{ old('notes', $activity->notes) }}</textarea>
+                              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" 
+                              placeholder="Enter notes" readonly>{{ old('notes', $activity->notes) }}</textarea>
                 </div>
 
                 <!-- Submit Button -->
@@ -219,6 +247,25 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const scopeInputs = document.querySelectorAll('input[name="audience_scope"]');
+    const purokWrapper = document.getElementById('audiencePurokWrapperEdit');
+
+    function updateAudienceVisibility() {
+        const selected = document.querySelector('input[name="audience_scope"]:checked');
+        if (!selected || !purokWrapper) return;
+        if (selected.value === 'purok') {
+            purokWrapper.classList.remove('hidden');
+        } else {
+            purokWrapper.classList.add('hidden');
+        }
+    }
+
+    scopeInputs.forEach(input => {
+        input.addEventListener('change', updateAudienceVisibility);
+    });
+
+    updateAudienceVisibility();
+
     setTimeout(() => {
         const skeleton = document.getElementById('hcaEditSkeleton');
         const content = document.getElementById('hcaEditContent');

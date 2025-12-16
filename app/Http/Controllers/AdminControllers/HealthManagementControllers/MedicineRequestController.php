@@ -6,6 +6,7 @@ use App\Models\Medicine;
 use App\Models\MedicineRequest;
 use App\Models\MedicineTransaction;
 use App\Models\Residents;
+use App\Models\MedicineBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
@@ -90,21 +91,40 @@ class MedicineRequestController
             'resident_id' => 'required|exists:residents,id',
             'quantity_requested' => 'required|integer|min:1',
             'notes' => 'nullable|string',
+            'privacy_consent' => 'required|accepted',
         ]);
 
         $medicine = Medicine::findOrFail($validated['medicine_id']);
+        $requestedQty = (int) $validated['quantity_requested'];
 
-        // Prevent multiple ongoing medicine requests (quantity_approved is null or 0)
-        if (MedicineRequest::where('resident_id', $validated['resident_id'])
-                ->where(function($q){ $q->whereNull('quantity_approved')->orWhere('quantity_approved', 0); })
-                ->exists()) {
-            notify()->error('Resident already has a pending or unapproved medicine request. Complete it before creating a new one.');
-            return back();
+        // Calculate available stock from non-expired batches (more accurate than current_stock)
+        $now = now()->toDateString();
+        $availableStock = MedicineBatch::where('medicine_id', $medicine->id)
+            ->where('remaining_quantity', '>', 0)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('expiry_date')
+                  ->orWhere('expiry_date', '>=', $now);
+            })
+            ->sum('remaining_quantity');
+
+        // Fallback: If no batches exist or all are expired, use current_stock and create a batch
+        // This handles legacy medicines created before batch system or out-of-sync data
+        if ($availableStock == 0 && $medicine->current_stock > 0) {
+            // Create a batch from current_stock to sync the data
+            MedicineBatch::create([
+                'medicine_id' => $medicine->id,
+                'batch_code' => null,
+                'quantity' => (int) $medicine->current_stock,
+                'remaining_quantity' => (int) $medicine->current_stock,
+                'expiry_date' => null, // No expiry date for legacy stock
+                'notes' => 'Auto-created batch to sync legacy stock',
+            ]);
+            $availableStock = (int) $medicine->current_stock;
         }
 
         // Ensure sufficient stock
-        if ($medicine->current_stock < (int) $validated['quantity_requested']) {
-            notify()->error('Insufficient stock to fulfill this request.');
+        if ($availableStock < $requestedQty) {
+            notify()->error('Insufficient stock to fulfill this request. Available: ' . $availableStock . ', Requested: ' . $requestedQty);
             return back();
         }
 
@@ -115,25 +135,67 @@ class MedicineRequestController
         $medicineRequest = MedicineRequest::create([
             'medicine_id' => $validated['medicine_id'],
             'resident_id' => $validated['resident_id'],
-            'quantity_requested' => (int) $validated['quantity_requested'],
-            'quantity_approved' => (int) $validated['quantity_requested'],
+            'quantity_requested' => $requestedQty,
+            'quantity_approved' => $requestedQty,
             'approved_by' => $approvedBy,
             'request_date' => now()->toDateString(),
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        // Deduct stock and log transaction
-        $medicine->current_stock -= (int) $validated['quantity_requested'];
+        // Deduct stock from oldest non-expired batches first (FEFO)
+        $remainingToDeduct = $requestedQty;
+
+        $batches = MedicineBatch::where('medicine_id', $medicine->id)
+            ->where('remaining_quantity', '>', 0)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('expiry_date')
+                  ->orWhere('expiry_date', '>=', $now);
+            })
+            ->orderBy('expiry_date')   // earliest expiry first
+            ->orderBy('created_at')    // then oldest batch
+            ->lockForUpdate()
+            ->get();
+
+        $totalDeducted = 0;
+        foreach ($batches as $batch) {
+            if ($remainingToDeduct <= 0) {
+                break;
+            }
+
+            $available = (int) $batch->remaining_quantity;
+            if ($available <= 0) {
+                continue;
+            }
+
+            $take = min($available, $remainingToDeduct);
+            $batch->remaining_quantity -= $take;
+            $batch->save();
+
+            $remainingToDeduct -= $take;
+            $totalDeducted += $take;
+        }
+
+        if ($remainingToDeduct > 0) {
+            // Rollback: delete the request if we couldn't fulfill it
+            $medicineRequest->delete();
+            notify()->error('Insufficient batch stock to fulfill this request. Available: ' . $totalDeducted . ', Requested: ' . $requestedQty . '. Please check batch availability.');
+            return back();
+        }
+
+        // Deduct from overall medicine stock
+        $medicine->current_stock -= $totalDeducted;
         $medicine->save();
 
         MedicineTransaction::create([
             'medicine_id' => $medicine->id,
             'resident_id' => $validated['resident_id'],
             'transaction_type' => 'OUT',
-            'quantity' => (int) $validated['quantity_requested'],
+            'quantity' => $totalDeducted,
             'transaction_date' => now(),
             'prescribed_by' => $approvedBy,
-            'notes' => ($validated['notes'] ? 'Auto-dispensed via request #'.$medicineRequest->id . ' - ' . $validated['notes'] : 'Auto-dispensed via request #'.$medicineRequest->id)
+            'notes' => ($validated['notes']
+                ? 'Auto-dispensed via request #'.$medicineRequest->id . ' - ' . $validated['notes']
+                : 'Auto-dispensed via request #'.$medicineRequest->id)
         ]);
 
         notify()->success('Request created and dispensed.');

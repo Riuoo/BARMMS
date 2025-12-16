@@ -87,12 +87,33 @@
                 </div>
             </div>
             
+            <!-- Privacy Consent Section -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2 shadow-lg mt-6">
+                <div class="flex items-start">
+                    <input type="checkbox" id="privacy_consent" name="privacy_consent" value="1" required
+                        class="mt-1 mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 bg-white rounded"
+                        {{ old('privacy_consent') ? 'checked' : '' }}>
+                    <label for="privacy_consent" class="text-sm text-gray-700 flex-1">
+                        I confirm that the child's guardian has been informed about and has consented to the 
+                        <a href="{{ route('public.privacy') }}" target="_blank" 
+                           class="text-blue-600 hover:text-blue-700 underline font-medium transition-colors">
+                            Barangay Privacy Policy
+                        </a>
+                        regarding the collection, use, and storage of the child's personal data.
+                        <span class="text-red-500">*</span>
+                    </label>
+                </div>
+                <p class="text-xs text-gray-600 mt-3 ml-7 leading-relaxed">
+                    <strong class="text-gray-700">Note:</strong> As the Secretary filling out this form, you are confirming that the child's guardian has been informed about the Privacy Policy and has provided their consent for the processing of the child's personal information as described in the policy.
+                </p>
+            </div>
+
             <div class="flex justify-between mt-8">
                 <a href="{{ route('admin.vaccination-records.child-profiles') }}" 
                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200">
                     Cancel
                 </a>
-                <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                <button type="submit" id="submitBtn" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
                     Create Profile
                 </button>
             </div>
@@ -110,6 +131,34 @@ document.addEventListener('DOMContentLoaded', function() {
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
+
+    // Privacy consent checkbox validation
+    const privacyConsentCheckbox = document.getElementById('privacy_consent');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    function updateSubmitButton() {
+        if (privacyConsentCheckbox && submitBtn) {
+            submitBtn.disabled = !privacyConsentCheckbox.checked;
+        }
+    }
+    
+    if (privacyConsentCheckbox) {
+        privacyConsentCheckbox.addEventListener('change', updateSubmitButton);
+        updateSubmitButton(); // Initial check
+    }
+
+    // Form submission validation
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!privacyConsentCheckbox || !privacyConsentCheckbox.checked) {
+                e.preventDefault();
+                alert('Please acknowledge and agree to the Privacy Policy by checking the consent box.');
+                if (privacyConsentCheckbox) privacyConsentCheckbox.focus();
+                return false;
+            }
+        });
+    }
 });
 </script>
 @endpush

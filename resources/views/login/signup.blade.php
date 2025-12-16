@@ -635,5 +635,40 @@
             }
         });
     </script>
+    <script>
+        // Ensure fields marked with * are required before submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const isFormControl = (el) => el && ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName);
+            const findControl = (label) => {
+                const forId = label.getAttribute('for');
+                if (forId) {
+                    const byId = document.getElementById(forId);
+                    if (isFormControl(byId)) return byId;
+                }
+                const sibling = label.nextElementSibling;
+                if (isFormControl(sibling)) return sibling;
+                return label.parentElement ? label.parentElement.querySelector('input, select, textarea') : null;
+            };
+
+            document.querySelectorAll('label').forEach((label) => {
+                const text = (label.textContent || '').trim();
+                const hasStar = label.querySelector('.text-red-500, .text-danger') || text.includes('*');
+                if (!hasStar) return;
+
+                const control = findControl(label);
+                if (!isFormControl(control)) return;
+
+                control.setAttribute('required', 'required');
+                control.setAttribute('aria-required', 'true');
+
+                if (control.type === 'radio' || control.type === 'checkbox') {
+                    document.querySelectorAll(`input[name="${control.name}"]`).forEach((peer) => {
+                        peer.setAttribute('required', 'required');
+                        peer.setAttribute('aria-required', 'true');
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

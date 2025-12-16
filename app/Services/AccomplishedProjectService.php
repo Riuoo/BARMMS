@@ -19,7 +19,14 @@ class AccomplishedProjectService
             $data['image'] = $this->uploadImage($data['image']);
         }
         
-        return AccomplishedProject::create($data);
+        $project = AccomplishedProject::create($data);
+
+        // If this is a barangay activity, notify its audience
+        if ($project->type === 'activity') {
+            $this->notifyAudience($project);
+        }
+
+        return $project;
     }
 
     /**
@@ -76,8 +83,45 @@ class AccomplishedProjectService
 
         // Handle is_featured field properly
         $data['is_featured'] = isset($data['is_featured']) ? true : false;
+
+        // Normalize audience for activities only
+        if (($data['type'] ?? 'project') === 'activity') {
+            $data['audience_scope'] = $data['audience_scope'] ?? 'all';
+            if ($data['audience_scope'] !== 'purok') {
+                $data['audience_scope'] = 'all';
+                $data['audience_purok'] = null;
+            }
+        } else {
+            $data['audience_scope'] = 'all';
+            $data['audience_purok'] = null;
+        }
         
         return $data;
+    }
+
+    /**
+     * Notify target audience for a newly created barangay activity.
+     */
+    private function notifyAudience(AccomplishedProject $activity): void
+    {
+        try {
+            $audienceService = app(\App\Services\ActivityAudienceService::class);
+            $residents = $audienceService->getAudienceResidents(
+                $activity->audience_scope ?? 'all',
+                $activity->audience_purok
+            );
+
+            if ($residents->isEmpty()) {
+                return;
+            }
+
+            foreach ($residents as $resident) {
+                \Illuminate\Support\Facades\Mail::to($resident->email)
+                    ->queue(new \App\Mail\BarangayActivityNotificationMail($activity));
+            }
+        } catch (\Throwable $e) {
+            // Fail silently – notifications should not break activity creation
+        }
     }
 
     /**

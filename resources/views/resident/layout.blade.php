@@ -1361,6 +1361,12 @@
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Community</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
+                                <a href="{{ route('resident.request_community_concern') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_concern') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_concern') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_concern') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Concern</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('resident.announcements') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.announcements*') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.announcements*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-bullhorn fa-fw mr-3 {{ request()->routeIs('resident.announcements*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Bulletin Board</span>
@@ -1370,12 +1376,6 @@
                                 <a href="{{ route('resident.faqs') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.faqs') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.faqs') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-question-circle fa-fw mr-3 {{ request()->routeIs('resident.faqs') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>FAQ & Quick Help</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('resident.request_community_concern') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_concern') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_concern') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_concern') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Community Concern</span>
                                 </a>
                             </li>
                         </ul>
@@ -1482,6 +1482,12 @@
                         <h3 class="text-gray-400 uppercase tracking-wide text-xs font-semibold mb-2 px-4">Community</h3>
                         <ul class="flex flex-col space-y-2">
                             <li>
+                                <a href="{{ route('resident.request_community_concern') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_concern') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_concern') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_concern') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Community Concern</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('resident.announcements') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.announcements*') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.announcements*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-bullhorn fa-fw mr-3 {{ request()->routeIs('resident.announcements*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Bulletin Board</span>
@@ -1491,12 +1497,6 @@
                                 <a href="{{ route('resident.faqs') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.faqs') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.faqs') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-question-circle fa-fw mr-3 {{ request()->routeIs('resident.faqs') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>FAQ & Quick Help</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('resident.request_community_concern') }}" class="flex items-center px-4 py-3 rounded {{ isActiveResidentRoute('resident.request_community_concern') }} transition duration-300 text-base" aria-current="{{ isActiveResidentRoute('resident.request_community_concern') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-clipboard-list fa-fw mr-3 {{ request()->routeIs('resident.request_community_concern') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Community Concern</span>
                                 </a>
                             </li>
                         </ul>
@@ -1544,6 +1544,42 @@
                     }, 500);
                 }
             }
+        });
+    </script>
+
+    <script>
+        // Auto-mark fields with a red asterisk as required for client-side blocking
+        document.addEventListener('DOMContentLoaded', function() {
+            const isFormControl = (el) => el && ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName);
+            const findControl = (label) => {
+                const forId = label.getAttribute('for');
+                if (forId) {
+                    const byId = document.getElementById(forId);
+                    if (isFormControl(byId)) return byId;
+                }
+                const sibling = label.nextElementSibling;
+                if (isFormControl(sibling)) return sibling;
+                return label.parentElement ? label.parentElement.querySelector('input, select, textarea') : null;
+            };
+
+            document.querySelectorAll('label').forEach((label) => {
+                const text = (label.textContent || '').trim();
+                const hasStar = label.querySelector('.text-red-500, .text-danger') || text.includes('*');
+                if (!hasStar) return;
+
+                const control = findControl(label);
+                if (!isFormControl(control)) return;
+
+                control.setAttribute('required', 'required');
+                control.setAttribute('aria-required', 'true');
+
+                if (control.type === 'radio' || control.type === 'checkbox') {
+                    document.querySelectorAll(`input[name="${control.name}"]`).forEach((peer) => {
+                        peer.setAttribute('required', 'required');
+                        peer.setAttribute('aria-required', 'true');
+                    });
+                }
+            });
         });
     </script>
 

@@ -34,12 +34,23 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Content -->
             <div class="lg:col-span-2">
-                <!-- Project Image -->
-                @if($project->image_url)
-                <div class="mb-6">
-                    <img src="{{ $project->image_url }}" alt="{{ $project->title }}" class="w-full h-64 object-cover rounded-lg shadow-sm">
+                <!-- Project Image / Placeholder -->
+                <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="relative h-64 bg-gradient-to-r from-gray-100 to-gray-50">
+                        @if($project->image_url)
+                        <img src="{{ $project->image_url }}" alt="{{ $project->title }}" class="w-full h-full object-cover">
+                        @else
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-image text-xl"></i>
+                                </div>
+                                <span class="text-sm font-medium">No image available</span>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
                 </div>
-                @endif
 
                 <!-- Project Description -->
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">

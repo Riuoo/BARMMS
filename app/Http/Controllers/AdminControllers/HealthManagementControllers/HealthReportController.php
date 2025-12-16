@@ -81,22 +81,23 @@ class HealthReportController
         // Medicine analytics (30-day window) - Detailed inventory with priority sorting
         $lowStockMedicines = \App\Models\Medicine::whereColumn('current_stock', '<=', 'minimum_stock')
             ->orderByRaw('(minimum_stock - current_stock) DESC') // Most critical first
-            ->with('category')
             ->limit(5)
             ->get();
 
-        $expiringMedicines = \App\Models\Medicine::whereNotNull('expiry_date')
+        // Expiring soon based on batches rather than a single medicine expiry date
+        $expiringBatches = \App\Models\MedicineBatch::with('medicine')
+            ->whereNotNull('expiry_date')
             ->where('expiry_date', '<=', now()->addDays(30))
+            ->where('remaining_quantity', '>', 0)
             ->orderBy('expiry_date', 'asc') // Soonest to expire first
-            ->with('category')
             ->limit(5)
             ->get();
 
         $medicineStats = [
             'low_stock' => $lowStockMedicines->count(),
-            'expiring_soon' => $expiringMedicines->count(),
+            'expiring_soon' => $expiringBatches->count(),
             'low_stock_details' => $lowStockMedicines,
-            'expiring_details' => $expiringMedicines,
+            'expiring_details' => $expiringBatches,
         ];
 
         $topRequestedMedicines = MedicineRequest::select('medicine_id')

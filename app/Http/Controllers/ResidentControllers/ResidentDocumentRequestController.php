@@ -22,6 +22,7 @@ class ResidentDocumentRequestController extends BaseResidentRequestController
             'document_type' => 'required|string|max:255',
             'description' => 'required|string',
             'document_template_id' => 'nullable|exists:document_templates,id',
+            'privacy_consent' => 'required|accepted',
         ]);
 
         $userId = $this->ensureAuthenticated();

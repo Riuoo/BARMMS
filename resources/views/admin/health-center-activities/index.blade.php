@@ -19,10 +19,6 @@
                     <p class="text-sm md:text-base text-gray-600">Plan, manage, and review health center activities</p>
                 </div>
                 <div class="mt-4 sm:mt-0 flex space-x-2">
-                    <a href="{{ route('admin.health-center-activities.upcoming') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
-                        <i class="fas fa-calendar-alt mr-2"></i>
-                        Upcoming
-                    </a>
                     <a href="{{ route('admin.health-center-activities.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
                         <i class="fas fa-plus mr-2"></i>
                         Add Activity
@@ -214,16 +210,21 @@
                     default => 'bg-gray-100 text-gray-800'
                 };
             @endphp
-            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden flex flex-col h-full">
                 <!-- Activity Image -->
-                <div class="relative">
+                <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-50">
                     @if($activity->image)
                         <img src="{{ $activity->image_url }}" 
                              alt="{{ $activity->activity_name }}" 
-                             class="w-full h-48 object-cover">
+                             class="w-full h-full object-cover">
                     @else
-                        <div class="w-full h-48 bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
-                            <i class="fas fa-heartbeat text-gray-400 text-4xl"></i>
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-image text-xl"></i>
+                                </div>
+                                <span class="text-sm font-medium">No image available</span>
+                            </div>
                         </div>
                     @endif
                     
@@ -250,15 +251,15 @@
                 </div>
 
                 <!-- Card Content -->
-                <div class="p-5">
+                <div class="p-5 flex flex-col h-full">
                     <!-- Title -->
                     <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight">{{ $activity->activity_name }}</h3>
                     
                     <!-- Description -->
                     <p class="text-gray-600 text-sm mb-2 leading-relaxed line-clamp-3">{{ Str::limit($activity->description, 120) }}</p>
 
-                    <!-- Date and Time Row -->
-                    <div class="space-y-2 mb-2">
+                    <!-- Date, Time and Audience Row -->
+                    <div class="space-y-2 mb-4">
                         <div class="flex items-center text-sm text-gray-500">
                             <i class="fas fa-calendar-alt mr-2 text-gray-400 w-4 text-center"></i>
                             <span>{{ $activity->activity_date->format('M d, Y') }}</span>
@@ -288,9 +289,21 @@
                         </div>
                         @endif
                     </div>
+                    <div class="space-y-2 mb-2">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-users mr-2 text-gray-400 w-4 text-center"></i>
+                            <span>
+                                @if($activity->audience_scope === 'purok' && $activity->audience_purok)
+                                    Audience: Purok {{ $activity->audience_purok }}
+                                @else
+                                    Audience: All Residents
+                                @endif
+                            </span>
+                        </div>
+                    </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 mt-auto pt-4">
                         <a href="{{ route('admin.health-center-activities.show', $activity) }}" 
                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition duration-300">
                             <i class="fas fa-eye mr-1"></i>View
@@ -306,7 +319,7 @@
                                 class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition duration-300 js-delete-activity">
                             <i class="fas fa-trash mr-1"></i>Delete
                         </button>
-                    </div>
+                        </div>
                 </div>
             </div>
             @endforeach

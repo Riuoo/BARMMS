@@ -67,6 +67,7 @@ class MedicalRecordController
             'notes' => 'nullable|string|max:2000',
             'follow_up_date' => 'nullable|date|after:consultation_datetime',
             'follow_up_notes' => 'nullable|string|max:2000',
+            'privacy_consent' => 'required|accepted',
         ]);
 
         // Handle "Other" consultation type

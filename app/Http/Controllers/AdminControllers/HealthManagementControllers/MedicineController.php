@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 use App\Models\Medicine;
 use App\Models\MedicineRequest;
 use App\Models\MedicineTransaction;
+use App\Models\MedicineBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -30,8 +31,13 @@ class MedicineController
 
         if ($request->filled('stock_status')) {
             $status = $request->get('stock_status');
+
             if ($status === 'low') {
+                // Low stock: current stock is less than or equal to the defined minimum
                 $query->whereColumn('current_stock', '<=', 'minimum_stock');
+            } elseif ($status === 'sufficient') {
+                // Sufficient stock: current stock is greater than the defined minimum
+                $query->whereColumn('current_stock', '>', 'minimum_stock');
             }
         }
 
@@ -47,19 +53,15 @@ class MedicineController
         ->paginate(10)
         ->withQueryString();
 
-        // Detailed list for expiring-soon modal (also drives the expiring_soon stat)
+        // Detailed list for expiring-soon modal (also drives the expiring_soon stat),
+        // now based on batches instead of a single medicine-level expiry date.
         $today = now()->toDateString();
         $limit = now()->addDays(30)->toDateString();
 
-        $expiringSoonMedicines = Medicine::select([
-            'id',
-            'name',
-            'generic_name',
-            'current_stock',
-            'expiry_date',
-        ])
+        $expiringSoonBatches = MedicineBatch::with('medicine')
             ->whereNotNull('expiry_date')
             ->whereBetween('expiry_date', [$today, $limit])
+            ->where('remaining_quantity', '>', 0)
             ->orderBy('expiry_date')
             ->get();
 
@@ -71,8 +73,8 @@ class MedicineController
             'low_stock' => \Illuminate\Support\Facades\Cache::remember('low_stock_medicines', 300, function () {
                 return Medicine::whereColumn('current_stock', '<=', 'minimum_stock')->count();
             }),
-            // Keep expiring_soon in sync with the modal by deriving from the same collection (no cache)
-            'expiring_soon' => $expiringSoonMedicines->count(),
+            // Keep expiring_soon in sync with the modal by deriving from the same batch collection (no cache)
+            'expiring_soon' => $expiringSoonBatches->count(),
         ];
 
         // Only select needed columns for top requested/dispensed
@@ -94,7 +96,7 @@ class MedicineController
             ->limit(5)
             ->get();
 
-        return view('admin.medicines.index', compact('medicines', 'stats', 'topRequested', 'topDispensed', 'expiringSoonMedicines'));
+        return view('admin.medicines.index', compact('medicines', 'stats', 'topRequested', 'topDispensed', 'expiringSoonBatches'));
     }
 
     public function create()
@@ -132,6 +134,18 @@ class MedicineController
 
         $medicine = Medicine::create($validated);
 
+        // Create initial batch if there is initial stock
+        if (($medicine->current_stock ?? 0) > 0) {
+            MedicineBatch::create([
+                'medicine_id' => $medicine->id,
+                'batch_code' => null,
+                'quantity' => (int) $medicine->current_stock,
+                'remaining_quantity' => (int) $medicine->current_stock,
+                'expiry_date' => $medicine->expiry_date,
+                'notes' => 'Initial stock on creation',
+            ]);
+        }
+
         // Log initial stock as an IN transaction so it appears in transactions/report
         if (($medicine->current_stock ?? 0) > 0) {
             MedicineTransaction::create([
@@ -149,7 +163,12 @@ class MedicineController
 
     public function edit(Medicine $medicine)
     {
-        return view('admin.medicines.edit', compact('medicine'));
+        $batches = $medicine->batches()
+            ->orderBy('expiry_date')
+            ->orderBy('created_at')
+            ->get();
+
+        return view('admin.medicines.edit', compact('medicine', 'batches'));
     }
 
     public function update(Request $request, Medicine $medicine)
@@ -199,18 +218,26 @@ class MedicineController
         ]);
 
         $medicine->current_stock += (int) $validated['quantity'];
-        // Keep the soonest expiry as the medicine's expiry_date reference
-        if (empty($medicine->expiry_date) || $validated['restock_expiry_date'] < $medicine->expiry_date) {
-            $medicine->expiry_date = $validated['restock_expiry_date'];
-        }
+        // Do not overwrite existing medicine expiry_date; track expiry per batch instead.
+        // (You may later choose to derive a summary expiry from batches if needed.)
         $medicine->save();
+
+        // Create a new batch for this restock
+        $batch = MedicineBatch::create([
+            'medicine_id' => $medicine->id,
+            'batch_code' => null,
+            'quantity' => (int) $validated['quantity'],
+            'remaining_quantity' => (int) $validated['quantity'],
+            'expiry_date' => $validated['restock_expiry_date'],
+            'notes' => $validated['notes'] ?? null,
+        ]);
 
         MedicineTransaction::create([
             'medicine_id' => $medicine->id,
             'transaction_type' => 'IN',
             'quantity' => (int) $validated['quantity'],
             'transaction_date' => now(),
-            'notes' => ($validated['notes'] ?? 'Restock') . ' (expiry: ' . $validated['restock_expiry_date'] . ')',
+            'notes' => ($validated['notes'] ?? 'Restock') . ' (batch ID: ' . $batch->id . ', expiry: ' . $validated['restock_expiry_date'] . ')',
         ]);
 
         notify()->success('Stock updated.');
@@ -223,23 +250,30 @@ class MedicineController
     private function deductExpiredStock(): void
     {
         $today = now()->toDateString();
-        $expired = Medicine::whereNotNull('expiry_date')
+        // Handle expiry per batch rather than per-medicine.
+        $expiredBatches = MedicineBatch::whereNotNull('expiry_date')
             ->where('expiry_date', '<', $today)
-            ->where('current_stock', '>', 0)
-            ->get(['id', 'current_stock', 'expiry_date']);
+            ->where('remaining_quantity', '>', 0)
+            ->get();
 
-        foreach ($expired as $med) {
-            $qty = (int) $med->current_stock;
+        foreach ($expiredBatches as $batch) {
+            $qty = (int) $batch->remaining_quantity;
             if ($qty <= 0) {
                 continue;
             }
-            Medicine::where('id', $med->id)->update(['current_stock' => 0]);
+
+            // Zero out the batch and adjust the parent medicine stock
+            $batch->remaining_quantity = 0;
+            $batch->save();
+
+            Medicine::where('id', $batch->medicine_id)->decrement('current_stock', $qty);
+
             MedicineTransaction::create([
-                'medicine_id' => $med->id,
+                'medicine_id' => $batch->medicine_id,
                 'transaction_type' => 'EXPIRED',
                 'quantity' => $qty,
                 'transaction_date' => now(),
-                'notes' => 'Auto-deducted expired stock (expiry: ' . ($med->expiry_date ? $med->expiry_date->format('Y-m-d') : 'N/A') . ')',
+                'notes' => 'Auto-deducted expired stock from batch ID ' . $batch->id . ' (expiry: ' . ($batch->expiry_date ? $batch->expiry_date->format('Y-m-d') : 'N/A') . ')',
             ]);
         }
     }

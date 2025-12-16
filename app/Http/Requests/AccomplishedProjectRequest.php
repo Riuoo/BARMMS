@@ -27,6 +27,8 @@ class AccomplishedProjectRequest extends FormRequest
             'funding_source' => 'nullable|string',
             'implementing_agency' => 'nullable|string',
             'is_featured' => 'boolean',
+            'audience_scope' => 'nullable|string|in:all,purok',
+            'audience_purok' => 'nullable|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'remove_image' => 'nullable|boolean',
         ];
@@ -48,6 +50,8 @@ class AccomplishedProjectRequest extends FormRequest
             'image.image' => 'The file must be an image.',
             'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif.',
             'image.max' => 'The image may not be greater than 2MB.',
+            'audience_scope.in' => 'Audience scope must be All Residents or Specific Purok.',
+            'audience_purok.max' => 'The selected Purok value is too long.',
         ];
     }
 } 

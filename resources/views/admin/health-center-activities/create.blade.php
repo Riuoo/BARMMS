@@ -54,11 +54,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="activity_name" class="block text-sm font-medium text-gray-700 mb-2">Activity Name <span class="text-red-500">*</span></label>
-                        <input type="text" name="activity_name" id="activity_name" value="{{ old('activity_name') }}" placeholder="Example: Vaccination Drive, Health Check-up" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="text" name="activity_name" id="activity_name" value="{{ old('activity_name') }}" placeholder="Example: Vaccination Drive, Health Check-up" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                     </div>
                     <div>
                         <label for="activity_type" class="block text-sm font-medium text-gray-700 mb-2">Activity Type <span class="text-red-500">*</span></label>
-                        <select name="activity_type" id="activity_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <select name="activity_type" id="activity_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                             <option value="">Select activity type...</option>
                             <option value="Vaccination" {{ old('activity_type') == 'Vaccination' ? 'selected' : '' }}>Vaccination</option>
                             <option value="Health Check-up" {{ old('activity_type') == 'Health Check-up' ? 'selected' : '' }}>Health Check-up</option>
@@ -83,21 +83,21 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="activity_date" class="block text-sm font-medium text-gray-700 mb-2">Activity Date <span class="text-red-500">*</span></label>
-                        <input type="date" name="activity_date" id="activity_date" value="{{ old('activity_date', date('Y-m-d')) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="date" name="activity_date" id="activity_date" value="{{ old('activity_date', date('Y-m-d')) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" required>
                     </div>
                     <div>
-                        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
-                        <input type="time" name="start_time" id="start_time" value="{{ old('start_time') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">Start Time <span class="text-red-500">*</span></label>
+                        <input type="time" name="start_time" id="start_time" value="{{ old('start_time') }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
-                        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
-                        <input type="time" name="end_time" id="end_time" value="{{ old('end_time') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">End Time <span class="text-red-500">*</span></label>
+                        <input type="time" name="end_time" id="end_time" value="{{ old('end_time') }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                     <div>
                         <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location <span class="text-red-500">*</span></label>
-                        <input type="text" name="location" id="location" value="{{ old('location') }}" placeholder="Example: Health Center, Barangay Hall" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="text" name="location" id="location" value="{{ old('location') }}" placeholder="Example: Health Center, Barangay Hall" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" required>
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
-                        <textarea name="description" id="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter activity description">{{ old('description') }}</textarea>
+                        <textarea name="description" id="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter activity description" required>{{ old('description') }}</textarea>
                     </div>
                     <div>
                         <label for="objectives" class="block text-sm font-medium text-gray-700 mb-2">Objectives</label>
@@ -135,30 +135,47 @@
                 </div>
             </div>
 
-            <!-- Target & Expected Participants -->
+            <!-- Target Audience & Expected Participants -->
             <div>
                 <h3 class="text-lg font-medium text-gray-900 mb-4">
                     <i class="fas fa-users text-yellow-600 mr-2"></i>
                     Audience
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="target_population" class="block text-sm font-medium text-gray-700 mb-2">Target Population</label>
-                        <select name="target_population" id="target_population" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                            <option value="">Select target population...</option>
-                            <option value="All Residents" {{ old('target_population') == 'All Residents' ? 'selected' : '' }}>All Residents</option>
-                            <option value="Children (0-12 years)" {{ old('target_population') == 'Children (0-12 years)' ? 'selected' : '' }}>Children (0-12 years)</option>
-                            <option value="Adolescents (13-19 years)" {{ old('target_population') == 'Adolescents (13-19 years)' ? 'selected' : '' }}>Adolescents (13-19 years)</option>
-                            <option value="Adults (20-59 years)" {{ old('target_population') == 'Adults (20-59 years)' ? 'selected' : '' }}>Adults (20-59 years)</option>
-                            <option value="Seniors (60+ years)" {{ old('target_population') == 'Seniors (60+ years)' ? 'selected' : '' }}>Seniors (60+ years)</option>
-                            <option value="Pregnant Women" {{ old('target_population') == 'Pregnant Women' ? 'selected' : '' }}>Pregnant Women</option>
-                            <option value="Infants" {{ old('target_population') == 'Infants' ? 'selected' : '' }}>Infants</option>
-                            <option value="Other" {{ old('target_population') == 'Other' ? 'selected' : '' }}>Other</option>
-                        </select>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Target Audience <span class="text-red-500">*</span></label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="audience_scope" value="all"
+                                       {{ old('audience_scope', 'all') === 'all' ? 'checked' : '' }}
+                                       class="h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-500" required>
+                                <span class="ml-2 text-sm text-gray-700">All Residents</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="audience_scope" value="purok"
+                                       {{ old('audience_scope') === 'purok' ? 'checked' : '' }}
+                                       class="h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-500" required>
+                                <span class="ml-2 text-sm text-gray-700">Specific Purok</span>
+                            </label>
+                            <div id="audiencePurokWrapper" class="mt-2 {{ old('audience_scope', 'all') === 'purok' ? '' : 'hidden' }}">
+                                <label for="audience_purok" class="block text-sm font-medium text-gray-700 mb-1">Select Purok</label>
+                                <select name="audience_purok" id="audience_purok"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                                    <option value="">Select Purok...</option>
+                                    @for($i = 1; $i <= 7; $i++)
+                                        <option value="{{ $i }}" {{ old('audience_purok') == $i ? 'selected' : '' }}>Purok {{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">This activity will primarily target residents from the selected Purok.</p>
+                            </div>
+                        </div>
                     </div>
                     <div>
-                        <label for="expected_participants" class="block text-sm font-medium text-gray-700 mb-2">Expected Participants</label>
-                        <input type="number" name="expected_participants" id="expected_participants" value="{{ old('expected_participants') }}" min="1" placeholder="Enter expected participants" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        <label for="target_participants" class="block text-sm font-medium text-gray-700 mb-2">Target Participants</label>
+                        <input type="number" name="target_participants" id="target_participants"
+                               value="{{ old('target_participants') }}" min="1"
+                               placeholder="e.g. 50"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                     </div>
                 </div>
             </div>
@@ -181,22 +198,18 @@
                 </div>
             </div>
 
-            <!-- Status & Organizer -->
+            <!-- Organizer & Status -->
             <div>
                 <h3 class="text-lg font-medium text-gray-900 mb-4">
                     <i class="fas fa-clipboard-check text-indigo-600 mr-2"></i>
-                    Status & Organizer
+                    Organizer & Status
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
-                        <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Select status...</option>
-                            <option value="Planned" {{ old('status') == 'Planned' ? 'selected' : '' }}>Planned</option>
-                            <option value="Ongoing" {{ old('status') == 'Ongoing' ? 'selected' : '' }}>Ongoing</option>
-                            <option value="Completed" {{ old('status') == 'Completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="Cancelled" {{ old('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <div class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700">
+                            Automatically set based on activity date and time (Planned → Ongoing → Completed). Use the cancel action separately if needed.
+                        </div>
                     </div>
                     <div>
                         <label for="organizer" class="block text-sm font-medium text-gray-700 mb-2">Organizer</label>
@@ -235,6 +248,25 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const scopeInputs = document.querySelectorAll('input[name="audience_scope"]');
+    const purokWrapper = document.getElementById('audiencePurokWrapper');
+
+    function updateAudienceVisibility() {
+        const selected = document.querySelector('input[name="audience_scope"]:checked');
+        if (!selected || !purokWrapper) return;
+        if (selected.value === 'purok') {
+            purokWrapper.classList.remove('hidden');
+        } else {
+            purokWrapper.classList.add('hidden');
+        }
+    }
+
+    scopeInputs.forEach(input => {
+        input.addEventListener('change', updateAudienceVisibility);
+    });
+
+    updateAudienceVisibility();
+
     setTimeout(() => {
         const skeleton = document.getElementById('hcaCreateSkeleton');
         const content = document.getElementById('hcaCreateContent');

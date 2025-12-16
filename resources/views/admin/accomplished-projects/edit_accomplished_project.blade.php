@@ -20,6 +20,27 @@
         </div>
     </div>
 
+    <!-- Alerts -->
+    @if ($errors->any())
+        <div class="mb-3 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc pl-5 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Form -->
     <form action="{{ route('admin.accomplished-projects.update', $project->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
@@ -28,7 +49,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Project Title -->
             <div class="md:col-span-2">
-                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Project Title *</label>
+                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                    Project Title <span class="text-red-500">*</span>
+                </label>
                 <input type="text" id="title" name="title" value="{{ old('title', $project->title) }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('title') border-red-500 @enderror" 
                     placeholder="Enter project title" required />
@@ -39,12 +62,15 @@
 
             <!-- Type -->
             <div>
-                <label for="type" class="block text-sm font-medium text-gray-700 mb-2">Type *</label>
-                <select name="type" id="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('type') border-red-500 @enderror" required>
+                <label for="type" class="block text-sm font-medium text-gray-700 mb-2">
+                    Type <span class="text-red-500">*</span> (locked)
+                </label>
+                <select name="type" id="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-100 cursor-not-allowed @error('type') border-red-500 @enderror" required disabled>
                     <option value="">Select Type</option>
                     <option value="project" {{ old('type', $project->type) == 'project' ? 'selected' : '' }}>Project</option>
                     <option value="activity" {{ old('type', $project->type) == 'activity' ? 'selected' : '' }}>Activity</option>
                 </select>
+                <input type="hidden" name="type" value="{{ old('type', $project->type) }}">
                 @error('type')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -97,8 +123,10 @@
 
             <!-- Category -->
             <div>
-                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                <select name="category" id="category" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('category') border-red-500 @enderror" required>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                    Category <span class="text-red-500">*</span>
+                </label>
+                <select name="category" id="category" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:ring-2 focus:ring-green-500 focus:border-transparent @error('category') border-red-500 @enderror" required disabled>
                     <option value="">Select Category</option>
                     <option value="Infrastructure" {{ old('category', $project->category) == 'Infrastructure' ? 'selected' : '' }}>Infrastructure</option>
                     <option value="Health" {{ old('category', $project->category) == 'Health' ? 'selected' : '' }}>Health</option>
@@ -108,6 +136,7 @@
                     <option value="Environment" {{ old('category', $project->category) == 'Environment' ? 'selected' : '' }}>Environment</option>
                     <option value="Livelihood" {{ old('category', $project->category) == 'Livelihood' ? 'selected' : '' }}>Livelihood</option>
                 </select>
+                <input type="hidden" name="category" value="{{ old('category', $project->category) }}">
                 @error('category')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -117,8 +146,8 @@
             <div>
                 <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location</label>
                 <input type="text" id="location" name="location" value="{{ old('location', $project->location) }}" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('location') border-red-500 @enderror" 
-                    placeholder="Enter project location" />
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:ring-2 focus:ring-green-500 focus:border-transparent @error('location') border-red-500 @enderror" 
+                    placeholder="Enter project location" readonly />
                 @error('location')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -148,7 +177,9 @@
 
             <!-- Start Date -->
             <div>
-                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date <span class="text-red-500">*</span>
+                </label>
                 <input type="date" id="start_date" name="start_date" value="{{ old('start_date', $project->start_date->format('Y-m-d')) }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('start_date') border-red-500 @enderror" required />
                 @error('start_date')
@@ -158,7 +189,9 @@
 
             <!-- Completion Date -->
             <div>
-                <label for="completion_date" class="block text-sm font-medium text-gray-700 mb-2">Completion Date *</label>
+                <label for="completion_date" class="block text-sm font-medium text-gray-700 mb-2">
+                    Completion Date <span class="text-red-500">*</span>
+                </label>
                 <input type="date" id="completion_date" name="completion_date" value="{{ old('completion_date', $project->completion_date->format('Y-m-d')) }}" 
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('completion_date') border-red-500 @enderror" required />
                 @error('completion_date')
@@ -177,12 +210,55 @@
                 @enderror
             </div>
 
+            <!-- Target Audience (for activities) -->
+            <div class="md:col-span-2 js-activity-only">
+                <h3 class="text-sm font-semibold text-gray-900 mb-2">Target Audience (Activities Only)</h3>
+                @php
+                    $currentAudienceScope = old('audience_scope', $project->audience_scope ?? 'all');
+                    $currentAudiencePurok = old('audience_purok', $project->audience_purok);
+                @endphp
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Audience Scope</label>
+                        <div class="space-y-1">
+                            <label class="flex items-center">
+                                <input type="radio" name="audience_scope" value="all"
+                                       {{ $currentAudienceScope === 'all' ? 'checked' : '' }}
+                                       class="h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-500" disabled>
+                                <span class="ml-2 text-sm text-gray-700">All Residents</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="audience_scope" value="purok"
+                                       {{ $currentAudienceScope === 'purok' ? 'checked' : '' }}
+                                       class="h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-500" disabled>
+                                <span class="ml-2 text-sm text-gray-700">Specific Purok</span>
+                            </label>
+                            <div id="activityAudiencePurokWrapperEdit" class="mt-2 {{ $currentAudienceScope === 'purok' ? '' : 'hidden' }}">
+                                <label for="audience_purok" class="block text-sm font-medium text-gray-700 mb-1">Select Purok</label>
+                                <select name="audience_purok" id="audience_purok"
+                                        class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" disabled>
+                                    <option value="">Select Purok...</option>
+                                    @for($i = 1; $i <= 10; $i++)
+                                        <option value="{{ $i }}" {{ (string)$currentAudiencePurok === (string)$i ? 'selected' : '' }}>Purok {{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">Used for targeting announcements, QR attendance context, and email notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="audience_scope" value="{{ $currentAudienceScope }}">
+                <input type="hidden" name="audience_purok" value="{{ $currentAudiencePurok }}">
+            </div>
+
             <!-- Description -->
             <div class="md:col-span-2">
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Project Description *</label>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Project Description <span class="text-red-500">*</span>
+                </label>
                 <textarea id="description" name="description" rows="4" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('description') border-red-500 @enderror" 
-                    placeholder="Enter project description" required>{{ old('description', $project->description) }}</textarea>
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:ring-2 focus:ring-green-500 focus:border-transparent @error('description') border-red-500 @enderror" 
+                    placeholder="Enter project description" required readonly>{{ old('description', $project->description) }}</textarea>
                 @error('description')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -192,8 +268,8 @@
             <div class="md:col-span-2">
                 <label for="beneficiaries" class="block text-sm font-medium text-gray-700 mb-2">Beneficiaries</label>
                 <textarea id="beneficiaries" name="beneficiaries" rows="3" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('beneficiaries') border-red-500 @enderror" 
-                    placeholder="Enter beneficiaries">{{ old('beneficiaries', $project->beneficiaries) }}</textarea>
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:ring-2 focus:ring-green-500 focus:border-transparent @error('beneficiaries') border-red-500 @enderror" 
+                    placeholder="Enter beneficiaries" readonly>{{ old('beneficiaries', $project->beneficiaries) }}</textarea>
                 @error('beneficiaries')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -203,8 +279,8 @@
             <div class="md:col-span-2">
                 <label for="impact" class="block text-sm font-medium text-gray-700 mb-2">Impact</label>
                 <textarea id="impact" name="impact" rows="3" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('impact') border-red-500 @enderror" 
-                    placeholder="Enter project impact">{{ old('impact', $project->impact) }}</textarea>
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:ring-2 focus:ring-green-500 focus:border-transparent @error('impact') border-red-500 @enderror" 
+                    placeholder="Enter project impact" readonly>{{ old('impact', $project->impact) }}</textarea>
                 @error('impact')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -277,18 +353,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const typeSelect = document.getElementById('type');
     const projectOnlyFields = document.querySelectorAll('.js-project-only');
+    const activityOnlyFields = document.querySelectorAll('.js-activity-only');
+    const audienceScopeInputs = document.querySelectorAll('input[name=\"audience_scope\"]');
+    const purokWrapper = document.getElementById('activityAudiencePurokWrapperEdit');
 
     function toggleTypeFields() {
         const isProject = typeSelect.value === 'project';
         projectOnlyFields.forEach((field) => {
             field.style.display = isProject ? 'block' : 'none';
         });
+        activityOnlyFields.forEach((field) => {
+            field.style.display = isProject ? 'none' : 'block';
+        });
+    }
+
+    function updateAudienceVisibility() {
+        if (!purokWrapper) return;
+        const selected = document.querySelector('input[name=\"audience_scope\"]:checked');
+        if (!selected || selected.value === 'all') {
+            purokWrapper.classList.add('hidden');
+        } else {
+            purokWrapper.classList.remove('hidden');
+        }
     }
 
     if (typeSelect) {
         typeSelect.addEventListener('change', toggleTypeFields);
         toggleTypeFields();
     }
+
+    audienceScopeInputs.forEach(input => {
+        input.addEventListener('change', updateAudienceVisibility);
+    });
+    updateAudienceVisibility();
 });
 </script>
 @endpush 

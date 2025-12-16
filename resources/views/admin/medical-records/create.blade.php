@@ -136,7 +136,7 @@
                                    class="flex-1 w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
                                    placeholder="Select a complaint" required readonly>
                             <button type="button" id="openComplaintModal"
-                                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                                    class="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-lg text-gray-100 bg-gray-800 hover:bg-gray-700 hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900 transition duration-200 dark:text-gray-700 dark:border-gray-300 dark:bg-white dark:hover:bg-gray-50 dark:hover:border-gray-300 dark:focus:ring-offset-white">
                                 <i class="fas fa-list mr-2"></i>Choose Complaint
                             </button>
                         </div>
@@ -293,6 +293,27 @@
                 </div>
             </div>
 
+            <!-- Privacy Consent Section -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2 shadow-lg">
+                <div class="flex items-start">
+                    <input type="checkbox" id="privacy_consent" name="privacy_consent" value="1" required
+                        class="mt-1 mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 bg-white rounded"
+                        {{ old('privacy_consent') ? 'checked' : '' }}>
+                    <label for="privacy_consent" class="text-sm text-gray-700 flex-1">
+                        I confirm that the resident has been informed about and has consented to the 
+                        <a href="{{ route('public.privacy') }}" target="_blank" 
+                           class="text-blue-600 hover:text-blue-700 underline font-medium transition-colors">
+                            Barangay Privacy Policy
+                        </a>
+                        regarding the collection, use, and storage of their personal and health data.
+                        <span class="text-red-500">*</span>
+                    </label>
+                </div>
+                <p class="text-xs text-gray-600 mt-3 ml-7 leading-relaxed">
+                    <strong class="text-gray-700">Note:</strong> As the Secretary filling out this form, you are confirming that the resident has been informed about the Privacy Policy and has provided their consent for the processing of their personal and health information as described in the policy.
+                </p>
+            </div>
+
             <!-- Form Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
                 <div class="text-sm text-gray-500">
@@ -305,8 +326,8 @@
                         <i class="fas fa-times mr-2"></i>
                         Cancel
                     </a>
-                    <button type="submit" 
-                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                    <button type="submit" id="submitBtn"
+                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
                         <i class="fas fa-save mr-2"></i>
                         Done
                     </button>
@@ -459,6 +480,34 @@ document.addEventListener('DOMContentLoaded', () => {
             searchResults.classList.add('hidden');
         }
     });
+
+    // Privacy consent checkbox validation
+    const privacyConsentCheckbox = document.getElementById('privacy_consent');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    function updateSubmitButton() {
+        if (privacyConsentCheckbox && submitBtn) {
+            submitBtn.disabled = !privacyConsentCheckbox.checked;
+        }
+    }
+    
+    if (privacyConsentCheckbox) {
+        privacyConsentCheckbox.addEventListener('change', updateSubmitButton);
+        updateSubmitButton(); // Initial check
+    }
+
+    // Form submission validation
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!privacyConsentCheckbox || !privacyConsentCheckbox.checked) {
+                e.preventDefault();
+                alert('Please acknowledge and agree to the Privacy Policy by checking the consent box.');
+                if (privacyConsentCheckbox) privacyConsentCheckbox.focus();
+                return false;
+            }
+        });
+    }
 });
 </script>
 

@@ -76,21 +76,23 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Resident <span class="text-red-500">*</span></label>
-                        <select
-                            id="resident-select"
-                            name="resident_id"
-                            class="block w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
-                            required
-                        >
-                            <option value="">Select resident...</option>
-                            @foreach($residents as $resident)
-                                <option value="{{ $resident->id }}" {{ old('resident_id') == $resident->id ? 'selected' : '' }}>
-                                    {{ $resident->full_name ?? ($resident->first_name . ' ' . $resident->last_name) }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <p class="mt-1 text-sm text-gray-500">Select the resident for this request</p>
+                        <label for="residentSearch" class="block text-sm font-medium text-gray-700 mb-2">
+                            Resident <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                id="residentSearch"
+                                placeholder="Search residents..."
+                                autocomplete="off"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                                aria-label="Search for a resident"
+                                required
+                            />
+                            <input type="hidden" id="resident_id" name="resident_id" value="{{ old('resident_id') }}" required>
+                            <div id="searchResults" class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto w-full"></div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Search and select the resident for this request</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Medicine <span class="text-red-500">*</span></label>
@@ -117,6 +119,27 @@
                 </div>
             </div>
 
+            <!-- Privacy Consent Section -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-2 shadow-lg">
+                <div class="flex items-start">
+                    <input type="checkbox" id="privacy_consent" name="privacy_consent" value="1" required
+                        class="mt-1 mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 bg-white rounded"
+                        {{ old('privacy_consent') ? 'checked' : '' }}>
+                    <label for="privacy_consent" class="text-sm text-gray-700 flex-1">
+                        I confirm that the resident has been informed about and has consented to the 
+                        <a href="{{ route('public.privacy') }}" target="_blank" 
+                           class="text-blue-600 hover:text-blue-700 underline font-medium transition-colors">
+                            Barangay Privacy Policy
+                        </a>
+                        regarding the collection, use, and storage of their personal data.
+                        <span class="text-red-500">*</span>
+                    </label>
+                </div>
+                <p class="text-xs text-gray-600 mt-3 ml-7 leading-relaxed">
+                    <strong class="text-gray-700">Note:</strong> As the Secretary filling out this form, you are confirming that the resident has been informed about the Privacy Policy and has provided their consent for the processing of their personal information as described in the policy.
+                </p>
+            </div>
+
             <!-- Form Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-gray-200">
                 <div class="text-sm text-gray-500">
@@ -129,8 +152,8 @@
                         <i class="fas fa-times mr-2"></i>
                         Cancel
                     </a>
-                    <button type="submit"
-                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200">
+                    <button type="submit" id="submitBtn"
+                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
                         <i class="fas fa-save mr-2"></i>
                         Submit
                     </button>
@@ -151,23 +174,97 @@ document.addEventListener('DOMContentLoaded', function() {
         if (headerSkeleton) headerSkeleton.style.display = 'none';
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
-
-        // Initialize Tom Select for searchable resident dropdown
-        if (typeof TomSelect !== 'undefined') {
-            const residentSelect = document.getElementById('resident-select');
-            if (residentSelect && !residentSelect.tomselect) {
-                new TomSelect(residentSelect, {
-                    maxItems: 1,
-                    sortField: {
-                        field: 'text',
-                        direction: 'asc'
-                    },
-                    allowEmptyOption: true,
-                    placeholder: 'Select resident...'
-                });
-            }
-        }
     }, 1000);
+
+    // Resident AJAX search functionality
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    const searchInput = document.getElementById('residentSearch');
+    const searchResults = document.getElementById('searchResults');
+    const residentIdInput = document.getElementById('resident_id');
+
+    if (searchInput && searchResults && residentIdInput) {
+        searchInput.addEventListener('input', debounce(async () => {
+            const term = searchInput.value.trim();
+            if (term.length < 2) {
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+                residentIdInput.value = '';
+                return;
+            }
+            try {
+                const response = await fetch(`{{ route('admin.search.residents') }}?term=${encodeURIComponent(term)}`);
+                const results = await response.json();
+                if (results.length > 0) {
+                    searchResults.innerHTML = results.map(resident => `
+                        <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-id="${resident.id}" data-name="${resident.name}">
+                            <div class="font-medium text-gray-900">${resident.name}</div>
+                            <div class="text-sm text-gray-500">${resident.email || 'N/A'}</div>
+                        </div>
+                    `).join('');
+                    searchResults.classList.remove('hidden');
+                } else {
+                    searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No residents found</div>';
+                    searchResults.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                searchResults.innerHTML = '<div class="p-3 text-red-500 text-center">Error searching residents</div>';
+                searchResults.classList.remove('hidden');
+            }
+        }, 250));
+
+        searchResults.addEventListener('click', (event) => {
+            const target = event.target.closest('[data-id]');
+            if (target && target.dataset.id) {
+                residentIdInput.value = target.dataset.id;
+                searchInput.value = target.dataset.name;
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+            }
+        });
+    }
+
+    // Privacy consent checkbox validation
+    const privacyConsentCheckbox = document.getElementById('privacy_consent');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    function updateSubmitButton() {
+        if (privacyConsentCheckbox && submitBtn) {
+            submitBtn.disabled = !privacyConsentCheckbox.checked;
+        }
+    }
+    
+    if (privacyConsentCheckbox) {
+        privacyConsentCheckbox.addEventListener('change', updateSubmitButton);
+        updateSubmitButton(); // Initial check
+    }
+
+    // Form submission validation
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!privacyConsentCheckbox || !privacyConsentCheckbox.checked) {
+                e.preventDefault();
+                alert('Please acknowledge and agree to the Privacy Policy by checking the consent box.');
+                if (privacyConsentCheckbox) privacyConsentCheckbox.focus();
+                return false;
+            }
+        });
+    }
 });
 </script>
 @endpush

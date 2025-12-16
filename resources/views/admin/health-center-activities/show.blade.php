@@ -27,14 +27,25 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Activity Image -->
-            @if($activity->image)
+            <!-- Activity Image / Placeholder -->
             <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                <img src="{{ $activity->image_url }}" 
-                     alt="{{ $activity->activity_name }}" 
-                     class="w-full h-64 object-cover">
+                <div class="relative h-64 bg-gradient-to-r from-gray-100 to-gray-50">
+                    @if($activity->image)
+                    <img src="{{ $activity->image_url }}" 
+                         alt="{{ $activity->activity_name }}" 
+                         class="w-full h-full object-cover">
+                    @else
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-image text-xl"></i>
+                            </div>
+                            <span class="text-sm font-medium">No image available</span>
+                        </div>
+                    </div>
+                    @endif
+                </div>
             </div>
-            @endif
 
             <!-- Title and Status -->
             <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl p-6">
@@ -71,6 +82,16 @@
                     <div>
                         <h4 class="font-medium text-gray-900 mb-2">Activity Type</h4>
                         <p class="text-gray-600">{{ $activity->activity_type }}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Target Audience</h4>
+                        <p class="text-gray-600">
+                            @if($activity->audience_scope === 'purok' && $activity->audience_purok)
+                                Purok {{ $activity->audience_purok }}
+                            @else
+                                All Residents
+                            @endif
+                        </p>
                     </div>
                     <div>
                         <h4 class="font-medium text-gray-900 mb-2">Date</h4>

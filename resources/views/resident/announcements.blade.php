@@ -130,37 +130,25 @@
             </div>
         </form>
 
-        <!-- Quick Filter Buttons -->
-        <div class="flex flex-wrap gap-2 mb-6">
-            <a href="{{ route('resident.announcements', ['featured' => 'true']) }}" 
-               class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium {{ request('featured') == 'true' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
-                <i class="fas fa-star mr-2"></i>
-                Featured Only
-            </a>
-            <a href="{{ route('resident.announcements', ['type' => 'project']) }}" 
-               class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium {{ request('type') == 'project' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
-                <i class="fas fa-project-diagram mr-2"></i>
-                Projects Only
-            </a>
-            <a href="{{ route('resident.announcements', ['type' => 'activity']) }}" 
-               class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium {{ request('type') == 'activity' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
-                <i class="fas fa-heartbeat mr-2"></i>
-                Health Activities Only
-            </a>
-        </div>
-
         <!-- Bulletin Board Grid -->
         @if($bulletin->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($bulletin as $item)
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition duration-200">
-                    @if($item->image_url)
-                    <div class="h-48 bg-gray-200 overflow-hidden">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition duration-200 flex flex-col h-full">
+                    <div class="h-48 bg-gray-100 overflow-hidden relative">
+                        @if($item->image_url)
                         <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="w-full h-full object-cover">
+                        @else
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-bullhorn text-2xl"></i>
+                                <span class="text-sm font-medium">No image available</span>
+                            </div>
+                        </div>
+                        @endif
                     </div>
-                    @endif
 
-                    <div class="p-6">
+                    <div class="p-6 flex flex-col h-full">
                         <div class="flex items-center justify-between mb-3">
                             <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                 {{ $item->category }}
@@ -181,7 +169,7 @@
                             @endif
                         </div>
 
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                 @if($item->status === 'completed') bg-green-100 text-green-800
                                 @elseif($item->status === 'ongoing') bg-blue-100 text-blue-800
@@ -190,10 +178,11 @@
                                 <i class="fas {{ $item->status === 'completed' ? 'fa-check-circle' : ($item->status === 'ongoing' ? 'fa-spinner' : 'fa-clock') }} mr-1"></i>
                                 {{ ucfirst($item->status) }}
                             </span>
-                            
+                        </div>
+                        <div class="pt-4 mt-auto border-t border-gray-100">
                             <a href="{{ $item->type === 'project' ? route('resident.announcements.project', $item->id) : route('resident.announcements.activity', $item->id) }}" 
-                               class="inline-flex items-center text-green-600 hover:text-green-700 font-medium text-sm">
-                                View Details <i class="fas fa-arrow-right ml-1"></i>
+                               class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-md transition">
+                                View Full Details
                             </a>
                         </div>
                     </div>

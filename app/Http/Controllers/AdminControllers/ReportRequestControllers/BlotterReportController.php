@@ -238,7 +238,8 @@ class BlotterReportController
             'type' => 'required|string|max:255',
             'description' => 'required|string',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,mp4,avi,mov,wmv|max:10240',
-            'summon_date' => 'required|date|after:today'
+            'summon_date' => 'required|date|after:today',
+            'privacy_consent' => 'required|accepted',
         ]);
         
         // Prevent same person from being both complainant and respondent

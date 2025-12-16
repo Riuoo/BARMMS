@@ -95,9 +95,9 @@
     <section class="hero-bg pt-20 pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center text-white">
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Community Accomplishments</h1>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Community Bulletin Board</h1>
                 <p class="text-xl md:text-2xl mb-8 text-gray-200 max-w-3xl mx-auto">
-                    Discover the transformative projects and initiatives that have improved our community's quality of life
+                    Browse completed projects, barangay activities and health activities across our community
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="/" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition duration-300 inline-flex items-center justify-center">
@@ -114,12 +114,8 @@
     </section>
 
     <!-- Community Bulletin Board (Projects + Activities) -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-6 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-6">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Community Bulletin Board</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Browse completed projects and barangay activities across our community</p>
-            </div>
 
             <!-- Filter Buttons -->
             <div class="flex justify-center mb-8 gap-3">

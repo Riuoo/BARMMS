@@ -86,16 +86,6 @@
                 </div>
             </div>
 
-            <!-- Medicine Category Filter -->
-            <div class="sm:w-48">
-                <select name="medicine_category" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                    <option value="">All Categories</option>
-                    @foreach($medicineCategories as $category)
-                        <option value="{{ $category }}" {{ request('medicine_category') == $category ? 'selected' : '' }}>{{ $category }}</option>
-                    @endforeach
-                </select>
-            </div>
-
             <!-- Action Buttons -->
             <div class="flex space-x-2">
                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">

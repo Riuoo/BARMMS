@@ -79,17 +79,10 @@
                 </div>
             </div>
             <div class="w-full sm:w-48">
-                <select name="category" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
-                    <option value="">All Categories</option>
-                    @foreach(['Antibiotic','Pain Relief','Vitamins','Chronic','Emergency','Antihypertensive','Antidiabetic','Antihistamine','Other'] as $cat)
-                        <option value="{{ $cat }}" @selected(request('category')===$cat)>{{ $cat }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="w-full sm:w-48">
                 <select name="stock_status" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 rounded-md">
                     <option value="">Any Stock</option>
                     <option value="low" @selected(request('stock_status')==='low')>Low Stock</option>
+                    <option value="sufficient" @selected(request('stock_status')==='sufficient')>Sufficient Stock</option>
                 </select>
             </div>
             <div class="flex space-x-2">
@@ -216,7 +209,6 @@
                                             data-category="{{ $med->category }}"
                                             data-stock="{{ $med->current_stock }}"
                                             data-minimum="{{ $med->minimum_stock }}"
-                                            data-expiry="{{ $med->expiry_date ? $med->expiry_date->format('Y-m-d') : '' }}"
                                             data-manufacturer="{{ $med->manufacturer }}"
                                             data-dosage="{{ $med->dosage_form }}"
                                             data-description="{{ $med->description }}"
@@ -227,6 +219,9 @@
                                     <a href="{{ route('admin.medicines.edit', $med) }}" class="inline-flex items-center px-2 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <button type="button" onclick="openDeleteModal({{ $med->id }})" class="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
                                 </div>
                             </td>
                             @endif
@@ -269,7 +264,6 @@
                         data-category="{{ $med->category }}"
                         data-stock="{{ $med->current_stock }}"
                         data-minimum="{{ $med->minimum_stock }}"
-                        data-expiry="{{ $med->expiry_date ? $med->expiry_date->format('Y-m-d') : '' }}"
                         data-manufacturer="{{ $med->manufacturer }}"
                         data-dosage="{{ $med->dosage_form }}"
                         data-description="{{ $med->description }}"
@@ -279,6 +273,9 @@
                     <a href="{{ route('admin.medicines.edit', $med) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none transition duration-200">
                         <i class="fas fa-edit mr-1"></i> Edit
                     </a>
+                    <button type="button" onclick="openDeleteModal({{ $med->id }})" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200" title="Delete">
+                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                    </button>
                     @endif
                 </div>
             </div>
@@ -304,7 +301,6 @@
             <div class="flex justify-between"><span class="text-gray-600">Manufacturer</span><span class="font-medium" id="mdm_manufacturer">-</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Stock</span><span class="font-medium" id="mdm_stock">-</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Minimum Stock</span><span class="font-medium" id="mdm_min_stock">-</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Expiry</span><span class="font-medium" id="mdm_expiry">-</span></div>
             <div>
                 <div class="text-gray-600 mb-1">Description</div>
                 <div class="text-gray-900" id="mdm_description">-</div>
@@ -327,24 +323,24 @@
             </button>
         </div>
         <div class="p-4 text-sm text-gray-800 max-h-[60vh] overflow-y-auto">
-            @if(isset($expiringSoonMedicines) && $expiringSoonMedicines->isNotEmpty())
+            @if(isset($expiringSoonBatches) && $expiringSoonBatches->isNotEmpty())
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Medicine</th>
                             <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Generic</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                            <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Batch Remaining</th>
                             <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($expiringSoonMedicines as $expMed)
+                        @foreach($expiringSoonBatches as $batch)
                             <tr>
-                                <td class="px-4 py-2 font-medium text-gray-900">{{ $expMed->name }}</td>
-                                <td class="px-4 py-2 text-gray-700">{{ $expMed->generic_name ?? '—' }}</td>
-                                <td class="px-4 py-2 text-gray-700">{{ $expMed->current_stock }}</td>
+                                <td class="px-4 py-2 font-medium text-gray-900">{{ $batch->medicine->name }}</td>
+                                <td class="px-4 py-2 text-gray-700">{{ $batch->medicine->generic_name ?? '—' }}</td>
+                                <td class="px-4 py-2 text-gray-700">{{ $batch->remaining_quantity }}</td>
                                 <td class="px-4 py-2 text-gray-700">
-                                    {{ optional($expMed->expiry_date)->format('M d, Y') ?? 'N/A' }}
+                                    {{ optional($batch->expiry_date)->format('M d, Y') ?? 'N/A' }}
                                 </td>
                             </tr>
                         @endforeach
@@ -359,6 +355,34 @@
                 Close
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Delete Medicine</h3>
+                <p class="text-sm text-gray-500">This action cannot be undone.</p>
+            </div>
+        </div>
+        <p class="text-gray-700 mb-6">Are you sure you want to delete this medicine? This will permanently remove the medicine and all associated batches and transactions from the system.</p>
+        <form id="deleteForm" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-200">
+                    Delete Medicine
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection
@@ -386,7 +410,6 @@ function openMedicineDetailModal(button) {
     document.getElementById('mdm_manufacturer').textContent = get('data-manufacturer') || '—';
     document.getElementById('mdm_stock').textContent = get('data-stock');
     document.getElementById('mdm_min_stock').textContent = get('data-minimum');
-    document.getElementById('mdm_expiry').textContent = get('data-expiry') || 'N/A';
     document.getElementById('mdm_description').textContent = get('data-description') || '—';
 
     const modal = document.getElementById('medicineDetailModal');
@@ -415,5 +438,19 @@ function closeExpiringSoonModal() {
 }
 document.getElementById('closeExpiringSoonModal')?.addEventListener('click', closeExpiringSoonModal);
 document.getElementById('dismissExpiringSoonModal')?.addEventListener('click', closeExpiringSoonModal);
+
+function openDeleteModal(medicineId) {
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    form.action = `/admin/medicines/${medicineId}`;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
 </script>
 @endpush

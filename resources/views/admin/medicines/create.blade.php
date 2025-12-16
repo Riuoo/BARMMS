@@ -32,19 +32,19 @@
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Medicine Name <span class="text-red-500">*</span></label>
+                        <label for="name" class="block text-sm font-medium text-gray-200 dark:text-gray-700 mb-2">Medicine Name <span class="text-red-500">*</span></label>
                         <input name="name" id="name" placeholder="Example: Paracetamol, Amoxicillin" 
                                value="{{ old('name') }}"
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
-                        <p class="mt-1 text-sm text-gray-500">Enter the brand name or trade name of the medicine</p>
+                               class="w-full border border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-400 rounded px-3 py-2 focus:ring-green-400 focus:border-green-400 dark:border-gray-300 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400 dark:focus:border-green-500 dark:focus:ring-green-500" required>
+                        <p class="mt-1 text-sm text-gray-400 dark:text-gray-500">Enter the brand name or trade name of the medicine</p>
                     </div>
                     
                     <div>
-                        <label for="generic_name" class="block text-sm font-medium text-gray-700 mb-2">Generic Name</label>
+                        <label for="generic_name" class="block text-sm font-medium text-gray-200 dark:text-gray-700 mb-2">Generic Name</label>
                         <input name="generic_name" id="generic_name" placeholder="Example: Acetaminophen, Amoxicillin trihydrate" 
                                value="{{ old('generic_name') }}"
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
-                        <p class="mt-1 text-sm text-gray-500">The generic or chemical name of the medicine (optional)</p>
+                               class="w-full border border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-400 rounded px-3 py-2 focus:ring-green-400 focus:border-green-400 dark:border-gray-300 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400 dark:focus:border-green-500 dark:focus:ring-green-500">
+                        <p class="mt-1 text-sm text-gray-400 dark:text-gray-500">The generic or chemical name of the medicine (optional)</p>
                     </div>
                     
                     <div>
@@ -67,19 +67,19 @@
                     </div>
                     
                     <div>
-                        <label for="dosage_form" class="block text-sm font-medium text-gray-700 mb-2">Dosage Form <span class="text-red-500">*</span></label>
+                        <label for="dosage_form" class="block text-sm font-medium text-gray-200 dark:text-gray-700 mb-2">Dosage Form <span class="text-red-500">*</span></label>
                         <input name="dosage_form" id="dosage_form" placeholder="Example: Tablet, Syrup, Capsule, Injection" 
                                value="{{ old('dosage_form') }}"
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
-                        <p class="mt-1 text-sm text-gray-500">The physical form of the medicine (tablet, syrup, etc.)</p>
+                               class="w-full border border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-400 rounded px-3 py-2 focus:ring-green-400 focus:border-green-400 dark:border-gray-300 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400 dark:focus:border-green-500 dark:focus:ring-green-500" required>
+                        <p class="mt-1 text-sm text-gray-400 dark:text-gray-500">The physical form of the medicine (tablet, syrup, etc.)</p>
                     </div>
                     
                     <div>
-                        <label for="manufacturer" class="block text-sm font-medium text-gray-700 mb-2">Manufacturer <span class="text-red-500">*</span></label>
+                        <label for="manufacturer" class="block text-sm font-medium text-gray-200 dark:text-gray-700 mb-2">Manufacturer <span class="text-red-500">*</span></label>
                         <input name="manufacturer" id="manufacturer" placeholder="Example: Pfizer, GSK, Sanofi" 
                                value="{{ old('manufacturer') }}"
-                               class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500" required>
-                        <p class="mt-1 text-sm text-gray-500">The pharmaceutical company that produces this medicine</p>
+                               class="w-full border border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-400 rounded px-3 py-2 focus:ring-green-400 focus:border-green-400 dark:border-gray-300 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400 dark:focus:border-green-500 dark:focus:ring-green-500" required>
+                        <p class="mt-1 text-sm text-gray-400 dark:text-gray-500">The pharmaceutical company that produces this medicine</p>
                     </div>
                 </div>
             </div>
@@ -166,6 +166,26 @@ document.addEventListener('DOMContentLoaded', function() {
         if (formSkeleton) formSkeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
+
+    // Toggle "Specify Category" input when "Other" is selected
+    const categorySelect = document.getElementById('category');
+    const categoryOtherContainer = document.getElementById('category_other_container');
+
+    if (categorySelect && categoryOtherContainer) {
+        const toggleCategoryOther = () => {
+            if (categorySelect.value === 'Other') {
+                categoryOtherContainer.classList.remove('hidden');
+            } else {
+                categoryOtherContainer.classList.add('hidden');
+            }
+        };
+
+        // Initial state (handles validation errors with old input)
+        toggleCategoryOther();
+
+        // Update on change
+        categorySelect.addEventListener('change', toggleCategoryOther);
+    }
 });
 </script>
 @endpush

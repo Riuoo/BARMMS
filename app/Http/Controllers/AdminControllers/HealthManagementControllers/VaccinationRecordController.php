@@ -176,7 +176,7 @@ class VaccinationRecordController
             'next_dose_date' => 'nullable|date|after:vaccination_date',
             // now ID based
             'administered_by' => 'nullable|integer|exists:barangay_profiles,id',
-            
+            'privacy_consent' => 'required|accepted',
         ]);
 
         // Fallback: if IDs are missing, try to resolve from search text
@@ -443,6 +443,7 @@ class VaccinationRecordController
             'medical_conditions' => 'nullable|string',
             'allergies' => 'nullable|string',
             'special_notes' => 'nullable|string',
+            'privacy_consent' => 'required|accepted',
         ]);
 
         // Use session-based user ID consistent with the rest of the app

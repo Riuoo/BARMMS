@@ -24,6 +24,9 @@ class AccomplishedProject extends Model
         'impact',
         'funding_source',
         'implementing_agency',
+        'audience_scope',
+        'audience_purok',
+        'reminder_sent',
         'is_featured',
     ];
 
@@ -31,6 +34,7 @@ class AccomplishedProject extends Model
         'start_date' => 'date',
         'completion_date' => 'date',
         'budget' => 'decimal:2',
+        'reminder_sent' => 'boolean',
         'is_featured' => 'boolean',
     ];
 
@@ -62,5 +66,17 @@ class AccomplishedProject extends Model
     public function getImageUrlAttribute()
     {
         return $this->image ? asset($this->image) : null;
+    }
+
+    /**
+     * Get a human-readable audience label for activity-type records.
+     */
+    public function getAudienceLabelAttribute(): string
+    {
+        if ($this->audience_scope === 'purok' && $this->audience_purok) {
+            return 'Purok ' . $this->audience_purok;
+        }
+
+        return 'All Residents';
     }
 } 

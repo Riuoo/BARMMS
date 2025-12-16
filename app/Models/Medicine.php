@@ -28,6 +28,11 @@ class Medicine extends Model
         'is_active' => 'boolean',
     ];
 
+    public function batches()
+    {
+        return $this->hasMany(MedicineBatch::class);
+    }
+
     public function transactions()
     {
         return $this->hasMany(MedicineTransaction::class);

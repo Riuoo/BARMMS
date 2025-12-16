@@ -27,12 +27,23 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Project Image -->
-            @if($project->image)
+            <!-- Project Image / Placeholder -->
             <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                <img src="{{ asset($project->image) }}" alt="{{ $project->title }}" class="w-full h-64 object-cover">
+                <div class="relative h-64 bg-gradient-to-r from-gray-100 to-gray-50">
+                    @if($project->image)
+                    <img src="{{ asset($project->image) }}" alt="{{ $project->title }}" class="w-full h-full object-cover">
+                    @else
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-image text-xl"></i>
+                            </div>
+                            <span class="text-sm font-medium">No image available</span>
+                        </div>
+                    </div>
+                    @endif
+                </div>
             </div>
-            @endif
             <!-- Project Title and Category -->
             <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-4">
@@ -70,6 +81,18 @@
                         <h4 class="font-medium text-gray-900 mb-2">Location</h4>
                         <p class="text-gray-600">{{ $project->location ?? 'N/A' }}</p>
                     </div>
+                    @if($project->type === 'activity')
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Target Audience</h4>
+                        <p class="text-gray-600">
+                            @if($project->audience_scope === 'purok' && $project->audience_purok)
+                                Purok {{ $project->audience_purok }}
+                            @else
+                                All Residents
+                            @endif
+                        </p>
+                    </div>
+                    @endif
                     <div>
                         <h4 class="font-medium text-gray-900 mb-2">Budget</h4>
                         <p class="text-gray-600">{{ $project->formatted_budget }}</p>

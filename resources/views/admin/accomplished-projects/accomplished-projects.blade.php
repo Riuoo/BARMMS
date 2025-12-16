@@ -6,7 +6,11 @@
 <div class="max-w-7xl mx-auto pt-2">
     <!-- Consolidated Grid Dashboard Skeleton -->
     <div id="accomplishedSkeleton">
-        @include('components.loading.grid-dashboard-skeleton', ['gridType' => 'activities'])
+        @include('components.loading.grid-dashboard-skeleton', [
+            'showWarning' => true,
+            'gridType' => 'activities',
+            'buttonCount' => 2
+        ])
     </div>
 
     <!-- Real Content (hidden initially) -->
@@ -26,6 +30,32 @@
             </div>
         </div>
     </div>
+
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="mb-3 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-800">{{ session('success') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-3 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-800">{{ session('error') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
         
     <!-- Search and Filter Section (Server-side) -->
     <form method="GET" action="{{ route('admin.accomplished-projects') }}" class="mb-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -189,48 +219,70 @@
     @endif
 
     <!-- Projects Grid -->
-    <div id="projectsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-2">
+    <div id="projectsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         @forelse($projects as $project)
-        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
+        @php
+            $status = strtolower($project->status ?? 'completed');
+            $statusBadge = match($status) {
+                'ongoing' => 'bg-yellow-100 text-yellow-800',
+                'completed' => 'bg-green-100 text-green-800',
+                'planned' => 'bg-blue-100 text-blue-800',
+                'cancelled' => 'bg-red-100 text-red-800',
+                default => 'bg-gray-100 text-gray-800'
+            };
+        @endphp
+        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden flex flex-col h-full">
             <!-- Project Image -->
-            <div class="relative">
+            <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-50">
                 @if($project->image)
                     <img src="{{ $project->image_url }}" 
                          alt="{{ $project->title }}" 
-                         class="w-full h-48 object-cover">
+                         class="w-full h-full object-cover">
                 @else
-                    <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                        <i class="fas fa-image text-gray-400 text-4xl"></i>
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-image text-xl"></i>
+                            </div>
+                            <span class="text-sm font-medium">No image available</span>
+                        </div>
                     </div>
                 @endif
                 
                 <!-- Featured Badge -->
                 @if($project->is_featured)
-                    <div class="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">
+                    <div class="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold shadow-sm">
                         <i class="fas fa-star mr-1"></i>Featured
                     </div>
                 @endif
                 
-                <!-- Category Badge -->
-                <div class="absolute bottom-3 left-3 flex gap-2">
-                    <span class="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                <!-- Status Badge -->
+                <div class="absolute top-3 left-3">
+                    <span class="px-3 py-1.5 rounded-full text-xs font-semibold {{ $statusBadge }} shadow-sm">
+                        <i class="fas fa-toggle-on mr-1.5 text-xs"></i>{{ ucfirst($project->status ?? 'Completed') }}
+                    </span>
+                </div>
+                
+                <!-- Category & Type Badges -->
+                <div class="absolute bottom-3 right-3 flex gap-2">
+                    <span class="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
                         {{ $project->category }}
                     </span>
-                    <span class="bg-gray-900/80 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    <span class="bg-gray-900/80 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
                         {{ ucfirst($project->type ?? 'project') }}
                     </span>
                 </div>
             </div>
 
             <!-- Project Content -->
-            <div class="p-5">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{{ $project->title }}</h3>
-                <p class="text-gray-600 text-sm mb-3 line-clamp-3">{{ $project->description }}</p>
+            <div class="p-5 flex flex-col h-full">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight">{{ $project->title }}</h3>
+                <p class="text-gray-600 text-sm mb-3 leading-relaxed line-clamp-3">{{ $project->description }}</p>
                 
                 <!-- Project Stats -->
                 <div class="space-y-2 mb-4 text-sm text-gray-600">
                     <div class="flex items-center">
-                        <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                        <i class="fas fa-calendar-alt mr-2 text-gray-400 w-4 text-center"></i>
                         <span>
                             @if($project->start_date)
                                 {{ $project->start_date->format('M d, Y') }}
@@ -246,14 +298,26 @@
                     </div>
                     @if($project->location)
                     <div class="flex items-start">
-                        <i class="fas fa-map-marker-alt mr-2 mt-0.5 text-gray-400"></i>
-                        <span>{{ $project->location }}</span>
+                        <i class="fas fa-map-marker-alt mr-2 text-gray-400 w-4 text-center mt-0.5"></i>
+                        <span class="leading-relaxed">{{ $project->location }}</span>
+                    </div>
+                    @endif
+                    @if($project->type === 'activity')
+                    <div class="flex items-center text-xs text-gray-500">
+                        <i class="fas fa-users mr-1 text-gray-400"></i>
+                        <span>
+                            @if($project->audience_scope === 'purok' && $project->audience_purok)
+                                Audience: Purok {{ $project->audience_purok }}
+                            @else
+                                Audience: All Residents
+                            @endif
+                        </span>
                     </div>
                     @endif
                     <div class="flex items-center justify-between">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
                             <i class="fas fa-info-circle mr-1 text-[10px]"></i>
-                            {{ ucfirst($project->status ?? 'completed') }}
+                            {{ ucfirst($project->status ?? 'Completed') }}
                         </span>
                         @if(!is_null($project->budget))
                         <span class="text-gray-700">
@@ -264,7 +328,7 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex gap-2">
+                <div class="flex gap-2 mt-auto pt-2">
                     <a href="{{ route('admin.accomplished-projects.show', $project) }}" 
                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition duration-300">
                         <i class="fas fa-eye mr-1"></i>View

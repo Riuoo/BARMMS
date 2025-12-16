@@ -26,6 +26,14 @@ class AttendanceController
     }
 
     /**
+     * Determine if strict audience enforcement is enabled.
+     */
+    private function isStrictAudience(): bool
+    {
+        return (bool) config('attendance.strict_audience', false);
+    }
+
+    /**
      * Show QR scanner interface
      */
     public function scanner(Request $request)
@@ -34,6 +42,7 @@ class AttendanceController
         $eventType = $this->resolveEventTypeForRole();
         $event = null;
         $eventName = null;
+        $strictAudience = $this->isStrictAudience();
 
         if ($eventId) {
             if ($eventType === 'event') {
@@ -71,6 +80,8 @@ class AttendanceController
             return [
                 'id' => $e->id,
                 'label' => $label,
+                'audience_scope' => $e->audience_scope ?? 'all',
+                'audience_purok' => $e->audience_purok ?? null,
             ];
         })->values();
 
@@ -94,6 +105,8 @@ class AttendanceController
                 'id' => $act->id,
                 'label' => $label,
                 'is_ongoing' => $act->status === 'Ongoing',
+                'audience_scope' => $act->audience_scope ?? 'all',
+                'audience_purok' => $act->audience_purok ?? null,
             ];
         })->values();
 
@@ -111,7 +124,8 @@ class AttendanceController
             'formattedEvents',
             'formattedHealthActivities',
             'formattedEventsJson',
-            'formattedHealthActivitiesJson'
+            'formattedHealthActivitiesJson',
+            'strictAudience'
         ));
     }
 
@@ -158,6 +172,7 @@ class AttendanceController
         }
 
         // Validate event belongs to allowed type
+        $event = null;
         if ($eventId) {
             if ($eventType === 'event') {
                 $event = AccomplishedProject::where('id', $eventId)
@@ -172,6 +187,23 @@ class AttendanceController
                     'success' => false,
                     'message' => 'Event not found or not accessible.',
                 ], 404);
+            }
+        }
+
+        // Audience check
+        $audienceWarning = null;
+        $strictAudience = $this->isStrictAudience();
+        if ($event && $resident && $event->audience_scope === 'purok' && !empty($event->audience_purok)) {
+            $residentAddress = (string) $resident->address;
+            $targetPurok = (string) $event->audience_purok;
+            if ($residentAddress && stripos($residentAddress, $targetPurok) === false) {
+                $audienceWarning = 'Note: This resident is not from Purok ' . $targetPurok . ', the target audience for this event.';
+                if ($strictAudience) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Access denied: this activity is limited to Purok ' . $targetPurok . '.',
+                    ], 403);
+                }
             }
         }
 
@@ -226,6 +258,7 @@ class AttendanceController
                     'name' => $resident->full_name,
                     'email' => $resident->email,
                 ],
+                'warning' => $audienceWarning,
                 'attendance_count' => $this->getAttendanceCount($eventId, $eventType),
             ], 200);
         } catch (\Exception $e) {
@@ -295,6 +328,8 @@ class AttendanceController
             ->where('active', true)
             ->first();
 
+        $strictAudience = $this->isStrictAudience();
+
         if ($resident) {
             // Found matching resident - log as resident attendance
             // Check for duplicate scan (same resident, same event)
@@ -315,6 +350,17 @@ class AttendanceController
                     ],
                     'previous_scan' => $existingLog->scanned_at->format('Y-m-d H:i:s'),
                 ], 409);
+            }
+
+            // Audience check for manual resident logging
+            $audienceWarning = null;
+            if ($event && $event->audience_scope === 'purok' && !empty($event->audience_purok)) {
+                $residentAddress = (string) $resident->address;
+                $targetPurok = (string) $event->audience_purok;
+                if ($residentAddress && stripos($residentAddress, $targetPurok) === false) {
+                    $audienceWarning = 'Note: This resident is not from Purok ' . $targetPurok . ', the target audience for this event.';
+                    // In strict mode, we still allow manual logging but return the warning
+                }
             }
 
             try {
@@ -350,6 +396,7 @@ class AttendanceController
                         'email' => $resident->email,
                     ],
                     'is_guest' => false,
+                    'warning' => $audienceWarning,
                     'attendance_count' => $this->getAttendanceCount($eventId, $eventType),
                 ], 200);
             } catch (\Exception $e) {
@@ -373,6 +420,12 @@ class AttendanceController
                     'message' => 'Already attended. This person has already been recorded for this event today.',
                     'previous_scan' => $existingLog->scanned_at->format('Y-m-d H:i:s'),
                 ], 409);
+            }
+
+            $audienceWarning = null;
+            if ($event && $event->audience_scope === 'purok' && !empty($event->audience_purok)) {
+                // Guest has no address; treat as out-of-audience informationally
+                $audienceWarning = 'Note: Guest recorded outside the target Purok ' . $event->audience_purok . '.';
             }
 
             try {
@@ -407,6 +460,7 @@ class AttendanceController
                         'contact' => $enteredContact,
                     ],
                     'is_guest' => true,
+                    'warning' => $audienceWarning,
                     'attendance_count' => $this->getAttendanceCount($eventId, $eventType),
                 ], 200);
             } catch (\Exception $e) {

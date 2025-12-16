@@ -254,6 +254,7 @@ class ResidentController
                 'emergency_contact_name' => 'nullable|string|max:255',
                 'emergency_contact_number' => 'nullable|string|max:255',
                 'emergency_contact_relationship' => 'nullable|string|max:255',
+                'privacy_consent' => 'required|accepted',
             ]);
 
             if (!empty($validatedData['password'])) {

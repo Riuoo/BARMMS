@@ -21,7 +21,28 @@
                 </section>
 
                 <section class="mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">1.1 Explicit Consent</h2>
+                    <p class="text-gray-700 mb-4">
+                        Before collecting your personal information through any form in our system, we require your explicit consent. This consent is obtained through:
+                    </p>
+                    <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+                        <li><strong>Privacy Consent Checkboxes:</strong> All forms that collect personal, health, or sensitive information include a required privacy consent checkbox that you must check before submitting the form.</li>
+                        <li><strong>Form Submission:</strong> By checking the consent checkbox and submitting a form, you explicitly acknowledge that you have read and agree to this Privacy Policy.</li>
+                        <li><strong>Admin-Assisted Forms:</strong> When barangay staff fill out forms on your behalf, they confirm that you have been informed about this Privacy Policy and have provided your consent.</li>
+                    </ul>
+                    <p class="text-gray-700 mb-4">
+                        <strong>Important:</strong> You cannot submit forms that collect personal information without providing consent. If you do not agree to this Privacy Policy, please do not use the system or submit any forms.
+                    </p>
+                    <p class="text-gray-700 mb-4">
+                        You have the right to withdraw your consent at any time by contacting our Data Protection Officer. However, withdrawal of consent may affect our ability to provide certain services that require your personal information.
+                    </p>
+                </section>
+
+                <section class="mb-8">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">2. Information We Collect</h2>
+                    <p class="text-gray-700 mb-4">
+                        <strong>Note:</strong> All information listed below is collected only with your explicit consent, as described in Section 1.1 above.
+                    </p>
                     
                     <h3 class="text-xl font-medium text-gray-800 mb-3">2.1 Personal Information</h3>
                     <p class="text-gray-700 mb-4">We may collect the following types of personal information:</p>
@@ -106,9 +127,11 @@
                         <li>Right to access and review your personal information</li>
                         <li>Right to request correction of inaccurate information</li>
                         <li>Right to request deletion of your information (subject to legal requirements)</li>
-                        <li>Right to withdraw consent for data processing</li>
+                        <li><strong>Right to withdraw consent for data processing</strong> - You may withdraw your consent at any time by contacting our Data Protection Officer. Note that withdrawal of consent will prevent you from using forms that require consent, and may affect our ability to provide certain services.</li>
                         <li>Right to file a complaint with the Data Protection Commission</li>
                         <li>Right to request information about data sharing practices</li>
+                        <li>Right to know what information is being collected and why</li>
+                        <li>Right to be informed before your information is collected (through privacy consent checkboxes on forms)</li>
                     </ul>
                 </section>
 

@@ -28,6 +28,9 @@ class HealthCenterActivity extends Model
         'challenges',
         'recommendations',
         'status',
+        'audience_scope',
+        'audience_purok',
+        'reminder_sent',
         'is_featured',
     ];
 
@@ -37,6 +40,7 @@ class HealthCenterActivity extends Model
         'start_time' => 'string',
         'end_time' => 'string',
         'budget' => 'decimal:2',
+        'reminder_sent' => 'boolean',
         'is_featured' => 'boolean',
     ];
 
@@ -85,5 +89,17 @@ class HealthCenterActivity extends Model
     public function scopeCompleted($query)
     {
         return $query->where('status', 'Completed');
+    }
+
+    /**
+     * Get a human-readable audience label.
+     */
+    public function getAudienceLabelAttribute(): string
+    {
+        if ($this->audience_scope === 'purok' && $this->audience_purok) {
+            return 'Purok ' . $this->audience_purok;
+        }
+
+        return 'All Residents';
     }
 } 

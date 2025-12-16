@@ -17,8 +17,8 @@ class HealthCenterActivityRequest extends FormRequest
             'activity_name' => 'required|string|max:255',
             'activity_type' => 'required|string|in:Vaccination,Health Check-up,Health Education,Medical Consultation,Emergency Response,Preventive Care,Maternal Care,Child Care,Other',
             'activity_date' => 'required|date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'location' => 'required|string|max:255',
             'description' => 'required|string|max:2000',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -27,9 +27,14 @@ class HealthCenterActivityRequest extends FormRequest
             'organizer' => 'nullable|string|max:255',
             'materials_needed' => 'nullable|string|max:1000',
             'budget' => 'nullable|numeric|min:0',
-            'status' => 'required|string|in:Planned,Ongoing,Completed,Cancelled',
+            'status' => 'nullable|string|in:Planned,Ongoing,Completed,Cancelled',
+            'audience_scope' => 'required|string|in:all,purok',
+            'audience_purok' => 'nullable|string|max:255',
             'is_featured' => 'nullable|boolean',
         ];
+
+        // audience_purok is required when scope is purok
+        $rules['audience_purok'] .= '|required_if:audience_scope,purok';
 
         // For update, add additional fields
         if ($this->isMethod('put') || $this->isMethod('patch')) {
@@ -68,6 +73,9 @@ class HealthCenterActivityRequest extends FormRequest
             'budget.min' => 'The budget cannot be negative.',
             'status.required' => 'The status is required.',
             'status.in' => 'The selected status is invalid.',
+            'audience_scope.required' => 'Please select the target audience scope.',
+            'audience_scope.in' => 'The selected audience scope is invalid.',
+            'audience_purok.required_if' => 'Please select a Purok when targeting a specific Purok.',
         ];
     }
 }

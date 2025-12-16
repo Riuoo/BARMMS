@@ -42,6 +42,9 @@
                     <p class="text-gray-700 mb-4">
                         To access certain features of BARMMS, you must create an account. You agree to provide accurate, current, and complete information during registration and to update such information to keep it accurate, current, and complete.
                     </p>
+                    <p class="text-gray-700 mb-4">
+                        <strong>Consent Requirement:</strong> During account registration, you must provide explicit consent to our Privacy Policy by checking the consent checkbox. Without providing this consent, you cannot complete the registration process.
+                    </p>
 
                     <h3 class="text-xl font-medium text-gray-800 mb-3">3.2 Account Security</h3>
                     <p class="text-gray-700 mb-4">
@@ -61,6 +64,8 @@
                         <li>Violate any applicable laws or regulations</li>
                         <li>Infringe upon the rights of others</li>
                         <li>Submit false or misleading information</li>
+                        <li>Submit forms without providing required privacy consent</li>
+                        <li>Attempt to bypass or circumvent privacy consent requirements</li>
                         <li>Attempt to gain unauthorized access to the system</li>
                         <li>Interfere with or disrupt the service</li>
                         <li>Use automated tools to access the system</li>
@@ -78,6 +83,20 @@
                     </p>
                     <p class="text-gray-700 mb-4">
                         By using BARMMS, you consent to the collection and use of your information as described in our Privacy Policy.
+                    </p>
+                    
+                    <h3 class="text-xl font-medium text-gray-800 mb-3">5.1 Explicit Consent Requirement</h3>
+                    <p class="text-gray-700 mb-4">
+                        When submitting forms that collect personal, health, or sensitive information, you must provide explicit consent by checking the privacy consent checkbox. This consent:
+                    </p>
+                    <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+                        <li>Is required before you can submit any form that collects personal information</li>
+                        <li>Indicates that you have read and understood the Privacy Policy</li>
+                        <li>Confirms your agreement to the collection, use, and storage of your data as described in the Privacy Policy</li>
+                        <li>Can be withdrawn at any time by contacting our Data Protection Officer</li>
+                    </ul>
+                    <p class="text-gray-700 mb-4">
+                        <strong>Important:</strong> Failure to provide consent will prevent you from submitting forms and accessing certain services that require personal information. Withdrawal of consent may also limit your ability to use certain features of the system.
                     </p>
                 </section>
 
