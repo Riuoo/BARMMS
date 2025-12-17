@@ -1,0 +1,11 @@
+[program:barmms_analytics_service]
+directory=/var/www/BARMMS/analytics_service
+command=/var/www/BARMMS/analytics_service/.venv/bin/python app.py
+autostart=true
+autorestart=true
+startretries=3
+stderr_logfile=/var/log/supervisor/barmms_analytics.err.log
+stdout_logfile=/var/log/supervisor/barmms_analytics.out.log
+environment=PORT="5000",DEBUG="False"
+
+

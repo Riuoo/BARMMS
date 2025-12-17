@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const finalAge = [...mergedAge, ...remaining];
         makeDoughnut(document.getElementById('chartAge'), finalAge.map(r => r[0]), finalAge.map(r => r[1]));
 
-        // Render the purok people chart with modal pie on click
+        // Draw the purok people chart with modal pie on click
         if (purokPeopleLabels.length && purokPeopleData.length) {
             makeBarChart(
                 document.getElementById('chartTopRequestedByPurok'),

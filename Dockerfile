@@ -1,4 +1,4 @@
-## Multi-stage Dockerfile for Laravel (BARMMS) on Render
+## Multi-stage Dockerfile for Laravel (BARMMS)
 
 # Stage 1: Build frontend assets with Vite
 FROM node:20-alpine AS frontend-build
@@ -66,7 +66,6 @@ RUN sed -i 's#/var/www/html#/var/www/html/public#g' /etc/apache2/sites-available
 # Ensure correct permissions for storage and cache
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Render will route traffic to the container's HTTP port (Apache defaults to 80)
 EXPOSE 80
 
 # Run database migrations on container start, then start Apache

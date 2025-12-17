@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('accomplished_projects', function (Blueprint $table) {
             $table->id();
+            $table->string('type')->default('project')->index();
             $table->string('title');
             $table->text('description');
             $table->string('category');
@@ -18,6 +19,9 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('completion_date');
             $table->string('status')->default('completed');
+            $table->string('audience_scope')->default('all');
+            $table->string('audience_purok')->nullable();
+            $table->boolean('reminder_sent')->default(false);
             $table->string('image')->nullable();
             $table->text('beneficiaries')->nullable();
             $table->text('impact')->nullable();

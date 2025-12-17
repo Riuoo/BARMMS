@@ -31,6 +31,9 @@ return new class extends Migration
             $table->text('challenges')->nullable();
             $table->text('recommendations')->nullable();
             $table->enum('status', ['Planned', 'Ongoing', 'Completed', 'Cancelled'])->default('Planned');
+            $table->string('audience_scope')->default('all');
+            $table->string('audience_purok')->nullable();
+            $table->boolean('reminder_sent')->default(false);
             $table->boolean('is_featured')->default(false);
             $table->timestamps();
         });

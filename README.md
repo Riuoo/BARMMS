@@ -110,6 +110,17 @@ Key smoke tests before deployment:
 - Configure cron for Laravel scheduler: `* * * * * php /path/to/artisan schedule:run`
 - Point storage symlink: `php artisan storage:link`
 
+## Deployment on DigitalOcean
+
+For a full, step-by-step guide to deploying BARMMS on a single Ubuntu Droplet (Laravel + the `analytics_service` Python API running together), see:
+
+- `DIGITALOCEAN_DEPLOYMENT_GUIDE.md`
+
+At a high level:
+- Nginx + PHP-FPM serve the Laravel app from `public/`.
+- MySQL (local or Managed DB) stores application data.
+- The `analytics_service` Flask app runs on the same Droplet under Supervisor (default `http://127.0.0.1:5000`), and Laravel calls it via `PYTHON_ANALYTICS_URL`.
+
 ## Contributing
 
 1. Fork + branch from `main`

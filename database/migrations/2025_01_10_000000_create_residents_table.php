@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('middle_name')->nullable();
             $table->string('last_name');
             $table->string('suffix')->nullable();
-            $table->string('email')->unique()->index();
+            $table->string('email')->nullable();
             $table->string('password');
             $table->text('two_factor_secret')->nullable();
             $table->boolean('two_factor_enabled')->default(false);
@@ -25,7 +25,7 @@ return new class extends Migration
             
             // New personal information fields
             $table->enum('gender', ['Male', 'Female']);
-            $table->string('contact_number');
+            $table->string('contact_number')->nullable();
             $table->date('birth_date');
             $table->enum('marital_status', ['Single', 'Married', 'Widowed', 'Divorced', 'Separated']);
             $table->string('occupation')->nullable();

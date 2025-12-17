@@ -84,6 +84,11 @@ class AccomplishedProjectService
         // Handle is_featured field properly
         $data['is_featured'] = isset($data['is_featured']) ? true : false;
 
+        // Set reminder_sent default to false if not provided
+        if (!isset($data['reminder_sent'])) {
+            $data['reminder_sent'] = false;
+        }
+
         // Normalize audience for activities only
         if (($data['type'] ?? 'project') === 'activity') {
             $data['audience_scope'] = $data['audience_scope'] ?? 'all';
