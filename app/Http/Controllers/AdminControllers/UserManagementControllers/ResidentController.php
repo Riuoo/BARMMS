@@ -160,21 +160,23 @@ class ResidentController
                 },
             ],
             'email' => [
-                'required',
+                'nullable',
                 'email',
                 'unique:residents,email',
                 function ($attribute, $value, $fail) {
-                    $exists = AccountRequest::where('email', $value)
-                        ->whereIn('status', ['pending', 'approved', 'completed'])
-                        ->exists();
-                    if ($exists) {
-                        $fail('This email has an account request that is pending, approved, or completed. Creating a resident account is not allowed for this email.');
+                    if ($value) {
+                        $exists = AccountRequest::where('email', $value)
+                            ->whereIn('status', ['pending', 'approved', 'completed'])
+                            ->exists();
+                        if ($exists) {
+                            $fail('This email has an account request that is pending, approved, or completed. Creating a resident account is not allowed for this email.');
+                        }
                     }
                 },
             ],
             'address' => 'required|string|max:500',
             'gender' => 'required|in:Male,Female',
-            'contact_number' => 'required|string|max:255',
+            'contact_number' => 'nullable|string|max:255',
             'birth_date' => 'required|date|before:today',
             'marital_status' => 'required|in:Single,Married,Widowed,Divorced,Separated',
             'occupation' => 'required|string|max:255',
@@ -196,11 +198,11 @@ class ResidentController
                 'middle_name' => !empty(trim($request->middle_name ?? '')) ? trim($request->middle_name) : null,
                 'last_name' => $request->last_name,
                 'suffix' => !empty(trim($request->suffix ?? '')) ? trim($request->suffix) : null,
-                'email' => $validatedData['email'],
+                'email' => !empty($validatedData['email']) ? $validatedData['email'] : null,
                 'role' => 'resident',
                 'address' => $validatedData['address'],
                 'gender' => $validatedData['gender'],
-                'contact_number' => $validatedData['contact_number'],
+                'contact_number' => !empty($validatedData['contact_number']) ? $validatedData['contact_number'] : null,
                 'birth_date' => $validatedData['birth_date'],
                 'marital_status' => $validatedData['marital_status'],
                 'occupation' => $validatedData['occupation'],

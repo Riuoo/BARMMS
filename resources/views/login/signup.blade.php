@@ -19,6 +19,20 @@
             <p class="mt-2 text-center text-sm text-gray-600">
                 Please provide your information to complete your registration
             </p>
+            @if(isset($resident) && $resident)
+                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>Your resident profile has been found!</strong> Most of your information has been pre-filled from your existing profile. Please review all information and provide your contact number to complete registration.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
         <form class="mt-8 space-y-6" action="{{ route('register') }}" method="POST">
             @csrf
@@ -33,20 +47,18 @@
                     <div class="mb-2">
                         <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
                         @php
-                            // Autofill logic: If first_name exists, use it; otherwise parse from full_name
-                            // First name = all words except the last word
+                            // Priority: resident data > accountRequest data
                             $firstName = '';
-                            if (isset($accountRequest)) {
-                                if ($accountRequest->first_name) {
-                                    $firstName = $accountRequest->first_name;
-                                } elseif ($accountRequest->full_name) {
-                                    $nameParts = explode(' ', trim($accountRequest->full_name));
-                                    if (count($nameParts) > 1) {
-                                        // All words except the last are first name
-                                        $firstName = implode(' ', array_slice($nameParts, 0, -1));
-                                    } else {
-                                        $firstName = $nameParts[0] ?? '';
-                                    }
+                            if (isset($resident) && $resident->first_name) {
+                                $firstName = $resident->first_name;
+                            } elseif (isset($accountRequest) && $accountRequest->first_name) {
+                                $firstName = $accountRequest->first_name;
+                            } elseif (isset($accountRequest) && $accountRequest->full_name) {
+                                $nameParts = explode(' ', trim($accountRequest->full_name));
+                                if (count($nameParts) > 1) {
+                                    $firstName = implode(' ', array_slice($nameParts, 0, -1));
+                                } else {
+                                    $firstName = $nameParts[0] ?? '';
                                 }
                             }
                         @endphp
@@ -56,9 +68,11 @@
                     <div class="mb-2">
                         <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
                         @php
-                            // Autofill middle name from AccountRequest
+                            // Priority: resident data > accountRequest data
                             $middleName = '';
-                            if (isset($accountRequest) && $accountRequest->middle_name) {
+                            if (isset($resident) && $resident->middle_name) {
+                                $middleName = $resident->middle_name;
+                            } elseif (isset($accountRequest) && $accountRequest->middle_name) {
                                 $middleName = $accountRequest->middle_name;
                             }
                         @endphp
@@ -68,17 +82,16 @@
                     <div class="mb-2">
                         <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
                         @php
-                            // Autofill logic: If last_name exists, use it; otherwise parse from full_name
-                            // Last name = last word
+                            // Priority: resident data > accountRequest data
                             $lastName = '';
-                            if (isset($accountRequest)) {
-                                if ($accountRequest->last_name) {
-                                    $lastName = $accountRequest->last_name;
-                                } elseif ($accountRequest->full_name) {
-                                    $nameParts = explode(' ', trim($accountRequest->full_name));
-                                    if (count($nameParts) > 0) {
-                                        $lastName = end($nameParts);
-                                    }
+                            if (isset($resident) && $resident->last_name) {
+                                $lastName = $resident->last_name;
+                            } elseif (isset($accountRequest) && $accountRequest->last_name) {
+                                $lastName = $accountRequest->last_name;
+                            } elseif (isset($accountRequest) && $accountRequest->full_name) {
+                                $nameParts = explode(' ', trim($accountRequest->full_name));
+                                if (count($nameParts) > 0) {
+                                    $lastName = end($nameParts);
                                 }
                             }
                         @endphp
@@ -88,9 +101,11 @@
                     <div>
                         <label for="suffix" class="block text-sm font-medium text-gray-700 mb-1">Suffix</label>
                         @php
-                            // Autofill suffix from AccountRequest
+                            // Priority: resident data > accountRequest data
                             $suffixValue = '';
-                            if (isset($accountRequest) && $accountRequest->suffix) {
+                            if (isset($resident) && $resident->suffix) {
+                                $suffixValue = $resident->suffix;
+                            } elseif (isset($accountRequest) && $accountRequest->suffix) {
                                 $suffixValue = $accountRequest->suffix;
                             }
                             $suffixValue = old('suffix', $suffixValue);
@@ -117,18 +132,33 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
+                        @php
+                            $genderValue = old('gender');
+                            if (isset($resident) && $resident->gender) {
+                                $genderValue = $resident->gender;
+                            }
+                        @endphp
                         <select id="gender" name="gender" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
                             <option value="">Select Gender</option>
-                            <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Male</option>
-                            <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Female</option>
+                            <option value="Male" {{ $genderValue == 'Male' ? 'selected' : '' }}>Male</option>
+                            <option value="Female" {{ $genderValue == 'Female' ? 'selected' : '' }}>Female</option>
                         </select>
+                        @if(isset($resident))
+                            <input type="hidden" name="gender" value="{{ $genderValue }}">
+                        @endif
                     </div>
                     <div>
                         <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
+                        @php
+                            $contactNumber = old('contact_number');
+                            if (isset($resident) && $resident->contact_number) {
+                                $contactNumber = $resident->contact_number;
+                            }
+                        @endphp
                         <input id="contact_number" name="contact_number" type="number" required
                             class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                            placeholder="Example: 09191234567" min="0" pattern="[0-9]*" inputmode="numeric" value="{{ old('contact_number') }}">
+                            placeholder="Example: 09191234567" min="0" pattern="[0-9]*" inputmode="numeric" value="{{ $contactNumber }}">
                     </div>
                 </div>
                 @php
@@ -151,15 +181,29 @@
                     </div>
                     <div>
                         <label for="purok" class="block text-sm font-medium text-gray-700 mb-1">Purok <span class="text-red-500">*</span></label>
-                        <select id="purok" name="purok" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" required>
+                        @php
+                            $purokValue = old('purok');
+                            $addressValue = old('address');
+                            if (isset($resident) && $resident->address) {
+                                $addressValue = $resident->address;
+                                // Extract purok from address (format: "Purok X, Barangay, City, Province")
+                                if (preg_match('/Purok\s+(\d+)/i', $resident->address, $matches)) {
+                                    $purokValue = 'Purok ' . $matches[1];
+                                }
+                            }
+                        @endphp
+                        <select id="purok" name="purok" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" required {{ isset($resident) ? 'disabled' : '' }}>
                             <option value="">Select Purok</option>
                             @for($i = 1; $i <= 7; $i++)
-                                <option value="Purok {{ $i }}" {{ old('purok') == 'Purok '.$i ? 'selected' : '' }}>Purok {{ $i }}</option>
+                                <option value="Purok {{ $i }}" {{ $purokValue == 'Purok '.$i ? 'selected' : '' }}>Purok {{ $i }}</option>
                             @endfor
                         </select>
+                        @if(isset($resident))
+                            <input type="hidden" name="purok" value="{{ $purokValue }}">
+                        @endif
                     </div>
                 </div>
-                <input type="hidden" id="address" name="address" value="{{ old('address') }}">
+                <input type="hidden" id="address" name="address" value="{{ $addressValue }}">
             </div>
 
             <!-- Personal Information Section -->
@@ -168,40 +212,64 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-1">Birth Date <span class="text-red-500">*</span></label>
+                        @php
+                            $birthDateValue = old('birth_date');
+                            if (isset($resident) && $resident->birth_date) {
+                                $birthDateValue = $resident->birth_date->format('Y-m-d');
+                            }
+                        @endphp
                         <input id="birth_date" name="birth_date" type="date" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                            value="{{ old('birth_date') }}">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
+                            value="{{ $birthDateValue }}" {{ isset($resident) ? 'readonly' : '' }}>
                     </div>
                     <div>
                         <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-1">Marital Status <span class="text-red-500">*</span></label>
+                        @php
+                            $maritalStatusValue = old('marital_status');
+                            if (isset($resident) && $resident->marital_status) {
+                                $maritalStatusValue = $resident->marital_status;
+                            }
+                        @endphp
                         <select id="marital_status" name="marital_status" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
                             <option value="">Select Marital Status</option>
-                            <option value="Single" {{ old('marital_status') == 'Single' ? 'selected' : '' }}>Single</option>
-                            <option value="Married" {{ old('marital_status') == 'Married' ? 'selected' : '' }}>Married</option>
-                            <option value="Widowed" {{ old('marital_status') == 'Widowed' ? 'selected' : '' }}>Widowed</option>
-                            <option value="Divorced" {{ old('marital_status') == 'Divorced' ? 'selected' : '' }}>Divorced</option>
-                            <option value="Separated" {{ old('marital_status') == 'Separated' ? 'selected' : '' }}>Separated</option>
+                            <option value="Single" {{ $maritalStatusValue == 'Single' ? 'selected' : '' }}>Single</option>
+                            <option value="Married" {{ $maritalStatusValue == 'Married' ? 'selected' : '' }}>Married</option>
+                            <option value="Widowed" {{ $maritalStatusValue == 'Widowed' ? 'selected' : '' }}>Widowed</option>
+                            <option value="Divorced" {{ $maritalStatusValue == 'Divorced' ? 'selected' : '' }}>Divorced</option>
+                            <option value="Separated" {{ $maritalStatusValue == 'Separated' ? 'selected' : '' }}>Separated</option>
                         </select>
+                        @if(isset($resident))
+                            <input type="hidden" name="marital_status" value="{{ $maritalStatusValue }}">
+                        @endif
                     </div>
                 </div>
                 <div class="mt-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Occupation <span class="text-red-500">*</span></label>
-                    <select id="occupation_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2">
+                    @php
+                        $occupationValue = old('occupation');
+                        if (isset($resident) && $resident->occupation) {
+                            $occupationValue = $resident->occupation;
+                        }
+                    @endphp
+                    <select id="occupation_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2 bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
                         <option value="">Select Occupation</option>
-                        <option value="Teacher">Teacher</option>
-                        <option value="Student">Student</option>
-                        <option value="Farmer">Farmer</option>
-                        <option value="Fisherman">Fisherman</option>
-                        <option value="Vendor">Vendor</option>
-                        <option value="Government Employee">Government Employee</option>
-                        <option value="Private Employee">Private Employee</option>
-                        <option value="Housewife">Housewife</option>
-                        <option value="Construction Worker">Construction Worker</option>
-                        <option value="Driver">Driver</option>
-                        <option value="_other">Other (specify)</option>
+                        <option value="Teacher" {{ $occupationValue == 'Teacher' ? 'selected' : '' }}>Teacher</option>
+                        <option value="Student" {{ $occupationValue == 'Student' ? 'selected' : '' }}>Student</option>
+                        <option value="Farmer" {{ $occupationValue == 'Farmer' ? 'selected' : '' }}>Farmer</option>
+                        <option value="Fisherman" {{ $occupationValue == 'Fisherman' ? 'selected' : '' }}>Fisherman</option>
+                        <option value="Vendor" {{ $occupationValue == 'Vendor' ? 'selected' : '' }}>Vendor</option>
+                        <option value="Government Employee" {{ $occupationValue == 'Government Employee' ? 'selected' : '' }}>Government Employee</option>
+                        <option value="Private Employee" {{ $occupationValue == 'Private Employee' ? 'selected' : '' }}>Private Employee</option>
+                        <option value="Housewife" {{ $occupationValue == 'Housewife' ? 'selected' : '' }}>Housewife</option>
+                        <option value="Construction Worker" {{ $occupationValue == 'Construction Worker' ? 'selected' : '' }}>Construction Worker</option>
+                        <option value="Driver" {{ $occupationValue == 'Driver' ? 'selected' : '' }}>Driver</option>
+                        <option value="_other" {{ !in_array($occupationValue, ['Teacher', 'Student', 'Farmer', 'Fisherman', 'Vendor', 'Government Employee', 'Private Employee', 'Housewife', 'Construction Worker', 'Driver']) && $occupationValue ? 'selected' : '' }}>Other (specify)</option>
                     </select>
-                    <input type="text" id="occupation" name="occupation" value="{{ old('occupation') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Enter occupation" required style="display: none;">
+                    <input type="text" id="occupation" name="occupation" value="{{ $occupationValue }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" placeholder="Enter occupation" required {{ isset($resident) ? 'readonly' : '' }} style="{{ isset($resident) || $occupationValue ? 'display: block;' : 'display: none;' }}">
+                    @if(isset($resident))
+                        <input type="hidden" name="occupation" value="{{ $occupationValue }}">
+                    @endif
                 </div>
             </div>
 
@@ -211,64 +279,111 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+                        @php
+                            $ageValue = old('age');
+                            if (isset($resident) && $resident->age) {
+                                $ageValue = $resident->age;
+                            }
+                        @endphp
                         <input id="age" name="age" type="number" min="1" max="120" required
                             class="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-gray-100 text-gray-700 rounded-md cursor-not-allowed"
-                            placeholder="Age" value="{{ old('age') }}" readonly>
+                            placeholder="Age" value="{{ $ageValue }}" readonly>
                     </div>
                     <div>
                         <label for="family_size" class="block text-sm font-medium text-gray-700 mb-1">Family Size <span class="text-red-500">*</span></label>
+                        @php
+                            $familySizeValue = old('family_size');
+                            if (isset($resident) && $resident->family_size) {
+                                $familySizeValue = $resident->family_size;
+                            }
+                        @endphp
                         <input id="family_size" name="family_size" type="number" min="1" max="20" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                            placeholder="Number of family members" value="{{ old('family_size') }}">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
+                            placeholder="Number of family members" value="{{ $familySizeValue }}" {{ isset($resident) ? 'readonly' : '' }}>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label for="education_level" class="block text-sm font-medium text-gray-700 mb-1">Education Level <span class="text-red-500">*</span></label>
+                        @php
+                            $educationLevelValue = old('education_level');
+                            if (isset($resident) && $resident->education_level) {
+                                $educationLevelValue = $resident->education_level;
+                            }
+                        @endphp
                         <select id="education_level" name="education_level" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
                             <option value="">Select Education Level</option>
-                            <option value="No Education" {{ old('education_level') == 'No Education' ? 'selected' : '' }}>No Education</option>
-                            <option value="Elementary" {{ old('education_level') == 'Elementary' ? 'selected' : '' }}>Elementary</option>
-                            <option value="High School" {{ old('education_level') == 'High School' ? 'selected' : '' }}>High School</option>
-                            <option value="Vocational" {{ old('education_level') == 'Vocational' ? 'selected' : '' }}>Vocational</option>
-                            <option value="College" {{ old('education_level') == 'College' ? 'selected' : '' }}>College</option>
-                            <option value="Post Graduate" {{ old('education_level') == 'Post Graduate' ? 'selected' : '' }}>Post Graduate</option>
+                            <option value="No Education" {{ $educationLevelValue == 'No Education' ? 'selected' : '' }}>No Education</option>
+                            <option value="Elementary" {{ $educationLevelValue == 'Elementary' ? 'selected' : '' }}>Elementary</option>
+                            <option value="High School" {{ $educationLevelValue == 'High School' ? 'selected' : '' }}>High School</option>
+                            <option value="Vocational" {{ $educationLevelValue == 'Vocational' ? 'selected' : '' }}>Vocational</option>
+                            <option value="College" {{ $educationLevelValue == 'College' ? 'selected' : '' }}>College</option>
+                            <option value="Post Graduate" {{ $educationLevelValue == 'Post Graduate' ? 'selected' : '' }}>Post Graduate</option>
                         </select>
+                        @if(isset($resident))
+                            <input type="hidden" name="education_level" value="{{ $educationLevelValue }}">
+                        @endif
                     </div>
                     <div>
                         <label for="income_level" class="block text-sm font-medium text-gray-700 mb-1">Income Level (Monthly, PHP) <span class="text-red-500">*</span></label>
+                        @php
+                            $incomeLevelValue = old('income_level');
+                            if (isset($resident) && $resident->income_level) {
+                                $incomeLevelValue = $resident->income_level;
+                            }
+                        @endphp
                         <select id="income_level" name="income_level" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
                             <option value="">Select Income Range</option>
-                            <option value="Low" {{ old('income_level') == 'Low' ? 'selected' : '' }}>Low (₱0 – ₱10,000)</option>
-                            <option value="Lower Middle" {{ old('income_level') == 'Lower Middle' ? 'selected' : '' }}>Lower Middle (₱10,001 – ₱20,000)</option>
-                            <option value="Middle" {{ old('income_level') == 'Middle' ? 'selected' : '' }}>Middle (₱20,001 – ₱40,000)</option>
-                            <option value="Upper Middle" {{ old('income_level') == 'Upper Middle' ? 'selected' : '' }}>Upper Middle (₱40,001 – ₱80,000)</option>
-                            <option value="High" {{ old('income_level') == 'High' ? 'selected' : '' }}>High (₱80,001 and above)</option>
+                            <option value="Low" {{ $incomeLevelValue == 'Low' ? 'selected' : '' }}>Low (₱0 – ₱10,000)</option>
+                            <option value="Lower Middle" {{ $incomeLevelValue == 'Lower Middle' ? 'selected' : '' }}>Lower Middle (₱10,001 – ₱20,000)</option>
+                            <option value="Middle" {{ $incomeLevelValue == 'Middle' ? 'selected' : '' }}>Middle (₱20,001 – ₱40,000)</option>
+                            <option value="Upper Middle" {{ $incomeLevelValue == 'Upper Middle' ? 'selected' : '' }}>Upper Middle (₱40,001 – ₱80,000)</option>
+                            <option value="High" {{ $incomeLevelValue == 'High' ? 'selected' : '' }}>High (₱80,001 and above)</option>
                         </select>
+                        @if(isset($resident))
+                            <input type="hidden" name="income_level" value="{{ $incomeLevelValue }}">
+                        @endif
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-1">Employment Status <span class="text-red-500">*</span></label>
+                        @php
+                            $employmentStatusValue = old('employment_status');
+                            if (isset($resident) && $resident->employment_status) {
+                                $employmentStatusValue = $resident->employment_status;
+                            }
+                        @endphp
                         <select id="employment_status" name="employment_status" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
                             <option value="">Select Employment Status</option>
-                            <option value="Unemployed" {{ old('employment_status') == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
-                            <option value="Part-time" {{ old('employment_status') == 'Part-time' ? 'selected' : '' }}>Part-time</option>
-                            <option value="Self-employed" {{ old('employment_status') == 'Self-employed' ? 'selected' : '' }}>Self-employed</option>
-                            <option value="Full-time" {{ old('employment_status') == 'Full-time' ? 'selected' : '' }}>Full-time</option>
+                            <option value="Unemployed" {{ $employmentStatusValue == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
+                            <option value="Part-time" {{ $employmentStatusValue == 'Part-time' ? 'selected' : '' }}>Part-time</option>
+                            <option value="Self-employed" {{ $employmentStatusValue == 'Self-employed' ? 'selected' : '' }}>Self-employed</option>
+                            <option value="Full-time" {{ $employmentStatusValue == 'Full-time' ? 'selected' : '' }}>Full-time</option>
                         </select>
+                        @if(isset($resident))
+                            <input type="hidden" name="employment_status" value="{{ $employmentStatusValue }}">
+                        @endif
                     </div>
                     <div>
                         <label for="is_pwd" class="block text-sm font-medium text-gray-700 mb-1">Person with Disability (PWD) <span class="text-red-500">*</span></label>
+                        @php
+                            $pwdValue = old('is_pwd', '0');
+                            if (isset($resident) && $resident->is_pwd !== null) {
+                                $pwdValue = $resident->is_pwd ? '1' : '0';
+                            }
+                        @endphp
                         <select id="is_pwd" name="is_pwd" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
-                            @php $pwdOld = old('is_pwd', '0'); @endphp
-                            <option value="0" {{ $pwdOld == '0' ? 'selected' : '' }}>No</option>
-                            <option value="1" {{ $pwdOld == '1' ? 'selected' : '' }}>Yes</option>
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
+                            <option value="0" {{ $pwdValue == '0' ? 'selected' : '' }}>No</option>
+                            <option value="1" {{ $pwdValue == '1' ? 'selected' : '' }}>Yes</option>
                         </select>
+                        @if(isset($resident))
+                            <input type="hidden" name="is_pwd" value="{{ $pwdValue }}">
+                        @endif
                     </div>
                 </div>
             </div>
@@ -279,33 +394,54 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        @php
+                            $emergencyContactName = old('emergency_contact_name');
+                            if (isset($resident) && $resident->emergency_contact_name) {
+                                $emergencyContactName = $resident->emergency_contact_name;
+                            }
+                        @endphp
                         <input id="emergency_contact_name" name="emergency_contact_name" type="text"
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                            placeholder="Full Name" value="{{ old('emergency_contact_name') }}">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
+                            placeholder="Full Name" value="{{ $emergencyContactName }}" {{ isset($resident) && $resident->emergency_contact_name ? 'readonly' : '' }}>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
-                        <select id="relationship_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2">
+                        @php
+                            $emergencyContactRelationship = old('emergency_contact_relationship');
+                            if (isset($resident) && $resident->emergency_contact_relationship) {
+                                $emergencyContactRelationship = $resident->emergency_contact_relationship;
+                            }
+                        @endphp
+                        <select id="relationship_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2 bg-gray-100 cursor-not-allowed" {{ isset($resident) && $resident->emergency_contact_relationship ? 'disabled' : '' }}>
                             <option value="">Select Relationship</option>
-                            <option value="Spouse">Spouse</option>
-                            <option value="Mother">Mother</option>
-                            <option value="Father">Father</option>
-                            <option value="Parent">Parent</option>
-                            <option value="Sibling">Sibling</option>
-                            <option value="Child">Child</option>
-                            <option value="Relative">Relative</option>
-                            <option value="Neighbor">Neighbor</option>
-                            <option value="Friend">Friend</option>
-                            <option value="Guardian">Guardian</option>
-                            <option value="_other">Other (specify)</option>
+                            <option value="Spouse" {{ $emergencyContactRelationship == 'Spouse' ? 'selected' : '' }}>Spouse</option>
+                            <option value="Mother" {{ $emergencyContactRelationship == 'Mother' ? 'selected' : '' }}>Mother</option>
+                            <option value="Father" {{ $emergencyContactRelationship == 'Father' ? 'selected' : '' }}>Father</option>
+                            <option value="Parent" {{ $emergencyContactRelationship == 'Parent' ? 'selected' : '' }}>Parent</option>
+                            <option value="Sibling" {{ $emergencyContactRelationship == 'Sibling' ? 'selected' : '' }}>Sibling</option>
+                            <option value="Child" {{ $emergencyContactRelationship == 'Child' ? 'selected' : '' }}>Child</option>
+                            <option value="Relative" {{ $emergencyContactRelationship == 'Relative' ? 'selected' : '' }}>Relative</option>
+                            <option value="Neighbor" {{ $emergencyContactRelationship == 'Neighbor' ? 'selected' : '' }}>Neighbor</option>
+                            <option value="Friend" {{ $emergencyContactRelationship == 'Friend' ? 'selected' : '' }}>Friend</option>
+                            <option value="Guardian" {{ $emergencyContactRelationship == 'Guardian' ? 'selected' : '' }}>Guardian</option>
+                            <option value="_other" {{ !in_array($emergencyContactRelationship, ['Spouse', 'Mother', 'Father', 'Parent', 'Sibling', 'Child', 'Relative', 'Neighbor', 'Friend', 'Guardian']) && $emergencyContactRelationship ? 'selected' : '' }}>Other (specify)</option>
                         </select>
-                        <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{ old('emergency_contact_relationship') }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Enter relationship (Example: Spouse, Parent)" style="display: none;">
+                        <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{ $emergencyContactRelationship }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" placeholder="Enter relationship (Example: Spouse, Parent)" {{ isset($resident) && $resident->emergency_contact_relationship ? 'readonly' : '' }} style="{{ isset($resident) && $resident->emergency_contact_relationship ? 'display: block;' : ($emergencyContactRelationship ? 'display: block;' : 'display: none;') }}">
+                        @if(isset($resident) && $resident->emergency_contact_relationship)
+                            <input type="hidden" name="emergency_contact_relationship" value="{{ $emergencyContactRelationship }}">
+                        @endif
                     </div>
                     <div>
                         <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                        @php
+                            $emergencyContactNumber = old('emergency_contact_number');
+                            if (isset($resident) && $resident->emergency_contact_number) {
+                                $emergencyContactNumber = $resident->emergency_contact_number;
+                            }
+                        @endphp
                         <input id="emergency_contact_number" name="emergency_contact_number" type="number"
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                            placeholder="Example: 09191234567" min="0" pattern="[0-9]*" inputmode="numeric" value="{{ old('emergency_contact_number') }}">
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
+                            placeholder="Example: 09191234567" min="0" pattern="[0-9]*" inputmode="numeric" value="{{ $emergencyContactNumber }}" {{ isset($resident) && $resident->emergency_contact_number ? 'readonly' : '' }}>
                     </div>
                 </div>
             </div>

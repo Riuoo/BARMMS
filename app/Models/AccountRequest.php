@@ -11,6 +11,7 @@ class AccountRequest extends Model
 
     protected $fillable = [
         'barangay_profile_id',
+        'resident_id',
         'email',
         'first_name',
         'middle_name',
@@ -28,4 +29,12 @@ class AccountRequest extends Model
     protected $casts = [
         'verification_documents' => 'array',
     ];
+
+    /**
+     * Get the resident associated with this account request.
+     */
+    public function resident()
+    {
+        return $this->belongsTo(Residents::class, 'resident_id');
+    }
 }

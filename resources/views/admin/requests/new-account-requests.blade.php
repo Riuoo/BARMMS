@@ -221,6 +221,13 @@
                                                     <div class="text-sm font-semibold text-gray-900 mb-1">{{ $request->full_name }}</div>
                                                 @endif
                                                 <div class="text-sm text-gray-600">{{ $request->email }}</div>
+                                                @if($request->resident_id && $request->resident)
+                                                    <div class="mt-2">
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                            <i class="fas fa-link mr-1"></i>Linked to Existing Resident Profile
+                                                        </span>
+                                                    </div>
+                                                @endif
                                                 @if($request->status === 'pending')
                                                     @if(isset($request->duplicate_by_email) && $request->duplicate_by_email)
                                                         <div class="mt-2">
@@ -368,6 +375,13 @@
                                 @endif
                                 <p class="text-sm text-gray-600 truncate mb-1">{{ $request->email }}</p>
                                 <p class="text-xs text-gray-500 truncate">New Account Request</p>
+                                @if($request->resident_id && $request->resident)
+                                    <div class="mt-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                            <i class="fas fa-link mr-1"></i>Linked to Existing Resident Profile
+                                        </span>
+                                    </div>
+                                @endif
                                 @if($request->status === 'pending')
                                     @if(isset($request->duplicate_by_email) && $request->duplicate_by_email)
                                         <div class="mt-2">

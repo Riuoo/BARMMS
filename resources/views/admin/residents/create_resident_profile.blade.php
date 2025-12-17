@@ -77,8 +77,8 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-                            <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Optional">
                             <p id="email-warning" class="mt-2 text-sm text-red-600 hidden"></p>
                         </div>
                     </div>
@@ -92,8 +92,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
-                            <input type="number" id="contact_number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Example: 9191234567" min="0" pattern="[0-9]*" inputmode="numeric" required>
+                            <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                            <input type="number" id="contact_number" name="contact_number" value="{{ old('contact_number') }}" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Optional (Example: 9191234567)" min="0" pattern="[0-9]*" inputmode="numeric">
                         </div>
                     </div>
                     @php

@@ -34,7 +34,7 @@ class AccountRequestController
         if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
-        $accountRequests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'completed', 'rejected')")->orderByDesc('created_at')->paginate(10);
+        $accountRequests = $query->with('resident')->orderByRaw("FIELD(status, 'pending', 'approved', 'completed', 'rejected')")->orderByDesc('created_at')->paginate(10);
         
         // Check for duplicates and residency for each pending request
         foreach ($accountRequests as $accountRequest) {
@@ -153,6 +153,16 @@ class AccountRequestController
             // Update status to 'approved' and save the approver id
             $accountRequest->status = 'approved';
             $accountRequest->save();
+
+            // If account request is linked to an existing resident, update the resident's email
+            if ($accountRequest->resident_id) {
+                $resident = Residents::find($accountRequest->resident_id);
+                if ($resident) {
+                    $resident->email = $accountRequest->email;
+                    $resident->save();
+                    Log::info('Updated resident email for resident_id: ' . $resident->id . ' with email: ' . $accountRequest->email);
+                }
+            }
 
             // Generate the full registration link for the email
             $registrationLink = route('register.form', ['token' => $accountRequest->token]);

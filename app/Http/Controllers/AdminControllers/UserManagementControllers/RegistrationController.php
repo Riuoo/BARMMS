@@ -12,7 +12,7 @@ class RegistrationController
 {
     public function showRegistrationForm($token)
     {
-        $accountRequest = AccountRequest::where('token', $token)->where('status', 'approved')->first();
+        $accountRequest = AccountRequest::with('resident')->where('token', $token)->where('status', 'approved')->first();
 
         if (!$accountRequest) {
             notify()->error('Invalid registration link.');
@@ -20,7 +20,12 @@ class RegistrationController
             
         }
 
-        return view('login.signup', compact('token', 'accountRequest'));
+        $resident = null;
+        if ($accountRequest->resident_id && $accountRequest->resident) {
+            $resident = $accountRequest->resident;
+        }
+
+        return view('login.signup', compact('token', 'accountRequest', 'resident'));
     }
 
     public function register(Request $request)
@@ -53,7 +58,25 @@ class RegistrationController
                         }
                     },
                 ],
-                'email' => 'required|email|max:255|unique:residents,email',
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    function ($attribute, $value, $fail) use ($request) {
+                        $accountRequest = AccountRequest::where('token', $request->token)->where('status', 'approved')->first();
+                        if ($accountRequest && $accountRequest->resident_id) {
+                            // If linked to existing resident, allow same email
+                            $resident = Residents::find($accountRequest->resident_id);
+                            if ($resident && $resident->email === $value) {
+                                return; // Same email is allowed for existing resident
+                            }
+                        }
+                        // Check uniqueness for new residents
+                        if (Residents::where('email', $value)->exists()) {
+                            $fail('The email has already been taken.');
+                        }
+                    },
+                ],
                 'address' => 'required|string|max:500',
                 'gender' => 'required|in:Male,Female',
                 'contact_number' => 'required|string|max:255',
@@ -78,39 +101,51 @@ class RegistrationController
                 return back()->withErrors($validator)->withInput();
             }
 
-            $accountRequest = AccountRequest::where('token', $request->token)->where('status', 'approved')->first();
+            $accountRequest = AccountRequest::with('resident')->where('token', $request->token)->where('status', 'approved')->first();
 
             if (!$accountRequest) {
                 notify()->error('Invalid registration link.');
                 return redirect()->route('landing');
             }
 
-            // Create a new Residents user with all demographic information
-            $user = Residents::create([
-                'first_name' => $request->first_name,
-                'middle_name' => !empty(trim($request->middle_name ?? '')) ? trim($request->middle_name) : null,
-                'last_name' => $request->last_name,
-                'suffix' => !empty(trim($request->suffix ?? '')) ? trim($request->suffix) : null,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => 'resident',
-                'address' => $request->address,
-                'gender' => $request->gender,
-                'contact_number' => $request->contact_number,
-                'birth_date' => $request->birth_date,
-                'marital_status' => $request->marital_status,
-                'occupation' => $request->occupation,
-                'age' => $request->age,
-                'family_size' => $request->family_size,
-                'education_level' => $request->education_level,
-                'income_level' => $request->income_level,
-                'employment_status' => $request->employment_status,
-                'is_pwd' => (bool) $request->is_pwd,
-                'emergency_contact_name' => $request->emergency_contact_name,
-                'emergency_contact_number' => $request->emergency_contact_number,
-                'emergency_contact_relationship' => $request->emergency_contact_relationship,
-                'active' => true,
-            ]);
+            // Check if account request is linked to an existing resident
+            if ($accountRequest->resident_id && $accountRequest->resident) {
+                // Update existing resident record
+                $resident = $accountRequest->resident;
+                $resident->email = $request->email;
+                $resident->contact_number = $request->contact_number;
+                $resident->password = Hash::make($request->password);
+                $resident->active = true;
+                $resident->save();
+                $user = $resident;
+            } else {
+                // Create a new Residents user with all demographic information
+                $user = Residents::create([
+                    'first_name' => $request->first_name,
+                    'middle_name' => !empty(trim($request->middle_name ?? '')) ? trim($request->middle_name) : null,
+                    'last_name' => $request->last_name,
+                    'suffix' => !empty(trim($request->suffix ?? '')) ? trim($request->suffix) : null,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'role' => 'resident',
+                    'address' => $request->address,
+                    'gender' => $request->gender,
+                    'contact_number' => $request->contact_number,
+                    'birth_date' => $request->birth_date,
+                    'marital_status' => $request->marital_status,
+                    'occupation' => $request->occupation,
+                    'age' => $request->age,
+                    'family_size' => $request->family_size,
+                    'education_level' => $request->education_level,
+                    'income_level' => $request->income_level,
+                    'employment_status' => $request->employment_status,
+                    'is_pwd' => (bool) $request->is_pwd,
+                    'emergency_contact_name' => $request->emergency_contact_name,
+                    'emergency_contact_number' => $request->emergency_contact_number,
+                    'emergency_contact_relationship' => $request->emergency_contact_relationship,
+                    'active' => true,
+                ]);
+            }
 
             $accountRequest->status = 'completed';
             $accountRequest->token = null;

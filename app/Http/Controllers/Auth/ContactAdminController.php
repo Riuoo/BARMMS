@@ -62,33 +62,41 @@ class ContactAdminController
         })));
         $fullName = preg_replace('/\s+/', ' ', $fullName); // Remove extra spaces
 
-        // Check if the full name already exists in the residents table (case-insensitive)
-        // Try exact match first
-        $duplicateByName = Residents::whereRaw(
+        // Check if the name matches an existing resident using fuzzy matching
+        $matchedResident = null;
+        
+        // Try exact match first (case-insensitive)
+        $matchedResident = Residents::whereRaw(
             "LOWER(TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')))) = ?",
             [strtolower($fullName)]
         )->first();
         
-        // If no exact match, try partial match
-        if (!$duplicateByName) {
-            $duplicateByName = Residents::whereRaw(
+        // If no exact match, try partial/fuzzy match
+        if (!$matchedResident) {
+            $matchedResident = Residents::whereRaw(
                 "LOWER(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))) LIKE ?",
                 ['%' . strtolower($fullName) . '%']
             )->first();
         }
         
-        // Also check without middle name (first + last only)
-        if (!$duplicateByName) {
+        // Also check without middle name (first + last only) for fuzzy matching
+        if (!$matchedResident) {
             $firstLast = trim($request->first_name . ' ' . $request->last_name);
-            $duplicateByName = Residents::whereRaw(
+            $matchedResident = Residents::whereRaw(
                 "LOWER(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, ''))) LIKE ?",
                 ['%' . strtolower($firstLast) . '%']
             )->first();
         }
 
-        if ($duplicateByName) {
-            notify()->error('This full name is already registered. Please visit the barangay office for verification.');
-            return back()->withInput();
+        // If name matches an existing resident
+        if ($matchedResident) {
+            // Check if resident already has an email
+            if (!empty($matchedResident->email)) {
+                notify()->error('This name already has an existing account. Please verify at the barangay office.');
+                return back()->withInput();
+            }
+            // If resident has no email, we'll link the account request to this resident
+            // The resident_id will be stored in the account request below
         }
 
         // Check if the email already exists in the residents table
@@ -141,6 +149,7 @@ class ContactAdminController
                 'status' => 'pending',
                 'token' => Str::uuid(),
                 'verification_documents' => $verificationDocuments,
+                'resident_id' => $matchedResident ? $matchedResident->id : null,
             ]);
             notify()->success('Your account request was submitted successfully! Please check your email for updates from the administrator.');
             return back();
