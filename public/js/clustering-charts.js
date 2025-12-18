@@ -38,6 +38,7 @@ function prepareAnalyticsChartData() {
     }
 
     const characteristics = window.clusteringData.characteristics;
+    const category = window.clusteringData.category || 'demographics';
     const colors = (window.clusteringConfig && window.clusteringConfig.colors && window.clusteringConfig.colors.clusters)
         ? window.clusteringConfig.colors.clusters
         : ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
@@ -55,13 +56,18 @@ function prepareAnalyticsChartData() {
         const avgFamilySize = cluster.avg_family_size || 4;
         const familySizes = generateFamilySizeArray(avgFamilySize, cluster.size || 0);
         
+        // Build label with purok information
+        const purok = cluster.purok && cluster.purok !== 'N/A' ? `Purok ${cluster.purok.toUpperCase()} · ` : '';
+        const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
+        
         return {
-            label: `Cluster ${index + 1}`,
+            label: `${purok}Cluster ${index + 1}`,
             color: colors[index % colors.length],
             size: cluster.size || 0,
             total: cluster.size || 0,
             ages: ages,
             familySizes: familySizes,
+            purok: cluster.purok || 'N/A',
             incomes: {
                 'Low': incomeDistribution['Low'] || 0,
                 'Lower Middle': incomeDistribution['Lower Middle'] || 0,
@@ -234,7 +240,7 @@ function initializeAgeChart(chartData) {
     const ctx = document.getElementById('ageChart');
     if (!ctx) return;
 
-    const ageRanges = ['0-20', '21-40', '41-60', '61-80', '80+'];
+    const ageRanges = ['0-20 years old', '21-40 years old', '41-60 years old', '61-80 years old', '80+ years old'];
     const ageColors = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
     
     const datasets = chartData.map((data, idx) => {

@@ -58,13 +58,21 @@
                 </a>
                 <h2 class="text-3xl font-bold text-gray-900 text-center flex-1 mr-8">Contact Administrator</h2>
             </div>
-            <p class="text-gray-600 mb-6 text-center">Please provide your information below to request an account. The administrator will review your request and contact you with a link to complete your account creation.</p>
+            <p class="text-gray-600 mb-2 text-center">
+                Please provide your information below to request an account. The administrator will review your request and, if approved, send you a link to complete your account creation.
+            </p>
+            <p class="text-xs text-gray-500 mb-6 text-center">
+                Your name must match an existing resident record in the barangay system, and you must upload a clear photo of a valid ID or official document for verification.
+            </p>
            <form action="{{ route('admin.contact.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 
                 <!-- Full Name Section -->
                 <div class="space-y-4">
                     <h3 class="text-lg font-medium text-gray-900">Personal Information</h3>
+                    <p class="text-xs text-gray-500">
+                        Enter your name exactly as it appears in the barangay resident records. If your details are not yet encoded, please visit the barangay office before submitting this request.
+                    </p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>

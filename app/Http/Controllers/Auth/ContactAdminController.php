@@ -88,15 +88,16 @@ class ContactAdminController
             )->first();
         }
 
-        // If name matches an existing resident
-        if ($matchedResident) {
-            // Check if resident already has an email
-            if (!empty($matchedResident->email)) {
-                notify()->error('This name already has an existing account. Please verify at the barangay office.');
-                return back()->withInput();
-            }
-            // If resident has no email, we'll link the account request to this resident
-            // The resident_id will be stored in the account request below
+        // Enforce that the name must exist in resident records
+        if (!$matchedResident) {
+            notify()->error('We could not find your name in the barangay resident records. Please visit the barangay office to verify or update your information before requesting an account.');
+            return back()->withInput();
+        }
+
+        // If name matches an existing resident, ensure they don't already have an account
+        if (!empty($matchedResident->email)) {
+            notify()->error('This name already has an existing account. Please verify at the barangay office.');
+            return back()->withInput();
         }
 
         // Check if the email already exists in the residents table

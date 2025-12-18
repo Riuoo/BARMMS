@@ -258,7 +258,10 @@
                 return;
             }
             
-            const residentLabels = residentDemographicsData.map(item => item.age_bracket || 'Unknown');
+            const residentLabels = residentDemographicsData.map(item => {
+                const bracket = item.age_bracket || 'Unknown';
+                return bracket === 'Unknown' ? bracket : `${bracket} years old`;
+            });
             const residentCounts = residentDemographicsData.map(item => item.count);
 
             // Validate that we have data to display

@@ -75,8 +75,12 @@ function prepareClusterChartData() {
         ? window.clusteringConfig.colors.clusters 
         : ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
 
+    const category = clusteringData.category || 'demographics';
+    const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
+
     clusteringData.characteristics.forEach((cluster, index) => {
-        labels.push(`Cluster ${index + 1}`);
+        const purok = cluster.purok && cluster.purok !== 'N/A' ? `Purok ${cluster.purok.toUpperCase()} · ` : '';
+        labels.push(`${purok}Cluster ${index + 1}`);
         data.push(cluster.size || 0);
     });
 
@@ -312,8 +316,8 @@ function generateClusterModalContent(payload) {
                     <p class="text-lg font-bold text-indigo-600">${formatOneDecimal(cluster.avg_family_size)}</p>
                 </div>
                 <div class="bg-gray-50 p-3 rounded">
-                    <h4 class="font-semibold text-gray-700">Most Common Purok</h4>
-                    <p class="text-lg font-bold text-rose-600">${cluster.most_common_purok || 'N/A'}</p>
+                    <h4 class="font-semibold text-gray-700">Purok</h4>
+                    <p class="text-lg font-bold text-rose-600">${purokDisplay}</p>
                 </div>
             </div>
 

@@ -4,6 +4,75 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Blotter Payment Terms Modal (access gate) -->
+    <div
+        id="blotterPaymentModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="blotterPaymentModalTitle"
+    >
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6 border border-gray-200">
+            <div class="flex items-start mb-4">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                    <i class="fas fa-file-invoice-dollar text-red-600"></i>
+                </div>
+                <div>
+                    <h2 id="blotterPaymentModalTitle" class="text-xl font-semibold text-gray-900">
+                        Blotter Request Payment Terms
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Before you can file a blotter report, please review and agree to the payment terms for this service.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-4 space-y-2 text-sm text-gray-700">
+                <p class="font-medium text-gray-900">
+                    Important details:
+                </p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>A standard processing fee may apply for each blotter request filed.</li>
+                    <li>All fees are <span class="font-semibold">non-refundable</span> once the request has been submitted and processed.</li>
+                    <li>Additional charges may apply for certified copies or follow-up documents related to this case.</li>
+                    <li>Payment will be settled at the barangay office upon confirmation of your request, unless otherwise instructed.</li>
+                </ul>
+                <p class="mt-2 text-xs text-gray-500">
+                    For questions about fees, you may contact the barangay office before submitting your request.
+                </p>
+            </div>
+
+            <div class="flex items-start mb-4">
+                <input
+                    id="agreePaymentTerms"
+                    type="checkbox"
+                    class="mt-1 mr-3 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                >
+                <label for="agreePaymentTerms" class="text-sm text-gray-700">
+                    I have read and understood the <span class="font-semibold">payment terms</span> for blotter requests and
+                    I agree to any applicable fees that may be charged by the barangay.
+                </label>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <a
+                    href="{{ route('resident.my-requests') }}"
+                    class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition duration-200"
+                >
+                    Cancel
+                </a>
+                <button
+                    id="continueToBlotterBtn"
+                    type="button"
+                    class="px-5 py-2 text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+                    disabled
+                >
+                    I Agree &amp; Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Consolidated Form Skeleton -->
     <div id="rbFormSkeleton">
         @include('components.loading.resident-request-form-skeleton', ['variant' => 'blotter'])
@@ -240,6 +309,26 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Blotter payment terms modal gate
+    const paymentModal = document.getElementById('blotterPaymentModal');
+    const agreePaymentTerms = document.getElementById('agreePaymentTerms');
+    const continueToBlotterBtn = document.getElementById('continueToBlotterBtn');
+
+    if (paymentModal && agreePaymentTerms && continueToBlotterBtn) {
+        // Ensure page content cannot be interacted with until terms are accepted
+        continueToBlotterBtn.disabled = !agreePaymentTerms.checked;
+
+        agreePaymentTerms.addEventListener('change', function () {
+            continueToBlotterBtn.disabled = !this.checked;
+        });
+
+        continueToBlotterBtn.addEventListener('click', function () {
+            // Hide the modal and allow access to the form
+            paymentModal.classList.add('hidden');
+            paymentModal.setAttribute('aria-hidden', 'true');
+        });
+    }
+
     // Skeleton transition
     setTimeout(() => {
         const fs = document.getElementById('rbFormSkeleton');

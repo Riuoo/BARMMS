@@ -23,6 +23,9 @@
             <div>
                 <h1 class="text-3xl font-bold text-gray-900">Account Requests</h1>
                 <p class="text-gray-600">Review and approve new account applications</p>
+                <p class="text-xs text-gray-500 mt-1">
+                    For each request, compare the uploaded verification documents (ID or official papers) with the linked resident profile before approving.
+                </p>
             </div>
         </div>
     </div>

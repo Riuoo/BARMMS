@@ -4,6 +4,73 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Document Payment Terms Modal (access gate) -->
+    <div
+        id="documentPaymentModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="documentPaymentModalTitle"
+    >
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6 border border-gray-200">
+            <div class="flex items-start mb-4">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                    <i class="fas fa-file-invoice-dollar text-blue-600"></i>
+                </div>
+                <div>
+                    <h2 id="documentPaymentModalTitle" class="text-xl font-semibold text-gray-900">
+                        Document Request Payment Terms
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Before you can request a document, please review and agree to the payment information for this service.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-4 space-y-2 text-sm text-gray-700">
+                <p class="font-medium text-gray-900">
+                    Important details:
+                </p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Some document types may have a standard processing fee.</li>
+                    <li>Any applicable fees are usually <span class="font-semibold">non-refundable</span> once processing has started.</li>
+                    <li>Additional charges may apply for certified copies or rush processing, depending on the document.</li>
+                </ul>
+                <p class="mt-2 text-xs text-gray-500">
+                    <span class="font-semibold text-gray-700">Note:</span> Not all documents require a fee. The barangay staff will inform you if your selected document has any associated charges.
+                </p>
+            </div>
+
+            <div class="flex items-start mb-4">
+                <input
+                    id="agreeDocumentPaymentTerms"
+                    type="checkbox"
+                    class="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                >
+                <label for="agreeDocumentPaymentTerms" class="text-sm text-gray-700">
+                    I have read and understood the payment information for document requests and I agree to any applicable fees that may be charged for my selected document.
+                </label>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <a
+                    href="{{ route('resident.my-requests') }}"
+                    class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition duration-200"
+                >
+                    Cancel
+                </a>
+                <button
+                    id="continueToDocumentBtn"
+                    type="button"
+                    class="px-5 py-2 text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+                    disabled
+                >
+                    I Agree &amp; Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Consolidated Form Skeleton -->
     <div id="rdFormSkeleton">
         @include('components.loading.resident-request-form-skeleton', ['variant' => 'document'])
@@ -188,8 +255,26 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Document payment terms modal gate
+    const documentPaymentModal = document.getElementById('documentPaymentModal');
+    const agreeDocumentPaymentTerms = document.getElementById('agreeDocumentPaymentTerms');
+    const continueToDocumentBtn = document.getElementById('continueToDocumentBtn');
+
+    if (documentPaymentModal && agreeDocumentPaymentTerms && continueToDocumentBtn) {
+        continueToDocumentBtn.disabled = !agreeDocumentPaymentTerms.checked;
+
+        agreeDocumentPaymentTerms.addEventListener('change', function () {
+            continueToDocumentBtn.disabled = !this.checked;
+        });
+
+        continueToDocumentBtn.addEventListener('click', function () {
+            documentPaymentModal.classList.add('hidden');
+            documentPaymentModal.setAttribute('aria-hidden', 'true');
+        });
+    }
+
     setTimeout(() => {
-        const fs = document.getElementById('residentRequestFormSkeleton');
+        const fs = document.getElementById('rdFormSkeleton');
         const content = document.getElementById('rdContent');
         if (fs) fs.style.display = 'none';
         if (content) content.style.display = 'block';

@@ -367,19 +367,23 @@ class PythonAnalyticsService
 
     /**
      * Build samples from residents for clustering
+     * CATEGORY-SPECIFIC: Uses ONLY demographic features
+     * Features: age, family_size, education_level, income_level, employment_status, is_pwd
+     * Does NOT include blotter or medical data
      */
     public function buildSamplesFromResidents($residents): array
     {
         $samples = [];
         
         foreach ($residents as $resident) {
+            // Feature vector: ONLY demographic data (6 features)
             $samples[] = [
-                floatval($resident->age ?? 0),
-                floatval($resident->family_size ?? 0),
-                $this->encodeEducation($resident->education_level ?? ''),
-                $this->encodeIncome($resident->income_level ?? ''),
-                $this->encodeEmployment($resident->employment_status ?? ''),
-                $this->encodePWD($resident->is_pwd ?? false)
+                floatval($resident->age ?? 0),                                    // Feature 1: Age
+                floatval($resident->family_size ?? 0),                           // Feature 2: Family size
+                $this->encodeEducation($resident->education_level ?? ''),        // Feature 3: Education level
+                $this->encodeIncome($resident->income_level ?? ''),              // Feature 4: Income level
+                $this->encodeEmployment($resident->employment_status ?? ''),      // Feature 5: Employment status
+                $this->encodePWD($resident->is_pwd ?? false)                     // Feature 6: PWD status
             ];
         }
         
@@ -430,7 +434,9 @@ class PythonAnalyticsService
 
     /**
      * Build samples from blotter data for clustering
-     * Features: total count, type distribution, status distribution
+     * CATEGORY-SPECIFIC: Uses ONLY blotter-related features
+     * Features: total_count, most_common_type, pending_count, approved_count, completed_count
+     * Does NOT include demographic data (age, income, employment, etc.)
      */
     public function buildSamplesFromBlotterData($residents, $blotterData): array
     {
@@ -444,7 +450,7 @@ class PythonAnalyticsService
                 'status_distribution' => []
             ];
             
-            // Encode blotter type (common types)
+            // Encode blotter type (common types) - BLOTTER-SPECIFIC ONLY
             $typeEncoding = [
                 'Theft' => 1,
                 'Assault' => 2,
@@ -462,23 +468,18 @@ class PythonAnalyticsService
                 $mostCommonType = array_key_first($blotterInfo['type_distribution']) ?? 'Other';
             }
             
-            // Encode status distribution
-            $statusEncoding = [
-                'pending' => 0,
-                'approved' => 1,
-                'completed' => 2,
-            ];
-            
+            // Encode status distribution - BLOTTER-SPECIFIC ONLY
             $pendingCount = $blotterInfo['status_distribution']['pending'] ?? 0;
             $approvedCount = $blotterInfo['status_distribution']['approved'] ?? 0;
             $completedCount = $blotterInfo['status_distribution']['completed'] ?? 0;
             
+            // Feature vector: ONLY blotter data (5 features)
             $samples[] = [
-                floatval($blotterInfo['total_count']),
-                floatval($typeEncoding[$mostCommonType] ?? 7),
-                floatval($pendingCount),
-                floatval($approvedCount),
-                floatval($completedCount),
+                floatval($blotterInfo['total_count']),           // Feature 1: Total blotter reports
+                floatval($typeEncoding[$mostCommonType] ?? 7),   // Feature 2: Most common type
+                floatval($pendingCount),                         // Feature 3: Pending count
+                floatval($approvedCount),                        // Feature 4: Approved count
+                floatval($completedCount),                      // Feature 5: Completed count
             ];
         }
         
@@ -537,7 +538,9 @@ class PythonAnalyticsService
 
     /**
      * Build samples from medical records data for clustering
-     * Features: total count, consultation type distribution, recent activity
+     * CATEGORY-SPECIFIC: Uses ONLY medical-related features
+     * Features: total_count, most_common_consultation_type, recent_count, has_follow_up
+     * Does NOT include demographic data (age, income, employment, etc.) or blotter data
      */
     public function buildSamplesFromMedicalRecordsData($residents, $medicalData): array
     {
@@ -552,7 +555,7 @@ class PythonAnalyticsService
                 'has_follow_up' => 0,
             ];
             
-            // Encode consultation type (common types)
+            // Encode consultation type (common types) - MEDICAL-SPECIFIC ONLY
             $typeEncoding = [
                 'General Check-up' => 1,
                 'Emergency' => 2,
@@ -570,15 +573,91 @@ class PythonAnalyticsService
                 $mostCommonType = array_key_first($medicalInfo['type_distribution']) ?? 'Other';
             }
             
+            // Feature vector: ONLY medical data (4 features)
             $samples[] = [
-                floatval($medicalInfo['total_count']),
-                floatval($typeEncoding[$mostCommonType] ?? 7),
-                floatval($medicalInfo['recent_count']),
-                floatval($medicalInfo['has_follow_up']),
+                floatval($medicalInfo['total_count']),                    // Feature 1: Total medical records
+                floatval($typeEncoding[$mostCommonType] ?? 7),            // Feature 2: Most common consultation type
+                floatval($medicalInfo['recent_count']),                   // Feature 3: Recent consultations (last 30 days)
+                floatval($medicalInfo['has_follow_up']),                 // Feature 4: Has follow-up scheduled
             ];
         }
         
         return $samples;
+    }
+
+    /**
+     * Build samples from purok-aggregated risk data for combined clustering
+     * Features: [blotter_count, demographic_score, medical_count, medicine_count]
+     * All features are normalized to 0-1 scale
+     */
+    public function buildPurokRiskFeatures(array $purokData): array
+    {
+        if (empty($purokData)) {
+            return [];
+        }
+
+        // Extract all values for normalization
+        $blotterCounts = array_column($purokData, 'blotter_count');
+        $demographicScores = array_column($purokData, 'demographic_score');
+        $medicalCounts = array_column($purokData, 'medical_count');
+        $medicineCounts = array_column($purokData, 'medicine_count');
+
+        // Calculate min/max for each feature
+        $blotterMin = min($blotterCounts);
+        $blotterMax = max($blotterCounts);
+        $demographicMin = min($demographicScores);
+        $demographicMax = max($demographicScores);
+        $medicalMin = min($medicalCounts);
+        $medicalMax = max($medicalCounts);
+        $medicineMin = min($medicineCounts);
+        $medicineMax = max($medicineCounts);
+
+        $samples = [];
+        foreach ($purokData as $data) {
+            // Normalize each feature to 0-1 scale
+            $normalizedBlotter = $this->normalizeValue(
+                $data['blotter_count'], 
+                $blotterMin, 
+                $blotterMax
+            );
+            $normalizedDemographic = $this->normalizeValue(
+                $data['demographic_score'], 
+                $demographicMin, 
+                $demographicMax
+            );
+            $normalizedMedical = $this->normalizeValue(
+                $data['medical_count'], 
+                $medicalMin, 
+                $medicalMax
+            );
+            $normalizedMedicine = $this->normalizeValue(
+                $data['medicine_count'], 
+                $medicineMin, 
+                $medicineMax
+            );
+
+            $samples[] = [
+                floatval($normalizedBlotter),
+                floatval($normalizedDemographic),
+                floatval($normalizedMedical),
+                floatval($normalizedMedicine),
+            ];
+        }
+
+        return $samples;
+    }
+
+    /**
+     * Normalize a value to 0-1 scale using min-max normalization
+     */
+    private function normalizeValue(float $value, float $min, float $max): float
+    {
+        // Handle case where all values are the same
+        if ($max - $min == 0) {
+            return 0.5; // Return middle value
+        }
+        
+        return ($value - $min) / ($max - $min);
     }
 }
 
