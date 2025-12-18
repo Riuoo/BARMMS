@@ -1859,12 +1859,12 @@
                                     <span>Patient Profile Lookup</span>
                                 </button>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.vaccination-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.vaccination-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Vaccination Records</span>
                                 </a>
-                            </li>
+                            </li> -->
                             <li>
                                 <a href="{{ route('admin.medical-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medical-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medical-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
@@ -1940,12 +1940,12 @@
                                     <span>Resident Demographic Analysis</span>
                                 </a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a href="{{ route('admin.decision-tree') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.decision-tree*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.decision-tree*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-sitemap fa-fw mr-3 {{ request()->routeIs('admin.decision-tree*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Resident Classification & Prediction</span>
                                 </a>
-                            </li>
+                            </li> -->
                         </ul>
                     </section>
                     @endif
@@ -2122,12 +2122,12 @@
                                     <span>Patient Profile Lookup</span>
                                 </button>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.vaccination-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Vaccination Records</span>
                                 </a>
-                            </li>
+                            </li> -->
                             <li>
                                 <a href="{{ route('admin.medical-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.medical-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
@@ -2203,12 +2203,12 @@
                                     <span>Resident Demographic Analysis</span>
                                 </a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a href="{{ route('admin.decision-tree') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.decision-tree*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-sitemap fa-fw mr-3 {{ request()->routeIs('admin.decision-tree*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
                                     <span>Resident Classification & Prediction</span>
                                 </a>
-                            </li>
+                            </li> -->
                         </ul>
                     </section>
                     @endif

@@ -155,6 +155,54 @@ DB_PASSWORD=STRONG_PASSWORD_HERE
 
 Create a Managed MySQL or PostgreSQL database in DigitalOcean and use the connection info they provide in `.env` (host, port, username, password, dbname, SSL options if needed).
 
+**Important:** Do **NOT** use MySQL `root` user in your Laravel `.env` file. MySQL 8.0+ uses Unix socket authentication (`auth_socket`) for root by default, which will cause `SQLSTATE[HY000] [1698] Access denied` errors when Laravel tries to connect.
+
+---
+
+#### Troubleshooting: "Access denied for user 'root'@'localhost'" Error
+
+If you see this error:
+
+```
+SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'
+```
+
+This happens because MySQL 8.0+ uses `auth_socket` authentication for the `root` user by default, which only allows connections from the system root user via Unix socket, not password-based connections from PHP/Laravel.
+
+**Solution 1: Use a dedicated MySQL user (Recommended)**
+
+Follow Option A above to create `barmms_user` and use it in your `.env`:
+
+```text
+DB_USERNAME=barmms_user
+DB_PASSWORD=STRONG_PASSWORD_HERE
+```
+
+**Solution 2: Change root to use password authentication (Not recommended for production)**
+
+If you must use root (not recommended), change its authentication method:
+
+```bash
+sudo mysql
+```
+
+Then:
+
+```sql
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'YOUR_ROOT_PASSWORD';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+Then in `.env`:
+
+```text
+DB_USERNAME=root
+DB_PASSWORD=YOUR_ROOT_PASSWORD
+```
+
+**Note:** Using root for application connections is a security risk. Always use a dedicated database user with minimal required privileges.
+
 ---
 
 ### 7. Configure Laravel (.env) and Install PHP Dependencies
@@ -163,6 +211,18 @@ From `/var/www/BARMMS`:
 
 ```bash
 cp .env.example .env
+```
+
+**Note:** If you need to edit `.env` later and don't have write permissions, use `sudo`:
+
+```bash
+sudo nano /var/www/BARMMS/.env
+```
+
+Or use `sudoedit` (safer, uses your editor):
+
+```bash
+sudoedit /var/www/BARMMS/.env
 ```
 
 Edit `.env`:

@@ -84,7 +84,7 @@
             <p>If you believe this is an error or have any questions, please contact the barangay office for assistance.</p>
         </div>
         <div class="footer">
-            <p>Contact us at: <a href="mailto:support@example.com">support@example.com</a></p>
+            <p>Contact us at: <a href="mailto:onelowermalinao@gmail.com">onelowermalinao@gmail.com</a></p>
             <p>&copy; {{ date('Y') }} BARMMS. All rights reserved.</p>
         </div>
     </div>
