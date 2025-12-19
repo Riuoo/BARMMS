@@ -135,22 +135,24 @@
                 </h3>
                 <div class="grid grid-cols-1 gap-6">
                     <div>
-                        <label for="document_type" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="document_template_id" class="block text-sm font-medium text-gray-700 mb-2">
                             Document Type <span class="text-red-500">*</span>
                         </label>
                         <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
-                                id="document_type" 
-                                name="document_type" 
+                                id="document_template_id" 
+                                name="document_template_id" 
                                 required>
                             <option value="">Select a document type</option>
                             @foreach(($templates ?? []) as $t)
-                                <option value="{{ optional($t)->document_type ?? '' }}" {{ old('document_type') == (optional($t)->document_type ?? '') ? 'selected' : '' }}>
+                                <option value="{{ optional($t)->id }}" {{ old('document_template_id') == optional($t)->id ? 'selected' : '' }}>
                                     {{ optional($t)->document_type ?? '' }}
                                 </option>
                             @endforeach
                         </select>
                         <p class="mt-1 text-sm text-gray-500">Choose the type of document you need</p>
                     </div>
+
+                    <input type="hidden" id="document_type" name="document_type" value="">
                 </div>
             </div>
 
@@ -174,18 +176,10 @@
                         <p class="mt-1 text-sm text-gray-500">Provide a clear and specific purpose for your document request</p>
                     </div>
 
-                    <div>
-                        <label for="additional_requirements" class="block text-sm font-medium text-gray-700 mb-2">
-                            Additional Requirements (Optional)
-                        </label>
-                        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" 
-                                  id="additional_requirements" 
-                                  name="additional_requirements" 
-                                  rows="3" 
-                                  placeholder="Enter additional requirements">{{ old('additional_requirements') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Include any special requirements or additional information needed</p>
-                    </div>
                 </div>
+
+                <!-- Template-specific fields will be dynamically loaded here -->
+                <div id="templateFieldsContainer" class="mt-4 space-y-4"></div>
             </div>
 
             <!-- Privacy Consent Section -->
@@ -279,6 +273,192 @@ document.addEventListener('DOMContentLoaded', function() {
         if (fs) fs.style.display = 'none';
         if (content) content.style.display = 'block';
     }, 1000);
+
+    // Template fields loading
+    const templateSelect = document.getElementById('document_template_id');
+    const documentTypeHidden = document.getElementById('document_type');
+    const templateFieldsContainer = document.getElementById('templateFieldsContainer');
+
+    // Load template-specific form fields
+    async function loadTemplateFields(templateId) {
+        if (!templateId || !templateFieldsContainer) {
+            if (templateFieldsContainer) templateFieldsContainer.innerHTML = '';
+            return;
+        }
+
+        try {
+            templateFieldsContainer.innerHTML = '<div class="text-sm text-gray-500 flex items-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading template fields...</div>';
+
+            const url = `{{ url('/resident/templates') }}/${templateId}/form-config`;
+            const res = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+
+            if (!res.ok) {
+                templateFieldsContainer.innerHTML = '<p class="text-sm text-red-500">Failed to load template fields.</p>';
+                return;
+            }
+
+            const data = await res.json();
+            const fields = data.manual_fields || [];
+
+            if (!fields.length) {
+                templateFieldsContainer.innerHTML = '<p class="text-sm text-gray-500">No additional details required for this template.</p>';
+                return;
+            }
+
+            // Build form inputs dynamically
+            let html = '<div class="mt-4 pt-4 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-700 mb-3">Additional Information</h4>';
+            fields.forEach(field => {
+                const inputName = `template_fields[${field.name}]`;
+                const label = field.label || field.name.replace(/_/g, ' ');
+                const requiredAttr = field.required ? 'required' : '';
+                const fieldId = `template_field_${field.name}`;
+                const autoFilled = field.auto_filled || false;
+                const autoFillClass = autoFilled ? 'bg-blue-50 border-blue-200' : '';
+
+                if (field.type === 'textarea') {
+                    html += `
+                        <div class="mb-4">
+                            <label for="${fieldId}" class="block text-sm font-medium text-gray-700 mb-1">
+                                ${label}${field.required ? ' <span class="text-red-500">*</span>' : ''}
+                            </label>
+                            <textarea
+                                id="${fieldId}"
+                                name="${inputName}"
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${autoFillClass}"
+                                ${requiredAttr}
+                                placeholder="${field.placeholder || ''}"
+                                data-auto-filled="${autoFilled}"
+                                data-source="${field.source || ''}"
+                            ></textarea>
+                        </div>
+                    `;
+                } else if (field.type === 'select' && Array.isArray(field.options)) {
+                    html += `
+                        <div class="mb-4">
+                            <label for="${fieldId}" class="block text-sm font-medium text-gray-700 mb-1">
+                                ${label}${field.required ? ' <span class="text-red-500">*</span>' : ''}
+                            </label>
+                            <select
+                                id="${fieldId}"
+                                name="${inputName}"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${autoFillClass}"
+                                ${requiredAttr}
+                                data-auto-filled="${autoFilled}"
+                                data-source="${field.source || ''}"
+                            >
+                                <option value="">Select...</option>
+                                ${field.options.map(opt => `
+                                    <option value="${opt.value}">${opt.label}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    const inputType = field.type === 'number' ? 'number' : (field.type === 'date' ? 'date' : (field.type === 'time' ? 'time' : 'text'));
+                    const numberAttrs = field.type === 'number' ? `min="${field.min || 0}" step="${field.step || 1}"` : '';
+                    html += `
+                        <div class="mb-4">
+                            <label for="${fieldId}" class="block text-sm font-medium text-gray-700 mb-1">
+                                ${label}${field.required ? ' <span class="text-red-500">*</span>' : ''}
+                            </label>
+                            <input
+                                type="${inputType}"
+                                id="${fieldId}"
+                                name="${inputName}"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${autoFillClass}"
+                                ${requiredAttr}
+                                ${numberAttrs}
+                                placeholder="${field.placeholder || ''}"
+                                data-auto-filled="${autoFilled}"
+                                data-source="${field.source || ''}"
+                            />
+                        </div>
+                    `;
+                }
+            });
+            html += '</div>';
+            templateFieldsContainer.innerHTML = html;
+            
+            // Populate auto-filled fields from resident data
+            await populateAutoFilledFields();
+        } catch (e) {
+            console.error('Error loading template fields', e);
+            templateFieldsContainer.innerHTML = '<p class="text-sm text-red-500">Error loading template fields.</p>';
+        }
+    }
+
+    // Populate auto-filled fields from resident demographics
+    async function populateAutoFilledFields() {
+        try {
+            // Get all fields marked as auto-filled
+            const autoFilledFields = document.querySelectorAll('[data-auto-filled="true"]');
+            if (autoFilledFields.length === 0) return;
+
+            // Fetch resident profile data (birth_date is available in profile)
+            const res = await fetch('{{ route("resident.profile") }}', {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+
+            if (!res.ok) {
+                // Try alternative: fetch from profile page data if available
+                console.warn('Could not fetch resident profile for auto-fill');
+                return;
+            }
+
+            const profileData = await res.json();
+
+            // Populate each auto-filled field based on its source
+            autoFilledFields.forEach(field => {
+                const source = field.getAttribute('data-source');
+                if (!source) return;
+
+                let value = '';
+                
+                // Map source to profile field
+                if (source === 'resident.birth_date') {
+                    if (profileData.birth_date) {
+                        // Format date for date input (YYYY-MM-DD)
+                        const date = new Date(profileData.birth_date);
+                        if (!isNaN(date.getTime())) {
+                            value = date.toISOString().split('T')[0];
+                        }
+                    }
+                }
+
+                if (value && field.value === '') {
+                    field.value = value;
+                }
+            });
+        } catch (e) {
+            console.error('Error populating auto-filled fields', e);
+            // Silently fail - fields can still be filled manually
+        }
+    }
+
+    // Sync hidden document_type with selected template and load template fields
+    if (templateSelect && documentTypeHidden) {
+        templateSelect.addEventListener('change', () => {
+            const selected = templateSelect.options[templateSelect.selectedIndex];
+            const templateId = templateSelect.value || '';
+            documentTypeHidden.value = selected ? (selected.textContent || '').trim() : '';
+            
+            // Load template-specific fields
+            loadTemplateFields(templateId);
+        });
+        // Initialize on load
+        const initSelected = templateSelect.options[templateSelect.selectedIndex];
+        documentTypeHidden.value = initSelected ? (initSelected.textContent || '').trim() : '';
+        
+        // Load fields if template is pre-selected
+        if (templateSelect.value) {
+            loadTemplateFields(templateSelect.value);
+        }
+    }
 
     // Privacy consent checkbox validation
     const privacyConsentCheckbox = document.getElementById('privacy_consent');

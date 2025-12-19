@@ -70,6 +70,9 @@ class MedicineController
             'total_medicines' => \Illuminate\Support\Facades\Cache::remember('total_medicines', 300, function () {
                 return Medicine::count();
             }),
+            'total_stock_units' => \Illuminate\Support\Facades\Cache::remember('total_stock_units', 300, function () {
+                return Medicine::sum('current_stock');
+            }),
             'low_stock' => \Illuminate\Support\Facades\Cache::remember('low_stock_medicines', 300, function () {
                 return Medicine::whereColumn('current_stock', '<=', 'minimum_stock')->count();
             }),

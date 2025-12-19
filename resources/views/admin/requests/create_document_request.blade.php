@@ -284,6 +284,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Populate auto-filled fields from resident demographics (admin)
+    async function populateAutoFilledFields() {
+        try {
+            const residentId = userIdInput ? userIdInput.value : '';
+            if (!residentId) return;
+
+            const autoFilledFields = document.querySelectorAll('[data-auto-filled="true"]');
+            if (!autoFilledFields.length) return;
+
+            const url = `{{ url('/admin/residents') }}/${residentId}/demographics`;
+            const res = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+            if (!res.ok) {
+                console.warn('Could not fetch resident demographics for auto-fill');
+                return;
+            }
+
+            const demographics = await res.json();
+
+            autoFilledFields.forEach(field => {
+                const source = field.getAttribute('data-source');
+                if (!source) return;
+
+                let value = '';
+
+                if (source === 'resident.birth_date' && demographics.birth_date) {
+                    value = demographics.birth_date; // already YYYY-MM-DD
+                }
+                if (source === 'resident.address' && demographics.address) {
+                    value = demographics.address;
+                }
+                if (source === 'resident.marital_status' && demographics.marital_status) {
+                    value = demographics.marital_status;
+                }
+
+                if (value && field.value === '') {
+                    field.value = value;
+                }
+            });
+        } catch (e) {
+            console.error('Error populating auto-filled fields', e);
+        }
+    }
+
     // Load template-specific form fields
     async function loadTemplateFields(templateId) {
         if (!templateId || !templateFieldsContainer) {
@@ -313,13 +359,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Build form inputs dynamically
+            // Build form inputs dynamically (support auto-filled fields)
             let html = '<div class="mt-4 pt-4 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-700 mb-3">Additional Information</h4>';
             fields.forEach(field => {
                 const inputName = `template_fields[${field.name}]`;
                 const label = field.label || field.name.replace(/_/g, ' ');
                 const requiredAttr = field.required ? 'required' : '';
                 const fieldId = `template_field_${field.name}`;
+                const autoFilled = field.auto_filled || false;
+                const autoFillClass = autoFilled ? 'bg-blue-50 border-blue-200' : '';
 
                 if (field.type === 'textarea') {
                     html += `
@@ -331,9 +379,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 id="${fieldId}"
                                 name="${inputName}"
                                 rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${autoFillClass}"
                                 ${requiredAttr}
                                 placeholder="${field.placeholder || ''}"
+                                data-auto-filled="${autoFilled}"
+                                data-source="${field.source || ''}"
                             ></textarea>
                         </div>
                     `;
@@ -346,8 +396,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <select
                                 id="${fieldId}"
                                 name="${inputName}"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${autoFillClass}"
                                 ${requiredAttr}
+                                data-auto-filled="${autoFilled}"
+                                data-source="${field.source || ''}"
                             >
                                 <option value="">Select...</option>
                                 ${field.options.map(opt => `
@@ -368,10 +420,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 type="${inputType}"
                                 id="${fieldId}"
                                 name="${inputName}"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${autoFillClass}"
                                 ${requiredAttr}
                                 ${numberAttrs}
                                 placeholder="${field.placeholder || ''}"
+                                data-auto-filled="${autoFilled}"
+                                data-source="${field.source || ''}"
                             />
                         </div>
                     `;
@@ -379,6 +433,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             html += '</div>';
             templateFieldsContainer.innerHTML = html;
+
+            // Populate auto-filled fields after rendering
+            await populateAutoFilledFields();
         } catch (e) {
             console.error('Error loading template fields', e);
             templateFieldsContainer.innerHTML = '<p class="text-sm text-red-500">Error loading template fields.</p>';
@@ -395,6 +452,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Load resident summary for display
             loadResidentSummary(target.dataset.id);
+
+            // Populate auto-filled fields with selected resident data
+            populateAutoFilledFields();
         }
     });
 

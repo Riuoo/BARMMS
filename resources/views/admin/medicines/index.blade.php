@@ -102,12 +102,12 @@
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-pills text-indigo-600 text-sm md:text-base"></i>
+                        <i class="fas fa-boxes text-indigo-600 text-sm md:text-base"></i>
                     </div>
                 </div>
                 <div class="ml-3 md:ml-4">
-                    <p class="text-xs md:text-sm font-medium text-gray-500">Total Medicines</p>
-                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ $stats['total_medicines'] ?? 0 }}</p>
+                    <p class="text-xs md:text-sm font-medium text-gray-500">Total Stock Units</p>
+                    <p class="text-lg md:text-2xl font-bold text-gray-900">{{ number_format($stats['total_stock_units'] ?? 0) }}</p>
                 </div>
             </div>
         </div>

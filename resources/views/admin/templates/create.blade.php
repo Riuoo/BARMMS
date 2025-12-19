@@ -59,26 +59,11 @@
                         </label>
                         <select id="document_type" name="document_type" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                             <option value="">Select document type...</option>
-                            <option value="Barangay Clearance">Barangay Clearance</option>
                             <option value="Certificate of Residency">Certificate of Residency</option>
                             <option value="Certificate of Indigency">Certificate of Indigency</option>
-                            <option value="Certificate of Good Moral Character">Certificate of Good Moral Character</option>
-                            <option value="Certificate of Live Birth">Certificate of Live Birth</option>
-                            <option value="Certificate of Death">Certificate of Death</option>
-                            <option value="Certificate of Marriage">Certificate of Marriage</option>
-                            <option value="Barangay ID">Barangay ID</option>
-                            <option value="Certificate of No Pending Case">Certificate of No Pending Case</option>
-                            <option value="Certificate of No Derogatory Record">Certificate of No Derogatory Record</option>
-                            <option value="Certificate of First Time Job Seeker">Certificate of First Time Job Seeker</option>
-                            <option value="Certificate of Solo Parent">Certificate of Solo Parent</option>
-                            <option value="Certificate of Senior Citizen">Certificate of Senior Citizen</option>
-                            <option value="Certificate of PWD (Person with Disability)">Certificate of PWD (Person with Disability)</option>
-                            <option value="Certificate of Tribal Membership">Certificate of Tribal Membership</option>
-                            <option value="Certificate of Land Ownership">Certificate of Land Ownership</option>
-                            <option value="Certificate of Business Operation">Certificate of Business Operation</option>
-                            <option value="Certificate of Community Tax Certificate">Certificate of Community Tax Certificate</option>
-                            <option value="Certificate of No Property">Certificate of No Property</option>
                             <option value="Certificate of Low Income">Certificate of Low Income</option>
+                            <option value="Barangay Clearance">Barangay Clearance</option>
+                            <option value="Certification">Certification</option>
                             <option value="Other">Other (Custom)</option>
                         </select>
                         <p class="mt-1 text-sm text-gray-500">Choose from common document types or select "Other" for custom types</p>

@@ -11,14 +11,11 @@ class DocumentTemplateSeeder extends Seeder
     {
         // Seed only core barangay-issued document templates
         $documentTypes = [
-            'Barangay Clearance',
             'Certificate of Residency',
             'Certificate of Indigency',
-            'Certificate of Good Moral Character',
-            'Barangay ID',
-            'Certificate of No Pending Case',
-            'Certificate of No Derogatory Record',
-            'Business Permit',
+            'Certificate of Low Income',
+            'Barangay Clearance',
+            'Certification',
         ];
 
         foreach ($documentTypes as $type) {

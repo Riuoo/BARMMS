@@ -388,6 +388,7 @@ Route::middleware(['resident.role'])->prefix('resident')->group(function () {
     // Document Requests
     Route::get('/request-document', [ResidentDocumentRequestController::class, 'requestDocument'])->name('resident.request_document_request');
     Route::post('/request-document', [ResidentDocumentRequestController::class, 'storeDocument'])->middleware(['input.sanitize', 'rate.limit:10,5']);
+    Route::get('/templates/{template}/form-config', [DocumentTemplateController::class, 'formConfig'])->name('resident.templates.form-config');
 
     // My Requests (Listing & Filtering)
     Route::get('/my-requests', [ResidentRequestListController::class, 'myRequests'])->name('resident.my-requests');

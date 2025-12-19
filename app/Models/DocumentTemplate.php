@@ -34,42 +34,67 @@ class DocumentTemplate extends Model
         $defaults = [
             'Barangay Clearance' => [
                 'header_content' => '
-                    <div class="header text-center">
-                        <h1>Republic of the Philippines</h1>
-                        <h2>Province of [province_name]</h2>
-                        <h2>Municipality of [municipality_name]</h2>
-                        <h1>BARANGAY CLEARANCE</h1>
+                    <div style="text-align: right; margin-bottom: 20px;">
+                        <div style="font-size: 14px; line-height: 1.6;">
+                            <div>Republic of the Philippines</div>
+                            <div>Province of [province_name]</div>
+                            <div>Municipality of [municipality_name]</div>
+                            <div>Barangay of [barangay_name]</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-weight: bold; font-size: 18px; margin-bottom: 10px;">OFFICE OF THE PUNONG BARANGAY</div>
+                        <div style="font-weight: bold; font-size: 24px; text-decoration: underline; margin-top: 15px;">BARANGAY CLEARANCE</div>
                     </div>
                 ',
                 'body_content' => '
-                    <div class="content">
-                        <p>TO WHOM IT MAY CONCERN:</p>
-                        <p>This is to certify that [resident_name], of legal age, [civil_status], Filipino, and a resident of [resident_address], has no pending case/s or record on file at the Office of the Barangay.</p>
-                        <p>This certification is being issued upon the request of the above-named person for [purpose].</p>
-                        <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
+                    <div style="margin-top: 30px; line-height: 1.8;">
+                        <div style="text-align: center; font-weight: bold; margin-bottom: 20px; font-size: 14px;">TO WHOM IT MAY CONCERN:</div>
+                        
+                        <div style="margin-bottom: 20px; text-align: justify;">
+                            <p style="margin-bottom: 10px;">This is to certify that the person whose name below has requested a <strong>RECORD CLEARANCE</strong> from this office of the Punong Barangay and result is listed below:</p>
+                        </div>
+                        
+                        <div style="margin-top: 25px; margin-bottom: 20px;">
+                            <div style="margin-bottom: 8px;"><strong>NAME:</strong> [resident_name]</div>
+                            <div style="margin-bottom: 8px;"><strong>ADDRESS:</strong> [resident_address]</div>
+                            [birth_date_section]
+                            [birth_place_section]
+                            [status_section]
+                            [remarks_section]
+                        </div>
+                        
+                        <div style="margin-top: 25px; text-align: justify;">
+                            <p>This certification is being issued this <strong>[day] day of [month] [year]</strong>, as a requirement/s and for whatever legal purpose/s it may serve him best.</p>
+                        </div>
                     </div>
                 ',
                 'footer_content' => '
-                    <div class="signature-section" style="margin-top: 80px;">
+                    <div style="margin-top: 100px;">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <!-- Prepared by (Secretary) -->
-                                <td style="width: 45%; vertical-align: top;">
+                                <!-- Certified by (Punong Barangay) - Left side -->
+                                <td style="width: 50%; vertical-align: top; padding-right: 20px;">
                                     <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[prepared_by_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Barangay Secretary</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Prepared by</div>
+                                        <div style="margin-bottom: 60px;">
+                                            <div style="border-top: 1px solid #000; width: 280px; margin: 0 auto 10px;"></div>
+                                            <div style="font-weight: bold; font-size: 16px; margin-top: 5px;">[captain_name]</div>
+                                            <div style="font-size: 14px; margin-top: 5px;">Punong Barangay</div>
+                                        </div>
+                                        <div style="font-weight: bold; font-size: 14px; margin-top: 10px;">Certified:</div>
                                     </div>
                                 </td>
                                 
-                                <!-- Certified by (Punong Barangay/Captain) -->
-                                <td style="width: 45%; vertical-align: top;">
+                                <!-- Prepared by (Secretary and Purok Leader) - Right side -->
+                                <td style="width: 50%; vertical-align: top; padding-left: 20px;">
                                     <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[captain_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Punong Barangay</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Certified by</div>
+                                        <div style="margin-bottom: 30px;">
+                                            <div style="border-top: 1px solid #000; width: 280px; margin: 0 auto 10px;"></div>
+                                            <div style="font-weight: bold; font-size: 16px; margin-top: 5px;">[prepared_by_name]</div>
+                                            <div style="font-size: 14px; margin-top: 5px;">Barangay Secretary</div>
+                                        </div>
+                                        [purok_leader_section]
+                                        <div style="font-weight: bold; font-size: 14px; margin-top: 10px;">Prepared by:</div>
                                     </div>
                                 </td>
                             </tr>
@@ -77,19 +102,22 @@ class DocumentTemplate extends Model
                     </div>
                 ',
                 'placeholders' => [
-                    'resident_name' => 'Name of the resident',
-                    'resident_address' => 'Address of the resident',
-                    'civil_status' => 'Civil status of the resident',
-                    'purpose' => 'Purpose of the clearance',
-                    'day' => 'Day of issuance',
-                    'month' => 'Month of issuance',
-                    'year' => 'Year of issuance',
+                    'resident_name' => 'Full name of the resident (Auto-filled from demographics)',
+                    'resident_address' => 'Complete address of the resident (Auto-filled from demographics)',
+                    'birth_date' => 'Birth date (Auto-filled from demographics, can be edited)',
+                    'birth_place' => 'Birth place (Required - e.g., Upper Malinao, Padada, Davao del Sur)',
+                    'status' => 'Civil status (Auto-filled from demographics - marital_status)',
+                    'remarks' => 'Remarks (Required - e.g., NO INCRIMINATORY RECORD OR ANY PENDING CASE/COMPLAINT FILED AGAINST HIM.)',
+                    'day' => 'Day of issuance (e.g., 25TH)',
+                    'month' => 'Month of issuance (e.g., February)',
+                    'year' => 'Year of issuance (e.g., 2025)',
                     'barangay_name' => 'Name of the barangay',
                     'municipality_name' => 'Name of the municipality',
                     'province_name' => 'Name of the province',
-                    'official_name' => 'Name of the barangay captain',
-                    'prepared_by_name' => 'Name of the person who prepared the document',
-                    'captain_name' => 'Name of the Punong Barangay'
+                    'prepared_by_name' => 'Name of the Barangay Secretary',
+                    'captain_name' => 'Name of the Punong Barangay',
+                    'purok_leader_name' => 'Name of the Purok Leader - Optional',
+                    'purok_number' => 'Purok number (Auto-filled from address - e.g., 5)'
                 ]
             ],
             'Certificate of Residency' => [
@@ -217,20 +245,20 @@ class DocumentTemplate extends Model
                     'captain_name' => 'Name of the Punong Barangay'
                 ]
             ],
-            'Business Permit' => [
+            'Certificate of Low Income' => [
                 'header_content' => '
                     <div class="header text-center">
                         <h1>Republic of the Philippines</h1>
                         <h2>Province of [province_name]</h2>
                         <h2>Municipality of [municipality_name]</h2>
-                        <h1>BUSINESS PERMIT</h1>
+                        <h1>CERTIFICATE OF LOW INCOME</h1>
                     </div>
                 ',
                 'body_content' => '
                     <div class="content">
                         <p>TO WHOM IT MAY CONCERN:</p>
-                        <p>This is to certify that [resident_name], of legal age, [civil_status], Filipino, and a resident of [resident_address], is hereby granted permission to operate a [business_type] business in Barangay [barangay_name] located at [business_address].</p>
-                        <p>This permit is being issued upon the request of the above-named person for [purpose] and is valid until [expiry_date].</p>
+                        <p>This is to certify that [resident_name], of legal age, [civil_status], Filipino, and a resident of [resident_address], belongs to a low-income family in this barangay with an estimated monthly income of [monthly_income] pesos.</p>
+                        <p>This certification is being issued upon the request of the above-named person for [purpose] to be used at [purpose_location].</p>
                         <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
                     </div>
                 ',
@@ -265,71 +293,9 @@ class DocumentTemplate extends Model
                     'resident_name' => 'Name of the resident',
                     'resident_address' => 'Address of the resident',
                     'civil_status' => 'Civil status of the resident',
-                    'business_type' => 'Type of business',
-                    'business_address' => 'Business address',
-                    'purpose' => 'Purpose of the permit',
-                    'expiry_date' => 'Permit expiry date',
-                    'day' => 'Day of issuance',
-                    'month' => 'Month of issuance',
-                    'year' => 'Year of issuance',
-                    'barangay_name' => 'Name of the barangay',
-                    'municipality_name' => 'Name of the municipality',
-                    'province_name' => 'Name of the province',
-                    'official_name' => 'Name of the barangay captain',
-                    'prepared_by_name' => 'Name of the person who prepared the document',
-                    'captain_name' => 'Name of the Punong Barangay'
-                ]
-            ],
-            'Certificate of Good Moral Character' => [
-                'header_content' => '
-                    <div class="header text-center">
-                        <h1>Republic of the Philippines</h1>
-                        <h2>Province of [province_name]</h2>
-                        <h2>Municipality of [municipality_name]</h2>
-                        <h1>CERTIFICATE OF GOOD MORAL CHARACTER</h1>
-                    </div>
-                ',
-                'body_content' => '
-                    <div class="content">
-                        <p>TO WHOM IT MAY CONCERN:</p>
-                        <p>This is to certify that [resident_name], of legal age, [civil_status], Filipino, and a resident of [resident_address], is a person of good moral character and has no derogatory record in this barangay.</p>
-                        <p>Based on the records and testimonies of barangay officials and residents, the above-named person has been known to be law-abiding, honest, and of good reputation in the community.</p>
-                        <p>This certification is being issued upon the request of the above-named person for [purpose].</p>
-                        <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
-                    </div>
-                ',
-                'footer_content' => '
-                    <div class="signature-section" style="margin-top: 80px;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <!-- Prepared by (Secretary) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[prepared_by_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Barangay Secretary</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Prepared by</div>
-                                    </div>
-                                </td>
-                                
-                                <!-- Certified by (Punong Barangay/Captain) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[captain_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Punong Barangay</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Certified by</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                ',
-                'placeholders' => [
-                    'resident_name' => 'Name of the resident',
-                    'resident_address' => 'Address of the resident',
-                    'civil_status' => 'Civil status of the resident',
+                    'monthly_income' => 'Monthly income amount',
                     'purpose' => 'Purpose of the certificate',
+                    'purpose_location' => 'Location where this certificate will be used',
                     'day' => 'Day of issuance',
                     'month' => 'Month of issuance',
                     'year' => 'Year of issuance',
@@ -341,303 +307,19 @@ class DocumentTemplate extends Model
                     'captain_name' => 'Name of the Punong Barangay'
                 ]
             ],
-            'Certificate of Live Birth' => [
+            'Certification' => [
                 'header_content' => '
                     <div class="header text-center">
                         <h1>Republic of the Philippines</h1>
                         <h2>Province of [province_name]</h2>
                         <h2>Municipality of [municipality_name]</h2>
-                        <h1>CERTIFICATE OF LIVE BIRTH</h1>
-                    </div>
-                ',
-                'body_content' => '
-                    <div class="content">
-                        <p>TO WHOM IT MAY CONCERN:</p>
-                        <p>This is to certify that a live birth occurred in Barangay [barangay_name], [municipality_name], [province_name] on [birth_date] at [birth_time].</p>
-                        <p>Child\'s Name: [child_name]<br>
-                        Sex: [child_sex]<br>
-                        Father\'s Name: [father_name]<br>
-                        Mother\'s Name: [mother_name]<br>
-                        Place of Birth: [birth_place]</p>
-                        <p>This certification is being issued upon the request of [resident_name] for [purpose].</p>
-                        <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
-                    </div>
-                ',
-                'footer_content' => '
-                    <div class="signature-section" style="margin-top: 80px;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <!-- Prepared by (Secretary) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[prepared_by_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Barangay Secretary</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Prepared by</div>
-                                    </div>
-                                </td>
-                                
-                                <!-- Certified by (Punong Barangay/Captain) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[captain_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Punong Barangay</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Certified by</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                ',
-                'placeholders' => [
-                    'resident_name' => 'Name of the requester',
-                    'child_name' => 'Name of the child',
-                    'child_sex' => 'Sex of the child',
-                    'father_name' => 'Father\'s name',
-                    'mother_name' => 'Mother\'s name',
-                    'birth_date' => 'Date of birth',
-                    'birth_time' => 'Time of birth',
-                    'birth_place' => 'Place of birth',
-                    'purpose' => 'Purpose of the certificate',
-                    'day' => 'Day of issuance',
-                    'month' => 'Month of issuance',
-                    'year' => 'Year of issuance',
-                    'barangay_name' => 'Name of the barangay',
-                    'municipality_name' => 'Name of the municipality',
-                    'province_name' => 'Name of the province',
-                    'official_name' => 'Name of the barangay captain',
-                    'prepared_by_name' => 'Name of the person who prepared the document',
-                    'captain_name' => 'Name of the Punong Barangay'
-                ]
-            ],
-            'Certificate of Death' => [
-                'header_content' => '
-                    <div class="header text-center">
-                        <h1>Republic of the Philippines</h1>
-                        <h2>Province of [province_name]</h2>
-                        <h2>Municipality of [municipality_name]</h2>
-                        <h1>CERTIFICATE OF DEATH</h1>
-                    </div>
-                ',
-                'body_content' => '
-                    <div class="content">
-                        <p>TO WHOM IT MAY CONCERN:</p>
-                        <p>This is to certify that a death occurred in Barangay [barangay_name], [municipality_name], [province_name] on [death_date] at [death_time].</p>
-                        <p>Deceased Person\'s Name: [deceased_name]<br>
-                        Age: [deceased_age]<br>
-                        Civil Status: [deceased_civil_status]<br>
-                        Cause of Death: [cause_of_death]<br>
-                        Place of Death: [death_place]</p>
-                        <p>This certification is being issued upon the request of [resident_name] for [purpose].</p>
-                        <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
-                    </div>
-                ',
-                'footer_content' => '
-                    <div class="signature-section" style="margin-top: 80px;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <!-- Prepared by (Secretary) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[prepared_by_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Barangay Secretary</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Prepared by</div>
-                                    </div>
-                                </td>
-                                
-                                <!-- Certified by (Punong Barangay/Captain) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[captain_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Punong Barangay</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Certified by</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                ',
-                'placeholders' => [
-                    'resident_name' => 'Name of the requester',
-                    'deceased_name' => 'Name of the deceased',
-                    'deceased_age' => 'Age of the deceased',
-                    'deceased_civil_status' => 'Civil status of the deceased',
-                    'death_date' => 'Date of death',
-                    'death_time' => 'Time of death',
-                    'death_place' => 'Place of death',
-                    'cause_of_death' => 'Cause of death',
-                    'purpose' => 'Purpose of the certificate',
-                    'day' => 'Day of issuance',
-                    'month' => 'Month of issuance',
-                    'year' => 'Year of issuance',
-                    'barangay_name' => 'Name of the barangay',
-                    'municipality_name' => 'Name of the municipality',
-                    'province_name' => 'Name of the province',
-                    'official_name' => 'Name of the barangay captain',
-                    'prepared_by_name' => 'Name of the person who prepared the document',
-                    'captain_name' => 'Name of the Punong Barangay'
-                ]
-            ],
-            'Certificate of Marriage' => [
-                'header_content' => '
-                    <div class="header text-center">
-                        <h1>Republic of the Philippines</h1>
-                        <h2>Province of [province_name]</h2>
-                        <h2>Municipality of [municipality_name]</h2>
-                        <h1>CERTIFICATE OF MARRIAGE</h1>
-                    </div>
-                ',
-                'body_content' => '
-                    <div class="content">
-                        <p>TO WHOM IT MAY CONCERN:</p>
-                        <p>This is to certify that a marriage ceremony was conducted in Barangay [barangay_name], [municipality_name], [province_name] on [marriage_date] at [marriage_time].</p>
-                        <p>Groom\'s Name: [groom_name]<br>
-                        Groom\'s Age: [groom_age]<br>
-                        Groom\'s Address: [groom_address]<br>
-                        Bride\'s Name: [bride_name]<br>
-                        Bride\'s Age: [bride_age]<br>
-                        Bride\'s Address: [bride_address]<br>
-                        Place of Ceremony: [ceremony_place]</p>
-                        <p>This certification is being issued upon the request of [resident_name] for [purpose].</p>
-                        <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
-                    </div>
-                ',
-                'footer_content' => '
-                    <div class="signature-section" style="margin-top: 80px;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <!-- Prepared by (Secretary) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[prepared_by_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Barangay Secretary</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Prepared by</div>
-                                    </div>
-                                </td>
-                                
-                                <!-- Certified by (Punong Barangay/Captain) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[captain_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Punong Barangay</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Certified by</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                ',
-                'placeholders' => [
-                    'resident_name' => 'Name of the requester',
-                    'groom_name' => 'Groom\'s name',
-                    'groom_age' => 'Groom\'s age',
-                    'groom_address' => 'Groom\'s address',
-                    'bride_name' => 'Bride\'s name',
-                    'bride_age' => 'Bride\'s age',
-                    'bride_address' => 'Bride\'s address',
-                    'marriage_date' => 'Date of marriage',
-                    'marriage_time' => 'Time of marriage',
-                    'ceremony_place' => 'Place of ceremony',
-                    'purpose' => 'Purpose of the certificate',
-                    'day' => 'Day of issuance',
-                    'month' => 'Month of issuance',
-                    'year' => 'Year of issuance',
-                    'barangay_name' => 'Name of the barangay',
-                    'municipality_name' => 'Name of the municipality',
-                    'province_name' => 'Name of the province',
-                    'official_name' => 'Name of the barangay captain',
-                    'prepared_by_name' => 'Name of the person who prepared the document',
-                    'captain_name' => 'Name of the Punong Barangay'
-                ]
-            ],
-            'Barangay ID' => [
-                'header_content' => '
-                    <div class="header text-center">
-                        <h1>Republic of the Philippines</h1>
-                        <h2>Province of [province_name]</h2>
-                        <h2>Municipality of [municipality_name]</h2>
-                        <h1>BARANGAY IDENTIFICATION CARD</h1>
+                        <h1>CERTIFICATION</h1>
                     </div>
                 ',
                 'body_content' => '
                     <div class="content">
                         <p>TO WHOM IT MAY CONCERN:</p>
                         <p>This is to certify that [resident_name], of legal age, [civil_status], Filipino, and a resident of [resident_address], is a bonafide resident of Barangay [barangay_name], [municipality_name], [province_name].</p>
-                        <p>ID Number: [id_number]<br>
-                        Date of Birth: [birth_date]<br>
-                        Place of Birth: [birth_place]<br>
-                        Contact Number: [contact_number]</p>
-                        <p>This identification card is being issued upon the request of the above-named person for [purpose] and is valid until [expiry_date].</p>
-                        <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
-                    </div>
-                ',
-                'footer_content' => '
-                    <div class="signature-section" style="margin-top: 80px;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <!-- Prepared by (Secretary) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[prepared_by_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Barangay Secretary</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Prepared by</div>
-                                    </div>
-                                </td>
-                                
-                                <!-- Certified by (Punong Barangay/Captain) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[captain_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Punong Barangay</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Certified by</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                ',
-                'placeholders' => [
-                    'resident_name' => 'Name of the resident',
-                    'resident_address' => 'Address of the resident',
-                    'civil_status' => 'Civil status of the resident',
-                    'id_number' => 'Barangay ID number',
-                    'birth_date' => 'Date of birth',
-                    'birth_place' => 'Place of birth',
-                    'contact_number' => 'Contact number',
-                    'purpose' => 'Purpose of the ID',
-                    'expiry_date' => 'ID expiry date',
-                    'day' => 'Day of issuance',
-                    'month' => 'Month of issuance',
-                    'year' => 'Year of issuance',
-                    'barangay_name' => 'Name of the barangay',
-                    'municipality_name' => 'Name of the municipality',
-                    'province_name' => 'Name of the province',
-                    'official_name' => 'Name of the barangay captain',
-                    'prepared_by_name' => 'Name of the person who prepared the document',
-                    'captain_name' => 'Name of the Punong Barangay'
-                ]
-            ],
-            'Certificate of No Pending Case' => [
-                'header_content' => '
-                    <div class="header text-center">
-                        <h1>Republic of the Philippines</h1>
-                        <h2>Province of [province_name]</h2>
-                        <h2>Municipality of [municipality_name]</h2>
-                        <h1>CERTIFICATE OF NO PENDING CASE</h1>
-                    </div>
-                ',
-                'body_content' => '
-                    <div class="content">
-                        <p>TO WHOM IT MAY CONCERN:</p>
-                        <p>This is to certify that [resident_name], of legal age, [civil_status], Filipino, and a resident of [resident_address], has no pending case/s or legal issues on file at the Office of the Barangay.</p>
-                        <p>Based on the records of the Barangay Justice System and the Office of the Barangay Captain, the above-named person has no pending complaints, cases, or legal proceedings filed against him/her.</p>
                         <p>This certification is being issued upon the request of the above-named person for [purpose].</p>
                         <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
                     </div>
@@ -673,68 +355,7 @@ class DocumentTemplate extends Model
                     'resident_name' => 'Name of the resident',
                     'resident_address' => 'Address of the resident',
                     'civil_status' => 'Civil status of the resident',
-                    'purpose' => 'Purpose of the certificate',
-                    'day' => 'Day of issuance',
-                    'month' => 'Month of issuance',
-                    'year' => 'Year of issuance',
-                    'barangay_name' => 'Name of the barangay',
-                    'municipality_name' => 'Name of the municipality',
-                    'province_name' => 'Name of the province',
-                    'official_name' => 'Name of the barangay captain',
-                    'prepared_by_name' => 'Name of the person who prepared the document',
-                    'captain_name' => 'Name of the Punong Barangay'
-                ]
-            ],
-            'Certificate of No Derogatory Record' => [
-                'header_content' => '
-                    <div class="header text-center">
-                        <h1>Republic of the Philippines</h1>
-                        <h2>Province of [province_name]</h2>
-                        <h2>Municipality of [municipality_name]</h2>
-                        <h1>CERTIFICATE OF NO DEROGATORY RECORD</h1>
-                    </div>
-                ',
-                'body_content' => '
-                    <div class="content">
-                        <p>TO WHOM IT MAY CONCERN:</p>
-                        <p>This is to certify that [resident_name], of legal age, [civil_status], Filipino, and a resident of [resident_address], has no derogatory record or negative information on file at the Office of the Barangay.</p>
-                        <p>Based on the records and background check conducted by the barangay officials, the above-named person has maintained a clean record and good standing in the community.</p>
-                        <p>This certification is being issued upon the request of the above-named person for [purpose].</p>
-                        <p>Issued this [day] day of [month] [year] at Barangay Lower Malinao, Padada, Davao Del Sur.</p>
-                    </div>
-                ',
-                'footer_content' => '
-                    <div class="signature-section" style="margin-top: 80px;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <!-- Prepared by (Secretary) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[prepared_by_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Barangay Secretary</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Prepared by</div>
-                                    </div>
-                                </td>
-                                
-                                <!-- Certified by (Punong Barangay/Captain) -->
-                                <td style="width: 45%; vertical-align: top;">
-                                    <div style="text-align: center;">
-                                        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px;"></div>
-                                        <div style="font-weight: bold; font-size: 16px;">[captain_name]</div>
-                                        <div style="font-size: 14px; color: #666;">Punong Barangay</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Certified by</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                ',
-                'placeholders' => [
-                    'resident_name' => 'Name of the resident',
-                    'resident_address' => 'Address of the resident',
-                    'civil_status' => 'Civil status of the resident',
-                    'purpose' => 'Purpose of the certificate',
+                    'purpose' => 'Purpose of the certification',
                     'day' => 'Day of issuance',
                     'month' => 'Month of issuance',
                     'year' => 'Year of issuance',
@@ -772,12 +393,63 @@ class DocumentTemplate extends Model
 
     /**
      * Replace placeholders in template content with actual values
+     * Handles conditional sections for optional fields
      */
     public function replacePlaceholders($content, $values)
     {
-        foreach ($values as $key => $value) {
-            $content = str_replace("[$key]", $value, $content);
+        // Handle conditional sections for Barangay Clearance
+        // Birth Date section
+        if (isset($values['birth_date']) && !empty($values['birth_date'])) {
+            $content = str_replace('[birth_date_section]', '<div style="margin-bottom: 8px;"><strong>Birth Date:</strong> ' . $values['birth_date'] . '</div>', $content);
+        } else {
+            $content = str_replace('[birth_date_section]', '', $content);
         }
+        
+        // Birth Place section
+        if (isset($values['birth_place']) && !empty($values['birth_place'])) {
+            $content = str_replace('[birth_place_section]', '<div style="margin-bottom: 8px;"><strong>Birth Place:</strong> ' . $values['birth_place'] . '</div>', $content);
+        } else {
+            $content = str_replace('[birth_place_section]', '', $content);
+        }
+        
+        // Status section
+        if (isset($values['status']) && !empty($values['status'])) {
+            $content = str_replace('[status_section]', '<div style="margin-bottom: 8px;"><strong>Status:</strong> ' . $values['status'] . '</div>', $content);
+        } else {
+            $content = str_replace('[status_section]', '', $content);
+        }
+        
+        // Remarks section
+        if (isset($values['remarks']) && !empty($values['remarks'])) {
+            $content = str_replace('[remarks_section]', '<div style="margin-bottom: 8px;"><strong>Remarks:</strong> ' . $values['remarks'] . '</div>', $content);
+        } else {
+            $content = str_replace('[remarks_section]', '', $content);
+        }
+        
+        // Purok Leader section
+        if (isset($values['purok_leader_name']) && !empty($values['purok_leader_name'])) {
+            $purokNumber = isset($values['purok_number']) && !empty($values['purok_number']) ? $values['purok_number'] : '';
+            $purokTitle = $purokNumber ? "Purok Leader- {$purokNumber}" : 'Purok Leader';
+            $purokSection = '<div style="margin-bottom: 30px;">
+                <div style="border-top: 1px solid #000; width: 280px; margin: 0 auto 10px;"></div>
+                <div style="font-weight: bold; font-size: 16px; margin-top: 5px;">' . $values['purok_leader_name'] . '</div>
+                <div style="font-size: 14px; margin-top: 5px;">' . $purokTitle . '</div>
+            </div>';
+            $content = str_replace('[purok_leader_section]', $purokSection, $content);
+        } else {
+            $content = str_replace('[purok_leader_section]', '', $content);
+        }
+        
+        // Replace all other placeholders
+        foreach ($values as $key => $value) {
+            if (!empty($value)) {
+                $content = str_replace("[$key]", $value, $content);
+            } else {
+                // Remove placeholder if value is empty
+                $content = str_replace("[$key]", '', $content);
+            }
+        }
+        
         return $content;
     }
 

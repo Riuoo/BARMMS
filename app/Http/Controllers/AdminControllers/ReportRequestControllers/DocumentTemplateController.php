@@ -805,10 +805,12 @@ class DocumentTemplateController
                 'resident_name'      => ['source' => 'resident.name', 'label' => 'Resident Name'],
                 'resident_address'   => ['source' => 'resident.address', 'label' => 'Resident Address'],
                 'civil_status'       => ['source' => 'resident.marital_status', 'label' => 'Civil Status'],
+                'status'             => ['source' => 'resident.marital_status', 'label' => 'Status (Civil Status)'],
                 'age'                => ['source' => 'resident.age', 'label' => 'Age'],
                 'birth_date'         => ['source' => 'resident.birth_date', 'label' => 'Birth Date'],
                 'birth_place'        => ['source' => 'resident.birth_place', 'label' => 'Birth Place'],
                 'contact_number'     => ['source' => 'resident.contact_number', 'label' => 'Contact Number'],
+                'purok_number'       => ['source' => 'resident.address', 'label' => 'Purok Number'],
 
                 'barangay_name'      => ['source' => 'barangay.barangay_name', 'label' => 'Barangay Name'],
                 'municipality_name'  => ['source' => 'barangay.municipality_name', 'label' => 'Municipality Name'],
@@ -826,18 +828,42 @@ class DocumentTemplateController
             $autoFields = [];
             $manualFields = [];
 
+            // Special handling for Barangay Clearance - certain fields should be required
+            $isBarangayClearance = strtolower($template->document_type) === 'barangay clearance';
+            
+            // Fields that should be auto-filled but can be overridden for Barangay Clearance
+            $autoFillButEditable = ['birth_date'];
+            
             // Process placeholders - handle both associative array (key => description) and numeric array
             foreach ($placeholders as $key => $desc) {
                 $placeholderKey = is_string($key) ? $key : (string) $desc;
                 $description = is_string($key) ? $desc : null;
 
-                // Skip if it's auto-filled
+                // Handle auto-filled fields that can be edited for Barangay Clearance
                 if (isset($autoMap[$placeholderKey])) {
-                    $autoFields[] = [
-                        'name'        => $placeholderKey,
-                        'label'       => $autoMap[$placeholderKey]['label'],
-                        'source'      => $autoMap[$placeholderKey]['source'],
-                    ];
+                    if ($isBarangayClearance && in_array($placeholderKey, $autoFillButEditable)) {
+                        // Add to manual fields but mark as auto-filled with pre-populated value
+                        $type = 'text';
+                        if ($placeholderKey === 'birth_date') {
+                            $type = 'date';
+                        }
+                        
+                        $manualFields[] = [
+                            'name'        => $placeholderKey,
+                            'label'       => $autoMap[$placeholderKey]['label'] . ' (Auto-filled, can be edited)',
+                            'type'        => $type,
+                            'required'    => true,
+                            'auto_filled' => true,
+                            'source'      => $autoMap[$placeholderKey]['source'],
+                        ];
+                    } else {
+                        // Regular auto-filled field
+                        $autoFields[] = [
+                            'name'        => $placeholderKey,
+                            'label'       => $autoMap[$placeholderKey]['label'],
+                            'source'      => $autoMap[$placeholderKey]['source'],
+                        ];
+                    }
                     continue;
                 }
 
@@ -861,11 +887,18 @@ class DocumentTemplateController
                     $type = 'number';
                 }
 
+                // Determine if field is required
+                $isRequired = true;
+                if ($isBarangayClearance) {
+                    // For Barangay Clearance, birth_place and remarks are required
+                    $isRequired = in_array($placeholderKey, ['birth_place', 'remarks']);
+                }
+
                 $field = [
                     'name'        => $placeholderKey,
                     'label'       => $description ?: ucwords(str_replace(['_', '-'], ' ', $placeholderKey)),
                     'type'        => $type,
-                    'required'    => true,
+                    'required'    => $isRequired,
                 ];
 
                 // Add options for select fields

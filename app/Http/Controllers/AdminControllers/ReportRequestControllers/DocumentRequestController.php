@@ -116,11 +116,28 @@ class DocumentRequestController
             }
             Log::info('Approve: Template fetched', ['elapsed' => microtime(true) - $start]);
 
+            // Extract purok number from address if available
+            $purokNumber = '';
+            if ($documentRequest->resident && $documentRequest->resident->address) {
+                if (preg_match('/Purok\s*(\d+)/i', $documentRequest->resident->address, $matches)) {
+                    $purokNumber = $matches[1];
+                }
+            }
+
+            // Format birth date for display (e.g., "June 21, 1967")
+            $birthDateFormatted = '';
+            if ($documentRequest->resident && $documentRequest->resident->birth_date) {
+                $birthDateFormatted = $documentRequest->resident->birth_date->format('F j, Y');
+            }
+
             // Prepare values for placeholders
             $values = [
                 'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
+                'birth_date' => $birthDateFormatted,
                 'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
+                'status' => $documentRequest->resident ? strtolower($documentRequest->resident->marital_status ?? '') : '',
+                'purok_number' => $purokNumber,
                 'purpose' => $documentRequest->description,
                 'day' => date('jS'),
                 'month' => date('F'),
@@ -217,11 +234,28 @@ class DocumentRequestController
                 return redirect()->back();
             }
 
+            // Extract purok number from address if available
+            $purokNumber = '';
+            if ($documentRequest->resident && $documentRequest->resident->address) {
+                if (preg_match('/Purok\s*(\d+)/i', $documentRequest->resident->address, $matches)) {
+                    $purokNumber = $matches[1];
+                }
+            }
+
+            // Format birth date for display (e.g., "June 21, 1967")
+            $birthDateFormatted = '';
+            if ($documentRequest->resident && $documentRequest->resident->birth_date) {
+                $birthDateFormatted = $documentRequest->resident->birth_date->format('F j, Y');
+            }
+
             // Prepare values for placeholders
             $values = [
                 'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
+                'birth_date' => $birthDateFormatted,
                 'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
+                'status' => $documentRequest->resident ? strtolower($documentRequest->resident->marital_status ?? '') : '',
+                'purok_number' => $purokNumber,
                 'purpose' => $documentRequest->description,
                 'day' => date('jS'),
                 'month' => date('F'),

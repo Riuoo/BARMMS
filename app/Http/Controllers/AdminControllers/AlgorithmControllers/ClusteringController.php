@@ -10,6 +10,8 @@ use App\Models\Residents;
 use App\Models\BlotterRequest;
 use App\Models\MedicalRecord;
 use App\Models\MedicineTransaction;
+use App\Models\MedicineRequest;
+use Illuminate\Support\Facades\DB;
 
 class ClusteringController
 {
@@ -173,6 +175,18 @@ class ClusteringController
 
                 $avgDemographic = count($clusterPuroks) > 0 ? $avgDemographic / count($clusterPuroks) : 0;
 
+                // Collect all resident IDs for this cluster
+                $clusterResidentIds = [];
+                foreach ($clusterPuroks as $purok) {
+                    $clusterResidentIds = array_merge($clusterResidentIds, $purok['resident_ids']);
+                }
+                $clusterResidentIds = array_unique($clusterResidentIds);
+
+                // Compute analytics for this cluster
+                $incidentAnalytics = $this->computeIncidentAnalytics($clusterResidentIds);
+                $medicalAnalytics = $this->computeMedicalAnalytics($clusterPuroks, $clusterResidentIds);
+                $medicineAnalytics = $this->computeMedicineAnalytics($clusterResidentIds);
+
                 $clusterData[$clusterId] = [
                     'id' => $clusterId,
                     'label' => $clusterLabels[$clusterId] ?? 'Cluster ' . ($clusterId + 1),
@@ -183,6 +197,9 @@ class ClusteringController
                     'total_medicine' => $totalMedicine,
                     'total_residents' => $totalResidents,
                     'avg_demographic' => $avgDemographic,
+                    'incident_analytics' => $incidentAnalytics,
+                    'medical_analytics' => $medicalAnalytics,
+                    'medicine_analytics' => $medicineAnalytics,
                 ];
             }
 
@@ -209,6 +226,15 @@ class ClusteringController
             ]);
         }
 
+        // Calculate aggregate statistics
+        $totalResidents = array_sum(array_column($clusterData, 'total_residents'));
+        $highRiskPuroks = 0;
+        foreach ($clusterData as $cluster) {
+            if (str_contains($cluster['label'], 'High')) {
+                $highRiskPuroks += $cluster['purok_count'];
+            }
+        }
+
         // Return view with cluster data
         return view('admin.clustering.index', [
             'clusters' => $clusterData,
@@ -217,6 +243,8 @@ class ClusteringController
             'silhouette' => $silhouette,
             'processingTime' => $processingTime,
             'totalPuroks' => count($purokData),
+            'totalResidents' => $totalResidents,
+            'highRiskPuroks' => $highRiskPuroks,
         ]);
     }
 
@@ -260,6 +288,11 @@ class ClusteringController
             // Calculate demographic score (average age and family size)
             $demographicScore = $this->calculatePurokDemographicScore($purokResidents);
 
+            // Compute per-purok analytics
+            $purokIncidentAnalytics = $this->computeIncidentAnalytics($residentIds);
+            $purokMedicalAnalytics = $this->computeMedicalAnalyticsForPurok($residentIds, $purokDisplay);
+            $purokMedicineAnalytics = $this->computeMedicineAnalytics($residentIds);
+
             $purokData[] = [
                 'purok_token' => $purokToken,
                 'purok_display' => $purokDisplay,
@@ -269,6 +302,9 @@ class ClusteringController
                 'demographic_score' => $demographicScore,
                 'medical_count' => (int)$medicalCount,
                 'medicine_count' => (int)$medicineCount,
+                'incident_analytics' => $purokIncidentAnalytics,
+                'medical_analytics' => $purokMedicalAnalytics,
+                'medicine_analytics' => $purokMedicineAnalytics,
             ];
         }
 
@@ -404,5 +440,222 @@ class ClusteringController
         }
         
         return 'n/a';
+    }
+
+    /**
+     * Compute incident analytics for a cluster
+     * Returns case types ordered from most common to least common
+     */
+    private function computeIncidentAnalytics(array $residentIds): array
+    {
+        if (empty($residentIds)) {
+            return ['case_types' => []];
+        }
+
+        $caseTypes = BlotterRequest::whereIn('respondent_id', $residentIds)
+            ->select('type', DB::raw('COUNT(*) as count'))
+            ->groupBy('type')
+            ->orderByDesc('count')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'type' => $item->type,
+                    'count' => $item->count,
+                ];
+            })
+            ->toArray();
+
+        return [
+            'case_types' => $caseTypes,
+        ];
+    }
+
+    /**
+     * Compute medical analytics for a single purok
+     */
+    private function computeMedicalAnalyticsForPurok(array $residentIds, string $purokDisplay): array
+    {
+        if (empty($residentIds)) {
+            return [
+                'visits_by_purok' => [],
+                'illnesses' => [],
+            ];
+        }
+
+        $medicalRecords = MedicalRecord::whereIn('resident_id', $residentIds)
+            ->select('diagnosis')
+            ->get();
+
+        $visitCount = $medicalRecords->count();
+        $illnessCounts = [];
+
+        foreach ($medicalRecords as $record) {
+            if ($record->diagnosis) {
+                $diagnosis = trim($record->diagnosis);
+                if (!isset($illnessCounts[$diagnosis])) {
+                    $illnessCounts[$diagnosis] = 0;
+                }
+                $illnessCounts[$diagnosis]++;
+            }
+        }
+
+        arsort($illnessCounts);
+        $illnessesArray = [];
+        foreach ($illnessCounts as $illness => $count) {
+            $illnessesArray[] = [
+                'illness' => $illness,
+                'count' => $count,
+            ];
+        }
+
+        return [
+            'visits_by_purok' => [['purok' => $purokDisplay, 'count' => $visitCount]],
+            'illnesses' => $illnessesArray,
+        ];
+    }
+
+    /**
+     * Compute medical analytics for a cluster
+     * Returns per-purok visit counts and illness frequencies
+     */
+    private function computeMedicalAnalytics(array $clusterPuroks, array $clusterResidentIds): array
+    {
+        if (empty($clusterResidentIds)) {
+            return [
+                'visits_by_purok' => [],
+                'illnesses' => [],
+            ];
+        }
+
+        // Get all medical records for cluster residents
+        $medicalRecords = MedicalRecord::whereIn('resident_id', $clusterResidentIds)
+            ->select('resident_id', 'diagnosis')
+            ->get();
+
+        // Map resident IDs to puroks
+        $residentToPurok = [];
+        foreach ($clusterPuroks as $purok) {
+            foreach ($purok['resident_ids'] as $residentId) {
+                $residentToPurok[$residentId] = $purok['purok_display'];
+            }
+        }
+
+        // Count visits per purok
+        $visitsByPurok = [];
+        $illnessCounts = [];
+
+        foreach ($medicalRecords as $record) {
+            $purokDisplay = $residentToPurok[$record->resident_id] ?? 'Unknown';
+            
+            // Count visits per purok
+            if (!isset($visitsByPurok[$purokDisplay])) {
+                $visitsByPurok[$purokDisplay] = 0;
+            }
+            $visitsByPurok[$purokDisplay]++;
+
+            // Count illnesses (diagnosis)
+            if ($record->diagnosis) {
+                $diagnosis = trim($record->diagnosis);
+                if (!isset($illnessCounts[$diagnosis])) {
+                    $illnessCounts[$diagnosis] = 0;
+                }
+                $illnessCounts[$diagnosis]++;
+            }
+        }
+
+        // Convert to sorted arrays
+        arsort($visitsByPurok);
+        $visitsByPurokArray = [];
+        foreach ($visitsByPurok as $purok => $count) {
+            $visitsByPurokArray[] = [
+                'purok' => $purok,
+                'count' => $count,
+            ];
+        }
+
+        arsort($illnessCounts);
+        $illnessesArray = [];
+        foreach ($illnessCounts as $illness => $count) {
+            $illnessesArray[] = [
+                'illness' => $illness,
+                'count' => $count,
+            ];
+        }
+
+        return [
+            'visits_by_purok' => $visitsByPurokArray,
+            'illnesses' => $illnessesArray,
+        ];
+    }
+
+    /**
+     * Compute medicine analytics for a cluster
+     * Returns medicines requested/dispensed ordered from most common to least common
+     */
+    private function computeMedicineAnalytics(array $clusterResidentIds): array
+    {
+        if (empty($clusterResidentIds)) {
+            return ['medicines' => []];
+        }
+
+        // Get medicine requests
+        $medicineRequests = MedicineRequest::whereIn('resident_id', $clusterResidentIds)
+            ->with('medicine:id,name')
+            ->get();
+
+        // Get medicine transactions (OUT type for dispensed)
+        $medicineTransactions = MedicineTransaction::whereIn('resident_id', $clusterResidentIds)
+            ->where('transaction_type', 'OUT')
+            ->with('medicine:id,name')
+            ->get();
+
+        // Combine and count medicines
+        $medicineCounts = [];
+
+        // Count from requests
+        foreach ($medicineRequests as $request) {
+            if ($request->medicine) {
+                $medicineName = $request->medicine->name;
+                if (!isset($medicineCounts[$medicineName])) {
+                    $medicineCounts[$medicineName] = [
+                        'name' => $medicineName,
+                        'requested' => 0,
+                        'dispensed' => 0,
+                    ];
+                }
+                $medicineCounts[$medicineName]['requested'] += $request->quantity_requested ?? 1;
+            }
+        }
+
+        // Count from transactions
+        foreach ($medicineTransactions as $transaction) {
+            if ($transaction->medicine) {
+                $medicineName = $transaction->medicine->name;
+                if (!isset($medicineCounts[$medicineName])) {
+                    $medicineCounts[$medicineName] = [
+                        'name' => $medicineName,
+                        'requested' => 0,
+                        'dispensed' => 0,
+                    ];
+                }
+                $medicineCounts[$medicineName]['dispensed'] += $transaction->quantity ?? 0;
+            }
+        }
+
+        // Calculate total and sort
+        $medicinesArray = [];
+        foreach ($medicineCounts as $medicine) {
+            $medicine['total'] = $medicine['requested'] + $medicine['dispensed'];
+            $medicinesArray[] = $medicine;
+        }
+
+        // Sort by total (most common first)
+        usort($medicinesArray, function($a, $b) {
+            return $b['total'] <=> $a['total'];
+        });
+
+        return [
+            'medicines' => $medicinesArray,
+        ];
     }
 }

@@ -1874,7 +1874,7 @@
                             <li>
                                 <a href="{{ route('admin.medicines.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medicines*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medicines*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-pills fa-fw mr-3 {{ request()->routeIs('admin.medicines*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Medicines Inventory</span>
+                                    <span>Medicine Management</span>
                                 </a>
                             </li>
                             <li>
@@ -1937,7 +1937,7 @@
                             <li>
                                 <a href="{{ route('admin.clustering') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.clustering*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.clustering*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-chart-pie fa-fw mr-3 {{ request()->routeIs('admin.clustering*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Resident Demographic Analysis</span>
+                                    <span>Purok Risk Clustering</span>
                                 </a>
                             </li>
                             <!-- <li>
@@ -2137,7 +2137,7 @@
                             <li>
                                 <a href="{{ route('admin.medicines.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.medicines*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-pills fa-fw mr-3 {{ request()->routeIs('admin.medicines*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Medicines Inventory</span>
+                                    <span>Medicine Management</span>
                                 </a>
                             </li>
                             <li>
@@ -2200,7 +2200,7 @@
                             <li>
                                 <a href="{{ route('admin.clustering') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.clustering*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-chart-pie fa-fw mr-3 {{ request()->routeIs('admin.clustering*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Resident Demographic Analysis</span>
+                                    <span>Purok Risk Clustering</span>
                                 </a>
                             </li>
                             <!-- <li>
