@@ -732,14 +732,18 @@ class DocumentTemplateController
         $sampleData = [
             'resident_name' => 'Juan Dela Cruz',
             'resident_address' => '123 Sample Street, Barangay Sample',
+            'birth_date' => 'June 15, 1985',
+            'birth_place' => 'Sample City, Sample Province',
             'civil_status' => 'Married',
+            'status' => 'married',
+            'remarks' => 'NO DEROGATORY RECORD',
             'purpose' => 'employment purposes',
             'day' => date('jS'),
             'month' => date('F'),
             'year' => date('Y'),
-            'barangay_name' => 'Sample Barangay',
-            'municipality_name' => 'Sample Municipality',
-            'province_name' => 'Sample Province',
+            'barangay_name' => 'Lower Malinao',
+            'municipality_name' => 'Padada',
+            'province_name' => 'Davao Del Sur',
             'official_name' => 'Hon. Sample Official'
         ];
 
@@ -808,7 +812,6 @@ class DocumentTemplateController
                 'status'             => ['source' => 'resident.marital_status', 'label' => 'Status (Civil Status)'],
                 'age'                => ['source' => 'resident.age', 'label' => 'Age'],
                 'birth_date'         => ['source' => 'resident.birth_date', 'label' => 'Birth Date'],
-                'birth_place'        => ['source' => 'resident.birth_place', 'label' => 'Birth Place'],
                 'contact_number'     => ['source' => 'resident.contact_number', 'label' => 'Contact Number'],
                 'purok_number'       => ['source' => 'resident.address', 'label' => 'Purok Number'],
 
@@ -832,7 +835,7 @@ class DocumentTemplateController
             $isBarangayClearance = strtolower($template->document_type) === 'barangay clearance';
             
             // Fields that should be auto-filled but can be overridden for Barangay Clearance
-            $autoFillButEditable = ['birth_date'];
+            $autoFillButEditable = [];
             
             // Process placeholders - handle both associative array (key => description) and numeric array
             foreach ($placeholders as $key => $desc) {

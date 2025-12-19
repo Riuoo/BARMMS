@@ -34,17 +34,29 @@ class DocumentTemplate extends Model
         $defaults = [
             'Barangay Clearance' => [
                 'header_content' => '
-                    <div style="text-align: right; margin-bottom: 20px;">
-                        <div style="font-size: 14px; line-height: 1.6;">
-                            <div>Republic of the Philippines</div>
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <!-- Logo Section -->
+                        <div style="margin-bottom: 15px;">
+                            <img src="/images/lower-malinao-brgy-logo.png" alt="Barangay Logo" style="width: 80px; height: 80px; object-fit: contain;" />
+                        </div>
+                        
+                        <!-- Header Text -->
+                        <div style="font-size: 12px; line-height: 1.4; margin-bottom: 15px;">
+                            <div style="font-weight: bold;">Republic of the Philippines</div>
                             <div>Province of [province_name]</div>
                             <div>Municipality of [municipality_name]</div>
-                            <div>Barangay of [barangay_name]</div>
+                            <div style="font-weight: bold;">Barangay of [barangay_name]</div>
                         </div>
-                    </div>
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <div style="font-weight: bold; font-size: 18px; margin-bottom: 10px;">OFFICE OF THE PUNONG BARANGAY</div>
-                        <div style="font-weight: bold; font-size: 24px; text-decoration: underline; margin-top: 15px;">BARANGAY CLEARANCE</div>
+                        
+                        <!-- Office Title -->
+                        <div style="font-weight: bold; font-size: 16px; margin-bottom: 20px; text-decoration: underline;">
+                            OFFICE OF THE PUNONG BARANGAY
+                        </div>
+                        
+                        <!-- Document Title -->
+                        <div style="font-weight: bold; font-size: 20px; text-decoration: underline; margin-bottom: 10px;">
+                            BARANGAY CLEARANCE
+                        </div>
                     </div>
                 ',
                 'body_content' => '
@@ -104,7 +116,7 @@ class DocumentTemplate extends Model
                 'placeholders' => [
                     'resident_name' => 'Full name of the resident (Auto-filled from demographics)',
                     'resident_address' => 'Complete address of the resident (Auto-filled from demographics)',
-                    'birth_date' => 'Birth date (Auto-filled from demographics, can be edited)',
+                    'birth_date' => 'Birth date (Auto-filled from demographics)',
                     'birth_place' => 'Birth place (Required - e.g., Upper Malinao, Padada, Davao del Sur)',
                     'status' => 'Civil status (Auto-filled from demographics - marital_status)',
                     'remarks' => 'Remarks (Required - e.g., NO INCRIMINATORY RECORD OR ANY PENDING CASE/COMPLAINT FILED AGAINST HIM.)',

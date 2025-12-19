@@ -127,14 +127,32 @@ class DocumentRequestController
             // Format birth date for display (e.g., "June 21, 1967")
             $birthDateFormatted = '';
             if ($documentRequest->resident && $documentRequest->resident->birth_date) {
-                $birthDateFormatted = $documentRequest->resident->birth_date->format('F j, Y');
+                try {
+                    // Ensure birth_date is a Carbon instance and format it
+                    $birthDate = $documentRequest->resident->birth_date;
+                    if ($birthDate instanceof \Carbon\Carbon) {
+                        $birthDateFormatted = $birthDate->format('F j, Y');
+                    } elseif (is_string($birthDate)) {
+                        // If it's a string, try to parse it
+                        $birthDateFormatted = \Carbon\Carbon::parse($birthDate)->format('F j, Y');
+                    }
+                } catch (\Exception $e) {
+                    // If there's an issue with date formatting, log it and use empty string
+                    Log::warning('Birth date formatting failed for resident ID: ' . $documentRequest->resident->id . ' - ' . $e->getMessage());
+                    $birthDateFormatted = '';
+                }
+            } else {
+                // Log when birth_date is missing to help with debugging
+                if ($documentRequest->resident) {
+                    Log::info('Birth date missing for resident: ' . $documentRequest->resident->full_name . ' (ID: ' . $documentRequest->resident->id . ')');
+                }
             }
 
             // Prepare values for placeholders
             $values = [
                 'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
-                'birth_date' => $birthDateFormatted,
+                'birth_date' => $birthDateFormatted ?: 'NOT PROVIDED', // Temporary: Show placeholder when missing
                 'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
                 'status' => $documentRequest->resident ? strtolower($documentRequest->resident->marital_status ?? '') : '',
                 'purok_number' => $purokNumber,
@@ -155,7 +173,15 @@ class DocumentRequestController
 
             // Merge dynamic template fields from additional_data
             if (is_array($documentRequest->additional_data)) {
+                // Preserve the formatted birth_date from resident record
+                $preservedBirthDate = $values['birth_date'];
+                
                 $values = array_merge($values, $documentRequest->additional_data);
+                
+                // Restore the formatted birth_date if it was overwritten
+                if ($preservedBirthDate && $preservedBirthDate !== 'NOT PROVIDED') {
+                    $values['birth_date'] = $preservedBirthDate;
+                }
             }
 
             // Generate the HTML using the template's generateHtml method
@@ -244,15 +270,46 @@ class DocumentRequestController
 
             // Format birth date for display (e.g., "June 21, 1967")
             $birthDateFormatted = '';
+            
+            \Log::info('Birth Date Processing Debug', [
+                'has_resident' => $documentRequest->resident ? 'YES' : 'NO',
+                'resident_id' => $documentRequest->resident ? $documentRequest->resident->id : 'NO_RESIDENT',
+                'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : 'NO_RESIDENT',
+                'birth_date_raw' => $documentRequest->resident ? $documentRequest->resident->birth_date : 'NO_RESIDENT',
+                'birth_date_type' => $documentRequest->resident && $documentRequest->resident->birth_date ? gettype($documentRequest->resident->birth_date) : 'NO_BIRTH_DATE'
+            ]);
+            
             if ($documentRequest->resident && $documentRequest->resident->birth_date) {
-                $birthDateFormatted = $documentRequest->resident->birth_date->format('F j, Y');
+                try {
+                    // Ensure birth_date is a Carbon instance and format it
+                    $birthDate = $documentRequest->resident->birth_date;
+                    if ($birthDate instanceof \Carbon\Carbon) {
+                        $birthDateFormatted = $birthDate->format('F j, Y');
+                        \Log::info('Birth date formatted successfully: ' . $birthDateFormatted);
+                    } elseif (is_string($birthDate)) {
+                        // If it's a string, try to parse it
+                        $birthDateFormatted = \Carbon\Carbon::parse($birthDate)->format('F j, Y');
+                        \Log::info('Birth date parsed and formatted: ' . $birthDateFormatted);
+                    }
+                } catch (\Exception $e) {
+                    // If there's an issue with date formatting, log it and use empty string
+                    \Log::warning('Birth date formatting failed for resident ID: ' . $documentRequest->resident->id . ' - ' . $e->getMessage());
+                    $birthDateFormatted = '';
+                }
+            } else {
+                // Log when birth_date is missing to help with debugging
+                if ($documentRequest->resident) {
+                    \Log::warning('Birth date is NULL or empty for resident: ' . $documentRequest->resident->full_name . ' (ID: ' . $documentRequest->resident->id . ')');
+                } else {
+                    \Log::error('No resident found for document request');
+                }
             }
 
             // Prepare values for placeholders
             $values = [
                 'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
-                'birth_date' => $birthDateFormatted,
+                'birth_date' => $birthDateFormatted ?: 'NOT PROVIDED', // Temporary: Show placeholder when missing
                 'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
                 'status' => $documentRequest->resident ? strtolower($documentRequest->resident->marital_status ?? '') : '',
                 'purok_number' => $purokNumber,
@@ -273,8 +330,36 @@ class DocumentRequestController
 
             // Merge dynamic template fields from additional_data
             if (is_array($documentRequest->additional_data)) {
+                \Log::info('Additional data being merged:', $documentRequest->additional_data);
+                
+                // Preserve the formatted birth_date from resident record
+                $preservedBirthDate = $values['birth_date'];
+                
+                // Check if additional_data contains birth_date that might overwrite our formatted one
+                if (isset($documentRequest->additional_data['birth_date'])) {
+                    \Log::warning('additional_data contains birth_date - will preserve formatted version!', [
+                        'formatted_birth_date' => $values['birth_date'],
+                        'additional_data_birth_date' => $documentRequest->additional_data['birth_date']
+                    ]);
+                }
+                
                 $values = array_merge($values, $documentRequest->additional_data);
+                
+                // Restore the formatted birth_date if it was overwritten
+                if ($preservedBirthDate && $preservedBirthDate !== 'NOT PROVIDED') {
+                    $values['birth_date'] = $preservedBirthDate;
+                    \Log::info('Restored formatted birth_date: ' . $preservedBirthDate);
+                }
+                
+                \Log::info('Birth date after merging additional_data:', ['birth_date' => $values['birth_date']]);
             }
+
+            // Debug: Log final values being passed to template
+            \Log::info('Final values passed to generateHtml:', [
+                'birth_date' => $values['birth_date'] ?? 'NOT_SET',
+                'resident_name' => $values['resident_name'] ?? 'NOT_SET',
+                'all_keys' => array_keys($values)
+            ]);
 
             $html = $template->generateHtml($values);
 
