@@ -68,6 +68,12 @@ class DocumentTemplateController
         return view('admin.templates.edit', compact('template'));
     }
 
+    public function builder($id)
+    {
+        $template = DocumentTemplate::findOrFail($id);
+        return view('admin.templates.builder', compact('template'));
+    }
+
     public function wordIntegration($id)
     {
         $template = DocumentTemplate::findOrFail($id);
@@ -443,13 +449,14 @@ class DocumentTemplateController
 
     /**
      * Sanitize Microsoft Word HTML while preserving basic structure and placeholders.
+     * Improved version that better preserves formatting.
      */
     private function sanitizeWordHtml(string $rawHtml): string
     {
-        // Remove MSO conditional comments and Office-specific XML blocks fast
+        // Remove MSO conditional comments and Office-specific XML blocks
         $clean = preg_replace('/<!--\s*\[if.*?endif\]\s*-->/is', '', $rawHtml) ?? $rawHtml;
         
-        // Remove style blocks completely - they're causing the raw CSS to show in content
+        // Remove style blocks - we'll use our own CSS
         $clean = preg_replace('/<style[^>]*>.*?<\/style>/is', '', $clean) ?? $clean;
         $clean = preg_replace('/<\/?(meta|link|script|xml)[^>]*>/is', '', $clean) ?? $clean;
         
@@ -459,25 +466,35 @@ class DocumentTemplateController
         $clean = preg_replace('/<div[^>]*>PHPWord<\/div>/i', '', $clean) ?? $clean;
         $clean = preg_replace('/PHPWord/i', '', $clean) ?? $clean;
 
+        // Remove Word-specific MSO styles but preserve important formatting
+        $clean = preg_replace('/mso-[^:]*:[^;]*;?/i', '', $clean) ?? $clean;
+        
+        // Clean up Word-specific font declarations but keep font-family
+        $clean = preg_replace('/font-family:\s*[^;]*["\']Calibri["\'][^;]*;?/i', '', $clean) ?? $clean;
+
         $dom = new \DOMDocument();
         // Suppress warnings for malformed Word HTML
-        @$dom->loadHTML($clean, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        @$dom->loadHTML('<?xml encoding="UTF-8">' . $clean, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
         $xpath = new \DOMXPath($dom);
 
         // Remove namespaced elements like o:p, v:*, w:*
         foreach ($xpath->query('//*[contains(name(), ":")]') as $node) {
-            $node->parentNode->removeChild($node);
+            if ($node->parentNode) {
+                $node->parentNode->removeChild($node);
+            }
         }
 
         // Remove any remaining script tags for safety
         foreach ($dom->getElementsByTagName('script') as $script) {
-            $script->parentNode->removeChild($script);
+            if ($script->parentNode) {
+                $script->parentNode->removeChild($script);
+            }
         }
 
         // Allowed tags and attributes - expanded to preserve formatting
-        $allowedTags = ['h1','h2','h3','h4','h5','h6','p','div','span','b','strong','i','em','u','br','hr','ul','ol','li','table','thead','tbody','tr','td','th','center'];
-        $allowedAttrs = ['style','class','align','valign','width','height','border','cellpadding','cellspacing','colspan','rowspan','dir'];
+        $allowedTags = ['h1','h2','h3','h4','h5','h6','p','div','span','b','strong','i','em','u','br','hr','ul','ol','li','table','thead','tbody','tfoot','tr','td','th','center','img','a'];
+        $allowedAttrs = ['style','class','align','valign','width','height','border','cellpadding','cellspacing','colspan','rowspan','dir','src','alt','href','target'];
 
         // Walk all elements
         $all = $dom->getElementsByTagName('*');
@@ -489,10 +506,12 @@ class DocumentTemplateController
             $tag = strtolower($el->nodeName);
             if (!in_array($tag, $allowedTags, true)) {
                 // Unwrap unknown tags: move children up, then remove
-                while ($el->firstChild) {
-                    $el->parentNode->insertBefore($el->firstChild, $el);
+                if ($el->parentNode) {
+                    while ($el->firstChild) {
+                        $el->parentNode->insertBefore($el->firstChild, $el);
+                    }
+                    $el->parentNode->removeChild($el);
                 }
-                $el->parentNode->removeChild($el);
                 continue;
             }
 
@@ -505,32 +524,62 @@ class DocumentTemplateController
                     }
                 }
                 
-                // Enhance alignment preservation
+                // Enhance alignment preservation - convert align to style
                 if ($el->hasAttribute('align')) {
                     $align = $el->getAttribute('align');
                     if (in_array($align, ['left', 'center', 'right', 'justify'])) {
-                        // Convert align attribute to inline style for better preservation
                         $currentStyle = $el->getAttribute('style') ?: '';
-                        $currentStyle .= 'text-align: ' . $align . '; ';
-                        $el->setAttribute('style', $currentStyle);
+                        // Only add if not already present
+                        if (stripos($currentStyle, 'text-align') === false) {
+                            $currentStyle = 'text-align: ' . $align . '; ' . $currentStyle;
+                            $el->setAttribute('style', trim($currentStyle));
+                        }
+                    }
+                    // Remove align attribute after converting to style
+                    $el->removeAttribute('align');
+                }
+                
+                // Clean up style attribute - remove MSO and invalid styles
+                if ($el->hasAttribute('style')) {
+                    $style = $el->getAttribute('style');
+                    // Remove MSO styles
+                    $style = preg_replace('/mso-[^:]*:[^;]*;?/i', '', $style) ?? $style;
+                    // Clean up multiple semicolons
+                    $style = preg_replace('/;\s*;/', ';', $style) ?? $style;
+                    $style = trim($style, '; ');
+                    if (!empty($style)) {
+                        $el->setAttribute('style', $style);
+                    } else {
+                        $el->removeAttribute('style');
                     }
                 }
             }
         }
 
-        // Convert multiple empty paragraphs into single break
+        // Get cleaned HTML
         $html = $dom->saveHTML();
-        $html = preg_replace('/(\s*<p>\s*<\/p>\s*){2,}/i', '<br>', $html) ?? $html;
+        
+        // Extract body content if wrapped in body tag
+        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $matches)) {
+            $html = $matches[1];
+        }
+        
+        // Convert multiple empty paragraphs into single break
+        $html = preg_replace('/(\s*<p[^>]*>\s*<\/p>\s*){2,}/i', '<br>', $html) ?? $html;
         
         // Preserve important whitespace and formatting
-        $html = preg_replace('/\s{3,}/', '  ', $html) ?? $html; // Allow double spaces but not excessive
-        $html = str_replace(['&nbsp;&nbsp;&nbsp;&nbsp;'], '&nbsp;&nbsp;', $html); // Reduce excessive non-breaking spaces
+        $html = preg_replace('/\s{3,}/', '  ', $html) ?? $html;
+        $html = str_replace(['&nbsp;&nbsp;&nbsp;&nbsp;'], '&nbsp;&nbsp;', $html);
         
         // Preserve paragraph spacing
         $html = preg_replace('/<p([^>]*)>\s*<\/p>/i', '<br>', $html) ?? $html;
         
         // Ensure proper line breaks after headings
         $html = preg_replace('/<\/h([1-6])>/i', '</h$1><br>', $html) ?? $html;
+        
+        // Clean up any remaining Word artifacts
+        $html = preg_replace('/lang="[^"]*"/i', '', $html) ?? $html;
+        $html = preg_replace('/xml:lang="[^"]*"/i', '', $html) ?? $html;
 
         return trim($html);
     }
@@ -814,6 +863,7 @@ class DocumentTemplateController
                 'birth_date'         => ['source' => 'resident.birth_date', 'label' => 'Birth Date'],
                 'contact_number'     => ['source' => 'resident.contact_number', 'label' => 'Contact Number'],
                 'purok_number'       => ['source' => 'resident.address', 'label' => 'Purok Number'],
+                'gender'             => ['source' => 'resident.gender', 'label' => 'Gender'],
 
                 'barangay_name'      => ['source' => 'barangay.barangay_name', 'label' => 'Barangay Name'],
                 'municipality_name'  => ['source' => 'barangay.municipality_name', 'label' => 'Municipality Name'],
@@ -891,10 +941,22 @@ class DocumentTemplateController
                 }
 
                 // Determine if field is required
-                $isRequired = true;
-                if ($isBarangayClearance) {
+                // Check the valid placeholders configuration first
+                $validPlaceholders = \App\Services\TemplateDefaultsService::getValidPlaceholders();
+                $isRequired = true; // Default to required
+                
+                if (isset($validPlaceholders[$placeholderKey])) {
+                    // Use the required setting from placeholder config if available
+                    $isRequired = $validPlaceholders[$placeholderKey]['required'] ?? true;
+                } elseif ($isBarangayClearance) {
                     // For Barangay Clearance, birth_place and remarks are required
                     $isRequired = in_array($placeholderKey, ['birth_place', 'remarks']);
+                }
+                
+                // Optional fields that should never be required
+                $optionalFields = ['requester_name', 'requester_relationship', 'dependents_list', 'purok_leader_name', 'purpose_details'];
+                if (in_array($placeholderKey, $optionalFields)) {
+                    $isRequired = false;
                 }
 
                 $field = [
@@ -939,6 +1001,172 @@ class DocumentTemplateController
             Log::error('Error fetching template form config: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to fetch template configuration'], 500);
         }
+    }
+
+    /**
+     * Validate template structure and placeholders
+     */
+    public function validateTemplate(Request $request, $id = null)
+    {
+        try {
+            $template = $id ? DocumentTemplate::findOrFail($id) : new DocumentTemplate();
+            
+            // If updating, merge request data
+            if ($request->has('header_content') || $request->has('body_content') || $request->has('footer_content')) {
+                $template->header_content = $request->input('header_content', $template->header_content);
+                $template->body_content = $request->input('body_content', $template->body_content);
+                $template->footer_content = $request->input('footer_content', $template->footer_content);
+            }
+            
+            // Validate template
+            $validation = $template->validate();
+            
+            // Test with sample data
+            $sampleData = $this->getSampleData();
+            $html = $template->generateHtml($sampleData);
+            
+            // Check for unreplaced placeholders
+            preg_match_all('/\[([^\]]+)\]/', $html, $matches);
+            $unreplaced = array_unique($matches[1] ?? []);
+            
+            return response()->json([
+                'valid' => $validation['valid'] && empty($unreplaced),
+                'validation' => $validation,
+                'unreplaced_placeholders' => $unreplaced,
+                'preview_html' => $html,
+                'placeholders_found' => $template->extractPlaceholders(
+                    ($template->header_content ?? '') . 
+                    ($template->body_content ?? '') . 
+                    ($template->footer_content ?? '')
+                )
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error validating template: ' . $e->getMessage());
+            return response()->json([
+                'valid' => false,
+                'error' => 'Failed to validate template: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Test template with multiple scenarios
+     */
+    public function testTemplate($id)
+    {
+        try {
+            $template = DocumentTemplate::findOrFail($id);
+            
+            // Test with various data scenarios
+            $testScenarios = [
+                'complete' => $this->getCompleteSampleData(),
+                'minimal' => $this->getMinimalSampleData(),
+                'edge_cases' => $this->getEdgeCaseData(),
+            ];
+            
+            $results = [];
+            foreach ($testScenarios as $scenario => $data) {
+                $html = $template->generateHtml($data);
+                preg_match_all('/\[([^\]]+)\]/', $html, $matches);
+                $unreplaced = array_unique($matches[1] ?? []);
+                
+                $results[$scenario] = [
+                    'html' => $html,
+                    'unreplaced' => $unreplaced,
+                    'valid' => empty($unreplaced),
+                ];
+            }
+            
+            return view('admin.templates.test-results', compact('template', 'results'));
+        } catch (\Exception $e) {
+            Log::error('Error testing template: ' . $e->getMessage());
+            notify()->error('Failed to test template: ' . $e->getMessage());
+            return back();
+        }
+    }
+
+    /**
+     * Get sample data for testing
+     */
+    private function getSampleData()
+    {
+        return [
+            'resident_name' => 'Juan Dela Cruz',
+            'resident_address' => '123 Sample Street, Barangay Sample',
+            'birth_date' => 'June 15, 1985',
+            'birth_place' => 'Sample City, Sample Province',
+            'civil_status' => 'Married',
+            'status' => 'Married',
+            'remarks' => 'NO DEROGATORY RECORD',
+            'purpose' => 'employment purposes',
+            'day' => date('jS'),
+            'month' => date('F'),
+            'year' => date('Y'),
+            'barangay_name' => 'Lower Malinao',
+            'municipality_name' => 'Padada',
+            'province_name' => 'Davao Del Sur',
+            'prepared_by_name' => 'Sample Secretary',
+            'captain_name' => 'Hon. Sample Captain',
+            'purok_leader_name' => 'Sample Purok Leader',
+            'purok_number' => '5',
+            'residence_years' => '10',
+            'monthly_income' => '5000',
+            'purpose_location' => 'Sample Location',
+            'verbal_request' => 'Yes',
+        ];
+    }
+
+    /**
+     * Get complete sample data
+     */
+    private function getCompleteSampleData()
+    {
+        return $this->getSampleData();
+    }
+
+    /**
+     * Get minimal sample data
+     */
+    private function getMinimalSampleData()
+    {
+        return [
+            'resident_name' => 'John Doe',
+            'resident_address' => '123 Main St',
+            'purpose' => 'test',
+            'day' => '1st',
+            'month' => 'January',
+            'year' => '2025',
+            'barangay_name' => 'Test Barangay',
+            'municipality_name' => 'Test Municipality',
+            'province_name' => 'Test Province',
+            'prepared_by_name' => 'Test Secretary',
+            'captain_name' => 'Test Captain',
+        ];
+    }
+
+    /**
+     * Get edge case sample data
+     */
+    private function getEdgeCaseData()
+    {
+        return [
+            'resident_name' => 'María José O\'Connor-Smith',
+            'resident_address' => '123 Main St., Apt. 4B, Purok 5',
+            'birth_date' => '',
+            'birth_place' => '',
+            'civil_status' => '',
+            'status' => '',
+            'remarks' => '',
+            'purpose' => 'Special characters: <>&"\'',
+            'day' => '31st',
+            'month' => 'December',
+            'year' => '2025',
+            'barangay_name' => 'Barangay with "Special" Characters',
+            'municipality_name' => 'Municipality & Co.',
+            'province_name' => 'Province <Test>',
+            'prepared_by_name' => '',
+            'captain_name' => '',
+        ];
     }
 
     public function destroy($id)

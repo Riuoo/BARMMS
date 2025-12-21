@@ -85,10 +85,6 @@ class Residents extends Authenticatable
         return $this->hasMany(MedicalRecord::class, 'resident_id');
     }
 
-    public function vaccinationRecords()
-    {
-        return $this->hasMany(VaccinationRecord::class, 'resident_id');
-    }
 
     public function attendanceLogs()
     {

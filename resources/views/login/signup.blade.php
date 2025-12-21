@@ -10,7 +10,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="icon" href="{{ asset('lower malinao logo.ico') }}" type="image/x-icon">
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="bg-green-600 text-white fixed w-full top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="{{ route('landing') }}" class="flex items-center space-x-3">
+                        <img src="/images/lower-malinao-brgy-logo.png" alt="Lower Malinao Barangay Logo" class="h-10 w-auto" />
+                        <h1 class="text-xl font-bold">Lower Malinao System</h1>
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{{ route('landing') }}" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-20 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
     <div class="max-w-4xl w-full space-y-8 bg-white p-10 rounded-lg shadow">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -505,6 +526,7 @@
             </div>
         </form>
     </div>
+    </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

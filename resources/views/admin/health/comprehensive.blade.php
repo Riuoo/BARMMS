@@ -55,17 +55,6 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
-                    <i class="fas fa-syringe text-white text-2xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Vaccinations</p>
-                    <p class="text-2xl font-semibold text-gray-900">{{ $vaccinationSummary['total'] }}</p>
-                </div>
-            </div>
-        </div>
 
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
@@ -131,45 +120,6 @@
             </div>
             @endif
         </div>
-
-        <!-- Vaccination Analysis -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Vaccination Analysis</h3>
-            
-            <!-- Vaccine Type Distribution -->
-            <div class="mb-6">
-                <h4 class="text-md font-medium text-gray-700 mb-3">Vaccine Type Distribution</h4>
-                <div class="space-y-2">
-                    @foreach($vaccinationSummary['by_type'] as $type => $count)
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-600">{{ ucfirst($type) }}</span>
-                        <div class="flex items-center">
-                            <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
-                                <div class="bg-green-500 h-2 rounded-full progress-bar" data-width="{{ ($vaccinationSummary['total'] > 0) ? round(($count / $vaccinationSummary['total']) * 100, 2) : 0 }}"></div>
-                            </div>
-                            <span class="text-sm font-medium text-gray-900">{{ $count }}</span>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Monthly Vaccination Trends -->
-            @if($vaccinationSummary['by_month']->count() > 0)
-            <div>
-                <h4 class="text-md font-medium text-gray-700 mb-3">Monthly Trends</h4>
-                <div class="space-y-2">
-                    @foreach($vaccinationSummary['by_month']->take(6) as $month => $count)
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-600">{{ \Carbon\Carbon::createFromFormat('Y-m', $month)->format('M Y') }}</span>
-                        <span class="text-sm font-medium text-gray-900">{{ $count }}</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-        </div>
-    </div>
 
     <!-- Consultation Analysis -->
     <div class="bg-white rounded-lg shadow p-6 mb-8">
@@ -279,13 +229,6 @@
             <div class="flex items-start">
                 <i class="fas fa-info-circle mt-1 mr-2"></i>
                 <p class="text-sm">Patient records show {{ $patientSummary['by_risk_level']->get('high', 0) }} high-risk patients requiring immediate attention.</p>
-            </div>
-            @endif
-            
-            @if($vaccinationSummary['total'] > 0)
-            <div class="flex items-start">
-                <i class="fas fa-info-circle mt-1 mr-2"></i>
-                <p class="text-sm">Vaccination coverage shows {{ $vaccinationSummary['by_type']->get('routine', 0) }} routine vaccinations administered.</p>
             </div>
             @endif
             

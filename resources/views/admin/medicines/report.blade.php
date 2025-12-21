@@ -270,18 +270,38 @@ document.addEventListener('DOMContentLoaded', function() {
         makeDoughnut(document.getElementById('chartCategory'), cat.map(r => r[0]), cat.map(r => r[1]));
 
         const defaultAgeBrackets = [
-            ['1-5', 0],
-            ['6-12', 0],
-            ['13-17', 0],
-            ['18-59', 0],
-            ['60+', 0],
+            ['1-5 years old', 0],
+            ['6-12 years old', 0],
+            ['13-17 years old', 0],
+            ['18-59 years old', 0],
+            ['60+ years old', 0],
         ];
-        const age = (requestsByAge || []).map(([label, value]) => [label || 'Unknown', value || 0]);
+        const age = (requestsByAge || []).map(([label, value]) => {
+            let processedLabel = label || 'Unknown';
+            // Add "years old" if not already present
+            if (processedLabel !== 'Unknown' && !processedLabel.includes('years old')) {
+                processedLabel = processedLabel + ' years old';
+            }
+            return [processedLabel, value || 0];
+        });
         const mergedAge = defaultAgeBrackets.map(([label, _]) => {
-            const found = age.find(a => a[0] === label);
+            // Try to find matching age bracket (with or without "years old")
+            const found = age.find(a => {
+                const ageLabel = a[0];
+                // Match by removing "years old" from both for comparison
+                const cleanLabel = label.replace(' years old', '');
+                const cleanAgeLabel = ageLabel.replace(' years old', '');
+                return cleanAgeLabel === cleanLabel;
+            });
             return [label, found ? found[1] : 0];
         });
-        const remaining = age.filter(a => !defaultAgeBrackets.find(([label]) => label === a[0]));
+        const remaining = age.filter(a => {
+            const cleanAgeLabel = a[0].replace(' years old', '');
+            return !defaultAgeBrackets.find(([label]) => {
+                const cleanLabel = label.replace(' years old', '');
+                return cleanLabel === cleanAgeLabel;
+            });
+        });
         const finalAge = [...mergedAge, ...remaining];
         makeDoughnut(document.getElementById('chartAge'), finalAge.map(r => r[0]), finalAge.map(r => r[1]));
 

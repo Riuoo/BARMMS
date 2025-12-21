@@ -125,31 +125,37 @@
                                 {{ number_format($cluster['total_residents'] ?? 0) }}
                             </p>
                         </div>
-                        <div class="bg-white rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition duration-200"
+                        <div class="bg-white rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition duration-200 incident-card"
                              role="button"
                              tabindex="0"
-                             onclick="openIncidentModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}')"
-                             onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); openIncidentModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); }">
+                             data-cluster-id="{{ $cluster['id'] }}"
+                             data-cluster-label="{{ addslashes($cluster['label']) }}"
+                             onclick="if(typeof window.openIncidentModal === 'function') { window.openIncidentModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); } else { console.error('openIncidentModal function not found'); }"
+                             onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); if(typeof window.openIncidentModal === 'function') { window.openIncidentModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); } }">
                             <p class="text-xs text-gray-600 mb-1">Incidents</p>
                             <p class="text-xl font-bold {{ $iconColor }}">
                                 {{ number_format($cluster['total_blotter'] ?? 0) }}
                             </p>
                         </div>
-                        <div class="bg-white rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition duration-200"
+                        <div class="bg-white rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition duration-200 medical-card"
                              role="button"
                              tabindex="0"
-                             onclick="openMedicalModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}')"
-                             onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); openMedicalModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); }">
+                             data-cluster-id="{{ $cluster['id'] }}"
+                             data-cluster-label="{{ addslashes($cluster['label']) }}"
+                             onclick="if(typeof window.openMedicalModal === 'function') { window.openMedicalModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); } else { console.error('openMedicalModal function not found'); }"
+                             onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); if(typeof window.openMedicalModal === 'function') { window.openMedicalModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); } }">
                             <p class="text-xs text-gray-600 mb-1">Medical Visits</p>
                             <p class="text-xl font-bold {{ $iconColor }}">
                                 {{ number_format($cluster['total_medical'] ?? 0) }}
                             </p>
                         </div>
-                        <div class="bg-white rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition duration-200"
+                        <div class="bg-white rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition duration-200 medicine-card"
                              role="button"
                              tabindex="0"
-                             onclick="openMedicineModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}')"
-                             onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); openMedicineModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); }">
+                             data-cluster-id="{{ $cluster['id'] }}"
+                             data-cluster-label="{{ addslashes($cluster['label']) }}"
+                             onclick="if(typeof window.openMedicineModal === 'function') { window.openMedicineModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); } else { console.error('openMedicineModal function not found'); }"
+                             onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); if(typeof window.openMedicineModal === 'function') { window.openMedicineModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}'); } }">
                             <p class="text-xs text-gray-600 mb-1">Medicine Disp.</p>
                             <p class="text-xl font-bold {{ $iconColor }}">
                                 {{ number_format($cluster['total_medicine'] ?? 0) }}
@@ -172,98 +178,13 @@
                         </div>
                     </div>
                     
-                    <!-- Per-Purok Details (Expandable) -->
-                    <details class="mt-4" id="details-{{ $cluster['id'] }}">
-                        <summary class="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                            <i class="fas fa-chevron-down mr-1"></i>
-                            View Purok Details
-                        </summary>
-                        <div class="mt-3 space-y-2">
-                            @foreach(($cluster['puroks'] ?? []) as $purokIndex => $purok)
-                                <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
-                                    <h5 class="font-semibold text-gray-900 mb-2">
-                                        {{ $purok['purok_display'] ?? 'N/A' }}
-                                    </h5>
-                                    <div class="grid grid-cols-2 gap-2 text-xs mb-3">
-                                        <div>
-                                            <span class="text-gray-600">Residents:</span>
-                                            <span class="font-semibold">{{ $purok['resident_count'] ?? 0 }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-gray-600">Incidents:</span>
-                                            <span class="font-semibold">{{ $purok['blotter_count'] ?? 0 }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-gray-600">Med. Visits:</span>
-                                            <span class="font-semibold">{{ $purok['medical_count'] ?? 0 }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-gray-600">Medicine:</span>
-                                            <span class="font-semibold">{{ $purok['medicine_count'] ?? 0 }}</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Detailed Breakdown -->
-                                    <div class="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                                        <!-- Incidents Breakdown -->
-                                        @php
-                                            $purokIncidents = collect($purok['incident_analytics']['case_types'] ?? [])
-                                                ->take(3);
-                                        @endphp
-                                        @if($purokIncidents->isNotEmpty())
-                                            <div class="text-xs">
-                                                <p class="font-semibold text-gray-700 mb-1">Top Case Types:</p>
-                                                <ul class="list-disc list-inside text-gray-600">
-                                                    @foreach($purokIncidents as $incident)
-                                                        <li>{{ $incident['type'] }} ({{ $incident['count'] }})</li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        @endif
-                                        
-                                        <!-- Medical Visits Breakdown -->
-                                        @php
-                                            $purokVisits = collect($purok['medical_analytics']['visits_by_purok'] ?? [])
-                                                ->first();
-                                            $purokIllnesses = collect($purok['medical_analytics']['illnesses'] ?? [])
-                                                ->take(3);
-                                        @endphp
-                                        @if($purokVisits || $purokIllnesses->isNotEmpty())
-                                            <div class="text-xs">
-                                                @if($purokVisits)
-                                                    <p class="font-semibold text-gray-700 mb-1">Visits: {{ $purokVisits['count'] }}</p>
-                                                @endif
-                                                @if($purokIllnesses->isNotEmpty())
-                                                    <p class="font-semibold text-gray-700 mb-1 mt-2">Top Diagnoses:</p>
-                                                    <ul class="list-disc list-inside text-gray-600">
-                                                        @foreach($purokIllnesses as $illness)
-                                                            <li>{{ $illness['illness'] }} ({{ $illness['count'] }})</li>
-                                                        @endforeach
-                                                    </ul>
-                                                @endif
-                                            </div>
-                                        @endif
-                                        
-                                        <!-- Medicine Breakdown -->
-                                        @php
-                                            $purokMedicines = collect($purok['medicine_analytics']['medicines'] ?? [])
-                                                ->take(3);
-                                        @endphp
-                                        @if($purokMedicines->isNotEmpty())
-                                            <div class="text-xs">
-                                                <p class="font-semibold text-gray-700 mb-1">Top Medicines:</p>
-                                                <ul class="list-disc list-inside text-gray-600">
-                                                    @foreach($purokMedicines as $medicine)
-                                                        <li>{{ $medicine['name'] }} (Total: {{ $medicine['total'] }})</li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </details>
+                    <!-- Per-Purok Details Button -->
+                    <button type="button" 
+                            class="mt-4 w-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg px-3 py-2 transition duration-200 flex items-center justify-center shadow-md"
+                            onclick="openPurokDetailsModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}')">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        View Purok Details
+                    </button>
                 </div>
             @endforeach
         </div>
@@ -271,8 +192,8 @@
 </div>
 
 <!-- Incident Analytics Modal -->
-<div id="incidentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col">
+<div id="incidentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[9999]">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900" id="incidentModalTitle">Incident Analytics</h3>
             <button type="button" id="closeIncidentModal" class="text-gray-500 hover:text-gray-700">
@@ -293,8 +214,8 @@
 </div>
 
 <!-- Medical Analytics Modal -->
-<div id="medicalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col">
+<div id="medicalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[9999]">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900" id="medicalModalTitle">Medical Visit Analytics</h3>
             <button type="button" id="closeMedicalModal" class="text-gray-500 hover:text-gray-700">
@@ -315,8 +236,8 @@
 </div>
 
 <!-- Medicine Analytics Modal -->
-<div id="medicineModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col">
+<div id="medicineModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[9999]">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900" id="medicineModalTitle">Medicine Dispense Analytics</h3>
             <button type="button" id="closeMedicineModal" class="text-gray-500 hover:text-gray-700">
@@ -336,24 +257,78 @@
     </div>
 </div>
 
+<!-- Purok Details Modal -->
+<div id="purokDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[9999]">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[85vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900" id="purokDetailsModalTitle">Purok Details</h3>
+            <button type="button" id="closePurokDetailsModal" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto flex-1">
+            <div id="purokDetailsModalContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+        <div class="flex justify-end px-6 py-4 border-t border-gray-200">
+            <button type="button" id="dismissPurokDetailsModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
-// Cluster data from PHP
-const clusterData = @json($clusters ?? []);
+// Cluster data from PHP - ensure it's always an array
+const clusterDataRaw = @json($clusters ?? []);
+// Convert to array if it's an object (happens when PHP array has non-sequential keys)
+let clusterData = [];
+if (Array.isArray(clusterDataRaw)) {
+    clusterData = clusterDataRaw;
+} else if (clusterDataRaw && typeof clusterDataRaw === 'object') {
+    // Convert object to array
+    clusterData = Object.values(clusterDataRaw);
+} else {
+    clusterData = [];
+}
 
-function openIncidentModal(clusterId, clusterLabel) {
-    const cluster = clusterData.find(c => c.id === clusterId);
-    if (!cluster || !cluster.incident_analytics) {
-        return;
-    }
+console.log('Cluster data loaded:', clusterData);
+console.log('Cluster data type:', typeof clusterDataRaw, 'isArray:', Array.isArray(clusterDataRaw));
 
+// Make functions globally accessible
+window.openIncidentModal = function(clusterId, clusterLabel) {
+    console.log('openIncidentModal called with:', clusterId, clusterLabel);
+    console.log('clusterData type:', typeof clusterData, 'isArray:', Array.isArray(clusterData));
+    
     const modal = document.getElementById('incidentModal');
     const title = document.getElementById('incidentModalTitle');
     const content = document.getElementById('incidentModalContent');
 
+    if (!modal) {
+        console.error('Modal element not found');
+        return;
+    }
+    if (!title || !content) {
+        console.error('Modal title or content not found');
+        return;
+    }
+
+    if (!Array.isArray(clusterData)) {
+        console.error('clusterData is not an array:', clusterData);
+        content.innerHTML = '<p class="text-red-600">Error: Cluster data is not available.</p>';
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+
     title.textContent = `Incident Analytics - ${clusterLabel}`;
 
-    const caseTypes = cluster.incident_analytics.case_types || [];
+    // Find cluster by ID (handle both string and number comparisons)
+    const cluster = clusterData.find(c => c.id == clusterId || c.id === clusterId);
+    const caseTypes = cluster?.incident_analytics?.case_types || [];
     
     if (caseTypes.length === 0) {
         content.innerHTML = '<p class="text-gray-600">No incident data available for this cluster.</p>';
@@ -378,24 +353,45 @@ function openIncidentModal(clusterId, clusterLabel) {
         content.innerHTML = html;
     }
 
+    // Show modal
     modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    console.log('Modal should be visible now');
 }
 
-function openMedicalModal(clusterId, clusterLabel) {
-    const cluster = clusterData.find(c => c.id === clusterId);
-    if (!cluster || !cluster.medical_analytics) {
-        return;
-    }
-
+window.openMedicalModal = function(clusterId, clusterLabel) {
+    console.log('openMedicalModal called with:', clusterId, clusterLabel);
+    console.log('clusterData type:', typeof clusterData, 'isArray:', Array.isArray(clusterData));
+    
     const modal = document.getElementById('medicalModal');
     const title = document.getElementById('medicalModalTitle');
     const content = document.getElementById('medicalModalContent');
 
+    if (!modal) {
+        console.error('Modal element not found');
+        return;
+    }
+    if (!title || !content) {
+        console.error('Modal title or content not found');
+        return;
+    }
+
+    if (!Array.isArray(clusterData)) {
+        console.error('clusterData is not an array:', clusterData);
+        content.innerHTML = '<p class="text-red-600">Error: Cluster data is not available.</p>';
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+
     title.textContent = `Medical Visit Analytics - ${clusterLabel}`;
 
-    const visitsByPurok = cluster.medical_analytics.visits_by_purok || [];
-    const illnesses = cluster.medical_analytics.illnesses || [];
+    // Find cluster by ID (handle both string and number comparisons)
+    const cluster = clusterData.find(c => c.id == clusterId || c.id === clusterId);
+    const visitsByPurok = cluster?.medical_analytics?.visits_by_purok || [];
+    const illnesses = cluster?.medical_analytics?.illnesses || [];
     
     let html = '<div class="space-y-6">';
     
@@ -442,23 +438,44 @@ function openMedicalModal(clusterId, clusterLabel) {
     
     content.innerHTML = html;
 
+    // Show modal
     modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    console.log('Modal should be visible now');
 }
 
-function openMedicineModal(clusterId, clusterLabel) {
-    const cluster = clusterData.find(c => c.id === clusterId);
-    if (!cluster || !cluster.medicine_analytics) {
-        return;
-    }
-
+window.openMedicineModal = function(clusterId, clusterLabel) {
+    console.log('openMedicineModal called with:', clusterId, clusterLabel);
+    console.log('clusterData type:', typeof clusterData, 'isArray:', Array.isArray(clusterData));
+    
     const modal = document.getElementById('medicineModal');
     const title = document.getElementById('medicineModalTitle');
     const content = document.getElementById('medicineModalContent');
 
+    if (!modal) {
+        console.error('Modal element not found');
+        return;
+    }
+    if (!title || !content) {
+        console.error('Modal title or content not found');
+        return;
+    }
+
+    if (!Array.isArray(clusterData)) {
+        console.error('clusterData is not an array:', clusterData);
+        content.innerHTML = '<p class="text-red-600">Error: Cluster data is not available.</p>';
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+
     title.textContent = `Medicine Dispense Analytics - ${clusterLabel}`;
 
-    const medicines = cluster.medicine_analytics.medicines || [];
+    // Find cluster by ID (handle both string and number comparisons)
+    const cluster = clusterData.find(c => c.id == clusterId || c.id === clusterId);
+    const medicines = cluster?.medicine_analytics?.medicines || [];
     
     if (medicines.length === 0) {
         content.innerHTML = '<p class="text-gray-600">No medicine data available for this cluster.</p>';
@@ -470,16 +487,238 @@ function openMedicineModal(clusterId, clusterLabel) {
         medicines.forEach((item, index) => {
             html += `
                 <div class="p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <span class="text-sm font-medium text-gray-500 mr-3">#${index + 1}</span>
                             <span class="text-sm font-medium text-gray-900">${escapeHtml(item.name)}</span>
                         </div>
                         <span class="text-sm font-bold text-gray-700">Total: ${item.total}</span>
                     </div>
-                    <div class="flex gap-4 text-xs text-gray-600 ml-8">
-                        <span>Requested: ${item.requested || 0}</span>
-                        <span>Dispensed: ${item.dispensed || 0}</span>
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+        content.innerHTML = html;
+    }
+
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    console.log('Modal should be visible now');
+}
+
+window.closeIncidentModal = function() {
+    const modal = document.getElementById('incidentModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+}
+
+window.closeMedicalModal = function() {
+    const modal = document.getElementById('medicalModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+}
+
+window.closeMedicineModal = function() {
+    const modal = document.getElementById('medicineModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+}
+
+window.openPurokDetailsModal = function(clusterId, clusterLabel) {
+    const modal = document.getElementById('purokDetailsModal');
+    const title = document.getElementById('purokDetailsModalTitle');
+    const content = document.getElementById('purokDetailsModalContent');
+
+    if (!modal || !title || !content) {
+        console.error('Purok details modal elements not found');
+        return;
+    }
+
+    if (!Array.isArray(clusterData)) {
+        console.error('clusterData is not an array:', clusterData);
+        content.innerHTML = '<p class="text-red-600">Error: Cluster data is not available.</p>';
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+
+    const cluster = clusterData.find(c => c.id == clusterId || c.id === clusterId);
+    if (!cluster || !cluster.puroks) {
+        content.innerHTML = '<p class="text-gray-600">No purok data available for this cluster.</p>';
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+
+    title.textContent = `Purok Details - ${clusterLabel}`;
+
+    let html = '<div class="space-y-4">';
+    
+    cluster.puroks.forEach((purok, index) => {
+        html += `<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">`;
+        html += `<h4 class="font-semibold text-lg text-gray-900 mb-3">${escapeHtml(purok.purok_display || 'N/A')}</h4>`;
+        
+        // Summary Statistics
+        html += '<div class="grid grid-cols-2 gap-3 mb-4">';
+        html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Residents:</span> <span class="font-semibold">${purok.resident_count || 0}</span></div>`;
+        html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Incidents:</span> <span class="font-semibold">${purok.blotter_count || 0}</span></div>`;
+        html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Med. Visits:</span> <span class="font-semibold">${purok.medical_count || 0}</span></div>`;
+        html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Medicine:</span> <span class="font-semibold">${purok.medicine_count || 0}</span></div>`;
+        html += '</div>';
+
+        // Detailed Breakdown
+        html += '<div class="mt-4 pt-4 border-t border-gray-300 space-y-3">';
+        
+        // Incidents Breakdown
+        const incidents = purok.incident_analytics?.case_types || [];
+        if (incidents.length > 0) {
+            html += '<div class="text-sm">';
+            html += '<p class="font-semibold text-gray-700 mb-2">Top Case Types:</p>';
+            html += '<ul class="list-disc list-inside text-gray-600 space-y-1">';
+            incidents.slice(0, 5).forEach(incident => {
+                html += `<li>${escapeHtml(incident.type)} (${incident.count})</li>`;
+            });
+            html += '</ul></div>';
+        }
+
+        // Medical Visits Breakdown
+        const visits = purok.medical_analytics?.visits_by_purok || [];
+        const illnesses = purok.medical_analytics?.illnesses || [];
+        if (visits.length > 0 || illnesses.length > 0) {
+            html += '<div class="text-sm">';
+            if (visits.length > 0) {
+                html += `<p class="font-semibold text-gray-700 mb-1">Visits: ${visits[0].count || 0}</p>`;
+            }
+            if (illnesses.length > 0) {
+                html += '<p class="font-semibold text-gray-700 mb-2 mt-2">Top Diagnoses:</p>';
+                html += '<ul class="list-disc list-inside text-gray-600 space-y-1">';
+                illnesses.slice(0, 5).forEach(illness => {
+                    html += `<li>${escapeHtml(illness.illness)} (${illness.count})</li>`;
+                });
+                html += '</ul>';
+            }
+            html += '</div>';
+        }
+
+        // Medicine Breakdown
+        const medicines = purok.medicine_analytics?.medicines || [];
+        if (medicines.length > 0) {
+            html += '<div class="text-sm">';
+            html += '<p class="font-semibold text-gray-700 mb-2">Top Medicines:</p>';
+            html += '<div class="space-y-2 mb-2">';
+            const topMedicines = medicines.slice(0, 3);
+            topMedicines.forEach((medicine, medIndex) => {
+                html += `<div class="flex items-center justify-between bg-white rounded p-2">`;
+                html += `<span class="text-gray-900">${escapeHtml(medicine.name)}</span>`;
+                html += `<span class="font-semibold text-gray-700">Total: ${medicine.total || 0}</span>`;
+                html += '</div>';
+            });
+            html += '</div>';
+            
+            if (medicines.length > 3) {
+                const totalDispensed = medicines.reduce((sum, m) => sum + (m.dispensed || 0), 0);
+                const remainingMedicines = medicines.slice(3);
+                const uniqueId = `medicines-${clusterId}-${index}`;
+                html += `<details class="mt-2">`;
+                html += `<summary class="text-blue-600 hover:text-blue-800 hover:underline text-xs italic cursor-pointer font-medium">`;
+                html += `+ ${medicines.length - 3} more medicine(s). Total of all medicines: ${totalDispensed}`;
+                html += `</summary>`;
+                html += `<div class="mt-2 space-y-2 pl-4 border-l-2 border-blue-200">`;
+                remainingMedicines.forEach((medicine) => {
+                    html += `<div class="flex items-center justify-between bg-white rounded p-2">`;
+                    html += `<span class="text-gray-900">${escapeHtml(medicine.name)}</span>`;
+                    html += `<span class="font-semibold text-gray-700">Total: ${medicine.total || 0}</span>`;
+                    html += '</div>';
+                });
+                html += '</div>';
+                html += '</details>';
+            }
+            html += '</div>';
+        }
+
+        html += '</div></div>';
+    });
+
+    html += '</div>';
+    content.innerHTML = html;
+
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+window.openPurokMedicineModal = function(clusterId, clusterLabel, purokDisplay) {
+    const modal = document.getElementById('medicineModal');
+    const title = document.getElementById('medicineModalTitle');
+    const content = document.getElementById('medicineModalContent');
+
+    if (!modal || !title || !content) {
+        console.error('Modal elements not found');
+        return;
+    }
+
+    if (!Array.isArray(clusterData)) {
+        console.error('clusterData is not an array:', clusterData);
+        content.innerHTML = '<p class="text-red-600">Error: Cluster data is not available.</p>';
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+
+    const cluster = clusterData.find(c => c.id == clusterId || c.id === clusterId);
+    if (!cluster || !cluster.puroks) {
+        content.innerHTML = '<p class="text-gray-600">No purok data available.</p>';
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+
+    // Find the specific purok
+    const purok = cluster.puroks.find(p => p.purok_display === purokDisplay);
+    if (!purok) {
+        content.innerHTML = '<p class="text-gray-600">Purok not found.</p>';
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+
+    title.textContent = `Medicine Dispense Analytics - ${purokDisplay} (${clusterLabel})`;
+
+    const medicines = purok.medicine_analytics?.medicines || [];
+    
+    if (medicines.length === 0) {
+        content.innerHTML = '<p class="text-gray-600">No medicine data available for this purok.</p>';
+    } else {
+        let html = '<div class="space-y-4">';
+        html += '<h4 class="font-semibold text-gray-900 mb-3">Medicines Requested/Dispensed (Most Common to Least Common)</h4>';
+        html += '<div class="space-y-2">';
+        
+        medicines.forEach((item, index) => {
+            html += `
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-sm font-medium text-gray-500 mr-3">#${index + 1}</span>
+                            <span class="text-sm font-medium text-gray-900">${escapeHtml(item.name)}</span>
+                        </div>
+                        <span class="text-sm font-bold text-gray-700">Total: ${item.total}</span>
                     </div>
                 </div>
             `;
@@ -490,25 +729,17 @@ function openMedicineModal(clusterId, clusterLabel) {
     }
 
     modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 }
 
-function closeIncidentModal() {
-    const modal = document.getElementById('incidentModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
-
-function closeMedicalModal() {
-    const modal = document.getElementById('medicalModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
-
-function closeMedicineModal() {
-    const modal = document.getElementById('medicineModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+window.closePurokDetailsModal = function() {
+    const modal = document.getElementById('purokDetailsModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+    }
 }
 
 function escapeHtml(text) {
@@ -517,32 +748,44 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Event listeners
-document.getElementById('closeIncidentModal')?.addEventListener('click', closeIncidentModal);
-document.getElementById('dismissIncidentModal')?.addEventListener('click', closeIncidentModal);
-document.getElementById('closeMedicalModal')?.addEventListener('click', closeMedicalModal);
-document.getElementById('dismissMedicalModal')?.addEventListener('click', closeMedicalModal);
-document.getElementById('closeMedicineModal')?.addEventListener('click', closeMedicineModal);
-document.getElementById('dismissMedicineModal')?.addEventListener('click', closeMedicineModal);
+// Event listeners - wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('closeIncidentModal')?.addEventListener('click', closeIncidentModal);
+    document.getElementById('dismissIncidentModal')?.addEventListener('click', closeIncidentModal);
+    document.getElementById('closeMedicalModal')?.addEventListener('click', closeMedicalModal);
+    document.getElementById('dismissMedicalModal')?.addEventListener('click', closeMedicalModal);
+    document.getElementById('closeMedicineModal')?.addEventListener('click', closeMedicineModal);
+    document.getElementById('dismissMedicineModal')?.addEventListener('click', closeMedicineModal);
 
-// Close modals on outside click
-document.getElementById('incidentModal')?.addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeIncidentModal();
-    }
+    // Close modals on outside click
+    document.getElementById('incidentModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeIncidentModal();
+        }
+    });
+
+    document.getElementById('medicalModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeMedicalModal();
+        }
+    });
+
+    document.getElementById('medicineModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeMedicineModal();
+        }
+    });
+
+    document.getElementById('closePurokDetailsModal')?.addEventListener('click', closePurokDetailsModal);
+    document.getElementById('dismissPurokDetailsModal')?.addEventListener('click', closePurokDetailsModal);
+
+    document.getElementById('purokDetailsModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePurokDetailsModal();
+        }
+    });
 });
 
-document.getElementById('medicalModal')?.addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeMedicalModal();
-    }
-});
-
-document.getElementById('medicineModal')?.addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeMedicineModal();
-    }
-});
 </script>
 @endpush
 @endsection

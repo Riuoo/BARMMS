@@ -1540,17 +1540,17 @@
     </script>
 
     <!-- Header -->
-    <header class="fixed top-0 left-0 w-full bg-white text-gray-900 flex items-center justify-between p-4 shadow-md z-50">
+    <header class="fixed top-0 left-0 w-full bg-green-600 text-white flex items-center justify-between p-4 shadow-md z-50">
         <div class="flex items-center space-x-4">
-            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-gray-900 focus:outline-none mr-2" aria-label="Toggle sidebar">
+            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-white focus:outline-none mr-2" aria-label="Toggle sidebar">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
-            <div class="flex items-center space-x-2 text-green-600 font-bold text-2xl">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-2 text-white font-bold text-2xl hover:opacity-80 transition-opacity">
                 <img src="/images/lower-malinao-brgy-logo.png" alt="Lower Malinao Barangay Logo" class="h-12 w-auto" />
                 <span>Lower Malinao</span>
-            </div>
+            </a>
         </div>
         <div class="flex items-center space-x-4">
             @if(!$isNurse)
@@ -1562,7 +1562,7 @@
                     title="Notifications"
                     type="button"
                 >
-                    <i class="fas fa-bell text-gray-900"></i>
+                    <i class="fas fa-bell text-white"></i>
                     {{-- Notification count badge --}}
                     <span id="notification-count-badge" class="absolute -top-0.5 -right-1 bg-red-600 text-white text-xs rounded-full px-0.5 min-w-[16px] h-4 flex items-center justify-center" style="display: none;"></span>
                 </button>
@@ -1651,8 +1651,8 @@
                     :aria-expanded="open.toString()"
                     type="button"
                 >
-                    <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
-                    <span class="font-semibold hidden sm:inline">
+                    <i class="fas fa-user text-white" aria-hidden="true"></i>
+                    <span class="font-semibold text-white hidden sm:inline">
                         @php
                             $currentAdminUser = null;
                             if (session('user_role') === 'barangay' || session('user_id')) {
@@ -1859,12 +1859,6 @@
                                     <span>Patient Profile Lookup</span>
                                 </button>
                             </li>
-                            <!-- <li>
-                                <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.vaccination-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.vaccination-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Vaccination Records</span>
-                                </a>
-                            </li> -->
                             <li>
                                 <a href="{{ route('admin.medical-records.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.medical-records*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.medical-records*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
                                     <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
@@ -1940,12 +1934,12 @@
                                     <span>Purok Risk Clustering</span>
                                 </a>
                             </li>
-                            <!-- <li>
-                                <a href="{{ route('admin.decision-tree') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.decision-tree*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.decision-tree*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
-                                    <i class="fas fa-sitemap fa-fw mr-3 {{ request()->routeIs('admin.decision-tree*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Resident Classification & Prediction</span>
+                            <li>
+                                <a href="{{ route('admin.programs.index') }}" class="flex items-center px-4 py-3 rounded {{ isActiveRoute('admin.programs*') }} transition duration-300 text-base" aria-current="{{ isActiveRoute('admin.programs*') == 'bg-green-600 font-medium text-white' ? 'page' : '' }}">
+                                    <i class="fas fa-project-diagram fa-fw mr-3 {{ request()->routeIs('admin.programs*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Program Recommendations</span>
                                 </a>
-                            </li> -->
+                            </li>
                         </ul>
                     </section>
                     @endif
@@ -2122,12 +2116,6 @@
                                     <span>Patient Profile Lookup</span>
                                 </button>
                             </li>
-                            <!-- <li>
-                                <a href="{{ route('admin.vaccination-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.vaccination-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-syringe fa-fw mr-3 {{ request()->routeIs('admin.vaccination-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Vaccination Records</span>
-                                </a>
-                            </li> -->
                             <li>
                                 <a href="{{ route('admin.medical-records.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.medical-records*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
                                     <i class="fas fa-stethoscope fa-fw mr-3 {{ request()->routeIs('admin.medical-records*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
@@ -2203,12 +2191,12 @@
                                     <span>Purok Risk Clustering</span>
                                 </a>
                             </li>
-                            <!-- <li>
-                                <a href="{{ route('admin.decision-tree') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.decision-tree*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
-                                    <i class="fas fa-sitemap fa-fw mr-3 {{ request()->routeIs('admin.decision-tree*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
-                                    <span>Resident Classification & Prediction</span>
+                            <li>
+                                <a href="{{ route('admin.programs.index') }}" class="flex items-center px-4 py-3 rounded {{ request()->routeIs('admin.programs*') ? 'bg-green-600 font-medium text-white' : 'hover:bg-gray-300' }} transition duration-300 text-base">
+                                    <i class="fas fa-project-diagram fa-fw mr-3 {{ request()->routeIs('admin.programs*') ? 'text-white' : 'text-green-600' }}" aria-hidden="true"></i>
+                                    <span>Program Recommendations</span>
                                 </a>
-                            </li> -->
+                            </li>
                         </ul>
                     </section>
                     @endif

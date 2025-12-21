@@ -4,7 +4,6 @@ namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 
 use App\Models\Residents;
 use App\Models\MedicalRecord;
-use App\Models\VaccinationRecord;
 use App\Models\MedicineRequest;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -79,10 +78,6 @@ class PatientHealthProfileController
             ->limit(15)
             ->get();
 
-        $vaccinationRecords = VaccinationRecord::where('resident_id', $residentId)
-            ->orderByDesc('vaccination_date')
-            ->limit(15)
-            ->get();
 
         $medicineRequests = MedicineRequest::with(['medicine', 'approvedByUser'])
             ->where('resident_id', $residentId)
@@ -101,15 +96,6 @@ class PatientHealthProfileController
                     'link' => route('admin.medical-records.show', $record->id),
                 ];
             }))
-            ->merge($vaccinationRecords->map(function ($record) {
-                return [
-                    'type' => 'vaccination',
-                    'date' => $record->vaccination_date,
-                    'title' => $record->vaccine_name ?? 'Vaccination',
-                    'details' => $record->vaccine_type ?? 'Vaccine administered',
-                    'link' => route('admin.vaccination-records.show', $record->id),
-                ];
-            }))
             ->merge($medicineRequests->map(function ($request) {
                 $qty = $request->quantity_requested ?? $request->quantity_approved ?? $request->quantity ?? 'N/A';
                 return [
@@ -126,7 +112,6 @@ class PatientHealthProfileController
 
         $stats = [
             'total_consultations' => $medicalRecords->count(),
-            'total_vaccinations' => $vaccinationRecords->count(),
             'total_requests' => $medicineRequests->count(),
         ];
 
@@ -134,7 +119,6 @@ class PatientHealthProfileController
             'resident',
             'patientName',
             'medicalRecords',
-            'vaccinationRecords',
             'medicineRequests',
             'timeline',
             'stats'

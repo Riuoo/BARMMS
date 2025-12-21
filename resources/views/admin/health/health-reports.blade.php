@@ -71,26 +71,6 @@
             </div>
         </div>
 
-        <!-- Total Vaccinations Card -->
-        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
-            <div class="p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-purple-100 text-xs font-medium">Vaccinations</p>
-                        <p class="text-white text-2xl font-bold">{{ $totalVaccinations }}</p>
-                    </div>
-                    <div class="bg-purple-400 bg-opacity-30 rounded-full p-2">
-                        <i class="fas fa-syringe text-white text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <a href="{{ route('admin.vaccination-records.index') }}" class="text-purple-100 hover:text-white text-xs font-medium flex items-center">
-                        Manage <i class="fas fa-arrow-right ml-1 text-xs"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
         <!-- Total Consultations Card -->
         <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300">
             <div class="p-4">
@@ -133,29 +113,9 @@
     </div>
 
     <!-- Health Alerts Section -->
-    @if(isset($overdueVaccinations) && count($overdueVaccinations) > 0 || isset($analyticsAlerts) && count($analyticsAlerts) > 0)
+    @if(isset($analyticsAlerts) && count($analyticsAlerts) > 0)
     <div class="mb-2">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @if(isset($overdueVaccinations) && count($overdueVaccinations) > 0)
-            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg shadow">
-                <div class="flex items-center mb-2">
-                    <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-2"></i>
-                    <span class="font-bold text-red-700">Overdue Vaccinations</span>
-                </div>
-                <ul class="list-disc ml-6 text-red-800 text-sm">
-                    @foreach(safeTake($overdueVaccinations, 3) as $vaccination)
-                        <li>
-                            <span class="font-semibold">{{ optional($vaccination->resident)->full_name ?? 'Unknown' }}</span>
-                            <span class="ml-1">({{ $vaccination->vaccine_name ?? 'Unknown' }})</span>
-                        </li>
-                    @endforeach
-                </ul>
-                @if(safeCount($overdueVaccinations) > 3)
-                    <p class="text-red-600 text-xs mt-2">+{{ safeCount($overdueVaccinations) - 3 }} more overdue</p>
-                @endif
-            </div>
-            @endif
-
             @if(isset($analyticsAlerts) && count($analyticsAlerts) > 0)
             <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg shadow">
                 <div class="flex items-center mb-2">
@@ -352,26 +312,6 @@
             </div>
         </div>
 
-        <!-- Due Vaccinations -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100">
-            <div class="p-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Due Vaccinations</h3>
-                <div class="space-y-3">
-                    @foreach(safeTake($dueVaccinations, 4) as $vaccination)
-                    <div class="border-l-4 border-yellow-500 pl-4">
-                        <p class="text-sm font-medium text-gray-900">{{ optional($vaccination->resident)->full_name ?? 'Unknown' }}</p>
-                        <p class="text-xs text-gray-500">{{ $vaccination->vaccine_name ?? '' }}</p>
-                        <p class="text-xs text-gray-400">Due: {{ optional($vaccination->next_dose_date)->format('M d, Y') }}</p>
-                    </div>
-                    @endforeach
-                </div>
-                <div class="mt-4">
-                    <a href="{{ route('admin.vaccination-records.due') }}" class="text-green-600 hover:text-green-800 text-sm font-medium">
-                        View All Due Vaccinations &rarr;
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Floating Action Button -->
@@ -384,10 +324,6 @@
             
             <!-- FAB Menu -->
             <div x-show="open" @click.away="open = false" x-transition class="absolute bottom-16 right-0 space-y-2">
-                <a href="{{ route('admin.vaccination-records.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-syringe text-green-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700">Record Vaccination</span>
-                </a>
                 <a href="{{ route('admin.medical-records.create') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                     <i class="fas fa-stethoscope text-blue-600 mr-2"></i>
                     <span class="text-sm font-medium text-gray-700">Log Consultation</span>

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -52,6 +53,31 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Dynamically find and drop all foreign key constraints that reference residents
+        // This handles auto-generated constraint names from foreignId()->constrained()
+        
+        $dbName = DB::connection()->getDatabaseName();
+        
+        // Get all foreign keys that reference residents
+        $foreignKeys = DB::select("
+            SELECT 
+                CONSTRAINT_NAME,
+                TABLE_NAME
+            FROM information_schema.KEY_COLUMN_USAGE
+            WHERE REFERENCED_TABLE_SCHEMA = ?
+            AND REFERENCED_TABLE_NAME = 'residents'
+        ", [$dbName]);
+        
+        // Drop each foreign key constraint
+        foreach ($foreignKeys as $fk) {
+            try {
+                DB::statement("ALTER TABLE `{$fk->TABLE_NAME}` DROP FOREIGN KEY `{$fk->CONSTRAINT_NAME}`");
+            } catch (\Exception $e) {
+                // Ignore errors if constraint doesn't exist or table doesn't exist
+                // This can happen during fresh migrations
+            }
+        }
+        
         Schema::dropIfExists('residents');
     }
 };

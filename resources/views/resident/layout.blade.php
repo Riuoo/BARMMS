@@ -1099,17 +1099,17 @@
     @include('notify::components.notify')
 
     <!-- Header -->
-    <header class="fixed top-0 left-0 w-full bg-white text-gray-900 flex items-center justify-between p-4 shadow-md z-50">
+    <header class="fixed top-0 left-0 w-full bg-green-600 text-white flex items-center justify-between p-4 shadow-md z-50">
         <div class="flex items-center space-x-4">
-            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-gray-900 focus:outline-none mr-2" aria-label="Toggle sidebar">
+            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-white focus:outline-none mr-2" aria-label="Toggle sidebar">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
-            <div class="flex items-center space-x-2 text-green-600 font-bold text-2xl">
+            <a href="{{ route('resident.dashboard') }}" class="flex items-center space-x-2 text-white font-bold text-2xl hover:opacity-80 transition-opacity">
                 <img src="/images/lower-malinao-brgy-logo.png" alt="Lower Malinao Barangay Logo" class="h-12 w-auto" />
                 <span>Lower Malinao</span>
-            </div>
+            </a>
         </div>
         <div class="flex items-center space-x-4">
             <!-- Notifications -->
@@ -1143,7 +1143,7 @@
                  x-init="init()"
                  @click.away="open = false">
                 <button @click="open = !open" class="relative focus:outline-none" aria-label="Notifications" title="Notifications">
-                    <i class="fas fa-bell text-gray-900"></i>
+                    <i class="fas fa-bell text-white"></i>
                     <span x-show="items.length > 0" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1" x-text="items.length"></span>
                 </button>
                 <div x-show="open"
@@ -1223,8 +1223,8 @@
                     :aria-expanded="open.toString()"
                     type="button"
                 >
-                    <i class="fas fa-user text-gray-900" aria-hidden="true"></i>
-                    <span class="font-semibold hidden sm:inline">{{ $currentUser->full_name ?? 'Resident' }}</span>
+                    <i class="fas fa-user text-white" aria-hidden="true"></i>
+                    <span class="font-semibold text-white hidden sm:inline">{{ $currentUser->full_name ?? 'Resident' }}</span>
                 </button>
                 <div
                     x-show="open"

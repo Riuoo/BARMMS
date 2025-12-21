@@ -66,26 +66,26 @@
     @include('notify::components.notify')
 
     <!-- Enhanced Navigation -->
-    <nav class="bg-white/90 backdrop-blur-md text-gray-900 fixed w-full top-0 z-50 shadow-lg border-b border-gray-200">
+    <nav class="bg-green-600 text-white fixed w-full top-0 z-50 shadow-lg border-b border-green-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-3">
+                <a href="{{ route('landing') }}" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
                     <img src="/images/lower-malinao-brgy-logo.png" alt="Lower Malinao Barangay Logo" class="h-10 w-auto" />
-                    <h1 class="text-xl font-bold gradient-text">
+                    <h1 class="text-xl font-bold text-white">
                         Lower Malinao System
                     </h1>
-                </div>
+                </a>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#home" class="hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Home</a>
-                        <a href="#bulletin" class="hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Bulletin Board</a>
-                        <!-- <a href="{{ route('public.accomplishments') }}" class="hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Accomplishments</a> -->
-                        <a href="#contact" class="hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contact</a>
-                        <!-- <a href="{{ route('admin.contact') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-300">Request Account</a> -->
+                        <a href="#home" class="hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Home</a>
+                        <a href="#bulletin" class="hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Bulletin Board</a>
+                        <!-- <a href="{{ route('public.accomplishments') }}" class="hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Accomplishments</a> -->
+                        <a href="#contact" class="hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contact</a>
+                        <!-- <a href="{{ route('admin.contact') }}" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-300">Request Account</a> -->
                     </div>
                 </div>
                 <div class="md:hidden">
-                    <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-900 focus:outline-none">
+                    <button id="mobile-menu-button" class="text-white hover:text-green-200 focus:outline-none">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
@@ -93,10 +93,10 @@
         </div>
         <!-- Mobile menu -->
         <div id="mobile-menu" class="md:hidden hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/95 backdrop-blur-md border-t border-gray-200">
-                <a href="#home" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Home</a>
-                <a href="#bulletin" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Bulletin Board</a>
-                <a href="#contact" class="block hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">Contact</a>
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-green-600 border-t border-green-700">
+                <a href="#home" class="block hover:bg-green-700 text-white px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#bulletin" class="block hover:bg-green-700 text-white px-3 py-2 rounded-md text-base font-medium">Bulletin Board</a>
+                <a href="#contact" class="block hover:bg-green-700 text-white px-3 py-2 rounded-md text-base font-medium">Contact</a>
             </div>
         </div>
     </nav>

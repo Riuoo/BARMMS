@@ -152,17 +152,23 @@ class DocumentRequestController
             $values = [
                 'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
-                'birth_date' => $birthDateFormatted ?: 'NOT PROVIDED', // Temporary: Show placeholder when missing
+                'birth_date' => $birthDateFormatted ?: '',
                 'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
                 'status' => $documentRequest->resident ? strtolower($documentRequest->resident->marital_status ?? '') : '',
+                'gender' => $documentRequest->resident ? strtolower($documentRequest->resident->gender ?? '') : '',
+                'age' => $documentRequest->resident ? ($documentRequest->resident->age ?? '') : '',
+                'title_of_respect' => \App\Models\DocumentTemplate::getTitleOfRespect(
+                    $documentRequest->resident ? $documentRequest->resident->gender : null,
+                    $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? null) : null
+                ),
                 'purok_number' => $purokNumber,
                 'purpose' => $documentRequest->description,
                 'day' => date('jS'),
                 'month' => date('F'),
                 'year' => date('Y'),
-                'barangay_name' => $adminUser ? $adminUser->barangay_name : '',
-                'municipality_name' => $adminUser ? $adminUser->municipality_name : '',
-                'province_name' => $adminUser ? $adminUser->province_name : '',
+                'barangay_name' => config('app.default_barangay', 'Lower Malinao'),
+                'municipality_name' => config('app.default_city', 'Padada'),
+                'province_name' => config('app.default_province', 'Davao Del Sur'),
                 'official_name' => $adminUser ? $adminUser->full_name : '',
                 'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
             ];
@@ -175,11 +181,9 @@ class DocumentRequestController
             if (is_array($documentRequest->additional_data)) {
                 // Preserve the formatted birth_date from resident record
                 $preservedBirthDate = $values['birth_date'];
-                
                 $values = array_merge($values, $documentRequest->additional_data);
-                
-                // Restore the formatted birth_date if it was overwritten
-                if ($preservedBirthDate && $preservedBirthDate !== 'NOT PROVIDED') {
+                // Restore birth_date if it was overwritten and we have a valid formatted date
+                if (!empty($preservedBirthDate)) {
                     $values['birth_date'] = $preservedBirthDate;
                 }
             }
@@ -193,12 +197,13 @@ class DocumentRequestController
             $pdf->setPaper('a4', 'portrait');
             $pdf->setOptions([
                 'isHtml5ParserEnabled' => true,
-                'isRemoteEnabled' => false,
+                'isRemoteEnabled' => true, // Enable for local file paths
                 'isFontSubsettingEnabled' => true,
-                'defaultFont' => 'Arial',
-                'dpi' => 150, // Lower DPI for faster generation
+                'defaultFont' => 'Times New Roman',
+                'dpi' => 150,
                 'debugCss' => false,
                 'debugLayout' => false,
+                'chroot' => public_path(), // Allow access to public folder
             ]);
             Log::info('Approve: PDF generated', ['elapsed' => microtime(true) - $start]);
 
@@ -270,38 +275,17 @@ class DocumentRequestController
 
             // Format birth date for display (e.g., "June 21, 1967")
             $birthDateFormatted = '';
-            
-            \Log::info('Birth Date Processing Debug', [
-                'has_resident' => $documentRequest->resident ? 'YES' : 'NO',
-                'resident_id' => $documentRequest->resident ? $documentRequest->resident->id : 'NO_RESIDENT',
-                'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : 'NO_RESIDENT',
-                'birth_date_raw' => $documentRequest->resident ? $documentRequest->resident->birth_date : 'NO_RESIDENT',
-                'birth_date_type' => $documentRequest->resident && $documentRequest->resident->birth_date ? gettype($documentRequest->resident->birth_date) : 'NO_BIRTH_DATE'
-            ]);
-            
             if ($documentRequest->resident && $documentRequest->resident->birth_date) {
                 try {
-                    // Ensure birth_date is a Carbon instance and format it
                     $birthDate = $documentRequest->resident->birth_date;
                     if ($birthDate instanceof \Carbon\Carbon) {
                         $birthDateFormatted = $birthDate->format('F j, Y');
-                        \Log::info('Birth date formatted successfully: ' . $birthDateFormatted);
                     } elseif (is_string($birthDate)) {
-                        // If it's a string, try to parse it
                         $birthDateFormatted = \Carbon\Carbon::parse($birthDate)->format('F j, Y');
-                        \Log::info('Birth date parsed and formatted: ' . $birthDateFormatted);
                     }
                 } catch (\Exception $e) {
-                    // If there's an issue with date formatting, log it and use empty string
-                    \Log::warning('Birth date formatting failed for resident ID: ' . $documentRequest->resident->id . ' - ' . $e->getMessage());
+                    Log::warning('Birth date formatting failed: ' . $e->getMessage());
                     $birthDateFormatted = '';
-                }
-            } else {
-                // Log when birth_date is missing to help with debugging
-                if ($documentRequest->resident) {
-                    \Log::warning('Birth date is NULL or empty for resident: ' . $documentRequest->resident->full_name . ' (ID: ' . $documentRequest->resident->id . ')');
-                } else {
-                    \Log::error('No resident found for document request');
                 }
             }
 
@@ -309,17 +293,23 @@ class DocumentRequestController
             $values = [
                 'resident_name' => $documentRequest->resident ? $documentRequest->resident->full_name : '',
                 'resident_address' => $documentRequest->resident ? $documentRequest->resident->address : '',
-                'birth_date' => $birthDateFormatted ?: 'NOT PROVIDED', // Temporary: Show placeholder when missing
+                'birth_date' => $birthDateFormatted ?: '',
                 'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
                 'status' => $documentRequest->resident ? strtolower($documentRequest->resident->marital_status ?? '') : '',
+                'gender' => $documentRequest->resident ? strtolower($documentRequest->resident->gender ?? '') : '',
+                'age' => $documentRequest->resident ? ($documentRequest->resident->age ?? '') : '',
+                'title_of_respect' => \App\Models\DocumentTemplate::getTitleOfRespect(
+                    $documentRequest->resident ? $documentRequest->resident->gender : null,
+                    $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? null) : null
+                ),
                 'purok_number' => $purokNumber,
                 'purpose' => $documentRequest->description,
                 'day' => date('jS'),
                 'month' => date('F'),
                 'year' => date('Y'),
-                'barangay_name' => $adminUser ? $adminUser->barangay_name : '',
-                'municipality_name' => $adminUser ? $adminUser->municipality_name : '',
-                'province_name' => $adminUser ? $adminUser->province_name : '',
+                'barangay_name' => config('app.default_barangay', 'Lower Malinao'),
+                'municipality_name' => config('app.default_city', 'Padada'),
+                'province_name' => config('app.default_province', 'Davao Del Sur'),
                 'official_name' => $adminUser ? $adminUser->full_name : '',
                 'official_position' => $adminUser ? ($adminUser->position ?? '') : '',
             ];
@@ -330,37 +320,15 @@ class DocumentRequestController
 
             // Merge dynamic template fields from additional_data
             if (is_array($documentRequest->additional_data)) {
-                \Log::info('Additional data being merged:', $documentRequest->additional_data);
-                
                 // Preserve the formatted birth_date from resident record
                 $preservedBirthDate = $values['birth_date'];
-                
-                // Check if additional_data contains birth_date that might overwrite our formatted one
-                if (isset($documentRequest->additional_data['birth_date'])) {
-                    \Log::warning('additional_data contains birth_date - will preserve formatted version!', [
-                        'formatted_birth_date' => $values['birth_date'],
-                        'additional_data_birth_date' => $documentRequest->additional_data['birth_date']
-                    ]);
-                }
-                
                 $values = array_merge($values, $documentRequest->additional_data);
-                
-                // Restore the formatted birth_date if it was overwritten
-                if ($preservedBirthDate && $preservedBirthDate !== 'NOT PROVIDED') {
+                // Restore birth_date if it was overwritten and we have a valid formatted date
+                if (!empty($preservedBirthDate)) {
                     $values['birth_date'] = $preservedBirthDate;
-                    \Log::info('Restored formatted birth_date: ' . $preservedBirthDate);
                 }
-                
-                \Log::info('Birth date after merging additional_data:', ['birth_date' => $values['birth_date']]);
             }
-
-            // Debug: Log final values being passed to template
-            \Log::info('Final values passed to generateHtml:', [
-                'birth_date' => $values['birth_date'] ?? 'NOT_SET',
-                'resident_name' => $values['resident_name'] ?? 'NOT_SET',
-                'all_keys' => array_keys($values)
-            ]);
-
+            
             $html = $template->generateHtml($values);
 
             // Generate PDF with optimized settings for speed
@@ -368,12 +336,13 @@ class DocumentRequestController
             $pdf->setPaper('a4', 'portrait');
             $pdf->setOptions([
                 'isHtml5ParserEnabled' => true,
-                'isRemoteEnabled' => false,
+                'isRemoteEnabled' => true, // Enable for local file:// paths
                 'isFontSubsettingEnabled' => true,
-                'defaultFont' => 'Arial',
-                'dpi' => 150, // Lower DPI for faster generation
+                'defaultFont' => 'Times New Roman',
+                'dpi' => 150,
                 'debugCss' => false,
                 'debugLayout' => false,
+                'chroot' => public_path(), // Allow access to public folder
             ]);
 
             if ($documentRequest->status === 'approved') {
@@ -531,17 +500,50 @@ class DocumentRequestController
                 [strtolower(trim($documentRequest->document_type))]
             )->firstOrFail();
 
+        // Extract purok number from address if available
+        $purokNumber = '';
+        if ($documentRequest->resident && $documentRequest->resident->address) {
+            if (preg_match('/Purok\s*(\d+)/i', $documentRequest->resident->address, $matches)) {
+                $purokNumber = $matches[1];
+            }
+        }
+
+        // Format birth date for display (e.g., "June 21, 1967")
+        $birthDateFormatted = '';
+        if ($documentRequest->resident && $documentRequest->resident->birth_date) {
+            try {
+                $birthDate = $documentRequest->resident->birth_date;
+                if ($birthDate instanceof \Carbon\Carbon) {
+                    $birthDateFormatted = $birthDate->format('F j, Y');
+                } elseif (is_string($birthDate)) {
+                    $birthDateFormatted = \Carbon\Carbon::parse($birthDate)->format('F j, Y');
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Birth date formatting failed in downloadRequest: ' . $e->getMessage());
+                $birthDateFormatted = '';
+            }
+        }
+
         $values = [
             'resident_name' => $documentRequest->resident?->full_name ?? '',
             'resident_address' => $documentRequest->resident?->address ?? '',
+            'birth_date' => $birthDateFormatted ?: '',
             'civil_status' => $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? '') : '',
+            'status' => $documentRequest->resident ? strtolower($documentRequest->resident->marital_status ?? '') : '',
+            'gender' => $documentRequest->resident ? strtolower($documentRequest->resident->gender ?? '') : '',
+            'age' => $documentRequest->resident ? ($documentRequest->resident->age ?? '') : '',
+            'title_of_respect' => \App\Models\DocumentTemplate::getTitleOfRespect(
+                $documentRequest->resident ? $documentRequest->resident->gender : null,
+                $documentRequest->resident ? ($documentRequest->resident->marital_status ?? $documentRequest->resident->civil_status ?? null) : null
+            ),
+            'purok_number' => $purokNumber,
             'purpose' => $documentRequest->description,
             'day' => date('jS'),
             'month' => date('F'),
             'year' => date('Y'),
-            'barangay_name' => $adminUser->barangay_name ?? '',
-            'municipality_name' => $adminUser->municipality_name ?? '',
-            'province_name' => $adminUser->province_name ?? '',
+            'barangay_name' => config('app.default_barangay', 'Lower Malinao'),
+            'municipality_name' => config('app.default_city', 'Padada'),
+            'province_name' => config('app.default_province', 'Davao Del Sur'),
             'official_name' => $adminUser->full_name ?? '',
             'official_position' => $adminUser->position ?? '',
         ];
@@ -552,11 +554,26 @@ class DocumentRequestController
 
         // Merge dynamic template fields from additional_data
         if (is_array($documentRequest->additional_data)) {
+            // Preserve formatted birth_date
+            $preservedBirthDate = $values['birth_date'];
             $values = array_merge($values, $documentRequest->additional_data);
+            // Restore birth_date if it was overwritten and we have a valid formatted date
+            if (!empty($preservedBirthDate)) {
+                $values['birth_date'] = $preservedBirthDate;
+            }
         }
 
         $html = $template->generateHtml($values);
         $pdf = Pdf::loadHTML($html);
+        $pdf->setPaper('a4', 'portrait');
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'isFontSubsettingEnabled' => true,
+            'defaultFont' => 'Times New Roman',
+            'dpi' => 150,
+            'chroot' => public_path(),
+        ]);
         $filename = $this->generateFilename($documentRequest);
 
         return $pdf->download($filename);

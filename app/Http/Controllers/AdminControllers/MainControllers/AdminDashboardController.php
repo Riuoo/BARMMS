@@ -8,7 +8,6 @@ use App\Models\BarangayProfile;
 use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\Residents;
-use App\Models\VaccinationRecord;
 use App\Models\HealthCenterActivity;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +29,6 @@ class AdminDashboardController
         $totalAccomplishedProjects = AccomplishedProject::count();
         
         // Additional metrics for enhanced dashboard
-        $totalVaccinationRecords = VaccinationRecord::count();
         $upcomingHealthActivities = HealthCenterActivity::where('activity_date', '>=', now())->count();
         
         // Get resident demographics data for charts (create age brackets from age column)
@@ -70,7 +68,6 @@ class AdminDashboardController
             'totalBlotterReports',
             'totalDocumentRequests',
             'totalAccomplishedProjects',
-            'totalVaccinationRecords',
             'upcomingHealthActivities',
             'residentDemographics',
             'residentTrends',

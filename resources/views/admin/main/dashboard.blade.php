@@ -177,9 +177,9 @@
                             <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
                             <span class="text-sm font-medium text-gray-700">Resident Demographic Analysis</span>
                         </a>
-                        <a href="{{ route('admin.decision-tree') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                            <i class="fas fa-sitemap text-indigo-600 mr-2"></i>
-                            <span class="text-sm font-medium text-gray-700">Resident Classification & Prediction</span>
+                        <a href="{{ route('admin.programs.index') }}" class="flex items-center bg-white rounded-lg shadow-lg p-3 hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-project-diagram text-indigo-600 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Program Recommendations</span>
                         </a>
                     </div>
                 </div>

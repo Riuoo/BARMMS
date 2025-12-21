@@ -320,6 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (source === 'resident.marital_status' && demographics.marital_status) {
                     value = demographics.marital_status;
                 }
+                if (source === 'resident.gender' && demographics.gender) {
+                    value = demographics.gender;
+                }
 
                 if (value && field.value === '') {
                     field.value = value;

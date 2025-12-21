@@ -23,7 +23,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0">
-                    <h1 class="text-xl font-bold">Lower Malinao System</h1>
+                    <a href="{{ route('landing') }}" class="flex items-center space-x-3">
+                        <img src="/images/lower-malinao-brgy-logo.png" alt="Lower Malinao Barangay Logo" class="h-10 w-auto" />
+                        <h1 class="text-xl font-bold">Lower Malinao System</h1>
+                    </a>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">

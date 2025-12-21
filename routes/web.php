@@ -21,16 +21,15 @@ use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentTempl
 use App\Http\Controllers\AdminControllers\ProjectControllers\AccomplishProjectController;
 use App\Http\Controllers\AdminControllers\NotificationControllers\AdminNotificationController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthReportController;
-use App\Http\Controllers\AdminControllers\HealthManagementControllers\VaccinationRecordController;
-use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicalRecordController;
+    use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicalRecordController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthCenterActivityController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\PatientHealthProfileController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineRequestController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineTransactionController;
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringController;
-use App\Http\Controllers\AdminControllers\AlgorithmControllers\DecisionTreeController;
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringAnalysisController;
+use App\Http\Controllers\AdminControllers\ProgramControllers\ProgramRecommendationController;
 use App\Http\Controllers\ResidentControllers\ResidentDashboardController;
 use App\Http\Controllers\ResidentControllers\ResidentBlotterController;
 use App\Http\Controllers\ResidentControllers\ResidentCommunityConcernController;
@@ -103,7 +102,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/notifications/mark-as-read/{type}/{id}', [AdminNotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
         Route::post('/notifications/mark-all-as-read-ajax', [AdminNotificationController::class, 'markAllAsReadAjax'])->name('admin.notifications.mark-all-as-read-ajax');
         Route::post('/notifications/mark-as-read-by-type/{type}', [AdminNotificationController::class, 'markAsReadByType'])->name('admin.notifications.mark-as-read-by-type');
-        // Resident search (needed by vaccination and medical forms) - allow nurse access
+        // Resident search (needed by medical forms) - allow nurse access
         Route::get('/search/residents', [ResidentController::class, 'search'])->name('admin.search.residents');
         Route::get('/residents/{resident}/summary', [ResidentController::class, 'summary'])->name('admin.residents.summary');
     });
@@ -124,16 +123,21 @@ Route::prefix('admin')->group(function () {
         Route::get('/clustering/optimal-k', [ClusteringController::class, 'getOptimalK'])->name('admin.clustering.optimal-k');
         Route::get('/clustering/export', [ClusteringController::class, 'export'])->name('admin.clustering.export');
         Route::get('/clustering/stats', [ClusteringController::class, 'getClusterStats'])->name('admin.clustering.stats');
-
-        Route::get('/decision-tree', [DecisionTreeController::class, 'index'])->name('admin.decision-tree');
-        Route::get('/decision-tree/stats', [DecisionTreeController::class, 'getStatistics'])->name('admin.decision-tree.stats');
-        Route::get('/decision-tree/export', [DecisionTreeController::class, 'exportRules'])->name('admin.decision-tree.export');
-        Route::get('/decision-tree/features', [DecisionTreeController::class, 'getFeatureImportance'])->name('admin.decision-tree.features');
         
         // Clustering Analysis Routes (all admin roles can access)
         Route::prefix('clustering')->group(function () {
             Route::get('blotter/analysis', [ClusteringAnalysisController::class, 'blotterAnalysis'])->name('clustering.blotter.analysis');
             Route::get('document/analysis', [ClusteringAnalysisController::class, 'documentAnalysis'])->name('clustering.document.analysis');
+        });
+
+        // Program Recommendations Routes (all admin roles can access)
+        Route::prefix('programs')->group(function () {
+            Route::get('/', [ProgramRecommendationController::class, 'index'])->name('admin.programs.index');
+            Route::get('/{programId}', [ProgramRecommendationController::class, 'byProgram'])->name('admin.programs.show');
+            Route::get('/purok/{purok}', [ProgramRecommendationController::class, 'byPurok'])->name('admin.programs.purok');
+            Route::get('/resident/{residentId}', [ProgramRecommendationController::class, 'byResident'])->name('admin.programs.resident');
+            Route::get('/{programId}/export', [ProgramRecommendationController::class, 'export'])->name('admin.programs.export');
+            Route::get('/{programId}/purok-groups', [ProgramRecommendationController::class, 'purokGroups'])->name('admin.programs.purok-groups');
         });
     });
 
@@ -153,6 +157,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/templates', [DocumentTemplateController::class, 'index'])->name('admin.templates.index');
         Route::get('/templates/{template}/preview', [DocumentTemplateController::class, 'preview'])->name('admin.templates.preview');
         Route::get('/templates/{template}/form-config', [DocumentTemplateController::class, 'formConfig'])->name('admin.templates.form-config');
+        Route::post('/templates/{template}/validate', [DocumentTemplateController::class, 'validateTemplate'])->name('admin.templates.validate');
+        Route::get('/templates/{template}/test', [DocumentTemplateController::class, 'testTemplate'])->name('admin.templates.test');
         
         Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
     });
@@ -197,6 +203,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/templates/create', [DocumentTemplateController::class, 'create'])->name('admin.templates.create');
         Route::post('/templates', [DocumentTemplateController::class, 'store'])->name('admin.templates.store');
         Route::get('/templates/{template}/edit', [DocumentTemplateController::class, 'edit'])->name('admin.templates.edit');
+        Route::get('/templates/{template}/builder', [DocumentTemplateController::class, 'builder'])->name('admin.templates.builder');
         Route::get('/templates/{template}/word-integration', [DocumentTemplateController::class, 'wordIntegration'])->name('admin.templates.word-integration');
         Route::get('/templates/{template}/download-word', [DocumentTemplateController::class, 'downloadWord'])->name('admin.templates.download-word');
         Route::post('/templates/{template}/upload-word', [DocumentTemplateController::class, 'uploadWord'])->name('admin.templates.upload-word');
@@ -210,6 +217,7 @@ Route::prefix('admin')->group(function () {
         Route::put('/templates/{template}', [DocumentTemplateController::class, 'update'])->name('admin.templates.update');
         Route::post('/templates/{template}/reset', [DocumentTemplateController::class, 'reset'])->name('admin.templates.reset');
         Route::post('/templates/{template}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
+        Route::post('/templates/validate', [DocumentTemplateController::class, 'validateTemplate'])->name('admin.templates.validate-new');
         Route::delete('/templates/{template}', [DocumentTemplateController::class, 'destroy'])->name('admin.templates.destroy');
         
         // Account Requests transactions
@@ -218,8 +226,6 @@ Route::prefix('admin')->group(function () {
 
         // Analytics transactions
         Route::post('/clustering/perform', [ClusteringController::class, 'performClustering'])->name('admin.clustering.perform');
-        Route::post('/decision-tree/perform', [DecisionTreeController::class, 'performAnalysis'])->name('admin.decision-tree.perform');
-        Route::post('/decision-tree/predict', [DecisionTreeController::class, 'predictForResident'])->name('admin.decision-tree.predict');
     });
 
     // --- ADMIN ROUTES GROUP (Protected by 'admin.role' middleware) ---
@@ -233,47 +239,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/health/patient/{resident}', [PatientHealthProfileController::class, 'show'])
             ->whereNumber('resident')
             ->name('admin.health.patient-profile');
-
-        // Resident search (needed by vaccination forms) - allow nurse access
-        // Note: This route is now in the admin,secretary,captain,councilor group for blotter forms
-
-        // Vaccination Records Routes
-        Route::get('/vaccination-records', [VaccinationRecordController::class, 'index'])->name('admin.vaccination-records.index');
-        Route::get('/vaccination-records/create', [VaccinationRecordController::class, 'create'])->name('admin.vaccination-records.create');
-        Route::get('/vaccination-records/create/child', [VaccinationRecordController::class, 'createChild'])->name('admin.vaccination-records.create.child');
-        Route::get('/vaccination-records/create/infant', [VaccinationRecordController::class, 'createInfant'])->name('admin.vaccination-records.create.infant');
-        Route::get('/vaccination-records/create/toddler', [VaccinationRecordController::class, 'createToddler'])->name('admin.vaccination-records.create.toddler');
-        Route::get('/vaccination-records/create/adult', [VaccinationRecordController::class, 'createAdult'])->name('admin.vaccination-records.create.adult');
-        Route::get('/vaccination-records/create/adolescent', [VaccinationRecordController::class, 'createAdolescent'])->name('admin.vaccination-records.create.adolescent');
-        Route::get('/vaccination-records/create/elderly', [VaccinationRecordController::class, 'createElderly'])->name('admin.vaccination-records.create.elderly');
-        Route::post('/vaccination-records', [VaccinationRecordController::class, 'store'])->name('admin.vaccination-records.store');
-
-        // Place specific routes BEFORE the {id} catch-all to avoid collisions
-        Route::get('/vaccination-records/search', [VaccinationRecordController::class, 'search'])->name('admin.vaccination-records.search');
-        Route::get('/vaccination-records/due', [VaccinationRecordController::class, 'dueVaccinations'])->name('admin.vaccination-records.due');
-        Route::get('/vaccination-records/report', [VaccinationRecordController::class, 'generateReport'])->name('admin.vaccination-records.report');
-
-        // Constrain {id} to numeric to prevent matching words like 'due'
-        Route::get('/vaccination-records/{id}', [VaccinationRecordController::class, 'show'])
-            ->whereNumber('id')
-            ->name('admin.vaccination-records.show');
-        Route::get('/vaccination-records/{id}/edit', [VaccinationRecordController::class, 'edit'])
-            ->whereNumber('id')
-            ->name('admin.vaccination-records.edit');
-        Route::put('/vaccination-records/{id}', [VaccinationRecordController::class, 'update'])
-            ->whereNumber('id')
-            ->name('admin.vaccination-records.update');
-        Route::delete('/vaccination-records/{id}', [VaccinationRecordController::class, 'destroy'])
-            ->whereNumber('id')
-            ->name('admin.vaccination-records.destroy');
-        
-        // Child Profile Routes
-        Route::get('/child-profiles', [VaccinationRecordController::class, 'getChildProfiles'])->name('admin.vaccination-records.child-profiles');
-        Route::get('/child-profiles/create', [VaccinationRecordController::class, 'createChildProfile'])->name('admin.vaccination-records.create-child-profile');
-        Route::post('/child-profiles', [VaccinationRecordController::class, 'storeChildProfile'])->name('admin.vaccination-records.store-child-profile');
-        
-        // Vaccination Schedule API
-        Route::get('/vaccination-schedules/recommended', [VaccinationRecordController::class, 'getRecommendedVaccines'])->name('admin.vaccination-schedules.recommended');
 
         // Medical Records Routes
         Route::get('/medical-records', [MedicalRecordController::class, 'index'])->name('admin.medical-records.index');

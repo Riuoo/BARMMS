@@ -41,42 +41,78 @@ class MedicineTransactionSeeder extends Seeder
             ]);
         }
 
-        // Seed OUT transactions - one per resident only
-        $residents = \App\Models\Residents::all();
-        foreach ($residents as $resident) {
-            // Get a random medicine request for this resident (if any exists)
-            $residentRequest = $requests->where('resident_id', $resident->id)->first();
-            
-            if ($residentRequest) {
-                // Use the existing request data
-                MedicineTransaction::create([
-                    'medicine_id' => $residentRequest->medicine_id,
-                    'resident_id' => $resident->id,
-                    'medical_record_id' => $residentRequest->medical_record_id,
-                    'transaction_type' => 'OUT',
-                    'quantity' => $residentRequest->quantity_approved ?? $residentRequest->quantity_requested,
-                    'transaction_date' => $residentRequest->request_date,
-                    'prescribed_by' => $residentRequest->approved_by,
-                    'notes' => 'Dispensed for resident: ' . $resident->name,
-                ]);
-            } else {
-                // If no request exists, create a transaction with random medicine
-                $randomMedicine = $medicines->random();
-                $randomPrescriber = $prescribers->random();
-                $randomMedicalRecord = $medicalRecords->random();
+        // Seed OUT transactions - create transactions for most requests (70-80% fulfillment rate)
+        // This ensures accurate data where dispensed <= requested for most cases
+        $processedRequests = [];
+        
+        foreach ($requests as $request) {
+            // 75% chance to create a transaction for this request (fulfilled)
+            if (rand(1, 100) <= 75) {
+                // Dispensed quantity should be <= requested quantity
+                // Sometimes dispense less than requested (partial fulfillment)
+                $requestedQty = $request->quantity_requested ?? 0;
+                $approvedQty = $request->quantity_approved ?? $requestedQty;
+                
+                // Skip if both requested and approved quantities are 0 or invalid
+                if ($requestedQty <= 0 && $approvedQty <= 0) {
+                    continue;
+                }
+                
+                // Ensure we have a valid approved quantity (at least 1)
+                if ($approvedQty <= 0) {
+                    $approvedQty = max(1, $requestedQty);
+                }
+                
+                // 80% chance to dispense full approved amount, 20% chance for partial
+                if (rand(1, 100) <= 80) {
+                    $dispensedQty = $approvedQty;
+                } else {
+                    // Partial fulfillment: dispense 50-90% of approved
+                    $dispensedQty = max(1, (int)($approvedQty * (rand(50, 90) / 100)));
+                }
+                
+                // Final safety check: ensure quantity is at least 1
+                $dispensedQty = max(1, $dispensedQty);
                 
                 MedicineTransaction::create([
-                    'medicine_id' => $randomMedicine->id,
-                    'resident_id' => $resident->id,
-                    'medical_record_id' => $randomMedicalRecord->id,
+                    'medicine_id' => $request->medicine_id,
+                    'resident_id' => $request->resident_id,
+                    'medical_record_id' => $request->medical_record_id,
                     'transaction_type' => 'OUT',
-                    'quantity' => rand(1, 10),
-                    'transaction_date' => now()->subDays(rand(1, 30)),
-                    'prescribed_by' => $randomPrescriber,
-                    'notes' => 'Dispensed for resident: ' . $resident->name,
+                    'quantity' => $dispensedQty,
+                    'transaction_date' => $request->request_date,
+                    'prescribed_by' => $request->approved_by,
+                    'notes' => 'Dispensed for resident request',
                 ]);
+                
+                $processedRequests[] = $request->id;
             }
         }
+        
+        // Create some direct dispensations (transactions without requests) - 10-15% of residents
+        $residents = \App\Models\Residents::all();
+        $numDirectDispensations = (int)($residents->count() * 0.12); // 12% of residents
+        
+        for ($i = 0; $i < $numDirectDispensations; $i++) {
+            $resident = $residents->random();
+            $randomMedicine = $medicines->random();
+            $randomPrescriber = $prescribers->random();
+            $randomMedicalRecord = $medicalRecords->random();
+            
+            MedicineTransaction::create([
+                'medicine_id' => $randomMedicine->id,
+                'resident_id' => $resident->id,
+                'medical_record_id' => $randomMedicalRecord->id,
+                'transaction_type' => 'OUT',
+                'quantity' => rand(1, 8),
+                'transaction_date' => now()->subDays(rand(1, 30)),
+                'prescribed_by' => $randomPrescriber,
+                'notes' => 'Direct dispensation without prior request',
+            ]);
+        }
+        
+        $this->command->info('Created ' . count($processedRequests) . ' transactions from requests');
+        $this->command->info('Created ' . $numDirectDispensations . ' direct dispensations');
 
         // Seed EXPIRED adjustments for some medicines
         foreach ($medicines->take(2) as $expiredMedicine) {

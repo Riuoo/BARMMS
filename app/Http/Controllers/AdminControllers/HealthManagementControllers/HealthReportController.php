@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\AdminControllers\HealthManagementControllers;
 
-use App\Models\VaccinationRecord;
 use App\Models\MedicalRecord;
 use App\Models\HealthCenterActivity;
 use App\Models\MedicineRequest;
@@ -17,7 +16,6 @@ class HealthReportController
     {
         // Get summary statistics
         $totalResidents = Residents::count();
-        $totalVaccinations = VaccinationRecord::count();
         $totalConsultations = MedicalRecord::count();
         $totalActivities = HealthCenterActivity::count();
 
@@ -32,12 +30,6 @@ class HealthReportController
             ->limit(5)
             ->get();
 
-        $dueVaccinations = VaccinationRecord::with('resident')
-            ->whereNotNull('next_dose_date')
-            ->where('next_dose_date', '<=', now()->addDays(30))
-            ->orderBy('next_dose_date', 'asc')
-            ->limit(10)
-            ->get();
 
         // PWD distribution
         $pwdDistribution = Residents::selectRaw('is_pwd, count(*) as count')
@@ -51,12 +43,6 @@ class HealthReportController
             ->orderBy('month', 'asc')
             ->get();
 
-        $overdueVaccinations = VaccinationRecord::with('resident')
-            ->whereNotNull('next_dose_date')
-            ->where('next_dose_date', '<', now())
-            ->orderBy('next_dose_date', 'asc')
-            ->limit(10)
-            ->get();
 
         $analyticsAlerts = [
             '3 children in Zone 2 are at high risk for malnutrition.',
@@ -68,14 +54,8 @@ class HealthReportController
             ['description' => 'Cluster 2: Children with incomplete vaccinations in Zone 1'],
         ];
 
-        $decisionTreeResults = [
-            ['description' => 'Children with incomplete vaccinations are at higher risk for measles.'],
-            ['description' => 'Elderly with hypertension and diabetes are at higher risk for complications.'],
-        ];
-
         $bhwStats = [
             'consultations' => MedicalRecord::whereMonth('created_at', now()->month)->count(),
-            'vaccinations' => VaccinationRecord::whereMonth('created_at', now()->month)->count(),
         ];
 
         // Medicine analytics (30-day window) - Detailed inventory with priority sorting
@@ -121,18 +101,14 @@ class HealthReportController
 
         return view('admin.health.health-reports', compact(
             'totalResidents',
-            'totalVaccinations',
             'totalConsultations',
             'totalActivities',
             'recentConsultations',
             'upcomingActivities',
-            'dueVaccinations',
             'pwdDistribution',
             'monthlyConsultations',
-            'overdueVaccinations',
             'analyticsAlerts',
             'kmeansResults',
-            'decisionTreeResults',
             'bhwStats',
             'medicineStats',
             'topRequestedMedicines',
@@ -144,16 +120,6 @@ class HealthReportController
     {
         $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : now()->startOfMonth();
         $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : now()->endOfMonth();
-
-        // Vaccination Summary
-        $vaccinations = VaccinationRecord::whereBetween('vaccination_date', [$startDate, $endDate])->get();
-        $vaccinationSummary = [
-            'total' => $vaccinations->count(),
-            'by_type' => $vaccinations->groupBy('vaccine_type')->map->count(),
-            'by_month' => $vaccinations->groupBy(function($record) {
-                return $record->vaccination_date->format('Y-m');
-            })->map->count(),
-        ];
 
         // Medical Consultations Summary
         $consultations = MedicalRecord::whereBetween('consultation_datetime', [$startDate, $endDate])->get();
@@ -177,7 +143,6 @@ class HealthReportController
         return view('admin.health.comprehensive', compact(
             'startDate',
             'endDate',
-            'vaccinationSummary',
             'consultationSummary',
             'activitySummary'
         ));

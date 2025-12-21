@@ -281,8 +281,10 @@ class ClusteringController
             $medicalCount = MedicalRecord::whereIn('resident_id', $residentIds)->count();
 
             // Count medicine dispenses (OUT transactions only)
+            // Only count transactions with valid medicine relationships to match analytics
             $medicineCount = MedicineTransaction::where('transaction_type', 'OUT')
                 ->whereIn('resident_id', $residentIds)
+                ->whereHas('medicine') // Only count transactions with valid medicine
                 ->sum('quantity');
 
             // Calculate demographic score (average age and family size)
@@ -629,6 +631,8 @@ class ClusteringController
 
         // Count from transactions
         foreach ($medicineTransactions as $transaction) {
+            // Only count transactions with valid medicine relationship
+            // This matches the medicine_count calculation which also requires valid medicine
             if ($transaction->medicine) {
                 $medicineName = $transaction->medicine->name;
                 if (!isset($medicineCounts[$medicineName])) {
@@ -641,11 +645,25 @@ class ClusteringController
                 $medicineCounts[$medicineName]['dispensed'] += $transaction->quantity ?? 0;
             }
         }
+        
+        // Verify sum matches: sum of all dispensed should equal medicine_count
+        // If there are transactions without medicines, they won't appear in analytics
+        // but will be counted in medicine_count - this is expected behavior
 
         // Calculate total and sort
+        // Total represents actual dispensed quantity to match the card's total_medicine
+        // The card shows sum of all dispensed quantities, so modal totals should match
+        // Only include medicines that were actually dispensed (dispensed > 0)
         $medicinesArray = [];
         foreach ($medicineCounts as $medicine) {
-            $medicine['total'] = $medicine['requested'] + $medicine['dispensed'];
+            // Skip medicines with 0 dispensed (only requested, never dispensed)
+            if ($medicine['dispensed'] <= 0) {
+                continue;
+            }
+            
+            // Total is the dispensed amount (actual medicine activity)
+            // This ensures sum of all modal totals equals the card's total_medicine
+            $medicine['total'] = $medicine['dispensed'];
             $medicinesArray[] = $medicine;
         }
 

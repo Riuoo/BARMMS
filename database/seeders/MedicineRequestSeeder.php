@@ -67,7 +67,9 @@ class MedicineRequestSeeder extends Seeder
                 $requestDate = Carbon::now()->subDays(rand(0, 30));
                 
                 $requested = rand(1, 10);
-                $approved = max(0, $requested - rand(0, 2));
+                // Approved should be at least 1 if requested is valid, but can be less than requested
+                // This simulates partial approval scenarios
+                $approved = max(1, $requested - rand(0, min(2, $requested - 1)));
                 
                 MedicineRequest::create([
                     'medicine_id' => $medicine->id,
@@ -136,13 +138,17 @@ class MedicineRequestSeeder extends Seeder
                 $resident = $purokResidents->random();
                 $requestDate = Carbon::now()->subDays(rand(0, 30));
                 
+                $requested = rand(1, 8);
+                // Approved can be same or slightly less than requested, but at least 1
+                $approved = rand(1, $requested);
+                
                 MedicineRequest::create([
                     'medicine_id' => $medicine->id,
                     'resident_id' => $resident->id,
                     'medical_record_id' => $medicalRecords->random()->id,
                     'request_date' => $requestDate->toDateString(),
-                    'quantity_requested' => rand(1, 8),
-                    'quantity_approved' => rand(1, 8),
+                    'quantity_requested' => $requested,
+                    'quantity_approved' => $approved,
                     'approved_by' => $approvers->random(),
                     'notes' => 'High frequency request for ' . $pattern['purok'],
                 ]);

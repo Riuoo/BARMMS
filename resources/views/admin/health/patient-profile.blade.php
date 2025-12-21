@@ -36,9 +36,6 @@
             <a href="{{ route('admin.medical-records.create') }}" class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700">
                 <i class="fas fa-stethoscope mr-2"></i> New Consultation
             </a>
-            <a href="{{ route('admin.vaccination-records.create') }}" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
-                <i class="fas fa-syringe mr-2"></i> New Vaccination
-            </a>
         </div>
     </div>
 
@@ -50,15 +47,6 @@
                 <div class="ml-3">
                     <p class="text-xs text-gray-500">Consultations</p>
                     <p class="text-xl font-semibold text-gray-900">{{ $stats['total_consultations'] }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center"><i class="fas fa-syringe"></i></div>
-                <div class="ml-3">
-                    <p class="text-xs text-gray-500">Vaccinations</p>
-                    <p class="text-xl font-semibold text-gray-900">{{ $stats['total_vaccinations'] }}</p>
                 </div>
             </div>
         </div>
@@ -79,7 +67,6 @@
             <nav class="-mb-px flex space-x-6" aria-label="Tabs">
                 <button @click="tab='overview'" :class="tab === 'overview' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium">Overview</button>
                 <button @click="tab='consultations'" :class="tab === 'consultations' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium">Consultations</button>
-                <button @click="tab='vaccinations'" :class="tab === 'vaccinations' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium">Vaccinations</button>
                 <button @click="tab='requests'" :class="tab === 'requests' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium">Medicine Requests</button>
                 <button @click="tab='timeline'" :class="tab === 'timeline' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium">Timeline</button>
             </nav>
@@ -104,7 +91,6 @@
                             <li class="py-2 flex items-start space-x-3">
                                 <span class="mt-0.5">
                                     @if($item['type'] === 'consultation') <i class="fas fa-stethoscope text-green-600"></i>
-                                    @elseif($item['type'] === 'vaccination') <i class="fas fa-syringe text-blue-600"></i>
                                     @else <i class="fas fa-pills text-amber-600"></i>
                                     @endif
                                 </span>
@@ -154,38 +140,6 @@
             </div>
         </div>
 
-        <!-- Vaccinations -->
-        <div x-show="tab==='vaccinations'" class="p-4">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-gray-500">Date</th>
-                            <th class="px-4 py-2 text-left text-gray-500">Vaccine</th>
-                            <th class="px-4 py-2 text-left text-gray-500">Type</th>
-                            <th class="px-4 py-2 text-left text-gray-500">Dose</th>
-                            <th class="px-4 py-2 text-left text-gray-500">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @forelse($vaccinationRecords as $record)
-                            <tr>
-                                <td class="px-4 py-2 text-gray-900">{{ optional($record->vaccination_date)->format('M d, Y') }}</td>
-                                <td class="px-4 py-2 text-gray-700">{{ $record->vaccine_name ?? '-' }}</td>
-                                <td class="px-4 py-2 text-gray-700">{{ $record->vaccine_type ?? '-' }}</td>
-                                <td class="px-4 py-2 text-gray-700">Dose {{ $record->dose_number ?? '-' }}</td>
-                                <td class="px-4 py-2">
-                                    <a href="{{ route('admin.vaccination-records.show', $record->id) }}" class="text-green-700 hover:text-green-900 font-medium">View</a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5" class="px-4 py-3 text-center text-gray-500">No vaccinations yet.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
         <!-- Medicine Requests -->
         <div x-show="tab==='requests'" class="p-4">
             <div class="overflow-x-auto">
@@ -223,7 +177,6 @@
                     <div class="flex items-start space-x-3 bg-gray-50 border border-gray-200 rounded-lg p-3">
                         <div class="mt-1">
                             @if($item['type'] === 'consultation') <i class="fas fa-stethoscope text-green-600"></i>
-                            @elseif($item['type'] === 'vaccination') <i class="fas fa-syringe text-blue-600"></i>
                             @else <i class="fas fa-pills text-amber-600"></i>
                             @endif
                         </div>
@@ -260,7 +213,6 @@
             <div class="flex justify-between"><span class="text-gray-600">Contact</span><span class="font-medium">{{ $resident->contact_number ?? 'N/A' }}</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Purok</span><span class="font-medium">{{ $displayPurok ?? 'N/A' }}</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Consultations</span><span class="font-medium">{{ $stats['total_consultations'] ?? 0 }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Vaccinations</span><span class="font-medium">{{ $stats['total_vaccinations'] ?? 0 }}</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Medicine Requests</span><span class="font-medium">{{ $stats['total_requests'] ?? 0 }}</span></div>
         </div>
         <div class="flex justify-end space-x-3 px-4 py-3 border-t border-gray-200">
