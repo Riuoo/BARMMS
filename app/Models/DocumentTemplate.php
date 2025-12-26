@@ -159,7 +159,7 @@ class DocumentTemplate extends Model
             }
             
             .template-footer {
-                margin-top: 30px;
+                padding-top: 100px;
                 page-break-inside: avoid;
             }
             
@@ -199,7 +199,8 @@ class DocumentTemplate extends Model
             
             /* Preserve spacing for paragraphs and headings */
             p {
-                margin: 10px 0;
+                margin-top: 25px;
+                margin-bottom: 10px;
             }
             
             h1, h2, h3, h4, h5, h6 {
@@ -318,18 +319,30 @@ class DocumentTemplate extends Model
         ]);
         // #endregion
         
+        // Check if content uses table structure (for Barangay Clearance alignment)
+        $usesTableStructure = strpos($content, '<table style="width: 100%; border-collapse: collapse;">') !== false 
+            && strpos($content, '[birth_date_section]') !== false;
+        
         if ($hasBirthDateSection) {
             // Template has [birth_date_section] placeholder - use conditional replacement
             if (!empty($birthDateValue) && ($birthDateValue !== 'NOT PROVIDED') && ($birthDateValue !== 'NOT_SET')) {
                 // #region agent log
                 \Log::info('DEBUG Birth date section WILL be added', ['birth_date_value' => $birthDateValue]);
                 // #endregion
-                $content = str_replace(
-                    '[birth_date_section]',
-                    '<div style="margin-bottom: 5px;"><strong>Birth Date:</strong> ' . $escapeValue($birthDateValue) . '</div>',
-                    $content
-                );
-        } else {
+                if ($usesTableStructure) {
+                    $content = str_replace(
+                        '[birth_date_section]',
+                        '<tr><td style="width: 30px; padding-bottom: 5px; vertical-align: top;"><strong>Birth Date</strong></td><td style="padding-bottom: 5px; vertical-align: top;">: ' . $escapeValue($birthDateValue) . '</td></tr>',
+                        $content
+                    );
+                } else {
+                    $content = str_replace(
+                        '[birth_date_section]',
+                        '<div style="margin-bottom: 5px;"><strong>Birth Date:</strong> ' . $escapeValue($birthDateValue) . '</div>',
+                        $content
+                    );
+                }
+            } else {
                 // #region agent log
                 \Log::info('DEBUG Birth date section WILL be removed', [
                     'birth_date_value' => $birthDateValue,
@@ -337,7 +350,7 @@ class DocumentTemplate extends Model
                     'is_not_provided' => ($birthDateValue === 'NOT PROVIDED'),
                 ]);
                 // #endregion
-            $content = str_replace('[birth_date_section]', '', $content);
+                $content = str_replace('[birth_date_section]', '', $content);
             }
         } elseif (!empty($birthDateValue) && ($birthDateValue !== 'NOT PROVIDED') && ($birthDateValue !== 'NOT_SET')) {
             // Template doesn't have [birth_date_section] placeholder but birth_date exists
@@ -346,43 +359,75 @@ class DocumentTemplate extends Model
                 // #region agent log
                 \Log::info('DEBUG Inserting birth_date before birth_place_section', ['birth_date_value' => $birthDateValue]);
                 // #endregion
-                $content = str_replace(
-                    '[birth_place_section]',
-                    '<div style="margin-bottom: 5px;"><strong>Birth Date:</strong> ' . $escapeValue($birthDateValue) . '</div>' . "\n" . '[birth_place_section]',
-                    $content
-                );
+                if ($usesTableStructure) {
+                    $content = str_replace(
+                        '[birth_place_section]',
+                        '<tr><td style="width: 30px; padding-bottom: 5px; vertical-align: top;"><strong>Birth Date</strong></td><td style="padding-bottom: 5px; vertical-align: top;">: ' . $escapeValue($birthDateValue) . '</td></tr>' . "\n" . '[birth_place_section]',
+                        $content
+                    );
+                } else {
+                    $content = str_replace(
+                        '[birth_place_section]',
+                        '<div style="margin-bottom: 5px;"><strong>Birth Date:</strong> ' . $escapeValue($birthDateValue) . '</div>' . "\n" . '[birth_place_section]',
+                        $content
+                    );
+                }
             }
         }
         
         // Birth Place section
         if (isset($values['birth_place']) && !empty($values['birth_place'])) {
-            $content = str_replace(
-                '[birth_place_section]',
-                '<div style="margin-bottom: 5px;"><strong>Birth Place:</strong> ' . $escapeValue($values['birth_place']) . '</div>',
-                $content
-            );
+            if ($usesTableStructure) {
+                $content = str_replace(
+                    '[birth_place_section]',
+                    '<tr><td style="width: 30px; padding-bottom: 5px; vertical-align: top;"><strong>Birth Place</strong></td><td style="padding-bottom: 5px; vertical-align: top;">: ' . $escapeValue($values['birth_place']) . '</td></tr>',
+                    $content
+                );
+            } else {
+                $content = str_replace(
+                    '[birth_place_section]',
+                    '<div style="margin-bottom: 5px;"><strong>Birth Place:</strong> ' . $escapeValue($values['birth_place']) . '</div>',
+                    $content
+                );
+            }
         } else {
             $content = str_replace('[birth_place_section]', '', $content);
         }
         
         // Status section
         if (isset($values['status']) && !empty($values['status'])) {
-            $content = str_replace(
-                '[status_section]',
-                '<div style="margin-bottom: 5px;"><strong>Status:</strong> ' . $escapeValue($values['status']) . '</div>',
-                $content
-            );
+            if ($usesTableStructure) {
+                $content = str_replace(
+                    '[status_section]',
+                    '<tr><td style="width: 30px; padding-bottom: 5px; vertical-align: top;"><strong>Status</strong></td><td style="padding-bottom: 5px; vertical-align: top;">: ' . $escapeValue($values['status']) . '</td></tr>',
+                    $content
+                );
+            } else {
+                $content = str_replace(
+                    '[status_section]',
+                    '<div style="margin-bottom: 5px;"><strong>Status:</strong> ' . $escapeValue($values['status']) . '</div>',
+                    $content
+                );
+            }
         } else {
             $content = str_replace('[status_section]', '', $content);
         }
         
         // Remarks section
         if (isset($values['remarks']) && !empty($values['remarks'])) {
-            $content = str_replace(
-                '[remarks_section]',
-                '<div style="margin-bottom: 5px;"><strong>Remarks:</strong> ' . $escapeValue($values['remarks']) . '</div>',
-                $content
-            );
+            if ($usesTableStructure) {
+                $content = str_replace(
+                    '[remarks_section]',
+                    '<tr><td style="width: 30px; padding-bottom: 5px; vertical-align: top;"><strong>Remarks</strong></td><td style="padding-bottom: 5px; vertical-align: top;">: ' . $escapeValue($values['remarks']) . '</td></tr>',
+                    $content
+                );
+            } else {
+                $content = str_replace(
+                    '[remarks_section]',
+                    '<div style="margin-bottom: 5px;"><strong>Remarks:</strong> ' . $escapeValue($values['remarks']) . '</div>',
+                    $content
+                );
+            }
         } else {
             $content = str_replace('[remarks_section]', '', $content);
         }
@@ -391,8 +436,8 @@ class DocumentTemplate extends Model
         if (isset($values['purok_leader_name']) && !empty($values['purok_leader_name'])) {
             $purokNumber = isset($values['purok_number']) && !empty($values['purok_number']) ? $values['purok_number'] : '';
             $purokTitle = $purokNumber ? "Purok Leader-{$purokNumber}" : 'Purok Leader';
-            $purokSection = '<div style="margin-top: 20px;">
-                <div style="font-weight: bold; font-size: 12pt;">' . $escapeValue($values['purok_leader_name']) . '</div>
+            $purokSection = '<div style="margin-top: 100px;">
+                <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">' . $escapeValue($values['purok_leader_name']) . '</div>
                 <div style="font-size: 10pt;">' . $escapeValue($purokTitle) . '</div>
             </div>';
             $content = str_replace('[purok_leader_section]', $purokSection, $content);
@@ -414,10 +459,10 @@ class DocumentTemplate extends Model
             if (!empty($requesterName)) {
                 // With requester name - use relationship if provided, otherwise default to "sibling"
                 $relationship = !empty($requesterRelationship) ? $requesterRelationship : 'sibling';
-                $requesterSection = '<p style="margin: 0; text-indent: 40px;">This certification is given upon the verbal request of the above mentioned-named for ' . $possessive . ' ' . $escapeValue($relationship) . ' ' . $escapeValue($requesterName) . ', as a requirement/s and for whatever legal purpose/s it may serve ' . $objective . ' best.</p>';
+                $requesterSection = '<p style="margin: 25px 0 0 0; text-indent: 40px;">This certification is given upon the verbal request of the above mentioned-named for ' . $possessive . ' ' . $escapeValue($relationship) . ' ' . $escapeValue($requesterName) . ', as a requirement/s and for whatever legal purpose/s it may serve ' . $objective . ' best.</p>';
             } else {
                 // Without requester name - generic text (Certificate of Indigency)
-                $requesterSection = '<p style="margin: 0; text-indent: 40px;">This certification is given upon the verbal request of the above-mentioned person as a requirement/s and for whatever legal purpose/s it may serve ' . $objective . ' best.</p>';
+                $requesterSection = '<p style="margin: 25px 0 0 0; text-indent: 40px;">This certification is given upon the verbal request of the above-mentioned person as a requirement/s and for whatever legal purpose/s it may serve ' . $objective . ' best.</p>';
             }
             $content = str_replace('[requester_section]', $requesterSection, $content);
         }
@@ -428,10 +473,10 @@ class DocumentTemplate extends Model
             $purposeDetails = $values['purpose_details'] ?? '';
             if (!empty($purposeDetails)) {
                 // With purpose details - include it in the sentence
-                $purposeDetailsSection = '<p style="margin: 0; text-indent: 40px;">This certification is given upon the verbal request of the above-mentioned named person for <strong>' . $escapeValue($purposeDetails) . '</strong> as a requirement/s and for whatever legal purpose/s it may serve her best.</p>';
+                $purposeDetailsSection = '<p style="margin: 25px 0 0 0; text-indent: 40px;">This certification is given upon the verbal request of the above-mentioned named person for <strong>' . $escapeValue($purposeDetails) . '</strong> as a requirement/s and for whatever legal purpose/s it may serve her best.</p>';
             } else {
                 // Without purpose details - generic text
-                $purposeDetailsSection = '<p style="margin: 0; text-indent: 40px;">This certification is given upon the verbal request of the above-mentioned named person as a requirement/s and for whatever legal purpose/s it may serve her best.</p>';
+                $purposeDetailsSection = '<p style="margin: 25px 0 0 0; text-indent: 40px;">This certification is given upon the verbal request of the above-mentioned named person as a requirement/s and for whatever legal purpose/s it may serve her best.</p>';
             }
             $content = str_replace('[purpose_details_section]', $purposeDetailsSection, $content);
         }

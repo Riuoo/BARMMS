@@ -235,7 +235,7 @@ class TemplateDefaultsService
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="[logo_path]" alt="Barangay Logo" style="width: 65px; height: 65px;" />
+                                <img src="[logo_path]" alt="Barangay Logo" style="width: 100px; height: 100px;" />
                             </td>
                             <td style="width: 70%; vertical-align: middle; text-align: center;">
                                 <div style="font-size: 11pt; line-height: 1.3;">
@@ -246,7 +246,7 @@ class TemplateDefaultsService
                                 </div>
                             </td>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 65px; height: 65px;" />
+                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 100px; height: 100px;" />
                             </td>
                         </tr>
                     </table>
@@ -265,33 +265,41 @@ class TemplateDefaultsService
                     <div style="text-align: center; font-weight: bold; margin-bottom: 15px; font-size: 12pt;">TO WHOM IT MAY CONCERN:</div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This is to certify that the person whose name below has requested a <strong>RECORD CLEARANCE</strong> from this office of the Punong Barangay and result is listed below:</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This is to certify that the person whose name below has requested a <strong>RECORD CLEARANCE</strong> from this office of the Punong Barangay and result is listed below:</p>
                     </div>
                     
                     <div style="margin-top: 15px; margin-bottom: 12px;">
-                        <div style="margin-bottom: 5px;"><strong>NAME</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: [resident_name]</div>
-                        <div style="margin-bottom: 5px;"><strong>ADDRESS</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: [resident_address]</div>
-                        [birth_date_section]
-                        [birth_place_section]
-                        [status_section]
-                        [remarks_section]
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 30px; padding-bottom: 5px; vertical-align: top;"><strong>NAME</strong></td>
+                                <td style="padding-bottom: 5px; vertical-align: top;">: [resident_name]</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 30px; padding-bottom: 5px; vertical-align: top;"><strong>ADDRESS</strong></td>
+                                <td style="padding-bottom: 5px; vertical-align: top;">: [resident_address]</td>
+                            </tr>
+                            [birth_date_section]
+                            [birth_place_section]
+                            [status_section]
+                            [remarks_section]
+                        </table>
                     </div>
                     
                     <div style="margin-top: 15px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This certification is being issued this <strong>[day] day of [month] [year]</strong>, for [purpose], as a requirement/s and for whatever legal purpose/s it may serve him best.</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This certification is being issued this <strong>[day] day of [month] [year]</strong>, for [purpose], as a requirement/s and for whatever legal purpose/s it may serve him best.</p>
                     </div>
                 </div>
             ',
             'footer_content' => '
-                <div style="margin-top: 40px;">
+                <div style="padding-top: 100px;">
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <!-- Certified - Left side -->
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: left;">
                                     <div style="font-size: 10pt;">Certified:</div>
-                                    <div style="margin-top: 30px;">
-                                        <div style="font-weight: bold; font-size: 12pt;">[captain_name]</div>
+                                    <div style="margin-top: 100px;">
+                                        <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[captain_name]</div>
                                         <div style="font-size: 10pt;">Punong Barangay</div>
                                     </div>
                                 </div>
@@ -301,8 +309,8 @@ class TemplateDefaultsService
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: right;">
                                     <div style="font-size: 10pt;">Prepared by:</div>
-                                    <div style="margin-top: 30px;">
-                                        <div style="font-weight: bold; font-size: 12pt;">[prepared_by_name]</div>
+                                    <div style="margin-top: 100px;">
+                                        <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[prepared_by_name]</div>
                                         <div style="font-size: 10pt;">Barangay Secretary</div>
                                     </div>
                                 </div>
@@ -345,7 +353,7 @@ class TemplateDefaultsService
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="[logo_path]" alt="Barangay Logo" style="width: 65px; height: 65px;" />
+                                <img src="[logo_path]" alt="Barangay Logo" style="width: 100px; height: 100px;" />
                             </td>
                             <td style="width: 70%; vertical-align: middle; text-align: center;">
                                 <div style="font-size: 11pt; line-height: 1.3;">
@@ -356,7 +364,7 @@ class TemplateDefaultsService
                                 </div>
                             </td>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 65px; height: 65px;" />
+                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 100px; height: 100px;" />
                             </td>
                         </tr>
                     </table>
@@ -375,27 +383,27 @@ class TemplateDefaultsService
                     <div style="font-weight: bold; margin-bottom: 15px; font-size: 12pt;">TO WHOM IT MAY CONCERN:</div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This is to certify that <strong>[resident_name]</strong>, of legal age, [civil_status], Filipino, this person is still living and a resident of [resident_address] at Barangay [barangay_name], [municipality_name], [province_name].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This is to certify that <strong>[resident_name]</strong>, of legal age, [civil_status], Filipino, this person is still living and a resident of [resident_address] at Barangay [barangay_name], [municipality_name], [province_name].</p>
                     </div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This certification is being issued upon the verbal request of the above-mentioned named person as per requirements, and for whatever legal purpose this may serve her best.</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This certification is being issued upon the verbal request of the above-mentioned named person as per requirements, and for whatever legal purpose this may serve her best.</p>
                     </div>
                     
                     <div style="margin-top: 15px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">Issued this <strong>[day] day of [month] [year]</strong>, at Barangay [barangay_name], [municipality_name], [province_name].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">Issued this <strong>[day] day of [month] [year]</strong>, at Barangay [barangay_name], [municipality_name], [province_name].</p>
                     </div>
                 </div>
             ',
             'footer_content' => '
-                <div style="margin-top: 40px;">
+                <div style="padding-top: 100px;">
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <!-- Certified - Left side -->
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: left;">
                                     <div style="font-size: 10pt;">Certified:</div>
-                                    <div style="margin-top: 30px;">
+                                    <div style="margin-top: 100px;">
                                         <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[captain_name]</div>
                                         <div style="font-size: 10pt;">Punong Barangay</div>
                                     </div>
@@ -406,8 +414,8 @@ class TemplateDefaultsService
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: right;">
                                     <div style="font-size: 10pt;">Prepared by:</div>
-                                    <div style="margin-top: 30px;">
-                                        <div style="font-weight: bold; font-size: 12pt;">[prepared_by_name]</div>
+                                    <div style="margin-top: 100px;">
+                                        <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[prepared_by_name]</div>
                                         <div style="font-size: 10pt;">Barangay Secretary</div>
                                     </div>
                                     [purok_leader_section]
@@ -447,7 +455,7 @@ class TemplateDefaultsService
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="[logo_path]" alt="Barangay Logo" style="width: 65px; height: 65px;" />
+                                <img src="[logo_path]" alt="Barangay Logo" style="width: 100px; height: 100px;" />
                             </td>
                             <td style="width: 70%; vertical-align: middle; text-align: center;">
                                 <div style="font-size: 11pt; line-height: 1.3;">
@@ -458,7 +466,7 @@ class TemplateDefaultsService
                                 </div>
                             </td>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 65px; height: 65px;" />
+                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 100px; height: 100px;" />
                             </td>
                         </tr>
                     </table>
@@ -477,11 +485,11 @@ class TemplateDefaultsService
                     <div style="font-weight: bold; margin-bottom: 15px; font-size: 12pt;">TO WHOM IT MAY CONCERN:</div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This is to certify that <strong>[resident_name]</strong>, Filipino, of legal age, [civil_status], [gender] and a resident of [resident_address], [municipality_name], [province_name].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This is to certify that <strong>[resident_name]</strong>, Filipino, of legal age, [civil_status], [gender] and a resident of [resident_address], [municipality_name], [province_name].</p>
                     </div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This certifies further that <strong>[resident_name]</strong> has Low Income due to irregular source of income in this barangay, he is asking a <strong>[purpose]</strong> to [purpose_location].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This certifies further that <strong>[resident_name]</strong> has Low Income due to irregular source of income in this barangay, he is asking a <strong>[purpose]</strong> to [purpose_location].</p>
                     </div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
@@ -489,19 +497,19 @@ class TemplateDefaultsService
                     </div>
                     
                     <div style="margin-top: 15px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">Issued this <strong>[day] day of [month] [year]</strong>, at Barangay [barangay_name], [municipality_name], [province_name].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">Issued this <strong>[day] day of [month] [year]</strong>, at Barangay [barangay_name], [municipality_name], [province_name].</p>
                     </div>
                 </div>
             ',
             'footer_content' => '
-                <div style="margin-top: 40px;">
+                <div style="padding-top: 100px;">
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <!-- Certified - Left side -->
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: left;">
                                     <div style="font-size: 10pt;">Certified:</div>
-                                    <div style="margin-top: 30px;">
+                                    <div style="margin-top: 100px;">
                                         <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[captain_name]</div>
                                         <div style="font-size: 10pt;">Punong Barangay</div>
                                     </div>
@@ -512,8 +520,8 @@ class TemplateDefaultsService
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: right;">
                                     <div style="font-size: 10pt;">Prepared by:</div>
-                                    <div style="margin-top: 30px;">
-                                        <div style="font-weight: bold; font-size: 12pt;">[prepared_by_name]</div>
+                                    <div style="margin-top: 100px;">
+                                        <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[prepared_by_name]</div>
                                         <div style="font-size: 10pt;">Barangay Secretary</div>
                                     </div>
                                     [purok_leader_section]
@@ -557,7 +565,7 @@ class TemplateDefaultsService
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="[logo_path]" alt="Barangay Logo" style="width: 65px; height: 65px;" />
+                                <img src="[logo_path]" alt="Barangay Logo" style="width: 100px; height: 100px;" />
                             </td>
                             <td style="width: 70%; vertical-align: middle; text-align: center;">
                                 <div style="font-size: 11pt; line-height: 1.3;">
@@ -568,7 +576,7 @@ class TemplateDefaultsService
                                 </div>
                             </td>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 65px; height: 65px;" />
+                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 100px; height: 100px;" />
                             </td>
                         </tr>
                     </table>
@@ -587,11 +595,11 @@ class TemplateDefaultsService
                     <div style="font-weight: bold; margin-bottom: 15px; font-size: 12pt;">TO WHOM IT MAY CONCERN:</div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">THIS IS TO CERTIFY that <strong>[resident_name]</strong>, Filipino, of legal age, [civil_status], [gender], and a resident of [resident_address], [municipality_name], [province_name].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">THIS IS TO CERTIFY that <strong>[resident_name]</strong>, Filipino, of legal age, [civil_status], [gender], and a resident of [resident_address], [municipality_name], [province_name].</p>
                     </div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This is to certify further that <strong>[resident_name]</strong>, has a low income due to irregular source of income in this barangay, she asking for <strong>[purpose]</strong>.</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This is to certify further that <strong>[resident_name]</strong>, has a low income due to irregular source of income in this barangay, she asking for <strong>[purpose]</strong>.</p>
                     </div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
@@ -599,19 +607,19 @@ class TemplateDefaultsService
                     </div>
                     
                     <div style="margin-top: 15px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">Issued this <strong>[day] day of [month], [year]</strong>, at Barangay [barangay_name], [municipality_name], [province_name].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">Issued this <strong>[day] day of [month], [year]</strong>, at Barangay [barangay_name], [municipality_name], [province_name].</p>
                     </div>
                 </div>
             ',
             'footer_content' => '
-                <div style="margin-top: 40px;">
+                <div style="padding-top: 100px;">
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <!-- Certified - Left side -->
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: left;">
                                     <div style="font-size: 10pt;">Certified:</div>
-                                    <div style="margin-top: 30px;">
+                                    <div style="margin-top: 100px;">
                                         <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[captain_name]</div>
                                         <div style="font-size: 10pt;">Punong Barangay</div>
                                     </div>
@@ -622,8 +630,8 @@ class TemplateDefaultsService
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: right;">
                                     <div style="font-size: 10pt;">Prepared by:</div>
-                                    <div style="margin-top: 30px;">
-                                        <div style="font-weight: bold; font-size: 12pt;">[prepared_by_name]</div>
+                                    <div style="margin-top: 100px;">
+                                        <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[prepared_by_name]</div>
                                         <div style="font-size: 10pt;">Barangay Secretary</div>
                                     </div>
                                     [purok_leader_section]
@@ -665,7 +673,7 @@ class TemplateDefaultsService
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="[logo_path]" alt="Barangay Logo" style="width: 65px; height: 65px;" />
+                                <img src="[logo_path]" alt="Barangay Logo" style="width: 100px; height: 100px;" />
                             </td>
                             <td style="width: 70%; vertical-align: middle; text-align: center;">
                                 <div style="font-size: 11pt; line-height: 1.3;">
@@ -676,7 +684,7 @@ class TemplateDefaultsService
                                 </div>
                             </td>
                             <td style="width: 15%; vertical-align: middle; text-align: center;">
-                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 65px; height: 65px;" />
+                                <img src="/images/padada-logo.png" alt="Padada Logo" style="width: 100px; height: 100px;" />
                             </td>
                         </tr>
                     </table>
@@ -695,11 +703,11 @@ class TemplateDefaultsService
                     <div style="font-weight: bold; margin-bottom: 15px; font-size: 12pt;">TO WHOM IT MAY CONCERN:</div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This is to certify that <strong>[resident_name]</strong>, [age] years old, [gender], [civil_status], a bonafide resident of [resident_address], [municipality_name], [province_name].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This is to certify that <strong>[resident_name]</strong>, [age] years old, [gender], [civil_status], a bonafide resident of [resident_address], [municipality_name], [province_name].</p>
                     </div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This is to certify further that the following names below are the list of her dependents and subject to moved out for household.</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This is to certify further that the following names below are the list of her dependents and subject to moved out for household.</p>
                         <div style="margin-left: 40px; margin-top: 10px;">
                             <div>Name :</div>
                             [dependents_list]
@@ -707,23 +715,23 @@ class TemplateDefaultsService
                     </div>
                     
                     <div style="margin-bottom: 12px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">This certification is being issued upon the request of <strong>the above-mentioned named</strong>, as a requirement and for whatever legal purpose it may serve her best.</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">This certification is being issued upon the request of <strong>the above-mentioned named</strong>, as a requirement and for whatever legal purpose it may serve her best.</p>
                     </div>
                     
                     <div style="margin-top: 15px; text-align: justify;">
-                        <p style="margin: 0; text-indent: 40px;">Issued this <strong>[day] day of [month] [year]</strong>, at the office of the Punong Barangay, Barangay [barangay_name], [municipality_name], [province_name].</p>
+                        <p style="margin: 25px 0 0 0; text-indent: 40px;">Issued this <strong>[day] day of [month] [year]</strong>, at the office of the Punong Barangay, Barangay [barangay_name], [municipality_name], [province_name].</p>
                     </div>
                 </div>
             ',
             'footer_content' => '
-                <div style="margin-top: 40px;">
+                <div style="padding-top: 100px;">
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                             <!-- Certified by - Left side -->
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: left;">
                                     <div style="font-size: 10pt;">Certified by:</div>
-                                    <div style="margin-top: 30px;">
+                                    <div style="margin-top: 100px;">
                                         <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[captain_name]</div>
                                         <div style="font-size: 10pt;">Punong Barangay</div>
                                     </div>
@@ -734,8 +742,8 @@ class TemplateDefaultsService
                             <td style="width: 50%; vertical-align: top;">
                                 <div style="text-align: right;">
                                     <div style="font-size: 10pt;">Prepared by:</div>
-                                    <div style="margin-top: 30px;">
-                                        <div style="font-weight: bold; font-size: 12pt;">[prepared_by_name]</div>
+                                    <div style="margin-top: 100px;">
+                                        <div style="font-weight: bold; font-size: 12pt; text-decoration: underline;">[prepared_by_name]</div>
                                         <div style="font-size: 10pt;">Barangay Secretary</div>
                                     </div>
                                     [purok_leader_section]
