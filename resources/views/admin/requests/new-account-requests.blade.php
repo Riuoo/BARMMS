@@ -241,14 +241,14 @@
                                                     @endif
                                                     @if(isset($request->duplicate_by_name) && $request->duplicate_by_name)
                                                         <div class="mt-2">
-                                                            <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
+                                                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
                                                                 <div class="flex items-start">
                                                                     <div class="flex-shrink-0">
-                                                                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                                                                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
                                                                     </div>
                                                                     <div class="ml-3">
-                                                                        <p class="text-sm text-red-700 font-medium">
-                                                                            This full name is already registered. Please visit the barangay office for verification.
+                                                                        <p class="text-sm text-yellow-700 font-medium">
+                                                                            A resident with a similar name exists. Please verify the name matches exactly (including middle name) before approving.
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -395,14 +395,14 @@
                                     @endif
                                     @if(isset($request->duplicate_by_name) && $request->duplicate_by_name)
                                         <div class="mt-2">
-                                            <div class="bg-red-50 border-l-4 border-red-400 p-2 rounded">
+                                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-2 rounded">
                                                 <div class="flex items-start">
                                                     <div class="flex-shrink-0">
-                                                        <i class="fas fa-exclamation-circle text-red-400 text-xs"></i>
+                                                        <i class="fas fa-exclamation-triangle text-yellow-400 text-xs"></i>
                                                     </div>
                                                     <div class="ml-2">
-                                                        <p class="text-xs text-red-700 font-medium">
-                                                            This full name is already registered. Please visit the barangay office for verification.
+                                                        <p class="text-xs text-yellow-700 font-medium">
+                                                            A resident with a similar name exists. Please verify the name matches exactly (including middle name) before approving.
                                                         </p>
                                                     </div>
                                                 </div>

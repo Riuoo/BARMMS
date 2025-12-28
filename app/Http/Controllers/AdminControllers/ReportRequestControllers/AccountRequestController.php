@@ -43,43 +43,88 @@ class AccountRequestController
                 $duplicateByEmail = Residents::where('email', $accountRequest->email)->first();
                 
                 // Check for duplicate by name if available
+                // Stricter validation: must match first name, last name, and handle middle name properly
                 $duplicateByName = null;
                 
                 // Use separate fields if available, otherwise use full_name
                 if ($accountRequest->first_name && $accountRequest->last_name) {
+                    $requestFirstName = trim($accountRequest->first_name);
+                    $requestMiddleName = trim($accountRequest->middle_name ?? '');
+                    $requestLastName = trim($accountRequest->last_name);
+                    $requestSuffix = trim($accountRequest->suffix ?? '');
+                    
                     // Build full name from parts
                     $nameParts = array_filter([
-                        $accountRequest->first_name,
-                        $accountRequest->middle_name ?? '',
-                        $accountRequest->last_name,
-                        $accountRequest->suffix ?? ''
+                        $requestFirstName,
+                        $requestMiddleName,
+                        $requestLastName,
+                        $requestSuffix
                     ], function($part) {
                         return !empty(trim($part ?? ''));
                     });
                     $fullName = implode(' ', $nameParts);
                     
-                    // Try exact match first using CONCAT
+                    // Try exact match first (case-insensitive, with all name parts)
                     $duplicateByName = Residents::whereRaw(
-                        "TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))) = ?",
-                        [trim($fullName)]
-                    )->first();
-                    
-                    // If no exact match, try partial match (case-insensitive)
-                    if (!$duplicateByName) {
-                        $duplicateByName = Residents::whereRaw(
-                            "LOWER(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))) LIKE ?",
-                            ['%' . strtolower($fullName) . '%']
-                        )->first();
-                    }
-                    
-                    // Also check without middle name (first + last only)
-                    if (!$duplicateByName) {
-                        $firstLast = trim($accountRequest->first_name . ' ' . $accountRequest->last_name);
-                        $duplicateByName = Residents::whereRaw(
-                            "LOWER(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, ''))) LIKE ?",
-                            ['%' . strtolower($firstLast) . '%']
-                        )->first();
+                        "LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ?",
+                        [strtolower($requestFirstName), strtolower($requestLastName)]
+                    )->where(function($query) use ($requestMiddleName, $requestSuffix) {
+                        // Handle middle name: both must have it or both must not have it
+                        if (!empty($requestMiddleName)) {
+                            // Request has middle name - resident must also have one
+                            $query->whereNotNull('middle_name')
+                                  ->where('middle_name', '!=', '')
+                                  ->whereRaw("LOWER(TRIM(middle_name)) = ?", [strtolower($requestMiddleName)]);
+                        } else {
+                            // Request has no middle name - resident must also not have one
+                            $query->where(function($q) {
+                                $q->whereNull('middle_name')
+                                  ->orWhere('middle_name', '=', '');
+                            });
                         }
+                    })->where(function($query) use ($requestSuffix) {
+                        // Handle suffix similarly
+                        if (!empty($requestSuffix)) {
+                            $query->whereRaw("LOWER(TRIM(COALESCE(suffix, ''))) = ?", [strtolower($requestSuffix)]);
+                        } else {
+                            $query->where(function($q) {
+                                $q->whereNull('suffix')
+                                  ->orWhere('suffix', '=', '');
+                            });
+                        }
+                    })->first();
+                    
+                    // If no exact match with middle name handling, try first+last only match
+                    // but flag it as a potential mismatch if middle names differ
+                    if (!$duplicateByName) {
+                        $firstLastMatch = Residents::whereRaw(
+                            "LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ?",
+                            [strtolower($requestFirstName), strtolower($requestLastName)]
+                        )->where(function($query) use ($requestSuffix) {
+                            if (!empty($requestSuffix)) {
+                                $query->whereRaw("LOWER(TRIM(COALESCE(suffix, ''))) = ?", [strtolower($requestSuffix)]);
+                            } else {
+                                $query->where(function($q) {
+                                    $q->whereNull('suffix')->orWhere('suffix', '=', '');
+                                });
+                            }
+                        })->first();
+                        
+                        // If found but middle names differ, this is a mismatch that needs attention
+                        if ($firstLastMatch) {
+                            $residentMiddleName = trim($firstLastMatch->middle_name ?? '');
+                            $hasMiddleNameMismatch = (!empty($requestMiddleName) && empty($residentMiddleName)) ||
+                                                      (empty($requestMiddleName) && !empty($residentMiddleName));
+                            
+                            if ($hasMiddleNameMismatch) {
+                                // Flag as duplicate but with middle name mismatch
+                                $duplicateByName = $firstLastMatch;
+                                $duplicateByName->middle_name_mismatch = true;
+                            } else {
+                                $duplicateByName = $firstLastMatch;
+                            }
+                        }
+                    }
                 } elseif ($accountRequest->full_name) {
                     // Fallback to full_name for old records using CONCAT
                     $duplicateByName = Residents::whereRaw(

@@ -21,8 +21,11 @@
             <p class="text-sm text-gray-600">Consolidated health profile and history</p>
             <div class="mt-2 text-sm text-gray-700 space-x-3">
                 <span class="inline-flex items-center"><i class="fas fa-envelope mr-2 text-gray-400"></i>{{ $resident->email ?? 'No email' }}</span>
-                @if(!empty($resident->contact_number))
-                    <span class="inline-flex items-center"><i class="fas fa-phone mr-2 text-gray-400"></i>{{ $resident->contact_number }}</span>
+                @php
+                    $contactNumber = $resident->getMaskedContactNumber();
+                @endphp
+                @if($contactNumber && $contactNumber !== 'Not provided')
+                    <span class="inline-flex items-center"><i class="fas fa-phone mr-2 text-gray-400"></i>{{ $contactNumber }}</span>
                 @endif
                 @if(!empty($displayPurok))
                     <span class="inline-flex items-center"><i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>{{ \Illuminate\Support\Str::startsWith($displayPurok, 'Purok') ? $displayPurok : 'Purok ' . $displayPurok }}</span>
@@ -80,7 +83,7 @@
                     <dl class="divide-y divide-gray-200 text-sm">
                         <div class="py-2 flex justify-between"><dt class="text-gray-500">Name</dt><dd class="text-gray-900">{{ $resident->full_name ?? '-' }}</dd></div>
                         <div class="py-2 flex justify-between"><dt class="text-gray-500">Email</dt><dd class="text-gray-900">{{ $resident->email ?? '-' }}</dd></div>
-                        <div class="py-2 flex justify-between"><dt class="text-gray-500">Contact</dt><dd class="text-gray-900">{{ $resident->contact_number ?? '-' }}</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-gray-500">Contact</dt><dd class="text-gray-900">{{ $resident->getMaskedContactNumber() }}</dd></div>
                         <div class="py-2 flex justify-between"><dt class="text-gray-500">Purok</dt><dd class="text-gray-900">{{ $displayPurok ?? '-' }}</dd></div>
                     </dl>
                 </div>
@@ -210,7 +213,7 @@
         <div class="p-4 space-y-3 text-sm text-gray-800">
             <div class="flex justify-between"><span class="text-gray-600">Name</span><span class="font-medium">{{ $resident->full_name ?? 'N/A' }}</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Email</span><span class="font-medium">{{ $resident->email ?? 'N/A' }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Contact</span><span class="font-medium">{{ $resident->contact_number ?? 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Contact</span><span class="font-medium">{{ $resident->getMaskedContactNumber() }}</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Purok</span><span class="font-medium">{{ $displayPurok ?? 'N/A' }}</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Consultations</span><span class="font-medium">{{ $stats['total_consultations'] ?? 0 }}</span></div>
             <div class="flex justify-between"><span class="text-gray-600">Medicine Requests</span><span class="font-medium">{{ $stats['total_requests'] ?? 0 }}</span></div>

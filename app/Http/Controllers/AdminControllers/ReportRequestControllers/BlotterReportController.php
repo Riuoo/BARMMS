@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\AdminControllers\ReportRequestControllers;
 
 use App\Models\BlotterRequest;
+use App\Models\BlotterTemplate;
 use App\Models\BarangayProfile;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -128,16 +129,37 @@ class BlotterReportController
 
             notify()->success('Blotter report approved successfully.');
 
+            // Get template
+            $template = BlotterTemplate::where('template_type', 'Summons')
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$template) {
+                throw new \Exception('Summons template not found. Please create a Summons template first.');
+            }
+            
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
                 $adminUser = BarangayProfile::find(session('user_id'));
             }
             
+            // Prepare values for template
+            $values = $this->prepareTemplateValues($blotter, $adminUser);
+            
+            // Generate HTML using template
+            $html = $template->generateHtml($values);
+            
             // Generate PDF
-            $pdf = Pdf::loadView('admin.pdfs.summons_pdf', [
-                'blotter' => $blotter,
-                'adminUser' => $adminUser
+            $pdf = Pdf::loadHTML($html);
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'isFontSubsettingEnabled' => true,
+                'defaultFont' => 'Times New Roman',
+                'dpi' => 150,
+                'chroot' => public_path(),
             ]);
             $filename = $this->generateFilename($blotter, 'summon_notice');
             $response = $pdf->download($filename);
@@ -180,16 +202,38 @@ class BlotterReportController
 
             notify()->success('Blotter report marked as completed.');
 
+            // Get template
+            $template = BlotterTemplate::where('template_type', 'Resolution')
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$template) {
+                notify()->error('Resolution template not found. Please create a Resolution template first.');
+                return back();
+            }
+            
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
                 $adminUser = BarangayProfile::find(session('user_id'));
             }
             
-            // Generate final resolution PDF
-            $pdf = Pdf::loadView('admin.pdfs.resolution_pdf', [
-                'blotter' => $blotter,
-                'adminUser' => $adminUser
+            // Prepare values for template
+            $values = $this->prepareTemplateValues($blotter, $adminUser);
+            
+            // Generate HTML using template
+            $html = $template->generateHtml($values);
+            
+            // Generate PDF
+            $pdf = Pdf::loadHTML($html);
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'isFontSubsettingEnabled' => true,
+                'defaultFont' => 'Times New Roman',
+                'dpi' => 150,
+                'chroot' => public_path(),
             ]);
             $filename = $this->generateFilename($blotter, 'case_resolution');
             
@@ -301,16 +345,38 @@ class BlotterReportController
             
             $blotter->save();
             
+            // Get template
+            $template = BlotterTemplate::where('template_type', 'Summons')
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$template) {
+                notify()->error('Summons template not found. Please create a Summons template first.');
+                return back();
+            }
+            
             // Get admin user data from session
             $adminUser = null;
             if (session()->has('user_role') && session('user_role') === 'barangay') {
                 $adminUser = BarangayProfile::find(session('user_id'));
             }
             
-            // Generate the PDF immediately after saving
-            $pdf = Pdf::loadView('admin.pdfs.summons_pdf', [
-                'blotter' => $blotter,
-                'adminUser' => $adminUser
+            // Prepare values for template
+            $values = $this->prepareTemplateValues($blotter, $adminUser);
+            
+            // Generate HTML using template
+            $html = $template->generateHtml($values);
+            
+            // Generate PDF
+            $pdf = Pdf::loadHTML($html);
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'isFontSubsettingEnabled' => true,
+                'defaultFont' => 'Times New Roman',
+                'dpi' => 150,
+                'chroot' => public_path(),
             ]);
             $filename = $this->generateFilename($blotter, 'blotter_report');
             
@@ -355,19 +421,41 @@ class BlotterReportController
 
         notify()->success('New summon generated successfully.');
 
+        // Get template
+        $template = BlotterTemplate::where('template_type', 'Summons')
+            ->where('is_active', true)
+            ->first();
+        
+        if (!$template) {
+            notify()->error('Summons template not found. Please create a Summons template first.');
+            return back();
+        }
+        
         // Get admin user data from session
         $adminUser = null;
         if (session()->has('user_role') && session('user_role') === 'barangay') {
             $adminUser = BarangayProfile::find(session('user_id'));
         }
         
-        // Generate the new summons PDF
-        $pdf = Pdf::loadView('admin.pdfs.summons_pdf', [
-            'blotter' => $blotter,
-            'adminUser' => $adminUser
+        // Prepare values for template
+        $values = $this->prepareTemplateValues($blotter, $adminUser);
+        
+        // Generate HTML using template
+        $html = $template->generateHtml($values);
+        
+        // Generate PDF
+        $pdf = Pdf::loadHTML($html);
+        $pdf->setPaper('a4', 'portrait');
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'isFontSubsettingEnabled' => true,
+            'defaultFont' => 'Times New Roman',
+            'dpi' => 150,
+            'chroot' => public_path(),
         ]);
         $filename = $this->generateFilename($blotter, 'new_summon_notice');
-        return $pdf->download($filename); // Download the new summons PDF
+        return $pdf->download($filename);
     }
 
     public function checkActive($id)
@@ -385,5 +473,57 @@ class BlotterReportController
         $name = strtolower(str_replace(' ', '_', $name));
         $date = date('Y-m-d');
         return "{$type}_{$name}_{$date}.pdf";
+    }
+
+    /**
+     * Prepare template values from blotter and admin user data
+     */
+    protected function prepareTemplateValues($blotter, $adminUser = null)
+    {
+        $values = [
+            'case_id' => $blotter->id,
+            'complainant_name' => $blotter->complainant_name ?? 'N/A',
+            'respondent_name' => $blotter->respondent ? $blotter->respondent->full_name : 'N/A',
+            'incident_type' => $blotter->type ?? 'N/A',
+            'description' => $blotter->description ?? '',
+            'status' => ucfirst($blotter->status ?? 'pending'),
+            'summon_date' => $blotter->summon_date ? $blotter->summon_date->format('F d, Y g:i A') : 'N/A',
+            'approved_at' => $blotter->approved_at ? $blotter->approved_at->format('F d, Y g:i A') : 'N/A',
+            'completed_at' => $blotter->completed_at ? $blotter->completed_at->format('F d, Y g:i A') : 'N/A',
+            'barangay_name' => config('app.default_barangay', 'Lower Malinao'),
+            'municipality_name' => config('app.default_city', 'Padada'),
+            'province_name' => config('app.default_province', 'Davao Del Sur'),
+        ];
+
+        // Add prepared by (current admin) and captain information for dual-signature footer
+        $officials = $this->getBarangayOfficials($adminUser);
+        $values = array_merge($values, $officials);
+
+        return $values;
+    }
+
+    /**
+     * Get barangay officials for document signatures
+     * Returns: prepared_by_name (secretary or current admin user) and captain_name (Punong Barangay)
+     */
+    protected function getBarangayOfficials($adminUser = null)
+    {
+        // Get secretary name (who prepared the document)
+        // If no secretary found, fall back to current admin user
+        $secretary = BarangayProfile::where('role', 'secretary')
+            ->where('active', true)
+            ->first();
+        
+        $preparedByName = $secretary ? $secretary->full_name : ($adminUser ? $adminUser->full_name : '');
+        
+        // Get current Punong Barangay (captain)
+        $captain = BarangayProfile::where('role', 'captain')
+            ->where('active', true)
+            ->first();
+        
+        return [
+            'prepared_by_name' => $preparedByName,
+            'captain_name' => $captain ? $captain->full_name : '',
+        ];
     }
 }

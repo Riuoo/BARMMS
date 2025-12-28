@@ -62,30 +62,73 @@ class ContactAdminController
         })));
         $fullName = preg_replace('/\s+/', ' ', $fullName); // Remove extra spaces
 
-        // Check if the name matches an existing resident using fuzzy matching
+        // Check if the name matches an existing resident using stricter validation
+        // Must match first name, last name, and handle middle name properly
         $matchedResident = null;
         
-        // Try exact match first (case-insensitive)
+        $requestFirstName = trim($request->first_name);
+        $requestMiddleName = trim($request->middle_name ?? '');
+        $requestLastName = trim($request->last_name);
+        $requestSuffix = trim($request->suffix ?? '');
+        
+        // Try exact match with strict middle name handling
         $matchedResident = Residents::whereRaw(
-            "LOWER(TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, '')))) = ?",
-            [strtolower($fullName)]
-        )->first();
+            "LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ?",
+            [strtolower($requestFirstName), strtolower($requestLastName)]
+        )->where(function($query) use ($requestMiddleName, $requestSuffix) {
+            // Handle middle name: both must have it or both must not have it
+            if (!empty($requestMiddleName)) {
+                // Request has middle name - resident must also have one and match
+                $query->whereNotNull('middle_name')
+                      ->where('middle_name', '!=', '')
+                      ->whereRaw("LOWER(TRIM(middle_name)) = ?", [strtolower($requestMiddleName)]);
+            } else {
+                // Request has no middle name - resident must also not have one
+                $query->where(function($q) {
+                    $q->whereNull('middle_name')
+                      ->orWhere('middle_name', '=', '');
+                });
+            }
+        })->where(function($query) use ($requestSuffix) {
+            // Handle suffix similarly
+            if (!empty($requestSuffix)) {
+                $query->whereRaw("LOWER(TRIM(COALESCE(suffix, ''))) = ?", [strtolower($requestSuffix)]);
+            } else {
+                $query->where(function($q) {
+                    $q->whereNull('suffix')
+                      ->orWhere('suffix', '=', '');
+                });
+            }
+        })->first();
         
-        // If no exact match, try partial/fuzzy match
+        // If no exact match, try first+last only but warn about middle name mismatch
         if (!$matchedResident) {
-            $matchedResident = Residents::whereRaw(
-                "LOWER(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(middle_name, ''), ' ', COALESCE(last_name, ''), ' ', COALESCE(suffix, ''))) LIKE ?",
-                ['%' . strtolower($fullName) . '%']
-            )->first();
-        }
-        
-        // Also check without middle name (first + last only) for fuzzy matching
-        if (!$matchedResident) {
-            $firstLast = trim($request->first_name . ' ' . $request->last_name);
-            $matchedResident = Residents::whereRaw(
-                "LOWER(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, ''))) LIKE ?",
-                ['%' . strtolower($firstLast) . '%']
-            )->first();
+            $firstLastMatch = Residents::whereRaw(
+                "LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ?",
+                [strtolower($requestFirstName), strtolower($requestLastName)]
+            )->where(function($query) use ($requestSuffix) {
+                if (!empty($requestSuffix)) {
+                    $query->whereRaw("LOWER(TRIM(COALESCE(suffix, ''))) = ?", [strtolower($requestSuffix)]);
+                } else {
+                    $query->where(function($q) {
+                        $q->whereNull('suffix')->orWhere('suffix', '=', '');
+                    });
+                }
+            })->first();
+            
+            if ($firstLastMatch) {
+                $residentMiddleName = trim($firstLastMatch->middle_name ?? '');
+                $hasMiddleNameMismatch = (!empty($requestMiddleName) && empty($residentMiddleName)) ||
+                                          (empty($requestMiddleName) && !empty($residentMiddleName));
+                
+                if ($hasMiddleNameMismatch) {
+                    // Middle name mismatch - reject and ask user to verify
+                    notify()->error('Name found but middle name does not match. Please verify your name matches exactly with barangay records (including middle name). Visit the barangay office if needed.');
+                    return back()->withInput();
+                } else {
+                    $matchedResident = $firstLastMatch;
+                }
+            }
         }
 
         // Enforce that the name must exist in resident records

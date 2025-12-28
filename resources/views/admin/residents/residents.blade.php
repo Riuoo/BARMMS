@@ -745,7 +745,12 @@
                     let hasData = false;
                     for (const key in fields) {
                         if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
-                            contentHtml += '<div class="flex items-center"><i class="' + fields[key].icon + ' text-blue-500 mr-2"></i><span><strong>' + fields[key].label + ':</strong> ' + data[key] + '</span></div>';
+                            let displayValue = data[key];
+                            // Convert is_pwd boolean/0/1 to Yes/No (fallback for legacy data)
+                            if (key === 'is_pwd' && typeof data[key] !== 'string') {
+                                displayValue = (data[key] == 1 || data[key] === true || data[key] === '1') ? 'Yes' : 'No';
+                            }
+                            contentHtml += '<div class="flex items-center"><i class="' + fields[key].icon + ' text-blue-500 mr-2"></i><span><strong>' + fields[key].label + ':</strong> ' + displayValue + '</span></div>';
                             hasData = true;
                         }
                     }

@@ -18,6 +18,7 @@ use App\Http\Controllers\AdminControllers\ReportRequestControllers\BlotterReport
 use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentRequestController;
 use App\Http\Controllers\AdminControllers\ReportRequestControllers\CommunityConcernController;
 use App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentTemplateController;
+use App\Http\Controllers\AdminControllers\ReportRequestControllers\BlotterTemplateController;
 use App\Http\Controllers\AdminControllers\ProjectControllers\AccomplishProjectController;
 use App\Http\Controllers\AdminControllers\NotificationControllers\AdminNotificationController;
 use App\Http\Controllers\AdminControllers\HealthManagementControllers\HealthReportController;
@@ -116,6 +117,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/barangay-profiles', [BarangayProfileController::class, 'barangayProfile'])->name('admin.barangay-profiles');
         Route::get('/residents', [ResidentController::class, 'residentProfile'])->name('admin.residents');
         Route::get('/residents/check-email', [ResidentController::class, 'checkEmailRequest'])->name('admin.residents.check-email');
+        Route::get('/residents/check-duplicate-name', [ResidentController::class, 'checkDuplicateName'])->name('admin.residents.check-duplicate-name');
         Route::get('/residents/{resident}/demographics', [ResidentController::class, 'getDemographics'])->middleware('2fa:view_demographics')->name('admin.residents.demographics');
 
         // Analytics - View routes (all can access)
@@ -159,6 +161,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/templates/{template}/form-config', [DocumentTemplateController::class, 'formConfig'])->name('admin.templates.form-config');
         Route::post('/templates/{template}/validate', [DocumentTemplateController::class, 'validateTemplate'])->name('admin.templates.validate');
         Route::get('/templates/{template}/test', [DocumentTemplateController::class, 'testTemplate'])->name('admin.templates.test');
+        
+        Route::get('/blotter-templates', [BlotterTemplateController::class, 'index'])->name('admin.blotter-templates.index');
+        Route::get('/blotter-templates/{template}/preview', [BlotterTemplateController::class, 'preview'])->name('admin.blotter-templates.preview');
         
         Route::get('/new-account-requests', [AccountRequestController::class, 'accountRequest'])->name('admin.requests.new-account-requests');
     });
@@ -219,6 +224,13 @@ Route::prefix('admin')->group(function () {
         Route::post('/templates/{template}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
         Route::post('/templates/validate', [DocumentTemplateController::class, 'validateTemplate'])->name('admin.templates.validate-new');
         Route::delete('/templates/{template}', [DocumentTemplateController::class, 'destroy'])->name('admin.templates.destroy');
+        
+        // Blotter Templates transactions
+        Route::get('/blotter-templates/{template}/edit', [BlotterTemplateController::class, 'edit'])->name('admin.blotter-templates.edit');
+        Route::get('/blotter-templates/{template}/builder', [BlotterTemplateController::class, 'builder'])->name('admin.blotter-templates.builder');
+        Route::put('/blotter-templates/{template}', [BlotterTemplateController::class, 'update'])->name('admin.blotter-templates.update');
+        Route::post('/blotter-templates/{template}/reset', [BlotterTemplateController::class, 'reset'])->name('admin.blotter-templates.reset');
+        Route::post('/blotter-templates/{template}/toggle-status', [BlotterTemplateController::class, 'toggleStatus'])->name('admin.blotter-templates.toggle-status');
         
         // Account Requests transactions
         Route::put('/new-account-requests/{id}/approve', [AccountRequestController::class, 'approveAccountRequest'])->name('admin.account-requests.approve');

@@ -34,9 +34,6 @@ class ResidentSeeder extends Seeder
             'income_level' => 'Low',
             'employment_status' => 'Unemployed',
             'is_pwd' => true,
-            'emergency_contact_name' => 'Maria Santos Dela Cruz',
-            'emergency_contact_number' => '09191234568',
-            'emergency_contact_relationship' => 'Child',
             'active' => true,
         ]);
 
@@ -60,10 +57,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'College',
             'income_level' => 'Middle',
             'employment_status' => 'Full-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Carmen Santos',
-            'emergency_contact_number' => '09191234570',
-            'emergency_contact_relationship' => 'Mother',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -87,10 +81,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'High School',
             'income_level' => 'Low',
             'employment_status' => 'Unemployed',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Roberto Reyes',
-            'emergency_contact_number' => '09191234572',
-            'emergency_contact_relationship' => 'Father',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -114,10 +105,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'Vocational',
             'income_level' => 'Upper Middle',
             'employment_status' => 'Self-employed',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Isabella Martinez',
-            'emergency_contact_number' => '09191234574',
-            'emergency_contact_relationship' => 'Spouse',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -141,10 +129,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'High School',
             'income_level' => 'Lower Middle',
             'employment_status' => 'Part-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Jose Garcia',
-            'emergency_contact_number' => '09191234576',
-            'emergency_contact_relationship' => 'Spouse',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -168,10 +153,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'Post Graduate',
             'income_level' => 'High',
             'employment_status' => 'Full-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Elena Lopez',
-            'emergency_contact_number' => '09191234578',
-            'emergency_contact_relationship' => 'Spouse',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -195,10 +177,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'College',
             'income_level' => 'Middle',
             'employment_status' => 'Full-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Miguel Rodriguez',
-            'emergency_contact_number' => '09191234580',
-            'emergency_contact_relationship' => 'Spouse',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -222,10 +201,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'High School',
             'income_level' => 'Lower Middle',
             'employment_status' => 'Full-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Carmen Hernandez',
-            'emergency_contact_number' => '09191234582',
-            'emergency_contact_relationship' => 'Spouse',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -249,10 +225,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'Post Graduate',
             'income_level' => 'Upper Middle',
             'employment_status' => 'Full-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Maria Santos',
-            'emergency_contact_number' => '09191234584',
-            'emergency_contact_relationship' => 'Child',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -276,10 +249,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'High School',
             'income_level' => 'Low',
             'employment_status' => 'Unemployed',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Rosa Morales',
-            'emergency_contact_number' => '09191234586',
-            'emergency_contact_relationship' => 'Mother',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -303,10 +273,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'High School',
             'income_level' => 'Lower Middle',
             'employment_status' => 'Full-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Lorna Villanueva',
-            'emergency_contact_number' => '09191234588',
-            'emergency_contact_relationship' => 'Mother',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -330,10 +297,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'Elementary',
             'income_level' => 'Low',
             'employment_status' => 'Full-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Manuel Alcantara',
-            'emergency_contact_number' => '09191234590',
-            'emergency_contact_relationship' => 'Sibling',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -358,9 +322,6 @@ class ResidentSeeder extends Seeder
             'income_level' => 'Low',
             'employment_status' => 'Part-time',
             'is_pwd' => true,
-            'emergency_contact_name' => 'Jose Bautista',
-            'emergency_contact_number' => '09191234592',
-            'emergency_contact_relationship' => 'Child',
             'active' => true,
         ]);
 
@@ -385,9 +346,6 @@ class ResidentSeeder extends Seeder
             'income_level' => 'Low',
             'employment_status' => 'Unemployed',
             'is_pwd' => true,
-            'emergency_contact_name' => 'Elena Dela Rosa',
-            'emergency_contact_number' => '09191234594',
-            'emergency_contact_relationship' => 'Child',
             'active' => true,
         ]);
 
@@ -412,9 +370,6 @@ class ResidentSeeder extends Seeder
             'income_level' => 'Lower Middle',
             'employment_status' => 'Self-employed',
             'is_pwd' => true,
-            'emergency_contact_name' => 'Ricardo Castro',
-            'emergency_contact_number' => '09191234596',
-            'emergency_contact_relationship' => 'Spouse',
             'active' => true,
         ]);
         Residents::create([
@@ -437,9 +392,6 @@ class ResidentSeeder extends Seeder
             'income_level' => 'Lower Middle',
             'employment_status' => 'Self-employed',
             'is_pwd' => true,
-            'emergency_contact_name' => 'Ricardo kusanagi',
-            'emergency_contact_number' => '09191234596',
-            'emergency_contact_relationship' => 'Spouse',
             'active' => true,
         ]);
 
@@ -454,7 +406,7 @@ class ResidentSeeder extends Seeder
             'role' => 'resident',
             'address' => 'Purok 2, Lower Malinao, Padada, Davao Del Sur',
             'gender' => 'Female',
-            'contact_number' => '09191234597',
+            'contact_number' => null,
             'birth_date' => Carbon::now()->subYears(45),
             'marital_status' => 'Married',
             'occupation' => 'Housewife',
@@ -463,10 +415,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'High School',
             'income_level' => 'Lower Middle',
             'employment_status' => 'Unemployed',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Jose Villanueva',
-            'emergency_contact_number' => '09191234598',
-            'emergency_contact_relationship' => 'Spouse',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -490,10 +439,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'Elementary',
             'income_level' => 'Low',
             'employment_status' => 'Self-employed',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Carmen Bautista',
-            'emergency_contact_number' => '09191234599',
-            'emergency_contact_relationship' => 'Spouse',
+            'is_pwd' => 0,
             'active' => true,
         ]);
 
@@ -518,9 +464,6 @@ class ResidentSeeder extends Seeder
             'income_level' => 'Low',
             'employment_status' => 'Unemployed',
             'is_pwd' => true,
-            'emergency_contact_name' => 'Maria Fernandez',
-            'emergency_contact_number' => '09191234600',
-            'emergency_contact_relationship' => 'Child',
             'active' => true,
         ]);
 
@@ -535,7 +478,7 @@ class ResidentSeeder extends Seeder
             'role' => 'resident',
             'address' => 'Purok 5, Lower Malinao, Padada, Davao Del Sur',
             'gender' => 'Male',
-            'contact_number' => '09191234601',
+            'contact_number' => null,
             'birth_date' => Carbon::now()->subYears(33),
             'marital_status' => 'Single',
             'occupation' => 'Driver',
@@ -544,10 +487,7 @@ class ResidentSeeder extends Seeder
             'education_level' => 'High School',
             'income_level' => 'Lower Middle',
             'employment_status' => 'Full-time',
-            'is_pwd' => false,
-            'emergency_contact_name' => 'Antonio Ramos Sr.',
-            'emergency_contact_number' => '09191234602',
-            'emergency_contact_relationship' => 'Father',
+            'is_pwd' => 0,
             'active' => true,
         ]);
     }

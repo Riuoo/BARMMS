@@ -66,7 +66,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- First Name -->
                     <div class="mb-2">
-                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-gray-500">(Read Only)</span></label>
                         @php
                             // Priority: resident data > accountRequest data
                             $firstName = '';
@@ -101,7 +101,7 @@
                     </div>
                     <!-- Last Name -->
                     <div class="mb-2">
-                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-gray-500">(Read Only)</span></label>
                         @php
                             // Priority: resident data > accountRequest data
                             $lastName = '';
@@ -144,7 +144,7 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address <span class="text-red-500">*</span></label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address <span class="text-gray-500">(Read Only)</span></label>
                         <input id="email" name="email" type="email" autocomplete="email" required
                                 class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
                             placeholder="Email address" value="{{ $accountRequest->email ?? old('email') }}" readonly>
@@ -152,7 +152,7 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
+                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-gray-500">(Read Only)</span></label>
                         @php
                             $genderValue = old('gender');
                             if (isset($resident) && $resident->gender) {
@@ -201,7 +201,7 @@
                         <input type="text" value="{{ $defaultProvince }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-gray-100 text-gray-600 rounded-md cursor-not-allowed" readonly>
                     </div>
                     <div>
-                        <label for="purok" class="block text-sm font-medium text-gray-700 mb-1">Purok <span class="text-red-500">*</span></label>
+                        <label for="purok" class="block text-sm font-medium text-gray-700 mb-1">Purok <span class="text-gray-500">(Read Only)</span></label>
                         @php
                             $purokValue = old('purok');
                             $addressValue = old('address');
@@ -240,8 +240,8 @@
                             }
                         @endphp
                         <input id="birth_date" name="birth_date" type="date" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
-                            value="{{ $birthDateValue }}" {{ isset($resident) ? 'readonly' : '' }}>
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                            value="{{ $birthDateValue }}">
                     </div>
                     <div>
                         <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-1">Marital Status <span class="text-red-500">*</span></label>
@@ -252,7 +252,7 @@
                             }
                         @endphp
                         <select id="marital_status" name="marital_status" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
                             <option value="">Select Marital Status</option>
                             <option value="Single" {{ $maritalStatusValue == 'Single' ? 'selected' : '' }}>Single</option>
                             <option value="Married" {{ $maritalStatusValue == 'Married' ? 'selected' : '' }}>Married</option>
@@ -260,9 +260,6 @@
                             <option value="Divorced" {{ $maritalStatusValue == 'Divorced' ? 'selected' : '' }}>Divorced</option>
                             <option value="Separated" {{ $maritalStatusValue == 'Separated' ? 'selected' : '' }}>Separated</option>
                         </select>
-                        @if(isset($resident))
-                            <input type="hidden" name="marital_status" value="{{ $maritalStatusValue }}">
-                        @endif
                     </div>
                 </div>
                 <div class="mt-4">
@@ -273,7 +270,7 @@
                             $occupationValue = $resident->occupation;
                         }
                     @endphp
-                    <select id="occupation_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2 bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
+                    <select id="occupation_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2">
                         <option value="">Select Occupation</option>
                         <option value="Teacher" {{ $occupationValue == 'Teacher' ? 'selected' : '' }}>Teacher</option>
                         <option value="Student" {{ $occupationValue == 'Student' ? 'selected' : '' }}>Student</option>
@@ -287,10 +284,7 @@
                         <option value="Driver" {{ $occupationValue == 'Driver' ? 'selected' : '' }}>Driver</option>
                         <option value="_other" {{ !in_array($occupationValue, ['Teacher', 'Student', 'Farmer', 'Fisherman', 'Vendor', 'Government Employee', 'Private Employee', 'Housewife', 'Construction Worker', 'Driver']) && $occupationValue ? 'selected' : '' }}>Other (specify)</option>
                     </select>
-                    <input type="text" id="occupation" name="occupation" value="{{ $occupationValue }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" placeholder="Enter occupation" required {{ isset($resident) ? 'readonly' : '' }} style="{{ isset($resident) || $occupationValue ? 'display: block;' : 'display: none;' }}">
-                    @if(isset($resident))
-                        <input type="hidden" name="occupation" value="{{ $occupationValue }}">
-                    @endif
+                    <input type="text" id="occupation" name="occupation" value="{{ $occupationValue }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Enter occupation" required style="{{ $occupationValue ? 'display: block;' : 'display: none;' }}">
                 </div>
             </div>
 
@@ -299,7 +293,7 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Demographic Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+                        <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-gray-500">(Read Only)</span></label>
                         @php
                             $ageValue = old('age');
                             if (isset($resident) && $resident->age) {
@@ -319,8 +313,8 @@
                             }
                         @endphp
                         <input id="family_size" name="family_size" type="number" min="1" max="20" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
-                            placeholder="Number of family members" value="{{ $familySizeValue }}" {{ isset($resident) ? 'readonly' : '' }}>
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                            placeholder="Number of family members" value="{{ $familySizeValue }}">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -333,7 +327,7 @@
                             }
                         @endphp
                         <select id="education_level" name="education_level" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
                             <option value="">Select Education Level</option>
                             <option value="No Education" {{ $educationLevelValue == 'No Education' ? 'selected' : '' }}>No Education</option>
                             <option value="Elementary" {{ $educationLevelValue == 'Elementary' ? 'selected' : '' }}>Elementary</option>
@@ -342,9 +336,6 @@
                             <option value="College" {{ $educationLevelValue == 'College' ? 'selected' : '' }}>College</option>
                             <option value="Post Graduate" {{ $educationLevelValue == 'Post Graduate' ? 'selected' : '' }}>Post Graduate</option>
                         </select>
-                        @if(isset($resident))
-                            <input type="hidden" name="education_level" value="{{ $educationLevelValue }}">
-                        @endif
                     </div>
                     <div>
                         <label for="income_level" class="block text-sm font-medium text-gray-700 mb-1">Income Level (Monthly, PHP) <span class="text-red-500">*</span></label>
@@ -355,7 +346,7 @@
                             }
                         @endphp
                         <select id="income_level" name="income_level" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
                             <option value="">Select Income Range</option>
                             <option value="Low" {{ $incomeLevelValue == 'Low' ? 'selected' : '' }}>Low (₱0 – ₱10,000)</option>
                             <option value="Lower Middle" {{ $incomeLevelValue == 'Lower Middle' ? 'selected' : '' }}>Lower Middle (₱10,001 – ₱20,000)</option>
@@ -363,9 +354,6 @@
                             <option value="Upper Middle" {{ $incomeLevelValue == 'Upper Middle' ? 'selected' : '' }}>Upper Middle (₱40,001 – ₱80,000)</option>
                             <option value="High" {{ $incomeLevelValue == 'High' ? 'selected' : '' }}>High (₱80,001 and above)</option>
                         </select>
-                        @if(isset($resident))
-                            <input type="hidden" name="income_level" value="{{ $incomeLevelValue }}">
-                        @endif
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -378,16 +366,13 @@
                             }
                         @endphp
                         <select id="employment_status" name="employment_status" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
                             <option value="">Select Employment Status</option>
                             <option value="Unemployed" {{ $employmentStatusValue == 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
                             <option value="Part-time" {{ $employmentStatusValue == 'Part-time' ? 'selected' : '' }}>Part-time</option>
                             <option value="Self-employed" {{ $employmentStatusValue == 'Self-employed' ? 'selected' : '' }}>Self-employed</option>
                             <option value="Full-time" {{ $employmentStatusValue == 'Full-time' ? 'selected' : '' }}>Full-time</option>
                         </select>
-                        @if(isset($resident))
-                            <input type="hidden" name="employment_status" value="{{ $employmentStatusValue }}">
-                        @endif
                     </div>
                     <div>
                         <label for="is_pwd" class="block text-sm font-medium text-gray-700 mb-1">Person with Disability (PWD) <span class="text-red-500">*</span></label>
@@ -398,13 +383,10 @@
                             }
                         @endphp
                         <select id="is_pwd" name="is_pwd" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" {{ isset($resident) ? 'disabled' : '' }}>
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
                             <option value="0" {{ $pwdValue == '0' ? 'selected' : '' }}>No</option>
                             <option value="1" {{ $pwdValue == '1' ? 'selected' : '' }}>Yes</option>
                         </select>
-                        @if(isset($resident))
-                            <input type="hidden" name="is_pwd" value="{{ $pwdValue }}">
-                        @endif
                     </div>
                 </div>
             </div>
@@ -414,55 +396,52 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Emergency Contact Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
                         @php
                             $emergencyContactName = old('emergency_contact_name');
                             if (isset($resident) && $resident->emergency_contact_name) {
                                 $emergencyContactName = $resident->emergency_contact_name;
                             }
                         @endphp
-                        <input id="emergency_contact_name" name="emergency_contact_name" type="text"
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
-                            placeholder="Full Name" value="{{ $emergencyContactName }}" {{ isset($resident) && $resident->emergency_contact_name ? 'readonly' : '' }}>
+                        <input id="emergency_contact_name" name="emergency_contact_name" type="text" required
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                            placeholder="Full Name" value="">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Relationship <span class="text-red-500">*</span></label>
                         @php
                             $emergencyContactRelationship = old('emergency_contact_relationship');
                             if (isset($resident) && $resident->emergency_contact_relationship) {
                                 $emergencyContactRelationship = $resident->emergency_contact_relationship;
                             }
                         @endphp
-                        <select id="relationship_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2 bg-gray-100 cursor-not-allowed" {{ isset($resident) && $resident->emergency_contact_relationship ? 'disabled' : '' }}>
+                        <select id="relationship_select" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm mb-2">
                             <option value="">Select Relationship</option>
-                            <option value="Spouse" {{ $emergencyContactRelationship == 'Spouse' ? 'selected' : '' }}>Spouse</option>
-                            <option value="Mother" {{ $emergencyContactRelationship == 'Mother' ? 'selected' : '' }}>Mother</option>
-                            <option value="Father" {{ $emergencyContactRelationship == 'Father' ? 'selected' : '' }}>Father</option>
-                            <option value="Parent" {{ $emergencyContactRelationship == 'Parent' ? 'selected' : '' }}>Parent</option>
-                            <option value="Sibling" {{ $emergencyContactRelationship == 'Sibling' ? 'selected' : '' }}>Sibling</option>
-                            <option value="Child" {{ $emergencyContactRelationship == 'Child' ? 'selected' : '' }}>Child</option>
-                            <option value="Relative" {{ $emergencyContactRelationship == 'Relative' ? 'selected' : '' }}>Relative</option>
-                            <option value="Neighbor" {{ $emergencyContactRelationship == 'Neighbor' ? 'selected' : '' }}>Neighbor</option>
-                            <option value="Friend" {{ $emergencyContactRelationship == 'Friend' ? 'selected' : '' }}>Friend</option>
-                            <option value="Guardian" {{ $emergencyContactRelationship == 'Guardian' ? 'selected' : '' }}>Guardian</option>
-                            <option value="_other" {{ !in_array($emergencyContactRelationship, ['Spouse', 'Mother', 'Father', 'Parent', 'Sibling', 'Child', 'Relative', 'Neighbor', 'Friend', 'Guardian']) && $emergencyContactRelationship ? 'selected' : '' }}>Other (specify)</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Father">Father</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Child">Child</option>
+                            <option value="Relative">Relative</option>
+                            <option value="Neighbor">Neighbor</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="_other">Other (specify)</option>
                         </select>
-                        <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{ $emergencyContactRelationship }}" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed" placeholder="Enter relationship (Example: Spouse, Parent)" {{ isset($resident) && $resident->emergency_contact_relationship ? 'readonly' : '' }} style="{{ isset($resident) && $resident->emergency_contact_relationship ? 'display: block;' : ($emergencyContactRelationship ? 'display: block;' : 'display: none;') }}">
-                        @if(isset($resident) && $resident->emergency_contact_relationship)
-                            <input type="hidden" name="emergency_contact_relationship" value="{{ $emergencyContactRelationship }}">
-                        @endif
+                        <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Enter relationship (Example: Spouse, Parent)" required style="display: none;">
                     </div>
                     <div>
-                        <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                        <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
                         @php
                             $emergencyContactNumber = old('emergency_contact_number');
                             if (isset($resident) && $resident->emergency_contact_number) {
                                 $emergencyContactNumber = $resident->emergency_contact_number;
                             }
                         @endphp
-                        <input id="emergency_contact_number" name="emergency_contact_number" type="number"
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
-                            placeholder="Example: 09191234567" min="0" pattern="[0-9]*" inputmode="numeric" value="{{ $emergencyContactNumber }}" {{ isset($resident) && $resident->emergency_contact_number ? 'readonly' : '' }}>
+                        <input id="emergency_contact_number" name="emergency_contact_number" type="number" required
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                            placeholder="Example: 09191234567" min="0" pattern="[0-9]*" inputmode="numeric" value="">
                     </div>
                 </div>
             </div>

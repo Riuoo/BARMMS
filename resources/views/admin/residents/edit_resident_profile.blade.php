@@ -148,7 +148,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     <div>
                         <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-2">
-                            Contact Number <span class="text-red-500">*</span>
+                            Contact Number
                         </label>
                         <input type="number" 
                                id="contact_number" 
@@ -158,8 +158,7 @@
                                placeholder="Example: 9191234567"
                                min="0" 
                                pattern="[0-9]*" 
-                               inputmode="numeric"
-                               required>
+                               inputmode="numeric">
                     </div>
                 </div>
             </div>
@@ -328,7 +327,8 @@
                                value="{{ old('age', $resident->age) }}" 
                                min="1" 
                                max="120" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed" 
+                               readonly
                                required>
                     </div>
                     <div>
@@ -384,7 +384,6 @@
                         </div>
                     @endif
                     </div>
-                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                         <div>
                             <label for="employment_status" class="block text-sm font-medium text-gray-700 mb-2">
@@ -421,13 +420,12 @@
             </div>
 
             <!-- Emergency Contact Information -->
-            <div class="border-b border-gray-200 pb-6">
+            <div class="border-b border-gray-200 pb-6 mt-4">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                     <i class="fas fa-phone-alt mr-2 text-red-600"></i>
                     Emergency Contact Information
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @if($resident->canViewField('emergency_contact_name'))
                     <div>
                         <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
                             Name
@@ -438,7 +436,6 @@
                                value="{{ old('emergency_contact_name', $resident->emergency_contact_name) }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
-                    @endif
                     @php
                         $knownRelationships = [
                             'Spouse',
@@ -455,7 +452,6 @@
                         $currentRelationship = old('emergency_contact_relationship', $resident->emergency_contact_relationship);
                         $relationshipSelectValue = in_array($currentRelationship, $knownRelationships) ? $currentRelationship : '_other';
                     @endphp
-                    @if($resident->canViewField('emergency_contact_relationship'))
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Relationship
@@ -475,8 +471,6 @@
                                placeholder="Enter relationship (Example: Spouse, Parent, Sibling)"
                                style="display: {{ $relationshipSelectValue === '_other' ? 'block' : 'none' }};">
                     </div>
-                    @endif
-                    @if($resident->canViewField('emergency_contact_number'))
                     <div>
                         <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">
                             Contact Number
@@ -491,7 +485,6 @@
                                pattern="[0-9]*" 
                                inputmode="numeric">
                     </div>
-                    @endif
                 </div>
             </div>
 
@@ -635,9 +628,10 @@
             }
         }
 
-        if (birthInput) {
-            birthInput.addEventListener('change', updateAge);
-            birthInput.addEventListener('input', updateAge);
+        // Note: birth_date is read-only in edit form, so age won't auto-update
+        // Age is calculated from birth_date on initial load
+        if (birthInput && ageInput) {
+            // Calculate age on page load
             updateAge();
         }
         if (purokSelect) {

@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             ResidentSeeder::class,
             MedicineSeeder::class,
             DocumentTemplateSeeder::class,
+            BlotterTemplateSeeder::class,
             AccomplishedProjectSeeder::class,
             HealthCenterActivitySeeder::class,
             MedicalRecordSeeder::class,

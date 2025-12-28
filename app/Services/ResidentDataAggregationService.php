@@ -48,7 +48,7 @@ class ResidentDataAggregationService
                 'income_level' => $resident->income_level,
                 'education_level' => $resident->education_level,
                 'family_size' => $resident->family_size,
-                'is_pwd' => $resident->is_pwd,
+                'is_pwd' => $resident->is_pwd ? 'Yes' : 'No',
                 'occupation' => $resident->occupation,
                 'purok' => $this->extractPurok($resident->address),
             ],

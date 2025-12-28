@@ -89,8 +89,8 @@ class RegistrationController
                 'income_level' => 'required|in:Low,Lower Middle,Middle,Upper Middle,High',
                 'employment_status' => 'required|in:Unemployed,Part-time,Self-employed,Full-time',
                 'is_pwd' => 'required|in:0,1',
-                'emergency_contact_name' => 'nullable|string|max:255',
-                'emergency_contact_number' => 'nullable|string|max:255',
+                'emergency_contact_name' => 'required|string|max:255',
+                'emergency_contact_number' => 'required|string|max:255',
                 'emergency_contact_relationship' => 'required|string|max:255',
                 'password' => 'required|string|min:8|confirmed',
                 'token' => 'required|string',
@@ -110,11 +110,23 @@ class RegistrationController
 
             // Check if account request is linked to an existing resident
             if ($accountRequest->resident_id && $accountRequest->resident) {
-                // Update existing resident record
+                // Update existing resident record with all information from the form
                 $resident = $accountRequest->resident;
                 $resident->email = $request->email;
                 $resident->contact_number = $request->contact_number;
                 $resident->password = Hash::make($request->password);
+                $resident->birth_date = $request->birth_date;
+                $resident->marital_status = $request->marital_status;
+                $resident->occupation = $request->occupation;
+                $resident->age = $request->age;
+                $resident->family_size = $request->family_size;
+                $resident->education_level = $request->education_level;
+                $resident->income_level = $request->income_level;
+                $resident->employment_status = $request->employment_status;
+                $resident->is_pwd = (bool) $request->is_pwd;
+                $resident->emergency_contact_name = $request->emergency_contact_name;
+                $resident->emergency_contact_number = $request->emergency_contact_number;
+                $resident->emergency_contact_relationship = $request->emergency_contact_relationship;
                 $resident->active = true;
                 $resident->save();
                 $user = $resident;
