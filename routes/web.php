@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Auth\LoginController;
@@ -345,6 +346,11 @@ Route::middleware(['admin.role'])->prefix('admin/faqs')->name('admin.faqs.')->gr
     Route::patch('/{faq}/toggle', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'toggle'])->name('toggle');
 });
 
+Route::middleware(['admin.role'])->prefix('admin/test-email')->name('admin.test-email.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\AdminControllers\Settings\TestEmailController::class, 'showTestEmailForm'])->name('index');
+    Route::post('/send', [\App\Http\Controllers\AdminControllers\Settings\TestEmailController::class, 'sendTestEmail'])->name('send');
+});
+
 Route::get('/admin/blotter-reports/{id}/check-active', [App\Http\Controllers\AdminControllers\ReportRequestControllers\BlotterReportController::class, 'checkActive'])->name('admin.blotter-reports.check-active');
 Route::get('/admin/document-requests/{id}/check-active', [App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentRequestController::class, 'checkActive'])->name('admin.document-requests.check-active');
 
@@ -401,4 +407,19 @@ Route::post('/logout', function () {
     Session::flush();
     return redirect()->route('landing');
 })->name('logout');
+
+// Test Email Route
+Route::get('/test-email', function () {
+    try {
+        $email = request('email', 'rodericktajos02@gmail.com');
+        
+        Mail::raw('Hello from Laravel via Brevo!', function ($message) use ($email) {
+            $message->to($email)
+                    ->subject('Test Email from BARMMS');
+        });
+        return 'Email sent to ' . $email . '!';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
 
