@@ -158,7 +158,7 @@ class AccountRequestController
     public function approveAccountRequest($id)
     {
         try {
-            Log::info('approveAccountRequest method called with id: ' . $id);
+        Log::info('approveAccountRequest method called with id: ' . $id);
         } catch (\Exception $e) {
             // Ignore logging errors if permissions are not set
         }
@@ -179,7 +179,7 @@ class AccountRequestController
                 AccountRequest::where('id', $existingRequest->id)->update(['status' => 'rejected']);
                 DB::rollBack();
                 try {
-                    Log::warning('Duplicate account request found for email: ' . $accountRequest->email . '. Older request rejected.');
+                Log::warning('Duplicate account request found for email: ' . $accountRequest->email . '. Older request rejected.');
                 } catch (\Exception $e) {
                     // Ignore logging errors
                 }
@@ -196,7 +196,7 @@ class AccountRequestController
             // Get the ID of the currently logged-in admin user from the session
             $adminUserId = Session::get('user_id');
             try {
-                Log::debug('Admin User ID from session: ' . $adminUserId);
+            Log::debug('Admin User ID from session: ' . $adminUserId);
             } catch (\Exception $e) {
                 // Ignore logging errors
             }
@@ -205,7 +205,7 @@ class AccountRequestController
                 $accountRequest->barangay_profile_id = $adminUserId;
             } else {
                 try {
-                    Log::warning('Admin User ID not found in session for account request approval: ' . $accountRequest->id);
+                Log::warning('Admin User ID not found in session for account request approval: ' . $accountRequest->id);
                 } catch (\Exception $e) {
                     // Ignore logging errors
                 }
@@ -222,7 +222,7 @@ class AccountRequestController
                     $resident->email = $accountRequest->email;
                     $resident->save();
                     try {
-                        Log::info('Updated resident email for resident_id: ' . $resident->id . ' with email: ' . $accountRequest->email);
+                    Log::info('Updated resident email for resident_id: ' . $resident->id . ' with email: ' . $accountRequest->email);
                     } catch (\Exception $e) {
                         // Ignore logging errors
                     }
@@ -236,13 +236,13 @@ class AccountRequestController
                 // Queue the email with the registration link (non-blocking)
                 Mail::to($accountRequest->email)->queue(new AccountApproved($accountRequest->token));
                 try {
-                    Log::info('Email queued successfully for: ' . $accountRequest->email);
+                Log::info('Email queued successfully for: ' . $accountRequest->email);
                 } catch (\Exception $logError) {
                     // Ignore logging errors if permissions are not set
                 }
             } catch (\Exception $e) {
                 try {
-                    Log::error('Error queuing email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
+                Log::error('Error queuing email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
                 } catch (\Exception $logError) {
                     // Ignore logging errors if permissions are not set
                 }
@@ -255,7 +255,7 @@ class AccountRequestController
         } catch (\Exception $e) {
             DB::rollBack();
             try {
-                Log::error('Error approving account request ' . $accountRequest->id . ': ' . $e->getMessage());
+            Log::error('Error approving account request ' . $accountRequest->id . ': ' . $e->getMessage());
             } catch (\Exception $logError) {
                 // Ignore logging errors if permissions are not set
             }
@@ -287,7 +287,7 @@ class AccountRequestController
         ]);
 
         try {
-            Log::info('rejectAccountRequest method called with id: ' . $id);
+        Log::info('rejectAccountRequest method called with id: ' . $id);
         } catch (\Exception $e) {
             // Ignore logging errors
         }
@@ -321,7 +321,7 @@ class AccountRequestController
             // Get the ID of the currently logged-in admin user from the session
             $adminUserId = Session::get('user_id');
             try {
-                Log::debug('Admin User ID from session: ' . $adminUserId);
+            Log::debug('Admin User ID from session: ' . $adminUserId);
             } catch (\Exception $e) {
                 // Ignore logging errors
             }
@@ -330,7 +330,7 @@ class AccountRequestController
                 $accountRequest->barangay_profile_id = $adminUserId;
             } else {
                 try {
-                    Log::warning('Admin User ID not found in session for account request rejection: ' . $accountRequest->id);
+                Log::warning('Admin User ID not found in session for account request rejection: ' . $accountRequest->id);
                 } catch (\Exception $e) {
                     // Ignore logging errors
                 }
@@ -345,13 +345,13 @@ class AccountRequestController
                 // Queue the rejection email
                 Mail::to($accountRequest->email)->queue(new AccountRejected($request->rejection_reason, $isDuplicate));
                 try {
-                    Log::info('Rejection email queued successfully for: ' . $accountRequest->email);
+                Log::info('Rejection email queued successfully for: ' . $accountRequest->email);
                 } catch (\Exception $logError) {
                     // Ignore logging errors if permissions are not set
                 }
             } catch (\Exception $e) {
                 try {
-                    Log::error('Error queuing rejection email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
+                Log::error('Error queuing rejection email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
                 } catch (\Exception $logError) {
                     // Ignore logging errors if permissions are not set
                 }
@@ -363,7 +363,7 @@ class AccountRequestController
         } catch (\Exception $e) {
             DB::rollBack();
             try {
-                Log::error('Error rejecting account request ' . $accountRequest->id . ': ' . $e->getMessage());
+            Log::error('Error rejecting account request ' . $accountRequest->id . ': ' . $e->getMessage());
             } catch (\Exception $logError) {
                 // Ignore logging errors if permissions are not set
             }

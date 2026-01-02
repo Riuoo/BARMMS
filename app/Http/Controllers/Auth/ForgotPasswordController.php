@@ -40,8 +40,8 @@ class ForgotPasswordController
             'created_at' => Carbon::now()
         ]);
 
-        // Send email (example using Laravel's Mail facade)
-        Mail::to($request->email)->send(
+        // Send email via queue (non-blocking)
+        Mail::to($request->email)->queue(
             new \App\Mail\PasswordResetMail($token, $request->email)
         );
 
