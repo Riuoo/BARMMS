@@ -408,6 +408,7 @@ Route::post('/logout', function () {
 Route::get('/test-email', function () {
     try {
         $email = request('email', 'rodericktajos02@gmail.com');
+        $useQueue = request('queue', 'true'); // Default to queue to avoid timeout
         
         // Validate email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -422,33 +423,43 @@ Route::get('/test-email', function () {
                    'Get your API key from: <a href="https://app.brevo.com/settings/keys/api" target="_blank">Brevo API Settings</a>';
         }
         
-        // Send email using Brevo API (much faster than SMTP)
-        $response = Http::withHeaders([
-            'accept' => 'application/json',
-            'api-key' => $apiKey,
-            'content-type' => 'application/json',
-        ])->post('https://api.brevo.com/v3/smtp/email', [
-            'sender' => [
-                'name' => env('MAIL_FROM_NAME', 'BARMMS'),
-                'email' => env('MAIL_FROM_ADDRESS', 'no-reply@example.com'),
-            ],
-            'to' => [
-                [
-                    'email' => $email,
-                ],
-            ],
-            'subject' => 'Test Email from BARMMS',
-            'htmlContent' => '<html><body><h1>Test Email</h1><p>' . htmlspecialchars($message) . '</p><p>If you received this email, it means your Brevo API configuration is working correctly.</p></body></html>',
-            'textContent' => $message . "\n\nIf you received this email, it means your Brevo API configuration is working correctly.",
-        ]);
-        
-        if ($response->successful()) {
-            return 'Email sent successfully to ' . $email . '!<br><br>' .
-                   'Response: ' . json_encode($response->json(), JSON_PRETTY_PRINT);
+        if ($useQueue === 'true' || $useQueue === '1') {
+            // Dispatch job to queue (prevents 504 timeout)
+            \App\Jobs\SendTestEmailJob::dispatch($email, $message);
+            
+            return 'Email queued successfully for ' . $email . '!<br><br>' .
+                   'The email will be sent in the background. Check your queue worker or logs to confirm delivery.<br><br>' .
+                   'To send immediately (may timeout), use: <code>?queue=false</code>';
         } else {
-            return 'Error sending email:<br>' .
-                   'Status: ' . $response->status() . '<br>' .
-                   'Response: ' . $response->body();
+            // Send immediately with short timeout
+            $response = Http::timeout(5) // 5 second timeout
+                ->withHeaders([
+                    'accept' => 'application/json',
+                    'api-key' => $apiKey,
+                    'content-type' => 'application/json',
+                ])->post('https://api.brevo.com/v3/smtp/email', [
+                    'sender' => [
+                        'name' => env('MAIL_FROM_NAME', 'BARMMS'),
+                        'email' => env('MAIL_FROM_ADDRESS', 'no-reply@barmmslowermalinao.app'),
+                    ],
+                    'to' => [
+                        [
+                            'email' => $email,
+                        ],
+                    ],
+                    'subject' => 'Test Email from BARMMS',
+                    'htmlContent' => '<html><body><h1>Test Email</h1><p>' . htmlspecialchars($message) . '</p><p>If you received this email, it means your Brevo API configuration is working correctly.</p></body></html>',
+                    'textContent' => $message . "\n\nIf you received this email, it means your Brevo API configuration is working correctly.",
+                ]);
+            
+            if ($response->successful()) {
+                return 'Email sent successfully to ' . $email . '!<br><br>' .
+                       'Response: ' . json_encode($response->json(), JSON_PRETTY_PRINT);
+            } else {
+                return 'Error sending email:<br>' .
+                       'Status: ' . $response->status() . '<br>' .
+                       'Response: ' . $response->body();
+            }
         }
     } catch (\Exception $e) {
         return 'Error: ' . $e->getMessage() . '<br><br>' .
@@ -457,6 +468,7 @@ Route::get('/test-email', function () {
                'MAIL_FROM_ADDRESS=your-verified-sender@example.com<br>' .
                'MAIL_FROM_NAME="BARMMS"</code><br><br>' .
                'Get your API key from: <a href="https://app.brevo.com/settings/keys/api" target="_blank">Brevo API Settings</a><br><br>' .
+               '<strong>Note:</strong> If you still get 504 errors, you may need to increase server timeouts. See instructions below.<br><br>' .
                'Stack trace: <pre>' . $e->getTraceAsString() . '</pre>';
     }
 });
