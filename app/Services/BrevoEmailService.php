@@ -211,7 +211,7 @@ class BrevoEmailService
             
             // Validate content
             if (empty($htmlContent) || empty(trim($htmlContent))) {
-                throw new \Exception('Rendered email content is empty for view: ' . $view);
+                throw new \Exception('Rendered email content is empty for view: ' . $view . '. This may indicate a route/URL generation issue on DigitalOcean.');
             }
             
             // Generate plain text version
@@ -231,11 +231,91 @@ class BrevoEmailService
                     'data_keys' => array_keys($data),
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
+                    'trace' => substr($e->getTraceAsString(), 0, 1000),
+                    'app_url' => config('app.url', 'not set'),
+                    'env_app_url' => env('APP_URL', 'not set'),
                 ]);
             } catch (\Exception $logError) {
                 // Ignore logging errors
             }
             return false;
+        }
+    }
+    
+    /**
+     * Safely generate URL with fallback for queue workers
+     */
+    protected function safeUrl(string $path): string
+    {
+        try {
+            return url($path);
+        } catch (\Exception $e) {
+            // Fallback: construct URL manually using APP_URL
+            $appUrl = config('app.url', env('APP_URL', 'http://localhost'));
+            $appUrl = rtrim($appUrl, '/');
+            $path = ltrim($path, '/');
+            return $appUrl . '/' . $path;
+        }
+    }
+    
+    /**
+     * Safely generate route URL with fallback for queue workers
+     */
+    protected function safeRoute(string $name, array $parameters = []): string
+    {
+        try {
+            return route($name, $parameters);
+        } catch (\Exception $e) {
+            // Log that we're using fallback (common on DigitalOcean queue workers)
+            try {
+                Log::debug('Using route fallback (route() failed)', [
+                    'route' => $name,
+                    'error' => $e->getMessage(),
+                    'parameters' => array_keys($parameters),
+                ]);
+            } catch (\Exception $logError) {
+                // Ignore logging errors
+            }
+            
+            // Fallback: construct URL manually based on route name
+            $appUrl = config('app.url', env('APP_URL', 'http://localhost'));
+            $appUrl = rtrim($appUrl, '/');
+            
+            // Map known routes to their paths
+            $routeMap = [
+                'password.reset' => '/reset-password/{token}',
+                'register.form' => '/register/{token}',
+            ];
+            
+            if (isset($routeMap[$name])) {
+                $path = $routeMap[$name];
+                $queryParams = [];
+                
+                // Replace path parameters
+                foreach ($parameters as $key => $value) {
+                    if (strpos($path, '{' . $key . '}') !== false) {
+                        $path = str_replace('{' . $key . '}', urlencode($value), $path);
+                    } else {
+                        // Parameters not in path go to query string
+                        $queryParams[$key] = $value;
+                    }
+                }
+                
+                // Add query string if there are additional parameters
+                if (!empty($queryParams)) {
+                    $path .= '?' . http_build_query($queryParams);
+                }
+                
+                return $appUrl . $path;
+            }
+            
+            // If route not in map, try to construct from name
+            try {
+                Log::warning('Route not in fallback map, using default path', ['route' => $name]);
+            } catch (\Exception $logError) {
+                // Ignore logging errors
+            }
+            return $appUrl . '/' . str_replace('.', '/', $name);
         }
     }
     
@@ -252,7 +332,7 @@ class BrevoEmailService
         switch ($view) {
             case 'emails.account-approved':
                 $token = $data['token'] ?? '';
-                $registerUrl = url('/register/' . $token);
+                $registerUrl = $this->safeRoute('register.form', ['token' => $token]);
                 return $this->getEmailTemplate('Account Approved', "
                     <h1>Account Approved</h1>
                     <p>Dear User,</p>
@@ -288,8 +368,14 @@ class BrevoEmailService
                 $token = $data['token'] ?? '';
                 $email = $data['email'] ?? '';
                 // Compute resetUrl and expires (same as PasswordResetMail does)
-                $resetUrl = route('password.reset', ['token' => $token, 'email' => $email]);
-                $expires = htmlspecialchars(now()->addHours(1)->format('g:i A'));
+                $resetUrl = $this->safeRoute('password.reset', ['token' => $token, 'email' => $email]);
+                // Safely get expiration time
+                try {
+                    $expires = htmlspecialchars(now()->addHours(1)->format('g:i A'));
+                } catch (\Exception $e) {
+                    // Fallback if now() fails
+                    $expires = '1 hour from now';
+                }
                 return $this->getEmailTemplate('Password Reset Request', "
                     <h1>Password Reset Request</h1>
                     <p>Click the button below to reset your password:</p>
