@@ -346,11 +346,6 @@ Route::middleware(['admin.role'])->prefix('admin/faqs')->name('admin.faqs.')->gr
     Route::patch('/{faq}/toggle', [\App\Http\Controllers\AdminControllers\Settings\FaqController::class, 'toggle'])->name('toggle');
 });
 
-Route::middleware(['admin.role'])->prefix('admin/test-email')->name('admin.test-email.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\AdminControllers\Settings\TestEmailController::class, 'showTestEmailForm'])->name('index');
-    Route::post('/send', [\App\Http\Controllers\AdminControllers\Settings\TestEmailController::class, 'sendTestEmail'])->name('send');
-});
-
 Route::get('/admin/blotter-reports/{id}/check-active', [App\Http\Controllers\AdminControllers\ReportRequestControllers\BlotterReportController::class, 'checkActive'])->name('admin.blotter-reports.check-active');
 Route::get('/admin/document-requests/{id}/check-active', [App\Http\Controllers\AdminControllers\ReportRequestControllers\DocumentRequestController::class, 'checkActive'])->name('admin.document-requests.check-active');
 
@@ -413,13 +408,14 @@ Route::get('/test-email', function () {
     try {
         $email = request('email', 'rodericktajos02@gmail.com');
         
-        Mail::raw('Hello from Laravel via Brevo!', function ($message) use ($email) {
+        // Use the configured mailer (should be 'smtp' or 'brevo' for Brevo)
+        Mail::mailer(config('mail.default'))->raw('Hello from Laravel via Brevo!', function ($message) use ($email) {
             $message->to($email)
                     ->subject('Test Email from BARMMS');
         });
         return 'Email sent to ' . $email . '!';
     } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
+        return 'Error: ' . $e->getMessage() . '<br><br>Stack trace: <pre>' . $e->getTraceAsString() . '</pre>';
     }
 });
 
