@@ -10,8 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Residents;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\BlotterSummonReadyMail;
+use App\Services\BrevoEmailService;
 
 class BlotterReportController
 {
@@ -117,11 +116,17 @@ class BlotterReportController
             // Send email to resident if email exists
             if ($user && $user->email) {
                 try {
-                    Mail::to($user->email)->queue(new BlotterSummonReadyMail(
-                        $user->full_name,
-                        $blotter->type,
-                        $blotter->summon_date ? $blotter->summon_date->format('F d, Y h:i A') : 'N/A'
-                    ));
+                    $emailService = app(BrevoEmailService::class);
+                    $emailService->queueEmail(
+                        $user->email,
+                        'Your Blotter Report Has Been Approved – Summon Notice Ready',
+                        'emails.blotter-summon-ready',
+                        [
+                            'residentName' => $user->full_name,
+                            'blotterTypeOrRecipient' => $blotter->type,
+                            'summonDate' => $blotter->summon_date ? $blotter->summon_date->format('F d, Y h:i A') : 'N/A'
+                        ]
+                    );
                 } catch (\Exception $e) {
                     Log::error('Failed to queue BlotterSummonReadyMail: ' . $e->getMessage());
                 }

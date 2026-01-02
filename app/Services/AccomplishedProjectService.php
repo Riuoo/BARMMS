@@ -121,8 +121,15 @@ class AccomplishedProjectService
             }
 
             foreach ($residents as $resident) {
-                \Illuminate\Support\Facades\Mail::to($resident->email)
-                    ->queue(new \App\Mail\BarangayActivityNotificationMail($activity));
+                if ($resident->email) {
+                    $emailService = app(BrevoEmailService::class);
+                    $emailService->queueEmail(
+                        $resident->email,
+                        'New Barangay Activity: ' . $activity->title,
+                        'emails.barangay-activity-notification',
+                        ['activity' => $activity]
+                    );
+                }
             }
         } catch (\Throwable $e) {
             // Fail silently – notifications should not break activity creation

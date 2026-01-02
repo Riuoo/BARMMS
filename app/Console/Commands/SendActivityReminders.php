@@ -6,9 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\HealthCenterActivity;
 use App\Models\AccomplishedProject;
 use App\Services\ActivityAudienceService;
-use App\Mail\HealthActivityNotificationMail;
-use App\Mail\BarangayActivityNotificationMail;
-use Illuminate\Support\Facades\Mail;
+use App\Services\BrevoEmailService;
 
 class SendActivityReminders extends Command
 {
@@ -66,7 +64,15 @@ class SendActivityReminders extends Command
         }
 
         foreach ($residents as $resident) {
-            Mail::to($resident->email)->queue(new HealthActivityNotificationMail($activity));
+            if ($resident->email) {
+                $emailService = app(BrevoEmailService::class);
+                $emailService->queueEmail(
+                    $resident->email,
+                    'New Health Activity: ' . $activity->activity_name,
+                    'emails.health-activity-notification',
+                    ['activity' => $activity]
+                );
+            }
         }
 
         $activity->reminder_sent = true;
@@ -87,7 +93,15 @@ class SendActivityReminders extends Command
         }
 
         foreach ($residents as $resident) {
-            Mail::to($resident->email)->queue(new BarangayActivityNotificationMail($activity));
+            if ($resident->email) {
+                $emailService = app(BrevoEmailService::class);
+                $emailService->queueEmail(
+                    $resident->email,
+                    'New Barangay Activity: ' . $activity->title,
+                    'emails.barangay-activity-notification',
+                    ['activity' => $activity]
+                );
+            }
         }
 
         $activity->reminder_sent = true;

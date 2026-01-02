@@ -6,8 +6,7 @@ use App\Models\DocumentRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\DocumentReadyForPickupMail;
+use App\Services\BrevoEmailService;
 use App\Models\Residents;
 use App\Models\BarangayProfile;
 use App\Models\DocumentTemplate;
@@ -215,7 +214,16 @@ class DocumentRequestController
             // Send email synchronously for now to ensure it works
             if ($user && $user->email) {
                 try {
-                    Mail::to($user->email)->queue(new DocumentReadyForPickupMail($user->full_name, $documentRequest->document_type));
+                    $emailService = app(BrevoEmailService::class);
+                    $emailService->queueEmail(
+                        $user->email,
+                        'Your requested document is ready for pickup',
+                        'emails.document-ready',
+                        [
+                            'residentName' => $user->full_name,
+                            'documentType' => $documentRequest->document_type
+                        ]
+                    );
                     Log::info('Approve: Email queued for background processing', ['elapsed' => microtime(true) - $start]);
                 } catch (\Exception $e) {
                     Log::error('Failed to queue DocumentReadyForPickupMail: ' . $e->getMessage());

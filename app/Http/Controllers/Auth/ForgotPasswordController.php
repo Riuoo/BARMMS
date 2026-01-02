@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\Residents;
 use App\Models\BarangayProfile;
+use App\Services\BrevoEmailService;
 
 class ForgotPasswordController
 {
@@ -41,8 +41,16 @@ class ForgotPasswordController
         ]);
 
         // Send email via queue (non-blocking)
-        Mail::to($request->email)->queue(
-            new \App\Mail\PasswordResetMail($token, $request->email)
+        // Note: PasswordResetMail computes resetUrl and expires internally
+        $emailService = app(BrevoEmailService::class);
+        $emailService->queueEmail(
+            $request->email,
+            'Password Reset Request',
+            'emails.password-reset',
+            [
+                'token' => $token,
+                'email' => $request->email
+            ]
         );
 
         notify()->success('Password reset link sent!');

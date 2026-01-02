@@ -179,8 +179,15 @@ class HealthCenterActivityService
             }
 
             foreach ($residents as $resident) {
-                \Illuminate\Support\Facades\Mail::to($resident->email)
-                    ->queue(new \App\Mail\HealthActivityNotificationMail($activity));
+                if ($resident->email) {
+                    $emailService = app(BrevoEmailService::class);
+                    $emailService->queueEmail(
+                        $resident->email,
+                        'New Health Activity: ' . $activity->activity_name,
+                        'emails.health-activity-notification',
+                        ['activity' => $activity]
+                    );
+                }
             }
         } catch (\Throwable $e) {
             // Fail silently – notifications should not break activity creation

@@ -4,13 +4,11 @@ namespace App\Http\Controllers\AdminControllers\ReportRequestControllers;
 
 use App\Models\AccountRequest;
 use App\Models\Residents;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Session;
-use App\Mail\AccountApproved;
-use App\Mail\AccountRejected;
+use App\Services\BrevoEmailService;
 use Illuminate\Http\Request;
 
 class AccountRequestController
@@ -215,26 +213,23 @@ class AccountRequestController
             $accountRequest->status = 'approved';
             $accountRequest->save();
 
-            // If account request is linked to an existing resident, update the resident's email
-            if ($accountRequest->resident_id) {
-                $resident = Residents::find($accountRequest->resident_id);
-                if ($resident) {
-                    $resident->email = $accountRequest->email;
-                    $resident->save();
-                    try {
-                    Log::info('Updated resident email for resident_id: ' . $resident->id . ' with email: ' . $accountRequest->email);
-                    } catch (\Exception $e) {
-                        // Ignore logging errors
-                    }
-                }
-            }
+            // Note: Do NOT update the resident's email here. The email will be set when the user
+            // completes registration using the registration token. Updating it here creates a
+            // security vulnerability where an attacker could use password reset before registration
+            // is completed, as the email would already be in the database.
 
             // Generate the full registration link for the email
             $registrationLink = route('register.form', ['token' => $accountRequest->token]);
 
             try {
                 // Queue the email with the registration link (non-blocking)
-                Mail::to($accountRequest->email)->queue(new AccountApproved($accountRequest->token));
+                $emailService = app(BrevoEmailService::class);
+                $emailService->queueEmail(
+                    $accountRequest->email,
+                    'Account Approved',
+                    'emails.account-approved',
+                    ['token' => $accountRequest->token]
+                );
                 try {
                 Log::info('Email queued successfully for: ' . $accountRequest->email);
                 } catch (\Exception $logError) {
@@ -343,7 +338,16 @@ class AccountRequestController
 
             try {
                 // Queue the rejection email
-                Mail::to($accountRequest->email)->queue(new AccountRejected($request->rejection_reason, $isDuplicate));
+                $emailService = app(BrevoEmailService::class);
+                $emailService->queueEmail(
+                    $accountRequest->email,
+                    'Account Request Rejected',
+                    'emails.account-rejected',
+                    [
+                        'rejectionReason' => $request->rejection_reason,
+                        'isDuplicate' => $isDuplicate
+                    ]
+                );
                 try {
                 Log::info('Rejection email queued successfully for: ' . $accountRequest->email);
                 } catch (\Exception $logError) {
