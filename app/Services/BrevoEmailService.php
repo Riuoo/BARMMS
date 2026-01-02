@@ -5,8 +5,6 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Mail\Markdown;
 
 class BrevoEmailService
 {
@@ -325,8 +323,8 @@ class BrevoEmailService
      */
     protected function renderEmailToHtml(string $view, array $data): string
     {
-        // Get app name for use in emails
-        $appName = config('app.name', 'BARMMS');
+        // Get app name for use in emails - explicitly use BARMMS
+        $appName = 'BARMMS';
         
         // Map views to HTML templates
         switch ($view) {
@@ -367,7 +365,7 @@ class BrevoEmailService
             case 'emails.password-reset':
                 $token = $data['token'] ?? '';
                 $email = $data['email'] ?? '';
-                // Compute resetUrl and expires (same as PasswordResetMail does)
+                // Compute resetUrl and expires
                 $resetUrl = $this->safeRoute('password.reset', ['token' => $token, 'email' => $email]);
                 // Safely get expiration time
                 try {
@@ -549,7 +547,7 @@ class BrevoEmailService
             {$content}
         </div>
         <div class='email-footer'>
-            <p style='margin: 0;'>This is an automated message from " . config('app.name', 'BARMMS') . "</p>
+            <p style='margin: 0;'>This is an automated message from BARMMS</p>
         </div>
     </div>
 </body>

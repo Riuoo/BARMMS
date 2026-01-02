@@ -2,17 +2,47 @@
 
 @section('title', 'Program Recommendations')
 
+@php
+    $userRole = session('user_role');
+    $isSecretary = $userRole === 'secretary';
+@endphp
+
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">
-            <i class="fas fa-project-diagram mr-2"></i>
-            Program Recommendations
-        </h1>
-        <p class="text-gray-600">
-            Programs recommended for residents based on demographics, blotter reports, and medical records
-        </p>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                    <i class="fas fa-project-diagram mr-2"></i>
+                    Program Recommendations
+                </h1>
+                <p class="text-gray-600">
+                    Programs recommended for residents based on demographics, blotter reports, and medical records
+                </p>
+            </div>
+            <!-- @if($isSecretary)
+                <div>
+                    <a href="{{ route('admin.programs.manage.index') }}" 
+                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-cog mr-2"></i>Manage Programs
+                    </a>
+                </div>
+            @endif -->
+        </div>
     </div>
+
+    @if(isset($error))
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700">{{ $error }}</p>
+                </div>
+            </div>
+        </div>
+    @else
 
     <!-- Summary Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -109,7 +139,7 @@
                     
                     <div class="mt-4">
                         <a href="{{ route('admin.programs.show', $program->id) }}" 
-                           class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                           class="block w-full text-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                             View Details
                         </a>
                     </div>
@@ -123,6 +153,7 @@
             <i class="fas fa-inbox text-4xl text-gray-400 mb-4"></i>
             <p class="text-gray-600">No programs available yet.</p>
         </div>
+    @endif
     @endif
 </div>
 @endsection

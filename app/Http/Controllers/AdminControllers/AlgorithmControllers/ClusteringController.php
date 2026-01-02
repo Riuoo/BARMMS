@@ -32,7 +32,8 @@ class ClusteringController
         }
         
         if (!$this->pythonService->isAvailable()) {
-            throw new \Exception('Python analytics service is not available. Please ensure the Python service is running on ' . config('services.python_analytics.url', 'http://localhost:5000'));
+            $baseUrl = config('services.python_analytics.url', 'http://localhost:5000');
+            throw new \Exception('The Python analytics service (app.py) is not running. Please start the Python service at ' . $baseUrl . ' to use this feature.');
         }
     }
 
@@ -70,8 +71,84 @@ class ClusteringController
             ]);
         }
         
-        // Aggregate data by purok
-        $purokData = $this->aggregateDataByPurok($residents);
+        // Format data for Python
+        $residentsData = $residents->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'address' => $r->address,
+                'age' => $r->age,
+                'family_size' => $r->family_size,
+            ];
+        })->toArray();
+        
+        $blottersData = BlotterRequest::select('id', 'respondent_id', 'type')
+            ->get()
+            ->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'respondent_id' => $b->respondent_id,
+                    'type' => $b->type,
+                ];
+            })->toArray();
+        
+        $medicalRecordsData = MedicalRecord::select('id', 'resident_id', 'diagnosis')
+            ->get()
+            ->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'resident_id' => $m->resident_id,
+                    'diagnosis' => $m->diagnosis,
+                ];
+            })->toArray();
+        
+        $medicineTransactionsData = MedicineTransaction::where('transaction_type', 'OUT')
+            ->whereHas('medicine')
+            ->select('id', 'resident_id', 'medicine_id', 'quantity', 'transaction_type')
+            ->get()
+            ->map(function ($t) {
+                return [
+                    'id' => $t->id,
+                    'resident_id' => $t->resident_id,
+                    'medicine_id' => $t->medicine_id,
+                    'quantity' => $t->quantity,
+                    'transaction_type' => $t->transaction_type,
+                ];
+            })->toArray();
+        
+        $medicineRequestsData = MedicineRequest::whereHas('medicine')
+            ->select('id', 'resident_id', 'medicine_id', 'quantity_requested')
+            ->get()
+            ->map(function ($r) {
+                return [
+                    'id' => $r->id,
+                    'resident_id' => $r->resident_id,
+                    'medicine_id' => $r->medicine_id,
+                    'quantity_requested' => $r->quantity_requested ?? 1,
+                ];
+            })->toArray();
+        
+        // Get medicine names mapping (needed for analytics)
+        $medicineNames = \App\Models\Medicine::pluck('name', 'id')->toArray();
+        
+        // Aggregate data by purok using Python
+        try {
+            $purokData = $this->pythonService->aggregatePurokData(
+                $residentsData,
+                $blottersData,
+                $medicalRecordsData,
+                $medicineTransactionsData,
+                $medicineRequestsData,
+                $medicineNames
+            );
+        } catch (\Exception $e) {
+            Log::error('Error aggregating purok data: ' . $e->getMessage());
+            return view('admin.clustering.index', [
+                'error' => 'Failed to aggregate data: ' . $e->getMessage(),
+                'clusters' => [],
+                'purokData' => [],
+                'k' => $k,
+            ]);
+        }
 
         if (empty($purokData)) {
             return view('admin.clustering.index', [
@@ -94,8 +171,18 @@ class ClusteringController
             'features' => ['blotter_count', 'demographic_score', 'medical_count', 'medicine_count']
         ]);
 
-        // Build feature samples for clustering
-        $samples = $this->pythonService->buildPurokRiskFeatures($purokData);
+        // Build feature samples for clustering using Python
+        try {
+            $samples = $this->pythonService->buildPurokRiskFeatures($purokData);
+        } catch (\Exception $e) {
+            Log::error('Error building purok features: ' . $e->getMessage());
+            return view('admin.clustering.index', [
+                'error' => 'Failed to build features: ' . $e->getMessage(),
+                'clusters' => [],
+                'purokData' => [],
+                'k' => $k,
+            ]);
+        }
 
         if (empty($samples)) {
             return view('admin.clustering.index', [
@@ -141,8 +228,30 @@ class ClusteringController
                 $clusters[$clusterId][] = $purokIndex;
             }
 
-            // Label clusters as Low/Moderate/High risk
-            $clusterLabels = $this->labelClustersByRisk($clusters, $centroids, $purokData);
+            // Label clusters as Low/Moderate/High risk using Python
+            try {
+                $clusterLabels = $this->pythonService->labelClustersByRisk($clusters, $purokData);
+            } catch (\Exception $e) {
+                Log::error('Error labeling clusters: ' . $e->getMessage());
+                // Fallback to simple labeling
+                $clusterLabels = [];
+                $clusterIds = array_keys($clusters);
+                foreach ($clusterIds as $index => $clusterId) {
+                    if (count($clusterIds) == 1) {
+                        $clusterLabels[$clusterId] = 'Moderate Risk';
+                    } elseif (count($clusterIds) == 2) {
+                        $clusterLabels[$clusterId] = $index == 0 ? 'Low Risk' : 'High Risk';
+                    } else {
+                        if ($index == 0) {
+                            $clusterLabels[$clusterId] = 'Low Risk';
+                        } elseif ($index == count($clusterIds) - 1) {
+                            $clusterLabels[$clusterId] = 'High Risk';
+                        } else {
+                            $clusterLabels[$clusterId] = 'Moderate Risk';
+                        }
+                    }
+                }
+            }
 
             Log::info('Purok Risk Clustering: Completed successfully', [
                 'total_puroks' => count($purokData),
@@ -182,10 +291,64 @@ class ClusteringController
                 }
                 $clusterResidentIds = array_unique($clusterResidentIds);
 
-                // Compute analytics for this cluster
-                $incidentAnalytics = $this->computeIncidentAnalytics($clusterResidentIds);
-                $medicalAnalytics = $this->computeMedicalAnalytics($clusterPuroks, $clusterResidentIds);
-                $medicineAnalytics = $this->computeMedicineAnalytics($clusterResidentIds);
+                // Compute analytics for this cluster using Python
+                try {
+                    // Format blotters for this cluster
+                    $clusterBlotters = BlotterRequest::whereIn('respondent_id', $clusterResidentIds)
+                        ->select('id', 'respondent_id', 'type')
+                        ->get()
+                        ->map(function ($b) {
+                            return [
+                                'id' => $b->id,
+                                'respondent_id' => $b->respondent_id,
+                                'type' => $b->type,
+                            ];
+                        })->toArray();
+                    
+                    $incidentAnalytics = $this->pythonService->computeIncidentAnalytics($clusterResidentIds, $clusterBlotters);
+                } catch (\Exception $e) {
+                    Log::error('Error computing incident analytics: ' . $e->getMessage());
+                    $incidentAnalytics = ['case_types' => []];
+                }
+                
+                try {
+                    // Format medical records for this cluster
+                    $clusterMedicalRecords = MedicalRecord::whereIn('resident_id', $clusterResidentIds)
+                        ->select('id', 'resident_id', 'diagnosis')
+                        ->get()
+                        ->map(function ($m) {
+                            return [
+                                'id' => $m->id,
+                                'resident_id' => $m->resident_id,
+                                'diagnosis' => $m->diagnosis,
+                            ];
+                        })->toArray();
+                    
+                    $medicalAnalytics = $this->pythonService->computeMedicalAnalytics($clusterPuroks, $clusterResidentIds, $clusterMedicalRecords);
+                } catch (\Exception $e) {
+                    Log::error('Error computing medical analytics: ' . $e->getMessage());
+                    $medicalAnalytics = ['visits_by_purok' => [], 'illnesses' => []];
+                }
+                
+                // Aggregate medicine analytics from puroks (more reliable than recomputing)
+                try {
+                    $medicineAnalytics = $this->aggregateMedicineAnalyticsFromPuroks($clusterPuroks);
+                    
+                    // Fallback: if no medicines found, compute directly from database
+                    if (empty($medicineAnalytics['medicines']) && $totalMedicine > 0) {
+                        Log::warning('No medicines in purok analytics, computing directly from database for cluster ' . $clusterId);
+                        $medicineAnalytics = $this->computeMedicineAnalyticsDirectly($clusterResidentIds);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error aggregating medicine analytics: ' . $e->getMessage());
+                    // Fallback to direct computation
+                    try {
+                        $medicineAnalytics = $this->computeMedicineAnalyticsDirectly($clusterResidentIds);
+                    } catch (\Exception $e2) {
+                        Log::error('Error in fallback medicine analytics: ' . $e2->getMessage());
+                        $medicineAnalytics = ['medicines' => []];
+                    }
+                }
 
                 $clusterData[$clusterId] = [
                     'id' => $clusterId,
@@ -210,6 +373,9 @@ class ClusteringController
                 $orderB = $labelOrder[$b['label']] ?? 999;
                 return $orderA <=> $orderB;
             });
+            
+            // Re-index array to ensure sequential keys for proper JSON encoding
+            $clusterData = array_values($clusterData);
 
             $processingTime = (int)round((microtime(true) - $t0) * 1000);
 
@@ -234,6 +400,24 @@ class ClusteringController
                 $highRiskPuroks += $cluster['purok_count'];
             }
         }
+
+        // Ensure puroks have medicine_analytics - compute if missing
+        foreach ($clusterData as &$cluster) {
+            foreach ($cluster['puroks'] as &$purok) {
+                // If medicine_count > 0 but medicine_analytics is empty, compute it
+                if (($purok['medicine_count'] ?? 0) > 0 && empty($purok['medicine_analytics']['medicines'] ?? [])) {
+                    try {
+                        $residentIds = $purok['resident_ids'] ?? [];
+                        if (!empty($residentIds)) {
+                            $purok['medicine_analytics'] = $this->computeMedicineAnalyticsDirectly($residentIds);
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning('Failed to compute medicine analytics for purok: ' . $e->getMessage());
+                    }
+                }
+            }
+        }
+        unset($cluster, $purok); // Unset references
 
         // Return view with cluster data
         return view('admin.clustering.index', [
@@ -591,8 +775,109 @@ class ClusteringController
     }
 
     /**
+     * Aggregate medicine analytics from puroks
+     * Combines medicine data from all puroks in a cluster
+     * Only includes dispensed medicines (matching the card's medicine_count)
+     */
+    private function aggregateMedicineAnalyticsFromPuroks(array $clusterPuroks): array
+    {
+        $medicineCounts = [];
+        
+        foreach ($clusterPuroks as $purok) {
+            $purokMedicineAnalytics = $purok['medicine_analytics'] ?? [];
+            $medicines = $purokMedicineAnalytics['medicines'] ?? [];
+            
+            if (empty($medicines)) {
+                continue;
+            }
+            
+            foreach ($medicines as $medicine) {
+                // Only include medicines that were actually dispensed
+                $dispensed = $medicine['dispensed'] ?? 0;
+                if ($dispensed <= 0) {
+                    continue;
+                }
+                
+                $name = $medicine['name'] ?? 'Unknown Medicine';
+                
+                if (!isset($medicineCounts[$name])) {
+                    $medicineCounts[$name] = [
+                        'name' => $name,
+                        'dispensed' => 0,
+                        'total' => 0,
+                    ];
+                }
+                
+                $medicineCounts[$name]['dispensed'] += $dispensed;
+                $medicineCounts[$name]['total'] += $medicine['total'] ?? $dispensed;
+            }
+        }
+        
+        // Convert to array and sort by total (most common first)
+        $medicinesArray = array_values($medicineCounts);
+        usort($medicinesArray, function($a, $b) {
+            return ($b['total'] ?? 0) <=> ($a['total'] ?? 0);
+        });
+        
+        return ['medicines' => $medicinesArray];
+    }
+
+    /**
+     * Compute medicine analytics directly from database (fallback method)
+     * Only includes dispensed medicines (OUT transactions)
+     */
+    private function computeMedicineAnalyticsDirectly(array $clusterResidentIds): array
+    {
+        if (empty($clusterResidentIds)) {
+            return ['medicines' => []];
+        }
+
+        // Get medicine transactions directly (only OUT = dispensed)
+        $medicineTransactions = MedicineTransaction::whereIn('resident_id', $clusterResidentIds)
+            ->where('transaction_type', 'OUT')
+            ->with('medicine:id,name')
+            ->get();
+
+        $medicineCounts = [];
+        
+        foreach ($medicineTransactions as $transaction) {
+            if ($transaction->medicine) {
+                $name = $transaction->medicine->name;
+                
+                if (!isset($medicineCounts[$name])) {
+                    $medicineCounts[$name] = [
+                        'name' => $name,
+                        'dispensed' => 0,
+                        'total' => 0,
+                    ];
+                }
+                
+                $quantity = $transaction->quantity ?? 0;
+                $medicineCounts[$name]['dispensed'] += $quantity;
+                $medicineCounts[$name]['total'] += $quantity;
+            }
+        }
+
+        // Convert to array and sort by total (most common first)
+        // Only include medicines that were actually dispensed
+        $medicinesArray = [];
+        foreach ($medicineCounts as $medicine) {
+            if ($medicine['dispensed'] > 0) {
+                $medicinesArray[] = $medicine;
+            }
+        }
+        
+        usort($medicinesArray, function($a, $b) {
+            return ($b['total'] ?? 0) <=> ($a['total'] ?? 0);
+        });
+
+        return ['medicines' => $medicinesArray];
+    }
+
+    /**
      * Compute medicine analytics for a cluster
      * Returns medicines requested/dispensed ordered from most common to least common
+     * @deprecated Use aggregateMedicineAnalyticsFromPuroks instead
      */
     private function computeMedicineAnalytics(array $clusterResidentIds): array
     {

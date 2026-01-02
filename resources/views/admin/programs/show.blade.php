@@ -13,7 +13,13 @@
                 </h1>
                 <p class="text-gray-600">{{ $program->description }}</p>
             </div>
-            <div class="flex gap-2">
+            <!-- <div class="flex gap-2">
+                @if(session('user_role') === 'secretary')
+                    <a href="{{ route('admin.programs.manage.edit', $program->id) }}" 
+                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-edit mr-2"></i>Edit
+                    </a>
+                @endif
                 <a href="{{ route('admin.programs.export', $program->id) }}" 
                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                     <i class="fas fa-download mr-2"></i>Export
@@ -22,7 +28,7 @@
                    class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>Back
                 </a>
-            </div>
+            </div> -->
         </div>
     </div>
 

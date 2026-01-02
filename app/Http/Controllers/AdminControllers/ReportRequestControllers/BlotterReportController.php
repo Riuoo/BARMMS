@@ -128,7 +128,7 @@ class BlotterReportController
                         ]
                     );
                 } catch (\Exception $e) {
-                    Log::error('Failed to queue BlotterSummonReadyMail: ' . $e->getMessage());
+                    Log::error('Failed to queue blotter summon ready email: ' . $e->getMessage());
                 }
             }
 

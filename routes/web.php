@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Auth\LoginController;
@@ -33,6 +31,7 @@ use App\Http\Controllers\AdminControllers\HealthManagementControllers\MedicineTr
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringController;
 use App\Http\Controllers\AdminControllers\AlgorithmControllers\ClusteringAnalysisController;
 use App\Http\Controllers\AdminControllers\ProgramControllers\ProgramRecommendationController;
+use App\Http\Controllers\AdminControllers\ProgramControllers\ProgramController;
 use App\Http\Controllers\ResidentControllers\ResidentDashboardController;
 use App\Http\Controllers\ResidentControllers\ResidentBlotterController;
 use App\Http\Controllers\ResidentControllers\ResidentCommunityConcernController;
@@ -137,11 +136,27 @@ Route::prefix('admin')->group(function () {
         // Program Recommendations Routes (all admin roles can access)
         Route::prefix('programs')->group(function () {
             Route::get('/', [ProgramRecommendationController::class, 'index'])->name('admin.programs.index');
-            Route::get('/{programId}', [ProgramRecommendationController::class, 'byProgram'])->name('admin.programs.show');
+            
+            // Program CRUD Routes (secretary only) - MUST come before /{programId} route
+            // Using explicit 'manage' prefix to avoid conflicts with parameterized routes
+            Route::middleware(['admin.role:secretary'])->prefix('manage')->name('admin.programs.manage.')->group(function () {
+                Route::get('/', [ProgramController::class, 'index'])->name('index');
+                Route::get('/create', [ProgramController::class, 'create'])->name('create');
+                Route::post('/', [ProgramController::class, 'store'])->name('store');
+                Route::get('/{program}/edit', [ProgramController::class, 'edit'])->name('edit');
+                Route::put('/{program}', [ProgramController::class, 'update'])->name('update');
+                Route::get('/{program}/delete-confirm', [ProgramController::class, 'deleteConfirm'])->name('delete-confirm');
+                Route::delete('/{program}', [ProgramController::class, 'destroy'])->name('destroy');
+            });
+            
+            // Specific routes before parameterized ones
             Route::get('/purok/{purok}', [ProgramRecommendationController::class, 'byPurok'])->name('admin.programs.purok');
             Route::get('/resident/{residentId}', [ProgramRecommendationController::class, 'byResident'])->name('admin.programs.resident');
+            
+            // Parameterized routes last
             Route::get('/{programId}/export', [ProgramRecommendationController::class, 'export'])->name('admin.programs.export');
             Route::get('/{programId}/purok-groups', [ProgramRecommendationController::class, 'purokGroups'])->name('admin.programs.purok-groups');
+            Route::get('/{programId}', [ProgramRecommendationController::class, 'byProgram'])->name('admin.programs.show');
         });
     });
 
@@ -310,15 +325,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/attendance/get-attendance', [AttendanceController::class, 'getAttendance'])->name('admin.attendance.get');
         Route::get('/attendance/logs', [AttendanceController::class, 'logs'])->name('admin.attendance.logs');
         Route::get('/attendance/report', [AttendanceController::class, 'report'])->name('admin.attendance.report');
-        
-        // Events Management (retired - use Barangay Activities based on Accomplished Projects instead)
-        // Route::get('/events', [EventController::class, 'index'])->name('admin.events.index');
-        // Route::get('/events/create', [EventController::class, 'create'])->name('admin.events.create');
-        // Route::post('/events', [EventController::class, 'store'])->name('admin.events.store');
-        // Route::get('/events/{id}', [EventController::class, 'show'])->name('admin.events.show');
-        // Route::get('/events/{id}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
-        // Route::put('/events/{id}', [EventController::class, 'update'])->name('admin.events.update');
-        // Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('admin.events.destroy');
     });
 
     Route::middleware(['admin.role:treasurer'])->group(function () {
@@ -403,31 +409,4 @@ Route::post('/logout', function () {
     Session::flush();
     return redirect()->route('landing');
 })->name('logout');
-
-// Test Email Route (Using Brevo API - Returns immediately to prevent timeout)
-Route::get('/test-email', function () {
-    $email = request('email', 'rodericktajos02@gmail.com');
-    
-    // Validate email
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return response('Error: Invalid email address: ' . $email, 400);
-    }
-    
-    $message = request('message', 'Hello from Laravel via Brevo API!');
-    $apiKey = env('BREVO_API_KEY');
-    
-    if (empty($apiKey)) {
-        return response('Error: BREVO_API_KEY is not set in .env file.', 500);
-    }
-    
-    // Dispatch job immediately without waiting - returns 202 Accepted
-    \App\Jobs\SendTestEmailJob::dispatch($email, $message)->afterResponse();
-    
-    // Return immediately with 202 Accepted status
-    return response()->json([
-        'status' => 'accepted',
-        'message' => 'Email request received and queued for ' . $email,
-        'note' => 'The email will be sent in the background. Check your email inbox shortly.'
-    ], 202);
-});
 

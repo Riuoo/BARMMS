@@ -7,19 +7,86 @@ use App\Models\HealthCenterActivity;
 use App\Models\MedicineRequest;
 use App\Models\MedicineTransaction;
 use App\Models\Residents;
+use App\Services\PythonAnalyticsService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class HealthReportController
 {
+    protected $pythonService;
+
+    public function __construct(PythonAnalyticsService $pythonService = null)
+    {
+        $this->pythonService = $pythonService ?? app(PythonAnalyticsService::class);
+    }
+
     public function healthReport()
     {
-        // Get summary statistics
-        $totalResidents = Residents::count();
-        $totalConsultations = MedicalRecord::count();
-        $totalActivities = HealthCenterActivity::count();
+        // Get data for Python analytics
+        $residents = Residents::all()->map(function($r) {
+            return ['id' => $r->id, 'is_pwd' => $r->is_pwd];
+        })->toArray();
 
-        // Get recent activities
+        $medicalRecords = MedicalRecord::all()->map(function($r) {
+            return [
+                'id' => $r->id,
+                'consultation_datetime' => $r->consultation_datetime ? $r->consultation_datetime->toIso8601String() : null,
+                'created_at' => $r->created_at ? $r->created_at->toIso8601String() : null,
+            ];
+        })->toArray();
+
+        $healthActivities = HealthCenterActivity::all()->map(function($a) {
+            return ['id' => $a->id];
+        })->toArray();
+
+        $medicineRequests = MedicineRequest::with('medicine')->get()->map(function($r) {
+            return [
+                'id' => $r->id,
+                'medicine_id' => $r->medicine_id,
+                'request_date' => $r->request_date ? $r->request_date->toIso8601String() : null,
+            ];
+        })->toArray();
+
+        $medicineTransactions = MedicineTransaction::with('medicine')->get()->map(function($t) {
+            return [
+                'id' => $t->id,
+                'medicine_id' => $t->medicine_id,
+                'transaction_type' => $t->transaction_type,
+                'quantity' => $t->quantity,
+                'transaction_date' => $t->transaction_date ? $t->transaction_date->toIso8601String() : null,
+            ];
+        })->toArray();
+
+        $medicines = \App\Models\Medicine::all()->map(function($m) {
+            return [
+                'id' => $m->id,
+                'name' => $m->name,
+                'current_stock' => $m->current_stock,
+                'minimum_stock' => $m->minimum_stock,
+            ];
+        })->toArray();
+
+        $medicineBatches = \App\Models\MedicineBatch::with('medicine')->get()->map(function($b) {
+            return [
+                'id' => $b->id,
+                'medicine_id' => $b->medicine_id,
+                'expiry_date' => $b->expiry_date ? $b->expiry_date->toIso8601String() : null,
+                'remaining_quantity' => $b->remaining_quantity,
+            ];
+        })->toArray();
+
+        // Get Python analytics
+        $analytics = $this->pythonService->analyzeHealthReport([
+            'residents' => $residents,
+            'medical_records' => $medicalRecords,
+            'health_activities' => $healthActivities,
+            'medicine_requests' => $medicineRequests,
+            'medicine_transactions' => $medicineTransactions,
+            'medicines' => $medicines,
+            'medicine_batches' => $medicineBatches,
+        ]);
+
+        // Get recent activities (still from PHP - display data)
         $recentConsultations = MedicalRecord::with('resident')
             ->orderBy('consultation_datetime', 'desc')
             ->limit(5)
@@ -30,46 +97,17 @@ class HealthReportController
             ->limit(5)
             ->get();
 
-
-        // PWD distribution
-        $pwdDistribution = Residents::selectRaw('is_pwd, count(*) as count')
-            ->groupBy('is_pwd')
-            ->get();
-
-        // Monthly consultation trends
-        $monthlyConsultations = MedicalRecord::selectRaw('DATE_FORMAT(consultation_datetime, "%Y-%m") as month, count(*) as count')
-            ->where('consultation_datetime', '>=', now()->subMonths(6))
-            ->groupBy('month')
-            ->orderBy('month', 'asc')
-            ->get();
-
-
-        $analyticsAlerts = [
-            '3 children in Zone 2 are at high risk for malnutrition.',
-            'Increase in respiratory complaints this month.',
-        ];
-
-        $kmeansResults = [
-            ['description' => 'Cluster 1: High-risk elderly in Purok 3'],
-            ['description' => 'Cluster 2: Children with incomplete vaccinations in Zone 1'],
-        ];
-
-        $bhwStats = [
-            'consultations' => MedicalRecord::whereMonth('created_at', now()->month)->count(),
-        ];
-
-        // Medicine analytics (30-day window) - Detailed inventory with priority sorting
+        // Medicine stats (still from PHP - inventory data)
         $lowStockMedicines = \App\Models\Medicine::whereColumn('current_stock', '<=', 'minimum_stock')
-            ->orderByRaw('(minimum_stock - current_stock) DESC') // Most critical first
+            ->orderByRaw('(minimum_stock - current_stock) DESC')
             ->limit(5)
             ->get();
 
-        // Expiring soon based on batches rather than a single medicine expiry date
         $expiringBatches = \App\Models\MedicineBatch::with('medicine')
             ->whereNotNull('expiry_date')
             ->where('expiry_date', '<=', now()->addDays(30))
             ->where('remaining_quantity', '>', 0)
-            ->orderBy('expiry_date', 'asc') // Soonest to expire first
+            ->orderBy('expiry_date', 'asc')
             ->limit(5)
             ->get();
 
@@ -80,40 +118,32 @@ class HealthReportController
             'expiring_details' => $expiringBatches,
         ];
 
-        $topRequestedMedicines = MedicineRequest::select('medicine_id')
-            ->selectRaw('COUNT(*) as requests')
-            ->whereBetween('request_date', [now()->subDays(30)->toDateString(), now()->toDateString()])
-            ->groupBy('medicine_id')
-            ->orderByDesc('requests')
-            ->with('medicine')
-            ->limit(5)
-            ->get();
+        // Static data
+        $analyticsAlerts = [
+            '3 children in Zone 2 are at high risk for malnutrition.',
+            'Increase in respiratory complaints this month.',
+        ];
 
-        $topDispensedMedicines = MedicineTransaction::select('medicine_id')
-            ->selectRaw('SUM(quantity) as total_qty')
-            ->where('transaction_type', 'OUT')
-            ->whereBetween('transaction_date', [now()->subDays(30), now()])
-            ->groupBy('medicine_id')
-            ->orderByDesc('total_qty')
-            ->with('medicine')
-            ->limit(5)
-            ->get();
+        $kmeansResults = [
+            ['description' => 'Cluster 1: High-risk elderly in Purok 3'],
+            ['description' => 'Cluster 2: Children with incomplete vaccinations in Zone 1'],
+        ];
 
-        return view('admin.health.health-reports', compact(
-            'totalResidents',
-            'totalConsultations',
-            'totalActivities',
-            'recentConsultations',
-            'upcomingActivities',
-            'pwdDistribution',
-            'monthlyConsultations',
-            'analyticsAlerts',
-            'kmeansResults',
-            'bhwStats',
-            'medicineStats',
-            'topRequestedMedicines',
-            'topDispensedMedicines'
-        ));
+        return view('admin.health.health-reports', [
+            'totalResidents' => $analytics['totalResidents'],
+            'totalConsultations' => $analytics['totalConsultations'],
+            'totalActivities' => $analytics['totalActivities'],
+            'recentConsultations' => $recentConsultations,
+            'upcomingActivities' => $upcomingActivities,
+            'pwdDistribution' => $analytics['pwdDistribution'],
+            'monthlyConsultations' => $analytics['monthlyConsultations'],
+            'analyticsAlerts' => $analyticsAlerts,
+            'kmeansResults' => $kmeansResults,
+            'bhwStats' => $analytics['bhwStats'],
+            'medicineStats' => $medicineStats,
+            'topRequestedMedicines' => $analytics['topRequestedMedicines'],
+            'topDispensedMedicines' => $analytics['topDispensedMedicines'],
+        ]);
     }
 
     public function generateComprehensiveReport(Request $request)

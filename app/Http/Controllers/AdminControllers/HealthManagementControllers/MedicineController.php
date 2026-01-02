@@ -6,12 +6,20 @@ use App\Models\Medicine;
 use App\Models\MedicineRequest;
 use App\Models\MedicineTransaction;
 use App\Models\MedicineBatch;
+use App\Models\Residents;
+use App\Services\PythonAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class MedicineController
 {
+    protected $pythonService;
+
+    public function __construct(PythonAnalyticsService $pythonService = null)
+    {
+        $this->pythonService = $pythonService ?? app(PythonAnalyticsService::class);
+    }
     public function index(Request $request)
     {
         $query = Medicine::query();
@@ -286,166 +294,74 @@ class MedicineController
         $start = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : now()->startOfMonth();
         $end = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : now()->endOfMonth();
 
+        // Get transactions for pagination (still from PHP - display data)
         $transactions = MedicineTransaction::with('medicine')
             ->whereBetween('transaction_date', [$start, $end])
             ->orderBy('transaction_date', 'desc')
             ->paginate(20)
             ->withQueryString();
 
-        // Consolidated medicine request analytics - single query for all request data
-        $requestAnalytics = $this->getConsolidatedRequestAnalytics($start, $end);
-
-        $topDispensed = MedicineTransaction::select('medicine_id')
-            ->selectRaw('SUM(quantity) as total_qty')
-            ->where('transaction_type', 'OUT')
-            ->whereBetween('transaction_date', [$start, $end])
-            ->groupBy('medicine_id')
-            ->orderByDesc('total_qty')
-            ->with('medicine')
-            ->limit(10)
-            ->get();
-
-        // Category distribution
-        $categoryCounts = Medicine::select('category')
-            ->selectRaw('COUNT(*) as count')
-            ->groupBy('category')
-            ->orderByDesc('count')
-            ->get();
-
-        // Monthly dispense trend (last 6 months)
-        $trendStart = $start->copy()->subMonths(5)->startOfMonth();
-        $monthlyDispensed = MedicineTransaction::where('transaction_type', 'OUT')
-            ->whereBetween('transaction_date', [$trendStart, $end])
-            ->selectRaw('DATE_FORMAT(transaction_date, "%Y-%m") as month, SUM(quantity) as qty')
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        // Requests by age bracket
-        $requestsByAgeBracket = DB::table('medicine_requests as mr')
-            ->join('residents as r', 'r.id', '=', 'mr.resident_id')
-            ->whereBetween('mr.request_date', [$start->toDateString(), $end->toDateString()])
-            ->selectRaw('CASE 
-                WHEN r.age BETWEEN 0 AND 12 THEN "0-12"
-                WHEN r.age BETWEEN 13 AND 17 THEN "13-17"
-                WHEN r.age BETWEEN 18 AND 35 THEN "18-35"
-                WHEN r.age BETWEEN 36 AND 60 THEN "36-60"
-                ELSE "61+" END as bracket, COUNT(*) as count')
-            ->groupBy('bracket')
-            ->orderBy('bracket')
-            ->get();
-
-        // Top requested people by purok (unique residents who made at least one request)
-        $topRequestedPeopleByPurok = DB::table('medicine_requests as mr')
-            ->join('residents as r', 'r.id', '=', 'mr.resident_id')
-            ->whereBetween('mr.request_date', [$start->toDateString(), $end->toDateString()])
-            ->selectRaw('CASE 
-                WHEN r.address LIKE "%Purok 1%" THEN "Purok 1"
-                WHEN r.address LIKE "%Purok 2%" THEN "Purok 2"
-                WHEN r.address LIKE "%Purok 3%" THEN "Purok 3"
-                WHEN r.address LIKE "%Purok 4%" THEN "Purok 4"
-                WHEN r.address LIKE "%Purok 5%" THEN "Purok 5"
-                WHEN r.address LIKE "%Purok 6%" THEN "Purok 6"
-                WHEN r.address LIKE "%Purok 7%" THEN "Purok 7"
-                WHEN r.address LIKE "%Purok 8%" THEN "Purok 8"
-                WHEN r.address LIKE "%Purok 9%" THEN "Purok 9"
-                ELSE "Other" 
-            END as purok, COUNT(DISTINCT mr.resident_id) as people')
-            ->groupBy('purok')
-            ->orderBy('purok')
-                    ->get();
-
-        return view('admin.medicines.report', compact(
-            'transactions', 'requestAnalytics', 'topDispensed', 'start', 'end',
-            'categoryCounts', 'monthlyDispensed', 'requestsByAgeBracket',
-            'topRequestedPeopleByPurok'
-        ));
-    }
-
-    /**
-     * Get consolidated medicine request analytics from a single query
-     * Eliminates redundancy by generating all request views from one data source
-     */
-    private function getConsolidatedRequestAnalytics($start, $end)
-    {
-        // Get medicine requests with purok information for geographic analysis
-        $requestsByPurok = DB::table('medicine_requests as mr')
-            ->join('residents as r', 'r.id', '=', 'mr.resident_id')
-            ->join('medicines as m', 'm.id', '=', 'mr.medicine_id')
-            ->whereBetween('mr.request_date', [$start->toDateString(), $end->toDateString()])
-            ->select([
-                'm.name as medicine_name',
-                'm.category as medicine_category',
-                DB::raw('CASE 
-                    WHEN r.address LIKE "%Purok 1%" THEN "Purok 1"
-                    WHEN r.address LIKE "%Purok 2%" THEN "Purok 2"
-                    WHEN r.address LIKE "%Purok 3%" THEN "Purok 3"
-                    WHEN r.address LIKE "%Purok 4%" THEN "Purok 4"
-                    WHEN r.address LIKE "%Purok 5%" THEN "Purok 5"
-                    WHEN r.address LIKE "%Purok 6%" THEN "Purok 6"
-                    WHEN r.address LIKE "%Purok 7%" THEN "Purok 7"
-                    WHEN r.address LIKE "%Purok 8%" THEN "Purok 8"
-                    WHEN r.address LIKE "%Purok 9%" THEN "Purok 9"
-                    ELSE "Other" 
-                END as purok'),
-                DB::raw('COUNT(*) as requests')
-            ])
-            ->groupBy('m.name', 'm.category', DB::raw('CASE 
-                WHEN r.address LIKE "%Purok 1%" THEN "Purok 1"
-                WHEN r.address LIKE "%Purok 2%" THEN "Purok 2"
-                WHEN r.address LIKE "%Purok 3%" THEN "Purok 3"
-                WHEN r.address LIKE "%Purok 4%" THEN "Purok 4"
-                WHEN r.address LIKE "%Purok 5%" THEN "Purok 5"
-                WHEN r.address LIKE "%Purok 6%" THEN "Purok 6"
-                WHEN r.address LIKE "%Purok 7%" THEN "Purok 7"
-                WHEN r.address LIKE "%Purok 8%" THEN "Purok 8"
-                WHEN r.address LIKE "%Purok 9%" THEN "Purok 9"
-                ELSE "Other" 
-            END'))
-            ->orderBy('purok')
-            ->orderByDesc('requests')
-            ->get();
-
-        // Get overall top requested medicines
-        $overallTopRequested = DB::table('medicine_requests as mr')
-            ->join('medicines as m', 'm.id', '=', 'mr.medicine_id')
-            ->whereBetween('mr.request_date', [$start->toDateString(), $end->toDateString()])
-            ->select([
-                'm.name as medicine_name',
-                'm.category as medicine_category',
-                DB::raw('COUNT(*) as requests')
-            ])
-            ->groupBy('m.name', 'm.category')
-            ->orderByDesc('requests')
-            ->limit(10)
-            ->get();
-
-        // Note: Debug logging removed for production
-
-        // Group by purok for geographic analysis
-        $byPurok = $requestsByPurok->groupBy('purok')
-            ->map(function ($purokGroup) {
-                return $purokGroup->take(5)->map(function ($item) {
-                    return [
-                        'medicine_name' => $item->medicine_name,
-                        'requests' => $item->requests
-                    ];
-                })->values();
-            });
-
-        // Overall top requested medicines
-        $overall = $overallTopRequested->map(function ($item) {
+        // Get data for Python analytics
+        $medicineRequests = MedicineRequest::with('medicine')->get()->map(function($r) {
             return [
-                'medicine' => ['name' => $item->medicine_name],
-                'requests' => $item->requests
+                'id' => $r->id,
+                'medicine_id' => $r->medicine_id,
+                'resident_id' => $r->resident_id,
+                'request_date' => $r->request_date ? $r->request_date->toIso8601String() : null,
             ];
-        })->values();
+        })->toArray();
 
-        return [
-            'by_purok' => $byPurok,
-            'overall' => $overall
-        ];
+        $medicineTransactions = MedicineTransaction::with('medicine')->get()->map(function($t) {
+            return [
+                'id' => $t->id,
+                'medicine_id' => $t->medicine_id,
+                'transaction_type' => $t->transaction_type,
+                'quantity' => $t->quantity,
+                'transaction_date' => $t->transaction_date ? $t->transaction_date->toIso8601String() : null,
+            ];
+        })->toArray();
+
+        $medicines = Medicine::all()->map(function($m) {
+            return [
+                'id' => $m->id,
+                'name' => $m->name,
+                'category' => $m->category,
+            ];
+        })->toArray();
+
+        $residents = Residents::all()->map(function($r) {
+            return [
+                'id' => $r->id,
+                'age' => $r->age,
+                'address' => $r->address,
+            ];
+        })->toArray();
+
+        // Get Python analytics
+        $analytics = $this->pythonService->analyzeMedicineReport(
+            [
+                'medicine_requests' => $medicineRequests,
+                'medicine_transactions' => $medicineTransactions,
+                'medicines' => $medicines,
+                'residents' => $residents,
+            ],
+            $start->toIso8601String(),
+            $end->toIso8601String()
+        );
+
+        return view('admin.medicines.report', [
+            'transactions' => $transactions,
+            'requestAnalytics' => $analytics['requestAnalytics'],
+            'topDispensed' => $analytics['topDispensed'],
+            'start' => $start,
+            'end' => $end,
+            'categoryCounts' => $analytics['categoryCounts'],
+            'monthlyDispensed' => $analytics['monthlyDispensed'],
+            'requestsByAgeBracket' => $analytics['requestsByAgeBracket'],
+            'topRequestedPeopleByPurok' => $analytics['topRequestedPeopleByPurok'],
+        ]);
     }
+
 }
 
 

@@ -41,17 +41,34 @@ class ForgotPasswordController
         ]);
 
         // Send email via queue (non-blocking)
-        // Note: PasswordResetMail computes resetUrl and expires internally
-        $emailService = app(BrevoEmailService::class);
-        $emailService->queueEmail(
-            $request->email,
-            'Password Reset Request',
-            'emails.password-reset',
-            [
-                'token' => $token,
-                'email' => $request->email
-            ]
-        );
+        // Change line 45-54 from:
+$emailService = app(BrevoEmailService::class);
+$emailService->queueEmail(
+    $request->email,
+    'Password Reset Request',
+    'emails.password-reset',
+    [
+        'token' => $token,
+        'email' => $request->email
+    ]
+);
+
+// To:
+$emailService = app(BrevoEmailService::class);
+$result = $emailService->sendMarkdownEmail(
+    $request->email,
+    'Password Reset Request',
+    'emails.password-reset',
+    [
+        'token' => $token,
+        'email' => $request->email
+    ]
+);
+
+if ($result === false) {
+    notify()->error('Failed to send email. Please try again later.');
+    return back();
+}
 
         notify()->success('Password reset link sent!');
         return back();

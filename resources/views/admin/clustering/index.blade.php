@@ -180,7 +180,7 @@
                     
                     <!-- Per-Purok Details Button -->
                     <button type="button" 
-                            class="mt-4 w-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg px-3 py-2 transition duration-200 flex items-center justify-center shadow-md"
+                            class="mt-4 w-full text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg px-3 py-2 transition duration-200 flex items-center justify-center shadow-md"
                             onclick="openPurokDetailsModal({{ $cluster['id'] }}, '{{ addslashes($cluster['label']) }}')">
                         <i class="fas fa-info-circle mr-2"></i>
                         View Purok Details
@@ -296,6 +296,10 @@ if (Array.isArray(clusterDataRaw)) {
 
 console.log('Cluster data loaded:', clusterData);
 console.log('Cluster data type:', typeof clusterDataRaw, 'isArray:', Array.isArray(clusterDataRaw));
+console.log('First cluster sample:', clusterData[0]);
+if (clusterData[0]) {
+    console.log('First cluster medicine_analytics:', clusterData[0].medicine_analytics);
+}
 
 // Make functions globally accessible
 window.openIncidentModal = function(clusterId, clusterLabel) {
@@ -474,25 +478,68 @@ window.openMedicineModal = function(clusterId, clusterLabel) {
     title.textContent = `Medicine Dispense Analytics - ${clusterLabel}`;
 
     // Find cluster by ID (handle both string and number comparisons)
-    const cluster = clusterData.find(c => c.id == clusterId || c.id === clusterId);
-    const medicines = cluster?.medicine_analytics?.medicines || [];
+    const cluster = clusterData.find(c => {
+        const cId = c.id;
+        const searchId = clusterId;
+        return cId == searchId || cId === searchId || String(cId) === String(searchId);
+    });
     
-    if (medicines.length === 0) {
-        content.innerHTML = '<p class="text-gray-600">No medicine data available for this cluster.</p>';
+    console.log('Searching for clusterId:', clusterId, 'type:', typeof clusterId);
+    console.log('Available cluster IDs:', clusterData.map(c => ({ id: c.id, type: typeof c.id, label: c.label })));
+    console.log('Found cluster:', cluster);
+    
+    if (!cluster) {
+        content.innerHTML = '<p class="text-red-600">Error: Cluster not found. Cluster ID: ' + clusterId + '</p>';
     } else {
+        // Debug: Log the full cluster structure
+        console.log('Full cluster structure:', JSON.stringify(cluster, null, 2));
+        console.log('Cluster medicine_analytics:', cluster.medicine_analytics);
+        console.log('Medicine analytics type:', typeof cluster.medicine_analytics);
+        
+        // Try multiple ways to access medicine data
+        let medicinesData = cluster.medicine_analytics?.medicines || 
+                           cluster.medicine_analytics || 
+                           cluster.medicines || 
+                           [];
+        
+        // If medicine_analytics is an object but not an array, try to extract medicines
+        if (medicinesData && typeof medicinesData === 'object' && !Array.isArray(medicinesData)) {
+            if (medicinesData.medicines && Array.isArray(medicinesData.medicines)) {
+                medicinesData = medicinesData.medicines;
+            } else {
+                medicinesData = [];
+            }
+        }
+        
+        const medicines = Array.isArray(medicinesData) ? medicinesData : [];
+        console.log('Final medicines array:', medicines);
+        console.log('Medicines length:', medicines.length);
+        
+        if (medicines.length === 0) {
+            content.innerHTML = '<div class="space-y-2">' +
+                '<p class="text-gray-600">No medicine data available for this cluster.</p>' +
+                '<p class="text-xs text-gray-500">Debug: medicine_analytics = ' + JSON.stringify(cluster.medicine_analytics) + '</p>' +
+                '</div>';
+        } else {
         let html = '<div class="space-y-4">';
-        html += '<h4 class="font-semibold text-gray-900 mb-3">Medicines Requested/Dispensed (Most Common to Least Common)</h4>';
+        html += '<h4 class="font-semibold text-gray-900 mb-3">Medicines Dispensed (Most Common to Least Common)</h4>';
         html += '<div class="space-y-2">';
         
         medicines.forEach((item, index) => {
+            console.log('Processing medicine item:', item);
+            const name = item.name || item.medicine_name || 'Unknown Medicine';
+            const dispensed = item.dispensed || item.quantity || item.total || 0;
+            
             html += `
-                <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <span class="text-sm font-medium text-gray-500 mr-3">#${index + 1}</span>
-                            <span class="text-sm font-medium text-gray-900">${escapeHtml(item.name)}</span>
+                            <span class="text-sm font-semibold text-gray-900">${escapeHtml(name)}</span>
                         </div>
-                        <span class="text-sm font-bold text-gray-700">Total: ${item.total}</span>
+                        <span class="text-sm font-bold text-blue-600">
+                            <i class="fas fa-pills mr-1"></i>${dispensed} dispensed
+                        </span>
                     </div>
                 </div>
             `;
@@ -500,6 +547,7 @@ window.openMedicineModal = function(clusterId, clusterLabel) {
         
         html += '</div></div>';
         content.innerHTML = html;
+        }
     }
 
     // Show modal
@@ -577,7 +625,7 @@ window.openPurokDetailsModal = function(clusterId, clusterLabel) {
         html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Residents:</span> <span class="font-semibold">${purok.resident_count || 0}</span></div>`;
         html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Incidents:</span> <span class="font-semibold">${purok.blotter_count || 0}</span></div>`;
         html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Med. Visits:</span> <span class="font-semibold">${purok.medical_count || 0}</span></div>`;
-        html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Medicine:</span> <span class="font-semibold">${purok.medicine_count || 0}</span></div>`;
+        html += `<div class="bg-white rounded p-2"><span class="text-gray-600 text-xs">Medicine Dispensed:</span> <span class="font-semibold">${purok.medicine_count || 0}</span></div>`;
         html += '</div>';
 
         // Detailed Breakdown
@@ -614,39 +662,57 @@ window.openPurokDetailsModal = function(clusterId, clusterLabel) {
             html += '</div>';
         }
 
-        // Medicine Breakdown
-        const medicines = purok.medicine_analytics?.medicines || [];
+        // Medicine Breakdown (Dispensed only)
+        let medicines = purok.medicine_analytics?.medicines || [];
+        
+        // Debug logging
+        if (purok.medicine_count > 0 && medicines.length === 0) {
+            console.warn('Purok has medicine_count > 0 but empty medicines array:', {
+                purok: purok.purok_display,
+                medicine_count: purok.medicine_count,
+                medicine_analytics: purok.medicine_analytics
+            });
+        }
+        
         if (medicines.length > 0) {
             html += '<div class="text-sm">';
-            html += '<p class="font-semibold text-gray-700 mb-2">Top Medicines:</p>';
+            html += '<p class="font-semibold text-gray-700 mb-2">Top Dispensed Medicines:</p>';
             html += '<div class="space-y-2 mb-2">';
             const topMedicines = medicines.slice(0, 3);
             topMedicines.forEach((medicine, medIndex) => {
+                const dispensed = medicine.dispensed || medicine.quantity || medicine.total || 0;
                 html += `<div class="flex items-center justify-between bg-white rounded p-2">`;
                 html += `<span class="text-gray-900">${escapeHtml(medicine.name)}</span>`;
-                html += `<span class="font-semibold text-gray-700">Total: ${medicine.total || 0}</span>`;
+                html += `<span class="text-xs font-semibold text-blue-600"><i class="fas fa-pills mr-1"></i>${dispensed} dispensed</span>`;
                 html += '</div>';
             });
             html += '</div>';
             
             if (medicines.length > 3) {
-                const totalDispensed = medicines.reduce((sum, m) => sum + (m.dispensed || 0), 0);
+                const totalDispensed = medicines.reduce((sum, m) => sum + (m.dispensed || m.quantity || m.total || 0), 0);
                 const remainingMedicines = medicines.slice(3);
                 const uniqueId = `medicines-${clusterId}-${index}`;
                 html += `<details class="mt-2">`;
                 html += `<summary class="text-blue-600 hover:text-blue-800 hover:underline text-xs italic cursor-pointer font-medium">`;
-                html += `+ ${medicines.length - 3} more medicine(s). Total of all medicines: ${totalDispensed}`;
+                html += `+ ${medicines.length - 3} more medicine(s). Total dispensed: ${totalDispensed}`;
                 html += `</summary>`;
                 html += `<div class="mt-2 space-y-2 pl-4 border-l-2 border-blue-200">`;
                 remainingMedicines.forEach((medicine) => {
+                    const dispensed = medicine.dispensed || medicine.quantity || medicine.total || 0;
                     html += `<div class="flex items-center justify-between bg-white rounded p-2">`;
                     html += `<span class="text-gray-900">${escapeHtml(medicine.name)}</span>`;
-                    html += `<span class="font-semibold text-gray-700">Total: ${medicine.total || 0}</span>`;
+                    html += `<span class="text-xs font-semibold text-blue-600"><i class="fas fa-pills mr-1"></i>${dispensed} dispensed</span>`;
                     html += '</div>';
                 });
                 html += '</div>';
                 html += '</details>';
             }
+            html += '</div>';
+        } else if (purok.medicine_count > 0) {
+            // Show message if medicine_count > 0 but no detailed analytics
+            html += '<div class="text-sm">';
+            html += '<p class="font-semibold text-gray-700 mb-2">Medicine Dispense:</p>';
+            html += `<p class="text-gray-600 text-xs">Total ${purok.medicine_count} medicine(s) dispensed, but detailed breakdown not available.</p>`;
             html += '</div>';
         }
 
@@ -703,22 +769,29 @@ window.openPurokMedicineModal = function(clusterId, clusterLabel, purokDisplay) 
 
     const medicines = purok.medicine_analytics?.medicines || [];
     
-    if (medicines.length === 0) {
+    if (!purok) {
+        content.innerHTML = '<p class="text-red-600">Error: Purok not found.</p>';
+    } else if (medicines.length === 0) {
         content.innerHTML = '<p class="text-gray-600">No medicine data available for this purok.</p>';
     } else {
         let html = '<div class="space-y-4">';
-        html += '<h4 class="font-semibold text-gray-900 mb-3">Medicines Requested/Dispensed (Most Common to Least Common)</h4>';
+        html += '<h4 class="font-semibold text-gray-900 mb-3">Medicines Dispensed (Most Common to Least Common)</h4>';
         html += '<div class="space-y-2">';
         
         medicines.forEach((item, index) => {
+            const name = item.name || 'Unknown Medicine';
+            const dispensed = item.dispensed || item.quantity || item.total || 0;
+            
             html += `
-                <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <span class="text-sm font-medium text-gray-500 mr-3">#${index + 1}</span>
-                            <span class="text-sm font-medium text-gray-900">${escapeHtml(item.name)}</span>
+                            <span class="text-sm font-semibold text-gray-900">${escapeHtml(name)}</span>
                         </div>
-                        <span class="text-sm font-bold text-gray-700">Total: ${item.total}</span>
+                        <span class="text-sm font-bold text-blue-600">
+                            <i class="fas fa-pills mr-1"></i>${dispensed} dispensed
+                        </span>
                     </div>
                 </div>
             `;

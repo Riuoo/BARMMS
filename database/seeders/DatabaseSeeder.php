@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AccomplishedProjectSeeder::class,
             HealthCenterActivitySeeder::class,
             MedicalRecordSeeder::class,
+            ProgramSeeder::class,              // <-- Programs for recommendations
             MedicineRequestSeeder::class,      // <-- Requests first
             MedicineTransactionSeeder::class,  // <-- Transactions after
             BlotterRequestSeeder::class,

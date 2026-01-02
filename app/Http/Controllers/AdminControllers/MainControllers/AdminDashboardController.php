@@ -9,11 +9,18 @@ use App\Models\BlotterRequest;
 use App\Models\DocumentRequest;
 use App\Models\Residents;
 use App\Models\HealthCenterActivity;
+use App\Services\PythonAnalyticsService;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController
 {
+    protected $pythonService;
+
+    public function __construct(PythonAnalyticsService $pythonService = null)
+    {
+        $this->pythonService = $pythonService ?? app(PythonAnalyticsService::class);
+    }
+
     public function index()
     {
         $userId = Session::get('user_id');
@@ -31,47 +38,39 @@ class AdminDashboardController
         // Additional metrics for enhanced dashboard
         $upcomingHealthActivities = HealthCenterActivity::where('activity_date', '>=', now())->count();
         
-        // Get resident demographics data for charts (create age brackets from age column)
-        $residentDemographics = Residents::select(
-            DB::raw('CASE 
-                WHEN age BETWEEN 0 AND 17 THEN "0-17"
-                WHEN age BETWEEN 18 AND 35 THEN "18-35"
-                WHEN age BETWEEN 36 AND 50 THEN "36-50"
-                WHEN age BETWEEN 51 AND 65 THEN "51-65"
-                WHEN age > 65 THEN "65+"
-                ELSE "Unknown"
-            END as age_bracket'),
-            DB::raw('count(*) as count')
-        )
-        ->groupBy('age_bracket')
-        ->get();
-            
-        // Get monthly resident registration trends
-        $residentTrends = Residents::select(
-            DB::raw('MONTH(created_at) as month'),
-            DB::raw('COUNT(*) as count')
-        )
-        ->whereYear('created_at', date('Y'))
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
-        
-        // Get document request types distribution
-        $documentRequestTypes = DocumentRequest::select('document_type', DB::raw('count(*) as count'))
-            ->groupBy('document_type')
-            ->get();
+        // Get data for Python analytics
+        $residents = Residents::all()->map(function($r) {
+            return [
+                'id' => $r->id,
+                'age' => $r->age,
+                'created_at' => $r->created_at ? $r->created_at->toIso8601String() : null,
+            ];
+        })->toArray();
 
-        return view('admin.main.dashboard', compact(
-            'barangay_profile',
-            'totalResidents',
-            'totalAccountRequests',
-            'totalBlotterReports',
-            'totalDocumentRequests',
-            'totalAccomplishedProjects',
-            'upcomingHealthActivities',
-            'residentDemographics',
-            'residentTrends',
-            'documentRequestTypes'
-        ));
+        $documentRequests = DocumentRequest::all()->map(function($r) {
+            return [
+                'id' => $r->id,
+                'document_type' => $r->document_type,
+            ];
+        })->toArray();
+
+        // Get Python analytics
+        $analytics = $this->pythonService->analyzeDashboard([
+            'residents' => $residents,
+            'document_requests' => $documentRequests,
+        ]);
+
+        return view('admin.main.dashboard', [
+            'barangay_profile' => $barangay_profile,
+            'totalResidents' => $totalResidents,
+            'totalAccountRequests' => $totalAccountRequests,
+            'totalBlotterReports' => $totalBlotterReports,
+            'totalDocumentRequests' => $totalDocumentRequests,
+            'totalAccomplishedProjects' => $totalAccomplishedProjects,
+            'upcomingHealthActivities' => $upcomingHealthActivities,
+            'residentDemographics' => $analytics['residentDemographics'],
+            'residentTrends' => $analytics['residentTrends'],
+            'documentRequestTypes' => $analytics['documentRequestTypes']
+        ]);
     }
 }

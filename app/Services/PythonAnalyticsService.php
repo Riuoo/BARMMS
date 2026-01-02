@@ -32,6 +32,52 @@ class PythonAnalyticsService
     }
 
     /**
+     * Get standardized error message for Python service errors
+     * Detects connection errors and provides clear, user-friendly messages
+     */
+    private function getStandardizedErrorMessage(\Exception $e, string $operation = 'operation'): string
+    {
+        $errorMessage = $e->getMessage();
+        $errorMessageLower = strtolower($errorMessage);
+        
+        // Check for connection-related errors (when Python app.py is not running)
+        $connectionErrors = [
+            'connection refused',
+            'connection timed out',
+            'failed to connect',
+            'could not resolve host',
+            'name or service not known',
+            'no connection could be made',
+            'errno 111',
+            'errno 110',
+            'curl error',
+            'guzzlehttp',
+        ];
+        
+        $isConnectionError = false;
+        foreach ($connectionErrors as $connectionError) {
+            if (str_contains($errorMessageLower, $connectionError)) {
+                $isConnectionError = true;
+                break;
+            }
+        }
+        
+        if ($isConnectionError) {
+            return sprintf(
+                'The Python analytics service (app.py) is not running. Please start the Python service at %s to use this feature.',
+                $this->baseUrl
+            );
+        }
+        
+        // For other errors, provide a clear message with context
+        return sprintf(
+            'Python analytics service error during %s: %s',
+            $operation,
+            $errorMessage
+        );
+    }
+
+    /**
      * Perform K-Means clustering
      */
     public function kmeansClustering(array $samples, int $k = 3, int $maxIterations = 100, int $numRuns = 3): array
@@ -55,7 +101,7 @@ class PythonAnalyticsService
                 throw new \Exception('Python service error: ' . $response->body());
             } catch (\Exception $e) {
                 Log::error('Python clustering error: ' . $e->getMessage());
-                return ['error' => 'Analytics service unavailable: ' . $e->getMessage()];
+                return ['error' => $this->getStandardizedErrorMessage($e, 'K-Means clustering')];
             }
         });
     }
@@ -83,7 +129,7 @@ class PythonAnalyticsService
                 throw new \Exception('Python service error: ' . $response->body());
             } catch (\Exception $e) {
                 Log::error('Python optimal K error: ' . $e->getMessage());
-                return ['error' => 'Analytics service unavailable: ' . $e->getMessage()];
+                return ['error' => $this->getStandardizedErrorMessage($e, 'optimal K calculation')];
             }
         });
     }
@@ -111,7 +157,7 @@ class PythonAnalyticsService
                 throw new \Exception('Python service error: ' . $response->body());
             } catch (\Exception $e) {
                 Log::error('Python hierarchical clustering error: ' . $e->getMessage());
-                return ['error' => 'Analytics service unavailable: ' . $e->getMessage()];
+                return ['error' => $this->getStandardizedErrorMessage($e, 'hierarchical clustering')];
             }
         });
     }
@@ -362,80 +408,713 @@ class PythonAnalyticsService
         return $samples;
     }
 
+
     /**
-     * Build samples from purok-aggregated risk data for combined clustering
-     * Features: [blotter_count, demographic_score, medical_count, medicine_count]
-     * All features are normalized to 0-1 scale
+     * Analyze blotter data using Python service
+     * Pure Python implementation - throws exception if service unavailable
+     */
+    public function analyzeBlotters(array $blotters): array
+    {
+        $cacheKey = 'python_blotter_analysis_' . md5(json_encode($blotters));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($blotters) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/analytics/blotter', [
+                        'blotters' => $blotters
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Python blotter analysis error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python blotter analysis error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'blotter analysis'));
+            }
+        });
+    }
+
+    /**
+     * Analyze document requests using Python service
+     * Pure Python implementation - throws exception if service unavailable
+     */
+    public function analyzeDocuments(array $requests): array
+    {
+        $cacheKey = 'python_document_analysis_' . md5(json_encode($requests));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($requests) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/analytics/documents', [
+                        'requests' => $requests
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Python document analysis error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python document analysis error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'document analysis'));
+            }
+        });
+    }
+
+    /**
+     * Analyze health report using Python service
+     * Pure Python implementation - throws exception if service unavailable
+     */
+    public function analyzeHealthReport(array $data): array
+    {
+        $cacheKey = 'python_health_report_' . md5(json_encode($data));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($data) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/analytics/health-report', $data);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Python health report analysis error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python health report analysis error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'health report analysis'));
+            }
+        });
+    }
+
+    /**
+     * Analyze medicine report using Python service
+     * Pure Python implementation - throws exception if service unavailable
+     */
+    public function analyzeMedicineReport(array $data, string $startDate, string $endDate): array
+    {
+        $cacheKey = 'python_medicine_report_' . md5(json_encode($data) . $startDate . $endDate);
+        
+        return Cache::remember($cacheKey, 1800, function () use ($data, $startDate, $endDate) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/analytics/medicine-report', [
+                        ...$data,
+                        'start_date' => $startDate,
+                        'end_date' => $endDate
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Python medicine report error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python medicine report error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'medicine report analysis'));
+            }
+        });
+    }
+
+    /**
+     * Analyze dashboard data using Python service
+     * Pure Python implementation - throws exception if service unavailable
+     */
+    public function analyzeDashboard(array $data): array
+    {
+        $cacheKey = 'python_dashboard_' . md5(json_encode($data));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($data) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/analytics/dashboard', $data);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Python dashboard analysis error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python dashboard analysis error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'dashboard analysis'));
+            }
+        });
+    }
+
+    /**
+     * Format residents data for Python program evaluation
+     */
+    public function formatResidentsForPrograms($residents): array
+    {
+        $formatted = [];
+        
+        foreach ($residents as $resident) {
+            $residentData = [
+                'id' => $resident->id,
+                'first_name' => $resident->first_name,
+                'middle_name' => $resident->middle_name,
+                'last_name' => $resident->last_name,
+                'suffix' => $resident->suffix,
+                'address' => $resident->address,
+                'age' => $resident->age,
+                'gender' => $resident->gender,
+                'marital_status' => $resident->marital_status,
+                'employment_status' => $resident->employment_status,
+                'income_level' => $resident->income_level,
+                'education_level' => $resident->education_level,
+                'family_size' => $resident->family_size,
+                'is_pwd' => $resident->is_pwd,
+                'occupation' => $resident->occupation,
+            ];
+            
+            // Get blotters
+            $blotters = \App\Models\BlotterRequest::where('respondent_id', $resident->id)
+                ->get()
+                ->map(function ($blotter) {
+                    return [
+                        'id' => $blotter->id,
+                        'type' => $blotter->type,
+                        'created_at' => $blotter->created_at ? $blotter->created_at->toIso8601String() : null,
+                    ];
+                })
+                ->toArray();
+            
+            // Get medical records
+            $medicalRecords = \App\Models\MedicalRecord::where('resident_id', $resident->id)
+                ->get()
+                ->map(function ($record) {
+                    return [
+                        'id' => $record->id,
+                        'diagnosis' => $record->diagnosis,
+                        'consultation_datetime' => $record->consultation_datetime ? $record->consultation_datetime->toIso8601String() : null,
+                    ];
+                })
+                ->toArray();
+            
+            // Aggregate profile using Python
+            try {
+                $profile = $this->aggregateResidentData($residentData, $blotters, $medicalRecords);
+            } catch (\Exception $e) {
+                Log::warning('Error aggregating resident data for resident ' . $resident->id . ': ' . $e->getMessage());
+                // Fallback to basic profile structure
+                $purok = 'n/a';
+                if (preg_match('/Purok\s*(\d+)/i', $resident->address, $matches)) {
+                    $purok = strtolower($matches[1]);
+                }
+                
+                $profile = [
+                    'resident' => $residentData,
+                    'demographics' => [
+                        'age' => $resident->age,
+                        'gender' => $resident->gender,
+                        'marital_status' => $resident->marital_status,
+                        'employment_status' => $resident->employment_status,
+                        'income_level' => $resident->income_level,
+                        'education_level' => $resident->education_level,
+                        'family_size' => $resident->family_size,
+                        'is_pwd' => $resident->is_pwd ? 'Yes' : 'No',
+                        'occupation' => $resident->occupation,
+                        'purok' => $purok,
+                    ],
+                    'blotter' => [
+                        'total_count' => count($blotters),
+                        'recent_count' => 0,
+                        'types' => array_column($blotters, 'type'),
+                        'has_recent_incidents' => false,
+                        'last_incident_date' => null,
+                    ],
+                    'medical' => [
+                        'total_visits' => count($medicalRecords),
+                        'recent_visits' => 0,
+                        'has_recent_visits' => false,
+                        'diagnoses' => array_filter(array_column($medicalRecords, 'diagnosis')),
+                        'chronic_conditions' => [],
+                        'has_chronic_conditions' => false,
+                        'last_visit_date' => null,
+                    ],
+                ];
+            }
+            
+            $formatted[] = [
+                'resident' => $residentData,
+                'profile' => $profile,
+            ];
+        }
+        
+        return $formatted;
+    }
+
+    /**
+     * Format program data for Python evaluation
+     */
+    public function formatProgramForEvaluation($program): array
+    {
+        return [
+            'id' => $program->id,
+            'name' => $program->name,
+            'type' => $program->type,
+            'description' => $program->description,
+            'criteria' => $program->criteria,
+            'target_puroks' => $program->target_puroks,
+            'is_active' => $program->is_active,
+            'priority' => $program->priority,
+        ];
+    }
+
+    /**
+     * Aggregate resident data using Python service
+     */
+    public function aggregateResidentData($resident, $blotters, $medicalRecords): array
+    {
+        $cacheKey = 'python_aggregate_resident_' . md5(json_encode([
+            'resident_id' => is_array($resident) ? $resident['id'] : $resident->id,
+            'blotters_count' => count($blotters),
+            'medical_count' => count($medicalRecords),
+        ]));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($resident, $blotters, $medicalRecords) {
+            $residentData = is_array($resident) ? $resident : [
+                'id' => $resident->id,
+                'address' => $resident->address,
+                'age' => $resident->age,
+                'gender' => $resident->gender,
+                'marital_status' => $resident->marital_status,
+                'employment_status' => $resident->employment_status,
+                'income_level' => $resident->income_level,
+                'education_level' => $resident->education_level,
+                'family_size' => $resident->family_size,
+                'is_pwd' => is_array($resident) ? ($resident['is_pwd'] ?? false) : $resident->is_pwd,
+                'occupation' => $resident->occupation ?? null,
+            ];
+            
+            $blottersData = is_array($blotters) ? $blotters : $blotters->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'type' => $b->type,
+                    'created_at' => $b->created_at ? $b->created_at->toIso8601String() : null,
+                ];
+            })->toArray();
+            
+            $medicalData = is_array($medicalRecords) ? $medicalRecords : $medicalRecords->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'diagnosis' => $m->diagnosis,
+                    'consultation_datetime' => $m->consultation_datetime ? $m->consultation_datetime->toIso8601String() : null,
+                ];
+            })->toArray();
+            
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/programs/aggregate-resident-data', [
+                        'resident' => $residentData,
+                        'blotters' => $blottersData,
+                        'medical_records' => $medicalData,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json()['profile'] ?? [];
+                }
+
+                Log::error('Python aggregate resident data error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python aggregate resident data error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'resident data aggregation'));
+            }
+        });
+    }
+
+    /**
+     * Evaluate resident eligibility using Python service
+     */
+    public function evaluateResident(array $residentData, array $programData): bool
+    {
+        $cacheKey = 'python_evaluate_resident_' . md5(json_encode($residentData) . json_encode($programData));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($residentData, $programData) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/programs/evaluate-resident', [
+                        'profile' => $residentData,
+                        'program' => $programData,
+                    ]);
+
+                if ($response->successful()) {
+                    $result = $response->json();
+                    return $result['eligible'] ?? false;
+                }
+
+                Log::error('Python evaluate resident error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python evaluate resident error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'resident eligibility evaluation'));
+            }
+        });
+    }
+
+    /**
+     * Get eligible residents for a program using Python service
+     */
+    public function getEligibleResidents(array $residentsData, array $programData, ?string $purok = null): array
+    {
+        $cacheKey = 'python_eligible_residents_' . md5(json_encode($residentsData) . json_encode($programData) . $purok);
+        
+        return Cache::remember($cacheKey, 1800, function () use ($residentsData, $programData, $purok) {
+            $payload = [
+                'residents' => $residentsData,
+                'program' => $programData,
+            ];
+            
+            if ($purok !== null) {
+                $payload['purok'] = $purok;
+            }
+            
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/programs/eligible-residents', $payload);
+
+                if ($response->successful()) {
+                    return $response->json()['eligible_residents'] ?? [];
+                }
+
+                Log::error('Python eligible residents error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python eligible residents error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'eligible residents retrieval'));
+            }
+        });
+    }
+
+    /**
+     * Get programs a resident is eligible for using Python service
+     */
+    public function getResidentPrograms(array $residentData, array $programsData): array
+    {
+        $cacheKey = 'python_resident_programs_' . md5(json_encode($residentData) . json_encode($programsData));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($residentData, $programsData) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/programs/resident-programs', [
+                        'resident' => $residentData,
+                        'programs' => $programsData,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json()['eligible_programs'] ?? [];
+                }
+
+                Log::error('Python resident programs error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python resident programs error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'resident programs retrieval'));
+            }
+        });
+    }
+
+    /**
+     * Get program recommendations by purok using Python service
+     */
+    public function getProgramRecommendationsByPurok(array $residentsData, array $programData): array
+    {
+        $cacheKey = 'python_recommendations_by_purok_' . md5(json_encode($residentsData) . json_encode($programData));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($residentsData, $programData) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/programs/recommendations-by-purok', [
+                        'residents' => $residentsData,
+                        'program' => $programData,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json()['recommendations'] ?? [];
+                }
+
+                Log::error('Python recommendations by purok error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python recommendations by purok error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'program recommendations by purok'));
+            }
+        });
+    }
+
+    /**
+     * Get purok eligibility statistics using Python service
+     */
+    public function getPurokEligibilityStats(array $residentsData, array $programData, ?string $purok = null): array
+    {
+        $cacheKey = 'python_purok_eligibility_stats_' . md5(json_encode($residentsData) . json_encode($programData) . $purok);
+        
+        return Cache::remember($cacheKey, 1800, function () use ($residentsData, $programData, $purok) {
+            $payload = [
+                'residents' => $residentsData,
+                'program' => $programData,
+            ];
+            
+            if ($purok !== null) {
+                $payload['purok'] = $purok;
+            }
+            
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/programs/purok-eligibility-stats', $payload);
+
+                if ($response->successful()) {
+                    return $response->json()['stats'] ?? [];
+                }
+
+                Log::error('Python purok eligibility stats error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python purok eligibility stats error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'purok eligibility statistics'));
+            }
+        });
+    }
+
+    /**
+     * Identify target puroks using Python service
+     */
+    public function identifyTargetPuroks(array $stats, float $threshold = 0.5): array
+    {
+        $targetPuroks = [];
+        
+        foreach ($stats as $stat) {
+            if (($stat['eligibility_percentage'] ?? 0) >= ($threshold * 100)) {
+                $targetPuroks[] = $stat['purok'] ?? '';
+            }
+        }
+        
+        return array_filter($targetPuroks);
+    }
+
+    /**
+     * Get all puroks using Python service
+     */
+    public function getAllPuroks(array $residentsData): array
+    {
+        $cacheKey = 'python_all_puroks_' . md5(json_encode($residentsData));
+        
+        return Cache::remember($cacheKey, 3600, function () use ($residentsData) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/programs/all-puroks', [
+                        'residents' => $residentsData,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json()['puroks'] ?? [];
+                }
+
+                Log::error('Python all puroks error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python all puroks error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'purok list retrieval'));
+            }
+        });
+    }
+
+    /**
+     * Aggregate data by purok using Python service
+     */
+    public function aggregatePurokData(
+        array $residents,
+        array $blotters,
+        array $medicalRecords,
+        array $medicineTransactions,
+        array $medicineRequests,
+        array $medicineNames = []
+    ): array {
+        $cacheKey = 'python_aggregate_purok_' . md5(json_encode([
+            'residents_count' => count($residents),
+            'blotters_count' => count($blotters),
+            'medical_count' => count($medicalRecords),
+        ]));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($residents, $blotters, $medicalRecords, $medicineTransactions, $medicineRequests, $medicineNames) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/clustering/aggregate-purok-data', [
+                        'residents' => $residents,
+                        'blotters' => $blotters,
+                        'medical_records' => $medicalRecords,
+                        'medicine_transactions' => $medicineTransactions,
+                        'medicine_requests' => $medicineRequests,
+                        'medicine_names' => $medicineNames,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json()['purok_data'] ?? [];
+                }
+
+                Log::error('Python aggregate purok data error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python aggregate purok data error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'purok data aggregation'));
+            }
+        });
+    }
+
+    /**
+     * Build purok risk features using Python service
      */
     public function buildPurokRiskFeatures(array $purokData): array
     {
-        if (empty($purokData)) {
-            return [];
-        }
+        $cacheKey = 'python_purok_features_' . md5(json_encode($purokData));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($purokData) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/clustering/build-purok-features', [
+                        'purok_data' => $purokData,
+                    ]);
 
-        // Extract all values for normalization
-        $blotterCounts = array_column($purokData, 'blotter_count');
-        $demographicScores = array_column($purokData, 'demographic_score');
-        $medicalCounts = array_column($purokData, 'medical_count');
-        $medicineCounts = array_column($purokData, 'medicine_count');
+                if ($response->successful()) {
+                    return $response->json()['samples'] ?? [];
+                }
 
-        // Calculate min/max for each feature
-        $blotterMin = min($blotterCounts);
-        $blotterMax = max($blotterCounts);
-        $demographicMin = min($demographicScores);
-        $demographicMax = max($demographicScores);
-        $medicalMin = min($medicalCounts);
-        $medicalMax = max($medicalCounts);
-        $medicineMin = min($medicineCounts);
-        $medicineMax = max($medicineCounts);
-
-        $samples = [];
-        foreach ($purokData as $data) {
-            // Normalize each feature to 0-1 scale
-            $normalizedBlotter = $this->normalizeValue(
-                $data['blotter_count'], 
-                $blotterMin, 
-                $blotterMax
-            );
-            $normalizedDemographic = $this->normalizeValue(
-                $data['demographic_score'], 
-                $demographicMin, 
-                $demographicMax
-            );
-            $normalizedMedical = $this->normalizeValue(
-                $data['medical_count'], 
-                $medicalMin, 
-                $medicalMax
-            );
-            $normalizedMedicine = $this->normalizeValue(
-                $data['medicine_count'], 
-                $medicineMin, 
-                $medicineMax
-            );
-
-            $samples[] = [
-                floatval($normalizedBlotter),
-                floatval($normalizedDemographic),
-                floatval($normalizedMedical),
-                floatval($normalizedMedicine),
-            ];
-        }
-
-        return $samples;
+                Log::error('Python build purok features error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python build purok features error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'purok risk features building'));
+            }
+        });
     }
 
     /**
-     * Normalize a value to 0-1 scale using min-max normalization
+     * Compute incident analytics using Python service
      */
-    private function normalizeValue(float $value, float $min, float $max): float
+    public function computeIncidentAnalytics(array $residentIds, array $blotters): array
     {
-        // Handle case where all values are the same
-        if ($max - $min == 0) {
-            return 0.5; // Return middle value
-        }
+        $cacheKey = 'python_incident_analytics_' . md5(json_encode($residentIds) . json_encode($blotters));
         
-        return ($value - $min) / ($max - $min);
+        return Cache::remember($cacheKey, 1800, function () use ($residentIds, $blotters) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/clustering/compute-incident-analytics', [
+                        'resident_ids' => $residentIds,
+                        'blotters' => $blotters,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Python incident analytics error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python incident analytics error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'incident analytics computation'));
+            }
+        });
     }
+
+    /**
+     * Compute medical analytics using Python service
+     */
+    public function computeMedicalAnalytics(array $clusterPuroks, array $clusterResidentIds, array $medicalRecords): array
+    {
+        $cacheKey = 'python_medical_analytics_' . md5(json_encode($clusterResidentIds) . json_encode($medicalRecords));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($clusterPuroks, $clusterResidentIds, $medicalRecords) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/clustering/compute-medical-analytics', [
+                        'cluster_puroks' => $clusterPuroks,
+                        'cluster_resident_ids' => $clusterResidentIds,
+                        'medical_records' => $medicalRecords,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Python medical analytics error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python medical analytics error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'medical analytics computation'));
+            }
+        });
+    }
+
+    /**
+     * Compute medicine analytics using Python service
+     */
+    public function computeMedicineAnalytics(
+        array $clusterResidentIds,
+        array $medicineRequests,
+        array $medicineTransactions,
+        array $medicineNames
+    ): array {
+        $cacheKey = 'python_medicine_analytics_' . md5(json_encode($clusterResidentIds) . json_encode($medicineTransactions));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($clusterResidentIds, $medicineRequests, $medicineTransactions, $medicineNames) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/clustering/compute-medicine-analytics', [
+                        'cluster_resident_ids' => $clusterResidentIds,
+                        'medicine_requests' => $medicineRequests,
+                        'medicine_transactions' => $medicineTransactions,
+                        'medicine_names' => $medicineNames,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Python medicine analytics error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python medicine analytics error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'medicine analytics computation'));
+            }
+        });
+    }
+
+    /**
+     * Label clusters by risk using Python service
+     */
+    public function labelClustersByRisk(array $clusters, array $purokData): array
+    {
+        $cacheKey = 'python_label_clusters_' . md5(json_encode($clusters) . json_encode($purokData));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($clusters, $purokData) {
+            try {
+                $response = Http::timeout($this->timeout)
+                    ->post($this->baseUrl . '/api/clustering/label-clusters-by-risk', [
+                        'clusters' => $clusters,
+                        'purok_data' => $purokData,
+                    ]);
+
+                if ($response->successful()) {
+                    $result = $response->json();
+                    return $result['labels'] ?? [];
+                }
+
+                Log::error('Python label clusters error: ' . $response->body());
+                throw new \Exception($response->body());
+            } catch (\Exception $e) {
+                Log::error('Python label clusters error: ' . $e->getMessage());
+                throw new \Exception($this->getStandardizedErrorMessage($e, 'cluster risk labeling'));
+            }
+        });
+    }
+
 }
 
 

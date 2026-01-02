@@ -226,7 +226,7 @@ class DocumentRequestController
                     );
                     Log::info('Approve: Email queued for background processing', ['elapsed' => microtime(true) - $start]);
                 } catch (\Exception $e) {
-                    Log::error('Failed to queue DocumentReadyForPickupMail: ' . $e->getMessage());
+                    Log::error('Failed to queue document ready email: ' . $e->getMessage());
                     // Don't fail the approval if email fails
                 }
             }
