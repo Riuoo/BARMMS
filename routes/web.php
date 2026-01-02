@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Auth\LoginController;
@@ -403,7 +404,7 @@ Route::post('/logout', function () {
     return redirect()->route('landing');
 })->name('logout');
 
-// Test Email Route
+// Test Email Route (Using Brevo API)
 Route::get('/test-email', function () {
     try {
         $email = request('email', 'rodericktajos02@gmail.com');
@@ -413,24 +414,49 @@ Route::get('/test-email', function () {
             return 'Error: Invalid email address: ' . $email;
         }
         
-        $message = request('message', 'Hello from Laravel via Brevo!');
+        $message = request('message', 'Hello from Laravel via Brevo API!');
+        $apiKey = env('BREVO_API_KEY');
         
-        // Set timeout to prevent 504 errors
-        set_time_limit(30);
+        if (empty($apiKey)) {
+            return 'Error: BREVO_API_KEY is not set in .env file.<br><br>' .
+                   'Get your API key from: <a href="https://app.brevo.com/settings/keys/api" target="_blank">Brevo API Settings</a>';
+        }
         
-        // Send email synchronously (not queued)
-        Mail::to($email)->send(new \App\Mail\TestEmail($message));
+        // Send email using Brevo API (much faster than SMTP)
+        $response = Http::withHeaders([
+            'accept' => 'application/json',
+            'api-key' => $apiKey,
+            'content-type' => 'application/json',
+        ])->post('https://api.brevo.com/v3/smtp/email', [
+            'sender' => [
+                'name' => env('MAIL_FROM_NAME', 'BARMMS'),
+                'email' => env('MAIL_FROM_ADDRESS', 'no-reply@example.com'),
+            ],
+            'to' => [
+                [
+                    'email' => $email,
+                ],
+            ],
+            'subject' => 'Test Email from BARMMS',
+            'htmlContent' => '<html><body><h1>Test Email</h1><p>' . htmlspecialchars($message) . '</p><p>If you received this email, it means your Brevo API configuration is working correctly.</p></body></html>',
+            'textContent' => $message . "\n\nIf you received this email, it means your Brevo API configuration is working correctly.",
+        ]);
         
-        return 'Email sent successfully to ' . $email . '!';
+        if ($response->successful()) {
+            return 'Email sent successfully to ' . $email . '!<br><br>' .
+                   'Response: ' . json_encode($response->json(), JSON_PRETTY_PRINT);
+        } else {
+            return 'Error sending email:<br>' .
+                   'Status: ' . $response->status() . '<br>' .
+                   'Response: ' . $response->body();
+        }
     } catch (\Exception $e) {
         return 'Error: ' . $e->getMessage() . '<br><br>' .
-               'Make sure your Brevo credentials are configured correctly in .env file:<br>' .
-               '<code>MAIL_MAILER=smtp<br>' .
-               'MAIL_HOST=smtp-relay.brevo.com<br>' .
-               'MAIL_PORT=587<br>' .
-               'MAIL_USERNAME=your-brevo-email<br>' .
-               'MAIL_PASSWORD=your-brevo-smtp-key<br>' .
-               'MAIL_ENCRYPTION=tls</code><br><br>' .
+               'Make sure your Brevo API key is configured correctly in .env file:<br>' .
+               '<code>BREVO_API_KEY=your-brevo-api-key<br>' .
+               'MAIL_FROM_ADDRESS=your-verified-sender@example.com<br>' .
+               'MAIL_FROM_NAME="BARMMS"</code><br><br>' .
+               'Get your API key from: <a href="https://app.brevo.com/settings/keys/api" target="_blank">Brevo API Settings</a><br><br>' .
                'Stack trace: <pre>' . $e->getTraceAsString() . '</pre>';
     }
 });

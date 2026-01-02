@@ -31,6 +31,8 @@ return [
     'brevo' => [
         'smtp_key' => env('BREVO_SMTP_KEY'),
         'api_key' => env('BREVO_API_KEY'),
+        'from_address' => env('MAIL_FROM_ADDRESS', 'no-reply@example.com'),
+        'from_name' => env('MAIL_FROM_NAME', 'BARMMS'),
     ],
 
     'slack' => [
