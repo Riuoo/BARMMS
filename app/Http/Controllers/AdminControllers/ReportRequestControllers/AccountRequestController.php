@@ -157,7 +157,11 @@ class AccountRequestController
     
     public function approveAccountRequest($id)
     {
-        Log::info('approveAccountRequest method called with id: ' . $id);
+        try {
+            Log::info('approveAccountRequest method called with id: ' . $id);
+        } catch (\Exception $e) {
+            // Ignore logging errors if permissions are not set
+        }
 
         $accountRequest = AccountRequest::findOrFail($id);
 
@@ -174,7 +178,11 @@ class AccountRequestController
             if ($existingRequest) {
                 AccountRequest::where('id', $existingRequest->id)->update(['status' => 'rejected']);
                 DB::rollBack();
-                Log::warning('Duplicate account request found for email: ' . $accountRequest->email . '. Older request rejected.');
+                try {
+                    Log::warning('Duplicate account request found for email: ' . $accountRequest->email . '. Older request rejected.');
+                } catch (\Exception $e) {
+                    // Ignore logging errors
+                }
                 notify()->error('An account request with this email was already pending and has been rejected. Please try approving the correct one.');
                 return redirect()->route('admin.new-account-requests');
 
@@ -187,12 +195,20 @@ class AccountRequestController
 
             // Get the ID of the currently logged-in admin user from the session
             $adminUserId = Session::get('user_id');
-            Log::debug('Admin User ID from session: ' . $adminUserId);
+            try {
+                Log::debug('Admin User ID from session: ' . $adminUserId);
+            } catch (\Exception $e) {
+                // Ignore logging errors
+            }
 
             if ($adminUserId) {
                 $accountRequest->barangay_profile_id = $adminUserId;
             } else {
-                Log::warning('Admin User ID not found in session for account request approval: ' . $accountRequest->id);
+                try {
+                    Log::warning('Admin User ID not found in session for account request approval: ' . $accountRequest->id);
+                } catch (\Exception $e) {
+                    // Ignore logging errors
+                }
             }
 
             // Update status to 'approved' and save the approver id
@@ -205,7 +221,11 @@ class AccountRequestController
                 if ($resident) {
                     $resident->email = $accountRequest->email;
                     $resident->save();
-                    Log::info('Updated resident email for resident_id: ' . $resident->id . ' with email: ' . $accountRequest->email);
+                    try {
+                        Log::info('Updated resident email for resident_id: ' . $resident->id . ' with email: ' . $accountRequest->email);
+                    } catch (\Exception $e) {
+                        // Ignore logging errors
+                    }
                 }
             }
 
@@ -215,9 +235,17 @@ class AccountRequestController
             try {
                 // Queue the email with the registration link (non-blocking)
                 Mail::to($accountRequest->email)->queue(new AccountApproved($accountRequest->token));
-                Log::info('Email queued successfully for: ' . $accountRequest->email);
+                try {
+                    Log::info('Email queued successfully for: ' . $accountRequest->email);
+                } catch (\Exception $logError) {
+                    // Ignore logging errors if permissions are not set
+                }
             } catch (\Exception $e) {
-                Log::error('Error queuing email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
+                try {
+                    Log::error('Error queuing email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
+                } catch (\Exception $logError) {
+                    // Ignore logging errors if permissions are not set
+                }
                 // Don't rollback the transaction since email queuing failed, not the approval
                 // The email can be retried later via queue retry mechanisms
             }
@@ -226,7 +254,11 @@ class AccountRequestController
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error approving account request ' . $accountRequest->id . ': ' . $e->getMessage());
+            try {
+                Log::error('Error approving account request ' . $accountRequest->id . ': ' . $e->getMessage());
+            } catch (\Exception $logError) {
+                // Ignore logging errors if permissions are not set
+            }
             notify()->error('Error approving account request: ' . $e->getMessage());
             return redirect()->route('admin.new-account-requests');
             
@@ -254,7 +286,11 @@ class AccountRequestController
             'rejection_reason' => 'required|string|min:10|max:500',
         ]);
 
-        Log::info('rejectAccountRequest method called with id: ' . $id);
+        try {
+            Log::info('rejectAccountRequest method called with id: ' . $id);
+        } catch (\Exception $e) {
+            // Ignore logging errors
+        }
 
         $accountRequest = AccountRequest::findOrFail($id);
 
@@ -284,12 +320,20 @@ class AccountRequestController
 
             // Get the ID of the currently logged-in admin user from the session
             $adminUserId = Session::get('user_id');
-            Log::debug('Admin User ID from session: ' . $adminUserId);
+            try {
+                Log::debug('Admin User ID from session: ' . $adminUserId);
+            } catch (\Exception $e) {
+                // Ignore logging errors
+            }
 
             if ($adminUserId) {
                 $accountRequest->barangay_profile_id = $adminUserId;
             } else {
-                Log::warning('Admin User ID not found in session for account request rejection: ' . $accountRequest->id);
+                try {
+                    Log::warning('Admin User ID not found in session for account request rejection: ' . $accountRequest->id);
+                } catch (\Exception $e) {
+                    // Ignore logging errors
+                }
             }
 
             // Update status to 'rejected' and save rejection reason
@@ -300,9 +344,17 @@ class AccountRequestController
             try {
                 // Queue the rejection email
                 Mail::to($accountRequest->email)->queue(new AccountRejected($request->rejection_reason, $isDuplicate));
-                Log::info('Rejection email queued successfully for: ' . $accountRequest->email);
+                try {
+                    Log::info('Rejection email queued successfully for: ' . $accountRequest->email);
+                } catch (\Exception $logError) {
+                    // Ignore logging errors if permissions are not set
+                }
             } catch (\Exception $e) {
-                Log::error('Error queuing rejection email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
+                try {
+                    Log::error('Error queuing rejection email for account request ' . $accountRequest->id . ': ' . $e->getMessage());
+                } catch (\Exception $logError) {
+                    // Ignore logging errors if permissions are not set
+                }
                 // Don't rollback the transaction since email queuing failed, not the rejection
             }
 
@@ -310,7 +362,11 @@ class AccountRequestController
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error rejecting account request ' . $accountRequest->id . ': ' . $e->getMessage());
+            try {
+                Log::error('Error rejecting account request ' . $accountRequest->id . ': ' . $e->getMessage());
+            } catch (\Exception $logError) {
+                // Ignore logging errors if permissions are not set
+            }
             notify()->error('Error rejecting account request: ' . $e->getMessage());
             return redirect()->route('admin.requests.new-account-requests');
         }
