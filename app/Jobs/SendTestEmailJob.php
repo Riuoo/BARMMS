@@ -14,6 +14,9 @@ class SendTestEmailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $tries = 3; // Retry up to 3 times
+    public $timeout = 30; // 30 second timeout per attempt
+
     public string $email;
     public string $message;
 

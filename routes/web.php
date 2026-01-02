@@ -404,72 +404,30 @@ Route::post('/logout', function () {
     return redirect()->route('landing');
 })->name('logout');
 
-// Test Email Route (Using Brevo API)
+// Test Email Route (Using Brevo API - Returns immediately to prevent timeout)
 Route::get('/test-email', function () {
-    try {
-        $email = request('email', 'rodericktajos02@gmail.com');
-        $useQueue = request('queue', 'true'); // Default to queue to avoid timeout
-        
-        // Validate email
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return 'Error: Invalid email address: ' . $email;
-        }
-        
-        $message = request('message', 'Hello from Laravel via Brevo API!');
-        $apiKey = env('BREVO_API_KEY');
-        
-        if (empty($apiKey)) {
-            return 'Error: BREVO_API_KEY is not set in .env file.<br><br>' .
-                   'Get your API key from: <a href="https://app.brevo.com/settings/keys/api" target="_blank">Brevo API Settings</a>';
-        }
-        
-        if ($useQueue === 'true' || $useQueue === '1') {
-            // Dispatch job to queue (prevents 504 timeout)
-            \App\Jobs\SendTestEmailJob::dispatch($email, $message);
-            
-            return 'Email queued successfully for ' . $email . '!<br><br>' .
-                   'The email will be sent in the background. Check your queue worker or logs to confirm delivery.<br><br>' .
-                   'To send immediately (may timeout), use: <code>?queue=false</code>';
-        } else {
-            // Send immediately with short timeout
-            $response = Http::timeout(5) // 5 second timeout
-                ->withHeaders([
-                    'accept' => 'application/json',
-                    'api-key' => $apiKey,
-                    'content-type' => 'application/json',
-                ])->post('https://api.brevo.com/v3/smtp/email', [
-                    'sender' => [
-                        'name' => env('MAIL_FROM_NAME', 'BARMMS'),
-                        'email' => env('MAIL_FROM_ADDRESS', 'no-reply@barmmslowermalinao.app'),
-                    ],
-                    'to' => [
-                        [
-                            'email' => $email,
-                        ],
-                    ],
-                    'subject' => 'Test Email from BARMMS',
-                    'htmlContent' => '<html><body><h1>Test Email</h1><p>' . htmlspecialchars($message) . '</p><p>If you received this email, it means your Brevo API configuration is working correctly.</p></body></html>',
-                    'textContent' => $message . "\n\nIf you received this email, it means your Brevo API configuration is working correctly.",
-                ]);
-            
-            if ($response->successful()) {
-                return 'Email sent successfully to ' . $email . '!<br><br>' .
-                       'Response: ' . json_encode($response->json(), JSON_PRETTY_PRINT);
-            } else {
-                return 'Error sending email:<br>' .
-                       'Status: ' . $response->status() . '<br>' .
-                       'Response: ' . $response->body();
-            }
-        }
-    } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage() . '<br><br>' .
-               'Make sure your Brevo API key is configured correctly in .env file:<br>' .
-               '<code>BREVO_API_KEY=your-brevo-api-key<br>' .
-               'MAIL_FROM_ADDRESS=your-verified-sender@example.com<br>' .
-               'MAIL_FROM_NAME="BARMMS"</code><br><br>' .
-               'Get your API key from: <a href="https://app.brevo.com/settings/keys/api" target="_blank">Brevo API Settings</a><br><br>' .
-               '<strong>Note:</strong> If you still get 504 errors, you may need to increase server timeouts. See instructions below.<br><br>' .
-               'Stack trace: <pre>' . $e->getTraceAsString() . '</pre>';
+    $email = request('email', 'rodericktajos02@gmail.com');
+    
+    // Validate email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return response('Error: Invalid email address: ' . $email, 400);
     }
+    
+    $message = request('message', 'Hello from Laravel via Brevo API!');
+    $apiKey = env('BREVO_API_KEY');
+    
+    if (empty($apiKey)) {
+        return response('Error: BREVO_API_KEY is not set in .env file.', 500);
+    }
+    
+    // Dispatch job immediately without waiting - returns 202 Accepted
+    \App\Jobs\SendTestEmailJob::dispatch($email, $message)->afterResponse();
+    
+    // Return immediately with 202 Accepted status
+    return response()->json([
+        'status' => 'accepted',
+        'message' => 'Email request received and queued for ' . $email,
+        'note' => 'The email will be sent in the background. Check your email inbox shortly.'
+    ], 202);
 });
 
