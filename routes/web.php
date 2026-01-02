@@ -408,14 +408,30 @@ Route::get('/test-email', function () {
     try {
         $email = request('email', 'rodericktajos02@gmail.com');
         
-        // Use the configured mailer (should be 'smtp' or 'brevo' for Brevo)
-        Mail::mailer(config('mail.default'))->raw('Hello from Laravel via Brevo!', function ($message) use ($email) {
-            $message->to($email)
-                    ->subject('Test Email from BARMMS');
-        });
-        return 'Email sent to ' . $email . '!';
+        // Validate email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return 'Error: Invalid email address: ' . $email;
+        }
+        
+        $message = request('message', 'Hello from Laravel via Brevo!');
+        
+        // Set timeout to prevent 504 errors
+        set_time_limit(30);
+        
+        // Send email synchronously (not queued)
+        Mail::to($email)->send(new \App\Mail\TestEmail($message));
+        
+        return 'Email sent successfully to ' . $email . '!';
     } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage() . '<br><br>Stack trace: <pre>' . $e->getTraceAsString() . '</pre>';
+        return 'Error: ' . $e->getMessage() . '<br><br>' .
+               'Make sure your Brevo credentials are configured correctly in .env file:<br>' .
+               '<code>MAIL_MAILER=smtp<br>' .
+               'MAIL_HOST=smtp-relay.brevo.com<br>' .
+               'MAIL_PORT=587<br>' .
+               'MAIL_USERNAME=your-brevo-email<br>' .
+               'MAIL_PASSWORD=your-brevo-smtp-key<br>' .
+               'MAIL_ENCRYPTION=tls</code><br><br>' .
+               'Stack trace: <pre>' . $e->getTraceAsString() . '</pre>';
     }
 });
 
